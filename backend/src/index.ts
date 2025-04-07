@@ -1,35 +1,39 @@
 import Fastify from 'fastify';
-import cors from '@fastify/cors';
+import { initDB } from './db';
 
-const fastify = Fastify({
-  logger: true
-});
 
-// Registrar CORS
-fastify.register(cors, {
-  origin: '*'
-});
+const startServer = async () => {
+  const fastify = Fastify({ logger: true });
+  const db = await initDB();
 
-// ruta báse
-fastify.get('/', async (request, reply) => {
-  return { message: 'Welcome to the ft_transcendence API!' };
-});
+  // inyectar la instancia de db para usarla en rutas
+  fastify.decorate('db', db);
 
-// Ruta para verificar que el servicio esté activo
-fastify.get('/health', async (request, reply) => {
-  return { status: 'ok' };
-});
+  //GET HOME
+  fastify.get('/', async (request, reply) => {
+      return {message : "Welcome to the transcendence API!"};
+  });
 
-// Iniciar el servidor
-const start = async () => {
-  try {
-    await fastify.listen({ port: 4000, host: '0.0.0.0' });
-    console.log('Server running on port 4000');
-  } catch (err) {
-    fastify.log.error(err);
-    process.exit(1);
-  }
+  // GET USERS
+  fastify.get('/users', async (request, reply) => {
+    const users = await db.all('SELECT * FROM users');
+    return users;
+  });
+
+  // POST USERS
+  fastify.post('/users', async (request, reply) => {
+    const { name, email } = request.body as any;
+    try {
+      await db.run('INSERT INTO users (name, email) VALUES (?, ?)', [name, email]);
+      return { success: true };
+    } catch (err) {
+      reply.code(400);
+      return { error: 'Error inserting user', details: err };
+    }
+  });
+
+  await fastify.listen({ port: 4000, host: '0.0.0.0' });
 };
 
-start();
+startServer().catch(console.error);
 

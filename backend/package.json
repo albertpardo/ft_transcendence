@@ -1,5 +1,5 @@
 {
-  "name": "ft-transcendence-backend",
+  "name": "transcendence-backend",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -20,4 +20,3 @@
     "ts-node": "^10.9.2"
   }
 }
-
