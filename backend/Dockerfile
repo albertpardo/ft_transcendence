@@ -8,6 +8,7 @@ COPY package-lock.json* ./
 
 RUN npm install
 RUN npm install sqlite
+
 # Copiar código fuente
 COPY . .
 

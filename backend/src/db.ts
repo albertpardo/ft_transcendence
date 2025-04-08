@@ -8,7 +8,7 @@
 import sqlite3 from 'sqlite3';
 import { open } from 'sqlite';
 
-// Importante: sqlite necesita modo verbose para debug
+// modo verbose para debug
 sqlite3.verbose();
 
 export const initDB = async () => {

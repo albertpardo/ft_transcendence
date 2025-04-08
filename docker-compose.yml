@@ -5,13 +5,12 @@ services:
       dockerfile: Dockerfile
     container_name: transcendence_backend
     volumes:
-      - ./backend:/app
-      - /app/node_modules
+      - backend-data:/app/data
     ports:
       - "4000:4000"
     environment:
       - NODE_ENV=development
-      - DATABASE_URL=sqlite:///app/database.db
+      - DATABASE_URL=sqlite:///app/data/database.db
     networks:
       - app-network
     restart: unless-stopped
@@ -19,3 +18,7 @@ services:
 networks:
   app-network:
     driver: bridge
+
+volumes:
+  backend-data:
+    driver: local
