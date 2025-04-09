@@ -1,4 +1,6 @@
-FROM node:18-alpine
+# Dockerfile backend
+
+FROM node:18
 
 WORKDIR /app
 
@@ -7,10 +9,12 @@ COPY package.json ./
 COPY package-lock.json* ./
 
 RUN npm install
-RUN npm install sqlite
+# RUN npm install sqlite
 
 # Copiar código fuente
 COPY . .
+
+RUN npm run build
 
 # Exponer puerto
 EXPOSE 4000
