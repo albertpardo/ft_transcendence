@@ -2,8 +2,11 @@ const Fastify = require('fastify');
 const fastifyJWT = require('@fastify/jwt');
 const fastifyRateLimit = require('@fastify/rate-limit');
 const fastifyCors = require('@fastify/cors');
+/*
 const fs = require('fs');
 const path = require('path');
+*/
+const { tlsConfig } = require('./config/tls')
 
 const { authMiddleware } = require('./middlewares/auth');
 const { jwtPlugin } = require('./plugins/jwt');
@@ -21,14 +24,16 @@ const exampleRoutes = require('./routes/example');
 //import { rateLimitPlugin } from './plugins/rateLimit.ts'
 //import exampleRoutes from './routes/example.ts'
 
+/*
 const tlsOptions = {
     key: fs.readFileSync(path.join(__dirname, '../certs/key.pem')),
     cert: fs.readFileSync(path.join(__dirname, '../certs/cert.pem')),
 }
+*/
 
 const server = Fastify ({
     logger: true,
-    https: tlsOptions,
+    https: tlsConfig,
 })
 
 //register plugins
@@ -48,7 +53,7 @@ server.register(exampleRoutes, { prefix: '/api' })
 async function start() {
     try {
         await registerPlugin()
-        server.listen({ port:443 }, (err: Error, address: string) => {
+        server.listen({ port:8443 }, (err: Error, address: string) => {
             if (err) {
                 server.log.error(err)
                 process.exit(1)
