@@ -20,6 +20,22 @@ const startServer = async () => {
     return users;
   });
 
+  //GET USERS BY ID
+  fastify.get('/users/:id', async (request, reply) => {
+    const { id } = request.params as any;
+    try {
+      const user = await db.get('SELECT * FROM users WHERE id = ?', [id]);
+      if (!user) {
+        reply.code(404);
+        return { error: 'User not found' };
+      }
+      return user;
+    } catch (err) {
+      reply.code(400);
+      return { error: 'Error fetching user', details: err };
+    }
+  });
+  
   // POST USERS
   fastify.post('/users', async (request, reply) => {
     const { name, email } = request.body as any;
