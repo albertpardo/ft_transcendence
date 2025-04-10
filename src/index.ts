@@ -1,3 +1,5 @@
+//import { FastifyReply } from "fastify";
+
 const Fastify = require('fastify');
 const fastifyJWT = require('@fastify/jwt');
 const fastifyRateLimit = require('@fastify/rate-limit');
@@ -12,6 +14,8 @@ const { authMiddleware } = require('./middlewares/auth');
 const { jwtPlugin } = require('./plugins/jwt');
 const { rateLimitPlugin } = require('./plugins/rateLimit');
 const exampleRoutes = require('./routes/example');
+
+//import type { FastifyRequest, FastifyReply } from 'fastify';
 //import Fastify from 'fastify'
 //import fastifyJWT from '@fastify/jwt'
 //import fastifyRateLimit from '@fastify/rate-limit'
@@ -38,7 +42,12 @@ const server = Fastify ({
 
 //register plugins
 async function registerPlugin() {
-    await server.register(fastifyCors)
+    await server.register(fastifyCors, {
+    //    origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
+        origin: true,
+        methods: ['GET', 'POST'],
+        credentials: true
+    })
     await server.register(jwtPlugin)
     await server.register(rateLimitPlugin)
 }

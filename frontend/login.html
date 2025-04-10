@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>API Gateway Login Test</title>
+</head>
+<body>
+  <h2>Login</h2>
+  <form id="login-form">
+    <label>
+      Username:
+      <input type="text" id="username" value="admin" />
+    </label>
+    <br/>
+    <label>
+      Password:
+      <input type="password" id="password" value="password" />
+    </label>
+    <br/>
+    <button type="submit">Login</button>
+  </form>
+
+  <h2>Call Protected API</h2>
+  <button id="call-api-btn" disabled>Call /api/example</button>
+
+  <pre id="result" style="margin-top: 20px; background: #f0f0f0; padding: 10px;"></pre>
+
+  <script>
+    let token = null;
+
+    const form = document.getElementById('login-form');
+    const callApiBtn = document.getElementById('call-api-btn');
+    const resultBox = document.getElementById('result');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+
+      try {
+        const response = await fetch('https://localhost:8443/api/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ username, password }),
+          credentials: 'include'
+        });
+
+        const data = await response.json();
+        resultBox.textContent = 'Login Response:\n' + JSON.stringify(data, null, 2);
+
+        if (data.token) {
+          token = data.token;
+          callApiBtn.disabled = false;
+        }
+      } catch (err) {
+        resultBox.textContent = 'Login Error: ' + err.message;
+      }
+    });
+
+    callApiBtn.addEventListener('click', async () => {
+      if (!token) return;
+
+      try {
+        const response = await fetch('https://localhost:8443/api/example', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        const data = await response.json();
+        resultBox.textContent = 'Protected API Response:\n' + JSON.stringify(data, null, 2);
+      } catch (err) {
+        resultBox.textContent = 'API Call Error: ' + err.message;
+      }
+    });
+  </script>
+</body>
+</html>
