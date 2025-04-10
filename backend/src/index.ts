@@ -20,6 +20,38 @@ const startServer = async () => {
     return users;
   });
 
+  //GET USERS BY ID
+  fastify.get('/users/id/:id', async (request, reply) => {
+    const { id } = request.params as any;
+    try {
+      const user = await db.get('SELECT * FROM users WHERE id = ?', [id]);
+      if (!user) {
+        reply.code(404);
+        return { err: 'User not found' };
+      }
+      return user;
+    } catch (err) {
+      reply.code(400);
+      return { err: 'Error fetching user', details: err };
+    }
+  });
+
+  //GET USERS BY NAME
+  fastify.get('/users/name/:name', async (request, reply) => {
+    const { name } = request.params as any;
+    try {
+      const user = await db.get('SELECT * FROM users WHERE LOWER(name) = LOWER(?)', [name]);
+      if (!user) {
+        reply.code(404);
+        return { error: 'User not found' };
+      }
+      return user;
+    } catch (err) {
+      reply.code(400);
+      return { err : 'Error fetching user', details: err };
+    }
+  });
+  
   // POST USERS
   fastify.post('/users', async (request, reply) => {
     const { name, email } = request.body as any;
@@ -33,17 +65,17 @@ const startServer = async () => {
   });
 
   // PUT USERS
-  fastify.put('/users/:id', async (request, reply) => {
-    const { id } = request.params as any;
-    const { name, email } = request.body as any;
-    try {
-      await db.run('UPDATE users SET name = ?, email = ? WHERE id = ?', [name, email, id]);
-      return { success: true };
-    } catch (err) {
-      reply.code(400);
-      return { error: 'Error updating user', details: err };
-    }
-  });
+  // fastify.put('/users/:id', async (request, reply) => {
+  //   const { id } = request.params as any;
+  //   const { name, email } = request.body as any;
+  //   try {
+  //     await db.run('UPDATE users SET name = ?, email = ? WHERE id = ?', [name, email, id]);
+  //     return { success: true };
+  //   } catch (err) {
+  //     reply.code(400);
+  //     return { error: 'Error updating user', details: err };
+  //   }
+  // });
 
   // DELETE USERS
 
