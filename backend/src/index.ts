@@ -40,7 +40,7 @@ const startServer = async () => {
   fastify.get('/users/name/:name', async (request, reply) => {
     const { name } = request.params as any;
     try {
-      const user = await db.get('SELECT * FROM users WHERE name = ?', [name]);
+      const user = await db.get('SELECT * FROM users WHERE LOWER(name) = LOWER(?)', [name]);
       if (!user) {
         reply.code(404);
         return { error: 'User not found' };
