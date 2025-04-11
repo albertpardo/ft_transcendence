@@ -1,39 +1,18 @@
-//import { FastifyReply } from "fastify";
-
+//require('dotenv').config();
+/// <reference path="./types/fastify-jwt.d.ts" />
+require('dotenv').config({ path: __dirname + '/../.env' });
 const Fastify = require('fastify');
-const fastifyJWT = require('@fastify/jwt');
+//const fastifyJWT = require('@fastify/jwt');
+import fastifyJWT from '@fastify/jwt';
 const fastifyRateLimit = require('@fastify/rate-limit');
 const fastifyCors = require('@fastify/cors');
-/*
-const fs = require('fs');
-const path = require('path');
-*/
 const { tlsConfig } = require('./config/tls')
 
+delete require.cache[require.resolve('./middlewares/auth')];
 const { authMiddleware } = require('./middlewares/auth');
 const { jwtPlugin } = require('./plugins/jwt');
 const { rateLimitPlugin } = require('./plugins/rateLimit');
 const exampleRoutes = require('./routes/example');
-
-//import type { FastifyRequest, FastifyReply } from 'fastify';
-//import Fastify from 'fastify'
-//import fastifyJWT from '@fastify/jwt'
-//import fastifyRateLimit from '@fastify/rate-limit'
-//import fastifyCors from '@fastify/cors'
-//import fs from 'fs'
-//import path from 'path'
-
-//import { authMiddleware } from './middlewares/auth.ts'
-//import { jwtPlugin } from './plugins/jwt.ts'
-//import { rateLimitPlugin } from './plugins/rateLimit.ts'
-//import exampleRoutes from './routes/example.ts'
-
-/*
-const tlsOptions = {
-    key: fs.readFileSync(path.join(__dirname, '../certs/key.pem')),
-    cert: fs.readFileSync(path.join(__dirname, '../certs/cert.pem')),
-}
-*/
 
 const server = Fastify ({
     logger: true,
@@ -62,6 +41,9 @@ server.register(exampleRoutes, { prefix: '/api' })
 async function start() {
     try {
         await registerPlugin()
+        // print all the routes
+        await server.ready()
+        console.log(server.printRoutes())
         server.listen({ port:8443 }, (err: Error, address: string) => {
             if (err) {
                 server.log.error(err)

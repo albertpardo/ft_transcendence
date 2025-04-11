@@ -48,13 +48,17 @@
           credentials: 'include'
         });
 
+        console.log("Test response:", response);
         const data = await response.json();
+        console.log("Got token: ", data.token);
         resultBox.textContent = 'Login Response:\n' + JSON.stringify(data, null, 2);
 
         if (data.token) {
           token = data.token;
           callApiBtn.disabled = false;
-        }
+        } else {
+          console.error("Token not received");
+    }
       } catch (err) {
         resultBox.textContent = 'Login Error: ' + err.message;
       }
@@ -63,13 +67,17 @@
     callApiBtn.addEventListener('click', async () => {
       if (!token) return;
 
+      console.log('📤 Sending token with /example request:', token);
+
       try {
         const response = await fetch('https://localhost:8443/api/example', {
+          method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`
           }
         });
 
+        console.log("Step into example");
         const data = await response.json();
         resultBox.textContent = 'Protected API Response:\n' + JSON.stringify(data, null, 2);
       } catch (err) {

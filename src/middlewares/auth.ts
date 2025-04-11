@@ -1,31 +1,24 @@
-/*
-import { FastifyRequest, FastifyReply } from 'fastify'
+//const { FastifyRequest, FastifyReply } = require('fastify');
+import { FastifyRequest, FastifyReply } from 'fastify';
 
-export const authMiddleware = async (req: FastifyRequest, reply: FastifyReply) => {
-    //TODO: Add JWT validation later
-    if (req.url?.startsWith('./api/public')) return // jump over auth
-
-    try {
-        await req.jwtVerify()
-    } catch (err) {
-        reply.code(401).send({ error: 'Unauthorized' })
-    }
-    console.log('Auth middleware triggered')
-}
-*/
-
-
-const { FastifyRequest, FastifyReply } = require('fastify');
-
+console.log("🛡️ Auth middleware loaded!");
 // JWT verification using authMiddleware
-module.exports.authMiddleware = async function (req, reply) {
+module.exports.authMiddleware = async function (req: FastifyRequest, reply: FastifyReply) {
 
-    if (req.url?.startsWith('./api/public')) return // if requested URL is public, skip auth
+    console.log("🔍 Incoming request URL:", req.url);
 
+    //if (req.url?.startsWith('/api/login') || req.url?.startsWith('/api/public')) return // if requested URL is public, skip auth
+
+    const publicPaths = ['/api/login', '/api/public'];
+    if (publicPaths.some(path => req.url?.startsWith(path))) return;
+    
     try {
         await req.jwtVerify(); //verfication by secret automatically
-    } catch (err) {
+        console.log('✅ JWT verified, user:', req.user);
+    } catch (err: any) {
+        console.error('❌ JWT verification failed:', err.message);
         reply.code(401).send({ error: 'Unauthorized' });
+        return;
     }
-    console.log('Auth middleware triggered');
+    console.log('✅ Auth middleware triggered!');
 };
