@@ -65,19 +65,33 @@ const startServer = async () => {
   });
 
   // PUT USERS
-  // fastify.put('/users/:id', async (request, reply) => {
-  //   const { id } = request.params as any;
-  //   const { name, email } = request.body as any;
-  //   try {
-  //     await db.run('UPDATE users SET name = ?, email = ? WHERE id = ?', [name, email, id]);
-  //     return { success: true };
-  //   } catch (err) {
-  //     reply.code(400);
-  //     return { error: 'Error updating user', details: err };
-  //   }
-  // });
+  fastify.put('/users/id/:id', async (request, reply) => {
+    const { id } = request.params as any;
+    const { name, email } = request.body as any;
+    try {
+      await db.run('UPDATE users SET name = ?, email = ? WHERE id = ?', [name, email, id]);
+      return { success: true };
+    } catch (err) {
+      reply.code(400);
+      return { error: 'Error updating user', details: err };
+    }
+  });
 
-  // DELETE USERS
+  //DELETE USERS
+  fastify.delete('/users/id/:id', async (request, reply) => {
+    const { id } = request.params as any;
+    try {
+      const result = await db.run('DELETE FROM users WHERE id = ?', [id]);
+      if (result.changes === 0) {
+        reply.code(404);
+        return { error: 'User not found' };
+      }
+      return { success: true };
+    } catch (err) {
+      reply.code(400);
+      return { error: 'Error deleting user', details: err };
+    }
+  });
 
 
   await fastify.listen({ port: 4000, host: '0.0.0.0' });
