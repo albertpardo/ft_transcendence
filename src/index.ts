@@ -4,13 +4,15 @@ require('dotenv').config({ path: __dirname + '/../.env' });
 const Fastify = require('fastify');
 //const fastifyJWT = require('@fastify/jwt');
 import fastifyJWT from '@fastify/jwt';
+//import { authHookPlugin } from './plugins/jwt';
+import { jwt, authHook } from './plugins/jwt';
 const fastifyRateLimit = require('@fastify/rate-limit');
 const fastifyCors = require('@fastify/cors');
 const { tlsConfig } = require('./config/tls')
 
 delete require.cache[require.resolve('./middlewares/auth')];
-const { authMiddleware } = require('./middlewares/auth');
-const { jwtPlugin } = require('./plugins/jwt');
+//const { authMiddleware } = require('./middlewares/auth');
+//const { jwtPlugin } = require('./plugins/jwt');
 const { rateLimitPlugin } = require('./plugins/rateLimit');
 const exampleRoutes = require('./routes/example');
 
@@ -27,20 +29,22 @@ async function registerPlugin() {
         methods: ['GET', 'POST'],
         credentials: true
     })
-    await server.register(jwtPlugin)
+    await server.register(jwt)
     await server.register(rateLimitPlugin)
+
+    await server.register(authHook)
 }
-
-//JWT middleware
-server.addHook('onRequest', authMiddleware)
-
-//register routes
-server.register(exampleRoutes, { prefix: '/api' })
 
 //start service (using HTTPS)
 async function start() {
     try {
         await registerPlugin()
+
+        //JWT middleware
+//        server.addHook('onRequest', authMiddleware)
+        //register routes
+        server.register(exampleRoutes, { prefix: '/api' })
+
         // print all the routes
         await server.ready()
         console.log(server.printRoutes())
