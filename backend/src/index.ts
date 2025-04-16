@@ -54,9 +54,9 @@ const startServer = async () => {
   
   // POST USERS
   fastify.post('/users', async (request, reply) => {
-    const { name, email } = request.body as any;
+    const { name, nickname, email, avatar } = request.body as any;
     try {
-      await db.run('INSERT INTO users (name, email) VALUES (?, ?)', [name, email]);
+      await db.run('INSERT INTO users (name, nickname, email, avatar) VALUES (?, ?, ?, ?)', [name, nickname, email, avatar]);
       return { success: true };
     } catch (err) {
       reply.code(400);
@@ -67,9 +67,9 @@ const startServer = async () => {
   // PUT USERS
   fastify.put('/users/id/:id', async (request, reply) => {
     const { id } = request.params as any;
-    const { name, email } = request.body as any;
+    const { name, nickname, email, avatar} = request.body as any;
     try {
-      await db.run('UPDATE users SET name = ?, email = ? WHERE id = ?', [name, email, id]);
+      await db.run('UPDATE users SET name = ?, nickname = ?, email = ?, avatar = ? WHERE id = ?', [name, nickname, email, avatar, id]);
       return { success: true };
     } catch (err) {
       reply.code(400);
