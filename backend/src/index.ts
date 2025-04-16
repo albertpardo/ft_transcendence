@@ -1,5 +1,6 @@
 import Fastify from 'fastify';
 import { initDB } from './db';
+import { pongMain } from './pong';
 
 
 const startServer = async () => {
@@ -11,6 +12,7 @@ const startServer = async () => {
 
   //GET HOME
   fastify.get('/', async (request, reply) => {
+	  pongMain().catch(console.error);
       return {message : "Welcome to the transcendence API!"};
   });
 
@@ -52,4 +54,3 @@ const startServer = async () => {
 };
 
 startServer().catch(console.error);
-

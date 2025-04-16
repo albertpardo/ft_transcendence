@@ -103,12 +103,14 @@ let ourRpaddle : Paddle = { y: 430, h: PADDLE_H, speed: 0 };
 //let ourRpaddle : Paddle = { y: (WINDOW_SIZE.y - PADDLE_H)/2, h: PADDLE_H, speed: 0 };
 let	whoLost : string = "nobody";
 
-const	pongMain = async () => {
+export const	pongMain = async () => {
 	while (true) {
 		whoLost = checkLoseConditions(ourBall);
 		if (whoLost != "none") {
 			console.log("ball lost by", whoLost);
+			throw "error!";
 			break ;
+			// in real world, this here would restart the game instead of just breaking.
 		}
 		updatePositions(ourBall, ourLpaddle, ourRpaddle);
 		console.log("ball speed: ", ourBall.speed);
@@ -117,4 +119,4 @@ const	pongMain = async () => {
 	};
 }
 
-pongMain().catch(console.error);
+//pongMain().catch(console.error);
