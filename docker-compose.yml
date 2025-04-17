@@ -6,6 +6,7 @@ services:
     container_name: transcendence_backend
     volumes:
       - backend-data:/app/data
+      - ./backend/uploads:/app/uploads
     ports:
       - "4000:4000"
     environment:
