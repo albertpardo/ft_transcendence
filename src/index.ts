@@ -1,18 +1,15 @@
-//require('dotenv').config();
+
 /// <reference path="./types/fastify-jwt.d.ts" />
 require('dotenv').config({ path: __dirname + '/../.env' });
 const Fastify = require('fastify');
-//const fastifyJWT = require('@fastify/jwt');
 import fastifyJWT from '@fastify/jwt';
-//import { authHookPlugin } from './plugins/jwt';
 import { jwt, authHook } from './plugins/jwt';
 const fastifyRateLimit = require('@fastify/rate-limit');
 const fastifyCors = require('@fastify/cors');
 const { tlsConfig } = require('./config/tls')
 
 delete require.cache[require.resolve('./middlewares/auth')];
-//const { authMiddleware } = require('./middlewares/auth');
-//const { jwtPlugin } = require('./plugins/jwt');
+
 const { rateLimitPlugin } = require('./plugins/rateLimit');
 const exampleRoutes = require('./routes/example');
 
@@ -29,6 +26,7 @@ async function registerPlugin() {
         methods: ['GET', 'POST'],
         credentials: true
     })
+    //JWT middleware
     await server.register(jwt)
     await server.register(rateLimitPlugin)
 
@@ -40,8 +38,6 @@ async function start() {
     try {
         await registerPlugin()
 
-        //JWT middleware
-//        server.addHook('onRequest', authMiddleware)
         //register routes
         server.register(exampleRoutes, { prefix: '/api' })
 
