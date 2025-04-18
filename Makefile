@@ -4,8 +4,8 @@ all:
 	
 	@echo "\n▉▉▉▉▉▉▉▉▉▉ WELCOME TO TRASCENDENCE PROJECT! ▉▉▉▉▉▉▉▉▉▉\n"
 	@echo "To check the system status run: make status\n"
-	@echo "Access to user API(back) at: http://127.0.0.1:4000"
-	@echo "Access to profile view(front) at: http://localhost:3000/index.html"
+	@echo "Access to user API(back) at: http://127.0.0.1:4000/api"
+	@echo "Access to profile view(front) at: http://127.0.0.1:3000"
 
 down:
 	docker compose -f docker-compose.yml down
