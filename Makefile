@@ -4,8 +4,8 @@ all:
 	
 	@echo "\n▉▉▉▉▉▉▉▉▉▉ WELCOME TO TRASCENDENCE PROJECT! ▉▉▉▉▉▉▉▉▉▉\n"
 	@echo "To check the system status run: make status\n"
-	@echo "Access your backend at: http://127.0.0.1:4000"
-#	@echo "Access your application at: http://127.0.0.1:3000"
+	@echo "Access to user API(back) at: http://127.0.0.1:4000/api"
+	@echo "Access to profile view(front) at: http://127.0.0.1:3000"
 
 down:
 	docker compose -f docker-compose.yml down
@@ -29,8 +29,6 @@ clean:
 
 fclean: clean
 	@echo "\n Cleaning up persistent data...\n"
-# sudo rm -rf /home/${USER}/data/mariadb || true;
-# @echo "\n Full cleanup completed.\n"
 
 re: down all
 

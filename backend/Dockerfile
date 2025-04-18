@@ -1,23 +1,20 @@
 # Dockerfile backend
-
 FROM node:18
 
 WORKDIR /app
 
 # Instalar dependencias
-COPY package.json ./
-COPY package-lock.json* ./
-
+COPY package*.json ./
 RUN npm install
-# RUN npm install sqlite
 
 # Copiar código fuente
 COPY . .
 
-RUN npm run build
+# Crear directorio de uploads si no existe
+RUN mkdir -p /app/uploads
 
 # Exponer puerto
 EXPOSE 4000
 
-# Comando para iniciar
-CMD ["npm", "start"]
+# Comando para iniciar (será sobrescrito por docker-compose)
+CMD ["npm", "run", "dev"]

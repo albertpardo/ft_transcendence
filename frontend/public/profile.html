@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en" class="bg-gray-900 text-white">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Transcendence - Profile</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="flex min-h-screen">
+
+  <!-- Sidebar -->
+  <aside class="w-64 bg-gray-900 p-6 flex flex-col items-center">
+    <h1 class="text-2xl font-bold tracking-wide mb-4">TRASCENDENCE</h1>
+
+    <!-- Avatar in sidebar -->
+    <div class="mb-6">
+      <img id="avatarSidebar" src="/assets/images/default-avatar.png" 
+           alt="Avatar"
+           class="w-24 h-24 rounded-full object-cover border-2 border-indigo-500 mb-6">
+    </div>
+
+    <nav class="w-full flex flex-col gap-4">
+      <button class="bg-gray-700 p-3 rounded-lg text-left hover:bg-gray-600">PROFILE</button>
+      <button class="bg-gray-800 p-3 rounded-lg text-left hover:bg-gray-700">PLAY_PONG</button>
+      <button class="bg-gray-800 p-3 rounded-lg text-left hover:bg-gray-700">TOURNAMENT</button>
+      <button class="bg-gray-800 p-3 rounded-lg text-left hover:bg-gray-700">STATS</button>
+    </nav>
+  </aside>
+
+  <!-- Main content -->
+  <main class="flex-1 p-10">
+    <h2 class="text-1xl font-semibold mb-4">My Profile</h2>
+
+    <form id="profileForm" class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-800 p-8 rounded-xl shadow-lg">
+      <!-- Name -->
+      <div>
+        <label for="name" class="block text-sm mb-2">Name</label>
+        <input type="text" id="name" name="name" disabled
+               class="w-full p-3 rounded bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+      </div>
+
+      <!-- Nickname -->
+      <div>
+        <label for="nickname" class="block text-sm mb-2">Nickname</label>
+        <input type="text" id="nickname" name="nickname" disabled
+               class="w-full p-3 rounded bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+      </div>
+
+      <!-- Avatar -->
+      <div>
+        <label for="avatar" class="block text-sm mb-2">Avatar</label>
+        <input type="file" id="avatar" name="avatar" disabled
+               class="w-full p-3 rounded bg-gray-700 text-white file:bg-indigo-600 file:text-white file:rounded file:px-4 file:py-2"
+               accept="image/*">
+      </div>
+
+      <!-- Email -->
+      <div>
+        <label for="email" class="block text-sm mb-2">Email</label>
+        <input type="email" id="email" name="email" disabled
+               class="w-full p-3 rounded bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+      </div>
+
+      <!-- Password -->
+      <div>
+        <label for="password" class="block text-sm mb-2">Password</label>
+        <input type="password" id="password" name="password" disabled
+               placeholder="********"
+               class="w-full p-3 rounded bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+      </div>
+
+      <!-- Unlock Button -->
+      <div class="col-span-1 md:col-span-2 flex justify-end">
+        <button type="button" id="unlockButton"
+                class="bg-yellow-500 hover:bg-yellow-600 text-black px-6 py-3 rounded-lg font-medium">
+          Editar datos
+        </button>
+      </div>
+
+      <!-- Save & Delete (hidden until unlocked) -->
+      <div id="actionButtons" class="flex items-end justify-end gap-4 col-span-1 md:col-span-2 mt-4 hidden">
+        <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-medium">
+          Save
+        </button>
+        <button type="button" class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-medium">
+          Delete
+        </button>
+      </div>
+    </form>
+  </main>
+
+  <script>
+    // Mostrar la vista previa del avatar
+    const avatarInput = document.getElementById("avatar");
+    const avatarSidebar = document.getElementById("avatarSidebar");
+    avatarInput.addEventListener("change", function(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          avatarSidebar.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Fetch GET de datos de usuario
+    document.addEventListener("DOMContentLoaded", () => {
+      const userId = 1; // hardcode for now
+      const url = `http://127.0.0.1:4000/users/id/${userId}`;
+      fetch(url)
+        .then(response => {
+          if (!response.ok) throw new Error("Error al obtener datos del usuario");
+          return response.json();
+        })
+        .then(data => {
+          document.getElementById("name").value = data.name || "";
+          document.getElementById("nickname").value = data.nickname || "";
+          document.getElementById("email").value = data.email || "";
+          if (data.avatar) avatarSidebar.src = data.avatar;
+        })
+        .catch(err => console.error("Error:", err));
+    });
+
+    // Desbloquear campos para edición
+    document.getElementById("unlockButton").addEventListener("click", () => {
+      const form = document.getElementById("profileForm");
+      form.querySelectorAll("input").forEach(input => {
+        input.disabled = false;
+      });
+      document.getElementById("actionButtons").classList.remove("hidden");
+      document.getElementById("unlockButton").disabled = true;
+    });
+  </script>
+
+</body>
+</html>

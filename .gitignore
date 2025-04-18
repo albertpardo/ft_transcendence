@@ -145,3 +145,5 @@ git-script.sh
 
 # backend/.gitignore
 #database.db
+
+.vscode/
