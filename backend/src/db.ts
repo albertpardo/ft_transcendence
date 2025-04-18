@@ -60,6 +60,7 @@ export const initDB = async () => {
       name TEXT NOT NULL,
       nickname TEXT NOT NULL UNIQUE,
       email TEXT NOT NULL UNIQUE,
+      password TEXT NOT NULL,
       avatar TEXT
     )
   `);

@@ -6,6 +6,8 @@ services:
     container_name: transcendence_backend
     volumes:
       - backend-data:/app/data
+      - ./backend:/app
+      - /app/node_modules
       - ./backend/uploads:/app/uploads
     ports:
       - "4000:4000"
@@ -15,6 +17,7 @@ services:
     networks:
       - app-network
     restart: unless-stopped
+    command: npm run dev
 
   frontend:
     build:
@@ -22,12 +25,16 @@ services:
       dockerfile: Dockerfile
     container_name: transcendence_frontend
     volumes:
-      - ./frontend/public:/usr/share/nginx/html
+      - ./frontend:/app
+      - /app/node_modules
     ports:
-      - "3000:80"
+      - "3000:3000"
+    depends_on:
+      - backend
     networks:
       - app-network
     restart: unless-stopped
+    command: npm run dev
 
 networks:
   app-network:
