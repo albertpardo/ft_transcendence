@@ -14,6 +14,13 @@ interface	Ball {
 	coords: Vector2;
 };
 
+interface	State {
+	stateBall: Ball;
+	stateLP: Paddle;
+	stateRP: Paddle;
+	stateWhoL: string;
+}
+
 const	ALPHA_MAX : number = 5*Math.PI/11;
 const	sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const	FRAME_TIME : number = 1/30;
@@ -101,22 +108,39 @@ let ourBall : Ball = { speed: {x: -1000, y: 0}, coords: {x: WINDOW_SIZE.x/2, y: 
 let ourLpaddle : Paddle = { y: (WINDOW_SIZE.y - PADDLE_H)/2, h: PADDLE_H, speed: 0 };
 let ourRpaddle : Paddle = { y: 430, h: PADDLE_H, speed: 0 };
 //let ourRpaddle : Paddle = { y: (WINDOW_SIZE.y - PADDLE_H)/2, h: PADDLE_H, speed: 0 };
-let	whoLost : string = "nobody";
+let	whoLost : string = "none";
+let	state : State = { stateBall: ourBall, stateLP: ourLpaddle, stateRP: ourRpaddle, stateWhoL: whoLost };
+let pongStarted : boolean = false;
+let pongDone : boolean = false;
 
 export const	pongMain = async () => {
+	pongStarted = true;
 	while (true) {
 		whoLost = checkLoseConditions(ourBall);
 		if (whoLost != "none") {
-			console.log("ball lost by", whoLost);
-			throw "error!";
-			break ;
+			pongDone = true;
+			state = { stateBall: ourBall, stateLP: ourLpaddle, stateRP: ourRpaddle, stateWhoL: whoLost };
+			return ("ball lost by... " + whoLost);
 			// in real world, this here would restart the game instead of just breaking.
 		}
 		updatePositions(ourBall, ourLpaddle, ourRpaddle);
 		console.log("ball speed: ", ourBall.speed);
 		console.log("ball coords:", ourBall.coords);
+		state = { stateBall: ourBall, stateLP: ourLpaddle, stateRP: ourRpaddle, stateWhoL: whoLost };
 		await sleep(FRAME_TIME_MS);
 	};
+}
+
+export function	getPongStarted() : boolean {
+	return (pongStarted);
+}
+
+export function	getPongDone() : boolean {
+	return (pongDone);
+}
+
+export function	getPongState() : State {
+	return (state);
 }
 
 //pongMain().catch(console.error);

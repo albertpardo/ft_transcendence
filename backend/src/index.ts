@@ -1,6 +1,6 @@
 import Fastify from 'fastify';
 import { initDB } from './db';
-import { pongMain } from './pong';
+import { pongMain, getPongStarted, getPongDone, getPongState } from './pong';
 
 
 const startServer = async () => {
@@ -12,8 +12,14 @@ const startServer = async () => {
 
   //GET HOME
   fastify.get('/', async (request, reply) => {
-	  pongMain().catch(console.error);
-      return {message : "Welcome to the transcendence API!"};
+	  if (getPongDone() === true) {
+      	return {message : "pong's loser is: " + getPongState().stateWhoL};
+	  }
+	  if (getPongStarted() === false) {
+		  pongMain();
+		  return {message : "pong wasn't started... well, now it is!"};
+	  }
+	  return {message : "pong ongoing;", state : getPongState()};
   });
 
   // GET USERS
