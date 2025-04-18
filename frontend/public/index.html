@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Transcendence - Perfil</title>
+  <title>Transcendence - Profile</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="flex min-h-screen">
@@ -29,28 +29,27 @@
 
   <!-- Main content -->
   <main class="flex-1 p-10">
-    <h2 class="text-3xl font-semibold mb-4">Edit profile</h2>
+    <h2 class="text-1xl font-semibold mb-4">My Profile</h2>
 
-    <form class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-800 p-8 rounded-xl shadow-lg">
-      
+    <form id="profileForm" class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-800 p-8 rounded-xl shadow-lg">
       <!-- Name -->
       <div>
         <label for="name" class="block text-sm mb-2">Name</label>
-        <input type="text" id="name" name="name" placeholder="Your name"
+        <input type="text" id="name" name="name" disabled
                class="w-full p-3 rounded bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500">
       </div>
 
       <!-- Nickname -->
       <div>
         <label for="nickname" class="block text-sm mb-2">Nickname</label>
-        <input type="text" id="nickname" name="nickname" placeholder="Your nickname"
+        <input type="text" id="nickname" name="nickname" disabled
                class="w-full p-3 rounded bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500">
       </div>
 
       <!-- Avatar -->
       <div>
         <label for="avatar" class="block text-sm mb-2">Avatar</label>
-        <input type="file" id="avatar" name="avatar"
+        <input type="file" id="avatar" name="avatar" disabled
                class="w-full p-3 rounded bg-gray-700 text-white file:bg-indigo-600 file:text-white file:rounded file:px-4 file:py-2"
                accept="image/*">
       </div>
@@ -58,19 +57,28 @@
       <!-- Email -->
       <div>
         <label for="email" class="block text-sm mb-2">Email</label>
-        <input type="email" id="email" name="email" placeholder="ejemplo@correo.com"
+        <input type="email" id="email" name="email" disabled
                class="w-full p-3 rounded bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500">
       </div>
 
       <!-- Password -->
       <div>
         <label for="password" class="block text-sm mb-2">Password</label>
-        <input type="password" id="password" name="password" placeholder="Nuevo password"
+        <input type="password" id="password" name="password" disabled
+               placeholder="********"
                class="w-full p-3 rounded bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500">
       </div>
 
-      <!-- Buttons -->
-      <div class="flex items-end justify-end gap-4 col-span-1 md:col-span-2 mt-4">
+      <!-- Unlock Button -->
+      <div class="col-span-1 md:col-span-2 flex justify-end">
+        <button type="button" id="unlockButton"
+                class="bg-yellow-500 hover:bg-yellow-600 text-black px-6 py-3 rounded-lg font-medium">
+          Editar datos
+        </button>
+      </div>
+
+      <!-- Save & Delete (hidden until unlocked) -->
+      <div id="actionButtons" class="flex items-end justify-end gap-4 col-span-1 md:col-span-2 mt-4 hidden">
         <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-medium">
           Save
         </button>
@@ -82,10 +90,9 @@
   </main>
 
   <script>
-    // Script para mostrar la vista previa del avatar en el formulario y en el sidebar
+    // Mostrar la vista previa del avatar
     const avatarInput = document.getElementById("avatar");
     const avatarSidebar = document.getElementById("avatarSidebar");
-
     avatarInput.addEventListener("change", function(event) {
       const file = event.target.files[0];
       if (file) {
@@ -96,34 +103,35 @@
         reader.readAsDataURL(file);
       }
     });
-  </script>
 
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const userId = 3; // <-- puedes hacerlo dinámico más adelante
-    const url = `http://127.0.0.1:4000/users/id/${userId}`;
+    // Fetch GET de datos de usuario
+    document.addEventListener("DOMContentLoaded", () => {
+      const userId = 1; // hardcode for now
+      const url = `http://127.0.0.1:4000/users/id/${userId}`;
+      fetch(url)
+        .then(response => {
+          if (!response.ok) throw new Error("Error al obtener datos del usuario");
+          return response.json();
+        })
+        .then(data => {
+          document.getElementById("name").value = data.name || "";
+          document.getElementById("nickname").value = data.nickname || "";
+          document.getElementById("email").value = data.email || "";
+          if (data.avatar) avatarSidebar.src = data.avatar;
+        })
+        .catch(err => console.error("Error:", err));
+    });
 
-    fetch(url)
-      .then(response => {
-        if (!response.ok) throw new Error("Error al obtener datos del usuario");
-        return response.json();
-      })
-      .then(data => {
-        // Rellena el formulario con los datos del usuario
-        document.getElementById("name").value = data.name || "";
-        document.getElementById("nickname").value = data.nickname || "";
-        document.getElementById("email").value = data.email || "";
-
-        // Mostrar avatar si existe
-        if (data.avatar) {
-          document.getElementById("avatarSidebar").src = data.avatar;
-        }
-      })
-      .catch(err => {
-        console.error("Error:", err);
+    // Desbloquear campos para edición
+    document.getElementById("unlockButton").addEventListener("click", () => {
+      const form = document.getElementById("profileForm");
+      form.querySelectorAll("input").forEach(input => {
+        input.disabled = false;
       });
-  });
-</script>
+      document.getElementById("actionButtons").classList.remove("hidden");
+      document.getElementById("unlockButton").disabled = true;
+    });
+  </script>
 
 </body>
 </html>

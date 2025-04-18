@@ -1,9 +1,21 @@
 import Fastify from 'fastify';
+import cors from '@fastify/cors';
+import fastifyStatic from '@fastify/static';
+import path from 'path';
 import { initDB } from './db';
-
 
 const startServer = async () => {
   const fastify = Fastify({ logger: true });
+
+  await fastify.register(cors, {
+    origin: '*'  // para desarrollo; en producción, restringe a tu dominio
+  });
+
+  await fastify.register(fastifyStatic, {
+    root: path.join(__dirname, '..', 'uploads'),
+    prefix: '/uploads/',     // todas las URLs /uploads/* vendrán de aquí
+  });
+
   const db = await initDB();
 
   // inyectar la instancia de db para usarla en rutas
@@ -69,9 +81,14 @@ const startServer = async () => {
     const { id } = request.params as any;
     const { name, nickname, email, avatar} = request.body as any;
     try {
-      await db.run('UPDATE users SET name = ?, nickname = ?, email = ?, avatar = ? WHERE id = ?', [name, nickname, email, avatar, id]);
+      const result = await db.run('UPDATE users SET name = ?, nickname = ?, email = ?, avatar = ? WHERE id = ?', [name, nickname, email, avatar, id]);
+      if (result.changes === 0) {
+        reply.code(404);
+        return { error: 'User not found' };
+      }
       return { success: true };
     } catch (err) {
+      console.error('Error completo:', err);
       reply.code(400);
       return { error: 'Error updating user', details: err };
     }

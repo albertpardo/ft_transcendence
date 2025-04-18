@@ -14,6 +14,7 @@ RUN npm install
 # Copiar código fuente
 COPY . .
 
+RUN mkdir -p /app/uploads
 RUN npm run build
 
 # Exponer puerto
