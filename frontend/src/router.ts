@@ -11,12 +11,20 @@ import { initDashboard } from './views/dashboard';
 export function route() {
   const hash = window.location.hash.replace('#', '') || 'home';
   const app = document.getElementById('app')!;
+  const isAuthenticated = !!localStorage.getItem('authToken');
 
-  // Si la ruta es 'login', renderiza solo el login y sale
+  // Si NO está autenticado y no está en login, lo redirige al login
+  if (!isAuthenticated && hash !== 'login') {
+    window.location.hash = 'login';
+    return;
+  }
+
+  // Si está en login (no importa si autenticado o no), carga la pantalla de login
   if (hash === 'login') {
     renderLogin(app);
     return;
   }
+
   // Si no es login, monta ESTRUCTURA del dashboard UNA vez
   if (!document.getElementById('sidebar')) {
     initDashboard();
