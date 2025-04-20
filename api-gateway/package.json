@@ -22,6 +22,7 @@
     "fastify-rate-limit": "^5.8.0",
     "https": "^1.0.0",
     "jsonwebtoken": "^9.0.2",
+    "raw-body": "^3.0.0",
     "serve": "^14.2.4"
   },
   "devDependencies": {

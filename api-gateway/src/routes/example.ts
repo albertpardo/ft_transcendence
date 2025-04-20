@@ -1,4 +1,4 @@
-const { generateToken } = require('../services/authServices');
+//const { generateToken } = require('../services/authServices');
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 
 console.log('✅ exampleRoutes is registered');

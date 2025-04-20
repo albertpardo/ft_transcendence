@@ -11,7 +11,7 @@ export async function authMiddleware(req: FastifyRequest, reply: FastifyReply) {
     console.log("🔍🔍🔍 All keys on req:", Object.keys(req));
 
     // if requested URL is public, skip auth
-    const publicPaths = ['/api/login', '/api/public'];
+    const publicPaths = ['/api/signup', '/api/login', '/api/public'];
     if (publicPaths.some(path => req.url?.startsWith(path))) return;
 
     try {
@@ -19,9 +19,9 @@ export async function authMiddleware(req: FastifyRequest, reply: FastifyReply) {
         console.log('✅ JWT verified, user:', req.user);
 
         //inject user ID or username into headers (for downstream services)
-        const userId = (req.user as any)?.user;
+        const userId = (req.user as any)?.userId;
         if (userId) {
-            req.headers['x-user-id'] = userId;
+            req.headers['x-user-id'] = String(userId);
             console.log(`📦 Injected x-user-id = ${userId} into headers`);
         }
     } catch (err: any) {
