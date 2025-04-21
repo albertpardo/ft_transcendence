@@ -1,4 +1,5 @@
 import Fastify from 'fastify';
+import helmet from '@fastify/helmet';
 import { initDB } from './db';
 import { pongMain, getPongStarted, getPongDone, getPongState } from './pong';
 
@@ -16,6 +17,13 @@ function makeid(length : number) : string {
 
 const startServer = async () => {
 	const fastify = Fastify({ logger: true });
+	fastify.register(helmet, {
+		contentSecurityPolicy: {
+			directives: {
+				defaultSrc: ["'self'"],
+			},
+		},
+	});
 	const db = await initDB();
 
 	// inyectar la instancia de db para usarla en rutas
@@ -25,7 +33,10 @@ const startServer = async () => {
 	// TODO get shall have absolutely 0 body
 	// TODO gameid is ok, but userid should be the principal way of identifying users trying to do anything
 	fastify.get('/', async (request, reply) => {
-		return {message : "the request is a following structure:\n" + request + "\n"};
+		return {message : "the request is a following structure: " + request};
+	});
+	fastify.post('/thing', async (request, reply) => {
+		return {message : "the request is a following structure: " + request};
 		/*
 		if (!(request.hasOwnProperty("gameId"))) {
 			if ((request.hasOwnProperty("newGame"))) {
