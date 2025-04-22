@@ -29,14 +29,15 @@ const startServer = async () => {
 			"Content-Security-Policy": "default-src 'self'",
 			"Content-Type": "text/html",
 		});
-		return JSON.stringify({message : "the request is a following structure: " + request});
+		return "text-only response. JSON-type responses make firefox generate a custom page for previewing them which messes with\
+				<br>trying to do any requests on them via firefox's own request inteface in the network section of the developer tools"
 	});
 	fastify.post('/thing', async (request, reply) => {
 		reply.headers({
 			"Content-Security-Policy": "default-src 'self'",
 			"Content-Type": "application/json",
 		});
-		return {message : "the request is a following structure: " + request, id : request.id};
+		return {message : "the request is a following structure: " + request, reqquery : request.query};
 		/*
 		if (!(request.hasOwnProperty("gameId"))) {
 			if ((request.hasOwnProperty("newGame"))) {
