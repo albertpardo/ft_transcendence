@@ -56,7 +56,7 @@ function	calculateVBounce(ball: Ball, paddle: Paddle) : Vector2 {
 
 
 class	PongRuntime {
-	private ball : Ball = { speed: {x: -100, y: 0}, coords: {x: WINDOW_SIZE.x/2, y: WINDOW_SIZE.y/2}};
+	private ball : Ball = { speed: {x: -10, y: 0}, coords: {x: WINDOW_SIZE.x/2, y: WINDOW_SIZE.y/2}};
 	private Lpaddle : Paddle = { y: (WINDOW_SIZE.y - PADDLE_H)/2, h: PADDLE_H, speed: 0 };
 	private Rpaddle : Paddle = { y: 430, h: PADDLE_H, speed: 0 };
 	private	whoLost : string = "none";
@@ -155,6 +155,8 @@ export function	getPongStarted(gameId: string) : boolean {
 	if (gamesMap.has(gameId)) {
 		return (gamesMap.get(gameId).pongStarted);
 	}
+	console.log(gamesMap);
+	console.log("inconspicuous console log.");
 	throw ("no game found registered at " + gameId);
 }
 

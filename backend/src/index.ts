@@ -1,6 +1,12 @@
 import Fastify from 'fastify';
+import type { FastifyRequest } from 'fastify';
 import { initDB } from './db';
 import { pongMain, getPongStarted, getPongDone, getPongState } from './pong';
+
+interface PongBodyReq {
+	gameId: string,
+	newGame: boolean,
+}
 
 function makeid(length : number) : string {
 	 let result : string= '';
@@ -26,36 +32,32 @@ const startServer = async () => {
 	// TODO gameid is ok, but userid should be the principal way of identifying users trying to do anything
 	fastify.get('/', async (request, reply) => {
 		reply.headers({
-			"Content-Security-Policy": "default-src 'self'",
+//			"Content-Security-Policy": "default-src 'self'",
 			"Content-Type": "text/html",
 		});
-		return "text-only response. JSON-type responses make firefox generate a custom page for previewing them which messes with\
-				<br>trying to do any requests on them via firefox's own request inteface in the network section of the developer tools"
+		return JSON.stringify(request.headers) + "<br>" + JSON.stringify(reply.getHeaders());
 	});
-	fastify.post('/thing', async (request, reply) => {
+	fastify.post('/', async (request: FastifyRequest<{ Body: PongBodyReq }>, reply) => {
 		reply.headers({
 			"Content-Security-Policy": "default-src 'self'",
 			"Content-Type": "application/json",
 		});
-		return {message : "the request is a following structure: " + request, reqquery : request.query};
-		/*
-		if (!(request.hasOwnProperty("gameId"))) {
-			if ((request.hasOwnProperty("newGame"))) {
+		if (request.body.gameId == "emptyId") {
+			if (request.body.newGame == true) {
 				let localGameId : string = makeid(512);
 				return {message : "new game created.", gameId : localGameId};
 			}
 			reply.code(400);
-			return {error: "GET / must have a gameId field to identify the game the user is referrng toi; alternatively, to start a new game, pass the newGame: <anything> field"};
+			return {error: "To start a new game, pass newGame:true"};
 		}
-		if (getPongDone(request.gameId) === true) {
-			return {message : "pong's loser is: " + getPongState(request.gameId).stateWhoL};
+		if (getPongDone(request.body.gameId) === true) {
+			return {message : "pong's loser is: " + getPongState(request.body.gameId).stateWhoL};
 		}
-		if (getPongStarted(request.gameId) === false) {
-			pongMain(request.gameId);
+		if (getPongStarted(request.body.gameId) === false) {
+			pongMain(request.body.gameId);
 			return {message : "pong wasn't started... well, now it is!"};
 		}
-		return {message : "pong ongoing;", state : getPongState(request.gameId)};
-	   */
+		return {message : "pong ongoing;", state : getPongState(request.body.gameId)};
 	});
 
 	// GET USERS
