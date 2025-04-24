@@ -1,7 +1,7 @@
 import Fastify from 'fastify';
 import type { FastifyRequest } from 'fastify';
 import { initDB } from './db';
-import { pongMain, getPongStarted, getPongDone, getPongState } from './pong';
+import { pongMain, addPongGameId, getPongStarted, getPongDone, getPongState } from './pong';
 
 interface PongBodyReq {
 	gameId: string,
@@ -38,26 +38,33 @@ const startServer = async () => {
 		return JSON.stringify(request.headers) + "<br>" + JSON.stringify(reply.getHeaders());
 	});
 	fastify.post('/', async (request: FastifyRequest<{ Body: PongBodyReq }>, reply) => {
-		reply.headers({
-			"Content-Security-Policy": "default-src 'self'",
-			"Content-Type": "application/json",
-		});
-		if (request.body.gameId == "emptyId") {
-			if (request.body.newGame == true) {
+		try {
+			reply.headers({
+				"Content-Security-Policy": "default-src 'self'",
+				"Content-Type": "application/json",
+			});
+			if (request.body.gameId === "emptyId") {
 				let localGameId : string = makeid(512);
+				addPongGameId(localGameId);
 				return {message : "new game created.", gameId : localGameId};
 			}
-			reply.code(400);
-			return {error: "To start a new game, pass newGame:true"};
+			if (request.body.newGame === true) {
+				pongMain(request.body.gameId);
+				return {message : "pong started."};
+			}
+			if (request.body.newGame === false) {
+				if (getPongDone(request.body.gameId) === true) {
+					return {message : "pong's loser is: " + getPongState(request.body.gameId).stateWhoL};
+				}
+				if (getPongStarted(request.body.gameId) === false) {
+					return {message : "pong wasn't started yet..."};
+				}
+			}
+			return {message : "pong ongoing...", state : getPongState(request.body.gameId)};
+		} catch (err) {
+			reply.code(500);
+			return { error: 'Some pong error', details: err };
 		}
-		if (getPongDone(request.body.gameId) === true) {
-			return {message : "pong's loser is: " + getPongState(request.body.gameId).stateWhoL};
-		}
-		if (getPongStarted(request.body.gameId) === false) {
-			pongMain(request.body.gameId);
-			return {message : "pong wasn't started... well, now it is!"};
-		}
-		return {message : "pong ongoing;", state : getPongState(request.body.gameId)};
 	});
 
 	// GET USERS

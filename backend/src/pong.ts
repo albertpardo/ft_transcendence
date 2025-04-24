@@ -142,9 +142,24 @@ class	PongRuntime {
 const gamesMap = new Map();
 
 export const	pongMain = async (gameId: string) => {
+	if (gamesMap.has(gameId)) {
+		if (gamesMap.get(gameId).pongStarted === true) {
+			throw ("pong already running!");
+		}
+		gamesMap.get(gameId).mainLoop();
+		console.log("a new game has been started at " + gameId);
+		console.log(gamesMap);
+	}
+	else {
+		throw ("pong game " + gameId + " not found in map");
+	}
+}
+
+export function addPongGameId(gameId: string) {
 	if (!(gamesMap.has(gameId))) {
 		gamesMap.set(gameId, new PongRuntime);
-		gamesMap.get(gameId).mainLoop();
+		console.log("game registred at " + gameId);
+		console.log(gamesMap);
 	}
 	else {
 		throw ("you're already registered at " + gameId);
@@ -152,15 +167,17 @@ export const	pongMain = async (gameId: string) => {
 }
 
 export function	getPongStarted(gameId: string) : boolean {
+	console.log(gamesMap);
+	console.log("getpongstarted");
 	if (gamesMap.has(gameId)) {
 		return (gamesMap.get(gameId).pongStarted);
 	}
-	console.log(gamesMap);
-	console.log("inconspicuous console log.");
 	throw ("no game found registered at " + gameId);
 }
 
 export function	getPongDone(gameId: string) : boolean {
+	console.log(gamesMap);
+	console.log("get pong  done");
 	if (gamesMap.has(gameId)) {
 		return (gamesMap.get(gameId).pongDone);
 	}
@@ -168,6 +185,8 @@ export function	getPongDone(gameId: string) : boolean {
 }
 
 export function	getPongState(gameId: string) : State {
+	console.log(gamesMap);
+	console.log("get pong state");
 	if (gamesMap.has(gameId)) {
 		return (gamesMap.get(gameId).pongState);
 	}
