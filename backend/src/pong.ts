@@ -24,7 +24,7 @@ interface	Ball {
 	coords: Vector2;
 };
 
-interface	State {
+export interface	State {
 	stateBall: Ball;
 	stateLP: Paddle;
 	stateRP: Paddle;
@@ -69,7 +69,7 @@ class	PongRuntime {
 		// ball bounces/fly-outs collision only check
 		if (this.ball.speed.x < 0) {
 			if (this.ball.speed.x * FRAME_TIME + this.ball.coords.x < 0) {
-				console.log("left exit imminent! paddle: ", this.Lpaddle);
+//				console.log("left exit imminent! paddle: ", this.Lpaddle);
 				// we will be exiting the screen if so
 				if ((this.ball.coords.y - this.Lpaddle.y >= 0) && (this.ball.coords.y - this.Lpaddle.y <= this.Lpaddle.h)) {
 					// bounce off the left pad, to NOT exit the screen then :)
@@ -131,8 +131,8 @@ class	PongRuntime {
 				// in real world, this here would restart the game instead of just breaking.
 			}
 			this.updatePositions();
-			console.log("ball speed: ", this.ball.speed);
-			console.log("ball coords:", this.ball.coords);
+//			console.log("ball speed: ", this.ball.speed);
+//			console.log("ball coords:", this.ball.coords);
 			this.gstate = { stateBall: this.ball, stateLP: this.Lpaddle, stateRP: this.Rpaddle, stateWhoL: this.whoLost };
 			await sleep(FRAME_TIME_MS);
 		};
@@ -140,55 +140,65 @@ class	PongRuntime {
 };
 
 const gamesMap = new Map();
+const nullVec2 : Vector2 = {x: 0, y: 0};
+const nullBall : Ball = {speed: nullVec2, coords: nullVec2};
+const nullPaddle : Paddle = {y: 0, h: 0, speed: 0};
+const nullState : State = {stateBall: nullBall, stateLP: nullPaddle, stateRP: nullPaddle, stateWhoL: "null state"};
 
-export const	pongMain = async (gameId: string) => {
+export const	startThePong = async (gameId: string) => {
 	if (gamesMap.has(gameId)) {
 		if (gamesMap.get(gameId).pongStarted === true) {
-			throw ("pong already running!");
+			console.error("game alr running");
+			return ;
 		}
 		gamesMap.get(gameId).mainLoop();
-		console.log("a new game has been started at " + gameId);
-		console.log(gamesMap);
+//		console.log("a new game has been started at " + gameId);
+//		console.log(gamesMap);
 	}
 	else {
-		throw ("pong game " + gameId + " not found in map");
+		console.error("game not found in map");
+		console.error(gameId);
+		console.error(gamesMap);
 	}
 }
 
 export function addPongGameId(gameId: string) {
 	if (!(gamesMap.has(gameId))) {
 		gamesMap.set(gameId, new PongRuntime);
-		console.log("game registred at " + gameId);
-		console.log(gamesMap);
+//		console.log("game registred at " + gameId);
+//		console.log(gamesMap);
 	}
 	else {
-		throw ("you're already registered at " + gameId);
+		console.error("you're already registered at " + gameId);
 	}
 }
 
 export function	getPongStarted(gameId: string) : boolean {
-	console.log(gamesMap);
-	console.log("getpongstarted");
+//	console.log(gamesMap);
+//	console.log("getpongstarted");
 	if (gamesMap.has(gameId)) {
 		return (gamesMap.get(gameId).pongStarted);
 	}
-	throw ("no game found registered at " + gameId);
+	console.error("no game found registered at " + gameId);
+	return false;
 }
 
 export function	getPongDone(gameId: string) : boolean {
-	console.log(gamesMap);
-	console.log("get pong  done");
+//	console.log(gamesMap);
+//	console.log("get pong  done");
 	if (gamesMap.has(gameId)) {
 		return (gamesMap.get(gameId).pongDone);
 	}
-	throw ("no game found registered at " + gameId);
+	console.error("no game found registered at " + gameId);
+	return false;
 }
 
 export function	getPongState(gameId: string) : State {
-	console.log(gamesMap);
-	console.log("get pong state");
+//	console.log(gamesMap);
+//	console.log("get pong state");
 	if (gamesMap.has(gameId)) {
-		return (gamesMap.get(gameId).pongState);
+		return (gamesMap.get(gameId).gstate);
 	}
-	throw ("no game found registered at " + gameId);
+	console.error("no game found registered at " + gameId);
+	return nullState;
 }
