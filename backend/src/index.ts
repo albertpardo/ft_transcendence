@@ -42,12 +42,12 @@ const startServer = async () => {
 			"Content-Security-Policy": "default-src 'self'",
 			"Content-Type": "application/json",
 		});
-		if (request.body.gameId === "emptyId") {
-			let localGameId : string = makeid(512);
+		if (request.body.gameId === "") {
+			let localGameId : string = makeid(32);
 			if (addPongGameId(localGameId) === PongResponses.AddedInMap) {
 				return {message : "new game created.", gameId : localGameId, success : true};
 			}
-			return {message : "game was already existing.", gameId : localGameId, success : false};
+			return {message : "game creation failed. please, try again.", gameId : "", success : false};
 		}
 		if (request.body.startGame === true) {
 			let startGameResponse : PongResponses = startThePong(request.body.gameId);
@@ -59,16 +59,20 @@ const startServer = async () => {
 			}
 			return {message : "pong started.", gameId : request.body.gameId, success : true};
 		}
-		// XXX TODO XXX left here
 		if (request.body.startGame === false) {
-			if (getPongDone(request.body.gameId) === true) {
-				return {message : "pong's loser is: " + getPongState(request.body.gameId).stateWhoL};
+			let checkOnGameResponse : PongResponses = getPongDoneness(request.body.gameId);
+			if (checkOnGameResponse === PongResponses.AlreadyRunning) {
+				return {message : "pong ongoing...", gameState : getPongState(request.body.gameId), success : true};
 			}
-			if (getPongStarted(request.body.gameId) === false) {
-				return {message : "pong wasn't started yet..."};
+			else if (checkOnGameResponse === PongResponses.StoppedRunning) {
+				return {message : "pong's lost!", gameState : getPongState(request.body.gameId), success : true};
 			}
+			else if (checkOnGameResponse === PongResponses.NotRunning) {
+				return {message : "pong wasn't started yet.", success : true};
+			}
+			return {message : "game doesn't exist.", gameId : request.body.gameId, success : false};
 		}
-		return {message : "pong ongoing...", gameState : getPongState(request.body.gameId)};
+		return {message : "unknown logical fork. the server is lowk cooked", success : false};
 	});
 
 	// GET USERS

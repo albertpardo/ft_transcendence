@@ -4,7 +4,7 @@ const	FRAME_TIME : number = 1/30;
 const	FRAME_TIME_MS : number = 1000 * FRAME_TIME;
 const	WINDOW_SIZE : Vector2 = {x: 1600, y: 900};
 const	PADDLE_H : number = 100;
-const	MIN_BALL_SPEED_Y : number = 30;
+const	MIN_BALL_SPEED_Y : number = 100;
 
 
 export enum PongResponses {
@@ -65,7 +65,7 @@ function	calculateVBounce(ball: Ball, paddle: Paddle) : Vector2 {
 
 
 class	PongRuntime {
-	private ball : Ball = { speed: {x: -10, y: 0}, coords: {x: WINDOW_SIZE.x/2, y: WINDOW_SIZE.y/2}};
+	private ball : Ball = { speed: {x: -50, y: 0}, coords: {x: WINDOW_SIZE.x/2, y: WINDOW_SIZE.y/2}};
 	private Lpaddle : Paddle = { y: (WINDOW_SIZE.y - PADDLE_H)/2, h: PADDLE_H, speed: 0 };
 	private Rpaddle : Paddle = { y: 430, h: PADDLE_H, speed: 0 };
 	private	whoLost : string = "none";
