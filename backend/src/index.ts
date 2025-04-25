@@ -1,11 +1,11 @@
 import Fastify from 'fastify';
 import type { FastifyRequest } from 'fastify';
 import { initDB } from './db';
-import { State, startThePong, addPongGameId, getPongStarted, getPongDone, getPongState } from './pong';
+import { PongResponses, State, startThePong, addPongGameId, getPongDoneness, getPongState } from './pong';
 
 interface PongBodyReq {
 	gameId: string,
-	newGame: boolean,
+	startGame: boolean,
 }
 
 function makeid(length : number) : string {
@@ -44,14 +44,23 @@ const startServer = async () => {
 		});
 		if (request.body.gameId === "emptyId") {
 			let localGameId : string = makeid(512);
-			addPongGameId(localGameId);
-			return {message : "new game created.", gameId : localGameId};
+			if (addPongGameId(localGameId) === PongResponses.AddedInMap) {
+				return {message : "new game created.", gameId : localGameId, success : true};
+			}
+			return {message : "game was already existing.", gameId : localGameId, success : false};
 		}
-		if (request.body.newGame === true) {
-			startThePong(request.body.gameId);
-			return {message : "pong started."};
+		if (request.body.startGame === true) {
+			let startGameResponse : PongResponses = startThePong(request.body.gameId);
+			if (startGameResponse === PongResponses.AlreadyRunning) {
+				return {message : "game was already running.", gameId : request.body.gameId, success : false};
+			}
+			else if (startGameResponse === PongResponses.NotInMap) {
+				return {message : "game doesn't exist.", gameId : request.body.gameId, success : false};
+			}
+			return {message : "pong started.", gameId : request.body.gameId, success : true};
 		}
-		if (request.body.newGame === false) {
+		// XXX TODO XXX left here
+		if (request.body.startGame === false) {
 			if (getPongDone(request.body.gameId) === true) {
 				return {message : "pong's loser is: " + getPongState(request.body.gameId).stateWhoL};
 			}

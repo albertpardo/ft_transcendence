@@ -7,6 +7,15 @@ const	PADDLE_H : number = 100;
 const	MIN_BALL_SPEED_Y : number = 30;
 
 
+export enum PongResponses {
+	StartedRunning,
+	AlreadyRunning,
+	NotRunning,
+	StoppedRunning,
+	AddedInMap,
+	AlreadyInMap,
+	NotInMap,
+}
 
 interface	Vector2 {
 	x: number;
@@ -145,57 +154,46 @@ const nullBall : Ball = {speed: nullVec2, coords: nullVec2};
 const nullPaddle : Paddle = {y: 0, h: 0, speed: 0};
 const nullState : State = {stateBall: nullBall, stateLP: nullPaddle, stateRP: nullPaddle, stateWhoL: "null state"};
 
-export const	startThePong = async (gameId: string) => {
+export function startThePong(gameId: string) : PongResponses {
 	if (gamesMap.has(gameId)) {
 		if (gamesMap.get(gameId).pongStarted === true) {
-			console.error("game alr running");
-			return ;
+			return PongResponses.AlreadyRunning;
 		}
 		gamesMap.get(gameId).mainLoop();
+		return PongResponses.StartedRunning;
 //		console.log("a new game has been started at " + gameId);
 //		console.log(gamesMap);
 	}
-	else {
-		console.error("game not found in map");
-		console.error(gameId);
-		console.error(gamesMap);
-	}
+	console.error("game not found in map. gameId and the map are as follows:");
+	console.error(gameId);
+	console.error(gamesMap);
+	return PongResponses.NotInMap;
 }
 
-export function addPongGameId(gameId: string) {
+export function addPongGameId(gameId: string) : PongResponses {
 	if (!(gamesMap.has(gameId))) {
 		gamesMap.set(gameId, new PongRuntime);
-//		console.log("game registred at " + gameId);
-//		console.log(gamesMap);
+		return PongResponses.AddedInMap;
 	}
-	else {
-		console.error("you're already registered at " + gameId);
-	}
+	console.error("you're already registered at " + gameId);
+	return PongResponses.AlreadyInMap;
 }
 
-export function	getPongStarted(gameId: string) : boolean {
-//	console.log(gamesMap);
-//	console.log("getpongstarted");
+export function	getPongDoneness(gameId: string) : PongResponses {
 	if (gamesMap.has(gameId)) {
-		return (gamesMap.get(gameId).pongStarted);
+		if (gamesMap.get(gameId).pongStarted && !(gamesMap.get(gameId).pongDone)) {
+			return PongResponses.AlreadyRunning;
+		}
+		if (gamesMap.get(gameId).pongDone) {
+			return PongResponses.StoppedRunning;
+		}
+		return PongResponses.NotRunning;
 	}
 	console.error("no game found registered at " + gameId);
-	return false;
-}
-
-export function	getPongDone(gameId: string) : boolean {
-//	console.log(gamesMap);
-//	console.log("get pong  done");
-	if (gamesMap.has(gameId)) {
-		return (gamesMap.get(gameId).pongDone);
-	}
-	console.error("no game found registered at " + gameId);
-	return false;
+	return PongResponses.NotInMap;
 }
 
 export function	getPongState(gameId: string) : State {
-//	console.log(gamesMap);
-//	console.log("get pong state");
 	if (gamesMap.has(gameId)) {
 		return (gamesMap.get(gameId).gstate);
 	}
