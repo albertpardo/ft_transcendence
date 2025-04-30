@@ -1,5 +1,13 @@
+// Encuentra la línea 28 y asegúrate de que no esté intentando llamar a un String como función.
+// Podría ser algo como:
+// Incorrecto: fastify.prefix('/api'); -> Si 'prefix' es un String, no una función
+// Correcto: fastify.register(async (fastify) => { fastify.prefix('/api'); ... });
+
 import Fastify from 'fastify';
 import type { FastifyRequest } from 'fastify';
+import cors from '@fastify/cors';
+import fastifyStatic from '@fastify/static';
+import path from 'path';
 import { initDB } from './db';
 import { PongResponses, State, startThePong, addPongGameId, getPongDoneness, getPongState } from './pong';
 
@@ -22,92 +30,155 @@ function makeid(length : number) : string {
 
 const startServer = async () => {
 	const fastify = Fastify({ logger: true });
+
+	await fastify.register(cors, {
+		origin: '*'	// para desarrollo; en producción, restringe a tu dominio
+	});
+
+	await fastify.register(fastifyStatic, {
+		root: path.join(__dirname, '..', 'uploads'),
+		prefix: '/uploads/',		 // todas las URLs /uploads/* vendrán de aquí
+		decorateReply: false
+	});
+
 	const db = await initDB();
 
 	// inyectar la instancia de db para usarla en rutas
 	fastify.decorate('db', db);
 
-	//GET HOME
-	// TODO get shall have absolutely 0 body
-	// TODO gameid is ok, but userid should be the principal way of identifying users trying to do anything
-	fastify.get('/', async (request, reply) => {
-		reply.headers({
-//			"Content-Security-Policy": "default-src 'self'",
-			"Content-Type": "text/html",
+	// Registra un plugin para prefijar las rutas API con '/api'
+	const apiRoutes = async (fastify) => {
+		// GET HOME
+		fastify.get('/', async (request, reply) => {
+			return {message : "Welcome to the transcendence API!"};
 		});
-		return JSON.stringify(request.headers) + "<br>" + JSON.stringify(reply.getHeaders());
-	});
-	fastify.post('/', async (request: FastifyRequest<{ Body: PongBodyReq }>, reply) => {
-		reply.headers({
-			"Content-Security-Policy": "default-src 'self'",
-			"Content-Type": "application/json",
+
+		// GET USERS
+		fastify.get('/users', async (request, reply) => {
+			const users = await db.all('SELECT * FROM users');
+			return users;
 		});
-		if (request.body.gameId === "") {
-			let localGameId : string = makeid(32);
-			if (addPongGameId(localGameId) === PongResponses.AddedInMap) {
-				return {message : "new game created.", gameId : localGameId, success : true};
+
+		// GET USERS BY ID
+		fastify.get('/users/id/:id', async (request, reply) => {
+			const { id } = request.params as any;
+			try {
+				const user = await db.get('SELECT * FROM users WHERE id = ?', [id]);
+				if (!user) {
+					reply.code(404);
+					return { err: 'User not found' };
+				}
+				return user;
+			} catch (err) {
+				reply.code(400);
+				return { err: 'Error fetching user', details: err };
 			}
-			return {message : "game creation failed. please, try again.", gameId : "", success : false};
-		}
-		if (request.body.startGame === true) {
-			let startGameResponse : PongResponses = startThePong(request.body.gameId);
-			if (startGameResponse === PongResponses.AlreadyRunning) {
-				return {message : "game was already running.", gameId : request.body.gameId, success : false};
+		});
+
+		// GET USERS BY NAME
+		fastify.get('/users/name/:name', async (request, reply) => {
+			const { name } = request.params as any;
+			try {
+				const user = await db.get('SELECT * FROM users WHERE LOWER(name) = LOWER(?)', [name]);
+				if (!user) {
+					reply.code(404);
+					return { error: 'User not found' };
+				}
+				return user;
+			} catch (err) {
+				reply.code(400);
+				return { err : 'Error fetching user', details: err };
 			}
-			else if (startGameResponse === PongResponses.NotInMap) {
+		});
+		
+		// POST USERS
+		fastify.post('/users', async (request, reply) => {
+			const { name, nickname, email, password, avatar } = request.body as any;
+			try {
+				await db.run('INSERT INTO users (name, nickname, email, password, avatar) VALUES (?, ?, ?, ?, ?)', [name, nickname, email, password, avatar]);
+				return { success: true };
+			} catch (err) {
+				reply.code(400);
+				return { error: 'Error inserting user', details: err };
+			}
+		});
+
+		// PUT USERS
+		fastify.put('/users/id/:id', async (request, reply) => {
+			const { id } = request.params as any;
+			const { name, nickname, email, password, avatar} = request.body as any;
+			try {
+				const result = await db.run('UPDATE users SET name = ?, nickname = ?, email = ?, password = ?, avatar = ? WHERE id = ?', [name, nickname, email, password, avatar, id]);
+				if (result.changes === 0) {
+					reply.code(404);
+					return { error: 'User not found' };
+				}
+				return { success: true };
+			} catch (err) {
+				console.error('Error completo:', err);
+				reply.code(400);
+				return { error: 'Error updating user', details: err };
+			}
+		});
+
+		// DELETE USERS
+		fastify.delete('/users/id/:id', async (request, reply) => {
+			const { id } = request.params as any;
+			try {
+				const result = await db.run('DELETE FROM users WHERE id = ?', [id]);
+				if (result.changes === 0) {
+					reply.code(404);
+					return { error: 'User not found' };
+				}
+				return { success: true };
+			} catch (err) {
+				reply.code(400);
+				return { error: 'Error deleting user', details: err };
+			}
+		});
+
+		// PONG
+		fastify.post('/pong', async (request: FastifyRequest<{ Body: PongBodyReq }>, reply) => {
+			reply.headers({
+				"Content-Security-Policy": "default-src 'self'",
+				"Content-Type": "application/json",
+			});
+			if (request.body.gameId === "") {
+				let localGameId : string = makeid(32);
+				if (addPongGameId(localGameId) === PongResponses.AddedInMap) {
+					return {message : "new game created.", gameId : localGameId, success : true};
+				}
+				return {message : "game creation failed. please, try again.", gameId : "", success : false};
+			}
+			if (request.body.startGame === true) {
+				let startGameResponse : PongResponses = startThePong(request.body.gameId);
+				if (startGameResponse === PongResponses.AlreadyRunning) {
+					return {message : "game was already running.", gameId : request.body.gameId, success : false};
+				}
+				else if (startGameResponse === PongResponses.NotInMap) {
+					return {message : "game doesn't exist.", gameId : request.body.gameId, success : false};
+				}
+				return {message : "pong started.", gameId : request.body.gameId, success : true};
+			}
+			if (request.body.startGame === false) {
+				let checkOnGameResponse : PongResponses = getPongDoneness(request.body.gameId);
+				if (checkOnGameResponse === PongResponses.AlreadyRunning) {
+					return {message : "pong ongoing...", gameState : getPongState(request.body.gameId), success : true};
+				}
+				else if (checkOnGameResponse === PongResponses.StoppedRunning) {
+					return {message : "pong's lost!", gameState : getPongState(request.body.gameId), success : true};
+				}
+				else if (checkOnGameResponse === PongResponses.NotRunning) {
+					return {message : "pong wasn't started yet.", success : true};
+				}
 				return {message : "game doesn't exist.", gameId : request.body.gameId, success : false};
 			}
-			return {message : "pong started.", gameId : request.body.gameId, success : true};
-		}
-		if (request.body.startGame === false) {
-			let checkOnGameResponse : PongResponses = getPongDoneness(request.body.gameId);
-			if (checkOnGameResponse === PongResponses.AlreadyRunning) {
-				return {message : "pong ongoing...", gameState : getPongState(request.body.gameId), success : true};
-			}
-			else if (checkOnGameResponse === PongResponses.StoppedRunning) {
-				return {message : "pong's lost!", gameState : getPongState(request.body.gameId), success : true};
-			}
-			else if (checkOnGameResponse === PongResponses.NotRunning) {
-				return {message : "pong wasn't started yet.", success : true};
-			}
-			return {message : "game doesn't exist.", gameId : request.body.gameId, success : false};
-		}
-		return {message : "unknown logical fork. the server is lowk cooked", success : false};
-	});
+			return {message : "unknown logical fork. the server is lowk cooked", success : false};
+		});
+	};
 
-	// GET USERS
-	fastify.get('/users', async (request, reply) => {
-		const users = await db.all('SELECT * FROM users');
-		return users;
-	});
-
-	// POST USERS
-	fastify.post('/users', async (request, reply) => {
-		const { name, email } = request.body as any;
-		try {
-			await db.run('INSERT INTO users (name, email) VALUES (?, ?)', [name, email]);
-			return { success: true };
-		} catch (err) {
-			reply.code(400);
-			return { error: 'Error inserting user', details: err };
-		}
-	});
-
-	// PUT USERS
-	fastify.put('/users/:id', async (request, reply) => {
-		const { id } = request.params as any;
-		const { name, email } = request.body as any;
-		try {
-			await db.run('UPDATE users SET name = ?, email = ? WHERE id = ?', [name, email, id]);
-			return { success: true };
-		} catch (err) {
-			reply.code(400);
-			return { error: 'Error updating user', details: err };
-		}
-	});
-
-	// DELETE USERS
-
+	// Registra las rutas API con prefijo '/api'
+	fastify.register(apiRoutes, { prefix: '/api' });
 
 	await fastify.listen({ port: 4000, host: '0.0.0.0' });
 };
