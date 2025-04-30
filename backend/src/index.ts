@@ -137,13 +137,26 @@ const startServer = async () => {
 			}
 		});
 
-		// PONG
+		// temporary pong logic. permanent logic will have a constant sent-from-server stream of gamestate
+		fastify.get('/pong', async (request, reply) => {
+			reply.headers({
+				"Content-Security-Policy": "default-src 'self'",
+				"Content-Type": "text/html",
+			});
+			return "Welcome to an \"html\" return for firefox testing purposes.<br>Enjoy your stay!";
+		});
 		fastify.post('/pong', async (request: FastifyRequest<{ Body: PongBodyReq }>, reply) => {
 			reply.headers({
 				"Content-Security-Policy": "default-src 'self'",
 				"Content-Type": "application/json",
 			});
+//			console.log(request.body);
+//			console.log(typeof(request.body.gameId));
+//			console.log(typeof(request.body.startGame));
+//			console.log(request.body.gameId);
+//			console.log(request.body.startGame);
 			if (request.body.gameId === "") {
+//				console.log("empty id. let's create one");
 				let localGameId : string = makeid(32);
 				if (addPongGameId(localGameId) === PongResponses.AddedInMap) {
 					return {message : "new game created.", gameId : localGameId, success : true};
@@ -151,6 +164,7 @@ const startServer = async () => {
 				return {message : "game creation failed. please, try again.", gameId : "", success : false};
 			}
 			if (request.body.startGame === true) {
+//				console.log("non-empty id, and asked for 'start game'");
 				let startGameResponse : PongResponses = startThePong(request.body.gameId);
 				if (startGameResponse === PongResponses.AlreadyRunning) {
 					return {message : "game was already running.", gameId : request.body.gameId, success : false};
@@ -161,6 +175,7 @@ const startServer = async () => {
 				return {message : "pong started.", gameId : request.body.gameId, success : true};
 			}
 			if (request.body.startGame === false) {
+//				console.log("non-empty id, and didn't ask for 'start game'");
 				let checkOnGameResponse : PongResponses = getPongDoneness(request.body.gameId);
 				if (checkOnGameResponse === PongResponses.AlreadyRunning) {
 					return {message : "pong ongoing...", gameState : getPongState(request.body.gameId), success : true};
@@ -177,7 +192,6 @@ const startServer = async () => {
 		});
 	};
 
-	// Registra las rutas API con prefijo '/api'
 	fastify.register(apiRoutes, { prefix: '/api' });
 
 	await fastify.listen({ port: 4000, host: '0.0.0.0' });
