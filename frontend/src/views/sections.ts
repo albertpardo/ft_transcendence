@@ -20,6 +20,9 @@
   
 
 // src/views/sections.ts
+
+import { doSomething } from './buttonClicking';
+
 export function renderHomeContent(el: HTMLElement) {
   el.innerHTML = `
     <h1 class="text-3xl font-bold mb-6">Welcome to Transcendence!</h1>
@@ -40,7 +43,8 @@ export function renderPlayContent(el: HTMLElement) {
   el.innerHTML = `
     <h1 class="text-3xl font-bold mb-6">Play Pong</h1>
     <p class="mb-4">Pong (texto de ejemplo).</p>
-    <img src="https://placehold.co/1000x400/444444/ffffff?text=Demo" class="w-full rounded-lg" alt="Pong">
+	<script type="module" src="/src/views/buttonClicking.ts"></script>
+	<button onclick="doSomething()" class="mb-4">click.</button>
   `;
 }
 
