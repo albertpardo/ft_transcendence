@@ -21,7 +21,7 @@
 
 // src/views/sections.ts
 
-import { doSomething } from './buttonClicking';
+// import { doSomething } from './buttonClicking';
 
 export function renderHomeContent(el: HTMLElement, bu: HTMLElement) {
 	el.innerHTML = `
@@ -47,9 +47,9 @@ export function renderProfileContent(el: HTMLElement, bu: HTMLElement) {
 export function renderPlayContent(el: HTMLElement, bu: HTMLElement) {
 	el.innerHTML = `
 		<h1 class="text-3xl font-bold mb-6">Play Pong</h1>
-		<p class="mb-4">Pong (texto de ejemplo).</p>
+		<p class="mb-4">Pong (texto de ejemplo).</p>	
 	`;
-	bu.hidden = false;
+	bu.hidden = false; //show the button
 }
 
 export function renderTournamentContent(el: HTMLElement, bu: HTMLElement) {

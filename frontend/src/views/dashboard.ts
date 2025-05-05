@@ -1,5 +1,6 @@
 // src/views/dashboard.ts
 import { renderHomeContent, renderProfileContent, renderPlayContent, renderTournamentContent, renderStatsContent } from './sections';
+import { doSomething } from './buttonClicking';
 
 export function initDashboard() {
   const hash = window.location.hash.replace('#', '') || 'home';
@@ -22,7 +23,7 @@ export function initDashboard() {
     </aside>
 	<div>
     	<main id="content-area" class="ml-64 p-6 md:p-8 lg:p-12 overflow-auto"></main>
-		<button id="secret-button" class="mt-auto w-full p-3 bg-red-600 rounded-lg hover:bg-red-700 transition" hidden>click me bro</button>
+      <button id="secret-button" class="mt-auto w-full p-3 bg-red-600 rounded-lg hover:bg-red-700 transition" hidden>click me bro</button>		
 	</div>
   `;
 
@@ -32,6 +33,13 @@ export function initDashboard() {
     window.location.hash = 'login';
     route();
   });
+
+  // Secret button
+  document.getElementById('secret-button')!.addEventListener('click', () => {
+    doSomething();
+    alert('Secret button clicked!');
+  });
+  
 
   // Renderizar la sección activa
   const contentArea = document.getElementById('content-area')!;
