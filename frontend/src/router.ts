@@ -1,3 +1,4 @@
+import { doSomething } from './views/buttonClicking';
 import { renderLogin } from './views/login';
 import {
   renderHomeContent,
@@ -31,13 +32,14 @@ export function route() {
   }
 
   // Renderiza el contenido según la sección
-  const content = document.getElementById('content-area')!;
+  const contentArea = document.getElementById('content-area')!;
+  const secretClickMeButton = document.getElementById('secret-button')!;
   switch (hash) {
-    case 'profile':    renderProfileContent(content);    break;
-    case 'play':       renderPlayContent(content);       break;
-    case 'tournament': renderTournamentContent(content); break;
-    case 'stats':      renderStatsContent(content);      break;
-    default:           renderHomeContent(content);
+    case 'profile':    renderProfileContent(contentArea, secretClickMeButton);    break;
+    case 'play':       renderPlayContent(contentArea, secretClickMeButton);       break;
+    case 'tournament': renderTournamentContent(contentArea, secretClickMeButton); break;
+    case 'stats':      renderStatsContent(contentArea, secretClickMeButton);      break;
+    default:           renderHomeContent(contentArea, secretClickMeButton);
   }
 
   // Actualiza el estado activo de los links del sidebar

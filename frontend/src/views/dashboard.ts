@@ -6,6 +6,7 @@ export function initDashboard() {
   const app = document.getElementById('app')!;
   app.innerHTML = `
     <aside id="sidebar" class="fixed left-0 top-0 bottom-0 w-64 bg-gray-900 p-6 flex flex-col">
+	<div>
       <h2 class="text-2xl font-bold mb-8 text-center">Transcendence</h2>
       <nav class="flex-grow space-y-3">
         <a href="#home" class="block p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition ${hash === 'home' ? 'bg-blue-600' : 'bg-gray-700'}">Dashboard</a>
@@ -17,8 +18,12 @@ export function initDashboard() {
       <button id="logout-btn" class="mt-auto w-full p-3 bg-red-600 rounded-lg hover:bg-red-700 transition">
         Logout
       </button>
+	  </div>
     </aside>
-    <main id="content-area" class="ml-64 p-6 md:p-8 lg:p-12 overflow-auto"></main>
+	<div>
+    	<main id="content-area" class="ml-64 p-6 md:p-8 lg:p-12 overflow-auto"></main>
+		<button id="secret-button" class="mt-auto w-full p-3 bg-red-600 rounded-lg hover:bg-red-700 transition" hidden>click me bro</button>
+	</div>
   `;
 
   // Logout → vuelve a index.html
@@ -30,12 +35,13 @@ export function initDashboard() {
 
   // Renderizar la sección activa
   const contentArea = document.getElementById('content-area')!;
+  const secretClickMeButton = document.getElementById('secret-button')!;
   switch (hash) {
-    case 'profile':    renderProfileContent(contentArea);    break;
-    case 'play':       renderPlayContent(contentArea);       break;
-    case 'tournament': renderTournamentContent(contentArea); break;
-    case 'stats':      renderStatsContent(contentArea);      break;
-    default:           renderHomeContent(contentArea);
+    case 'profile':    renderProfileContent(contentArea, secretClickMeButton);    break;
+    case 'play':       renderPlayContent(contentArea, secretClickMeButton);       break;
+    case 'tournament': renderTournamentContent(contentArea, secretClickMeButton); break;
+    case 'stats':      renderStatsContent(contentArea, secretClickMeButton);      break;
+    default:           renderHomeContent(contentArea, secretClickMeButton);
   }
 }
 
