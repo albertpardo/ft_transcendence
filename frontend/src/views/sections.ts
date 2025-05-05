@@ -39,10 +39,16 @@ export function renderProfileContent(el: HTMLElement) {
   `;
 }
 
+// the alert doesn't work
+// the load of src views buttonclicking ts doesn't work
+// the dosomething call fails because it wasn't defined in the end
 export function renderPlayContent(el: HTMLElement) {
   el.innerHTML = `
     <h1 class="text-3xl font-bold mb-6">Play Pong</h1>
     <p class="mb-4">Pong (texto de ejemplo).</p>
+	<script type="text/javascript">
+		alert('Current directory: ' + window.location.pathname);
+	</script>
 	<script type="module" src="/src/views/buttonClicking.ts"></script>
 	<button onclick="doSomething()" class="mb-4">click.</button>
   `;
