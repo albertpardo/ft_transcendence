@@ -1,6 +1,6 @@
 // src/views/dashboard.ts
 import { renderHomeContent, renderProfileContent, renderPlayContent, renderTournamentContent, renderStatsContent } from './sections';
-import { doSomething } from './buttonClicking';
+import { doSomething, registerGame } from './buttonClicking';
 
 export function initDashboard() {
   const hash = window.location.hash.replace('#', '') || 'home';
@@ -35,10 +35,16 @@ export function initDashboard() {
   });
 
   // Secret button
-  document.getElementById('secret-button')!.addEventListener('click', () => {
-    doSomething();
-    alert('Secret button clicked!');
-  });
+	document.getElementById('secret-button')!.addEventListener('click', () => {
+		registerGame(function (error, response) {
+			if (error) {
+				console.error(error);
+			}
+			else {
+				response?.text().then((result) => alert('Secret button clicked! Response text: ' + result));
+			}
+		});
+	});
   
 
   // Renderizar la sección activa
