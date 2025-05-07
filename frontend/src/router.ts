@@ -34,12 +34,13 @@ export function route() {
   // Renderiza el contenido según la sección
   const contentArea = document.getElementById('content-area')!;
   const secretClickMeButton = document.getElementById('secret-button')!;
+  const registeredGamesList = document.getElementById('registered-games-list')!;
   switch (hash) {
-    case 'profile':    renderProfileContent(contentArea, secretClickMeButton);    break;
-    case 'play':       renderPlayContent(contentArea, secretClickMeButton);       break;
-    case 'tournament': renderTournamentContent(contentArea, secretClickMeButton); break;
-    case 'stats':      renderStatsContent(contentArea, secretClickMeButton);      break;
-    default:           renderHomeContent(contentArea, secretClickMeButton);
+    case 'profile':    renderProfileContent(contentArea, secretClickMeButton, registeredGamesList);    break;
+    case 'play':       renderPlayContent(contentArea, secretClickMeButton, registeredGamesList);       break;
+    case 'tournament': renderTournamentContent(contentArea, secretClickMeButton, registeredGamesList); break;
+    case 'stats':      renderStatsContent(contentArea, secretClickMeButton, registeredGamesList);      break;
+    default:           renderHomeContent(contentArea, secretClickMeButton, registeredGamesList);
   }
 
   // Actualiza el estado activo de los links del sidebar

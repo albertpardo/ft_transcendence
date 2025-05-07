@@ -24,8 +24,10 @@ export function initDashboard() {
 	<div>
     	<main id="content-area" class="ml-64 p-6 md:p-8 lg:p-12 overflow-auto"></main>
       <button id="secret-button" class="mt-auto w-full p-3 bg-red-600 rounded-lg hover:bg-red-700 transition" hidden>click me bro</button>		
+	  <p id="registered-games-list" hidden></p>
 	</div>
   `;
+  const registeredGamesList = document.getElementById('registered-games-list')!;
 
   // Logout → vuelve a index.html
   document.getElementById('logout-btn')!.addEventListener('click', () => {
@@ -41,7 +43,7 @@ export function initDashboard() {
 				console.error(error);
 			}
 			else {
-				response?.text().then((result) => alert('Secret button clicked! Response text: ' + result));
+				response?.text().then((result) => registeredGamesList.innerHTML += result + "<br>");
 			}
 		});
 	});
@@ -51,11 +53,11 @@ export function initDashboard() {
   const contentArea = document.getElementById('content-area')!;
   const secretClickMeButton = document.getElementById('secret-button')!;
   switch (hash) {
-    case 'profile':    renderProfileContent(contentArea, secretClickMeButton);    break;
-    case 'play':       renderPlayContent(contentArea, secretClickMeButton);       break;
-    case 'tournament': renderTournamentContent(contentArea, secretClickMeButton); break;
-    case 'stats':      renderStatsContent(contentArea, secretClickMeButton);      break;
-    default:           renderHomeContent(contentArea, secretClickMeButton);
+    case 'profile':    renderProfileContent(contentArea, secretClickMeButton, registeredGamesList);    break;
+    case 'play':       renderPlayContent(contentArea, secretClickMeButton, registeredGamesList);       break;
+    case 'tournament': renderTournamentContent(contentArea, secretClickMeButton, registeredGamesList); break;
+    case 'stats':      renderStatsContent(contentArea, secretClickMeButton, registeredGamesList);      break;
+    default:           renderHomeContent(contentArea, secretClickMeButton, registeredGamesList);
   }
 }
 
