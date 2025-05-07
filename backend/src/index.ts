@@ -150,11 +150,12 @@ const startServer = async () => {
 				"Content-Security-Policy": "default-src 'self'",
 				"Content-Type": "application/json",
 			});
-//			console.log(request.body);
-//			console.log(typeof(request.body.gameId));
-//			console.log(typeof(request.body.startGame));
-//			console.log(request.body.gameId);
-//			console.log(request.body.startGame);
+			console.log("hooray! new request:");
+			console.log(request.body);
+			console.log(typeof(request.body.gameId));
+			console.log(typeof(request.body.startGame));
+			console.log(request.body.gameId);
+			console.log(request.body.startGame);
 			if (request.body.gameId === "") {
 //				console.log("empty id. let's create one");
 				let localGameId : string = makeid(32);
@@ -167,7 +168,7 @@ const startServer = async () => {
 //				console.log("non-empty id, and asked for 'start game'");
 				let startGameResponse : PongResponses = startThePong(request.body.gameId);
 				if (startGameResponse === PongResponses.AlreadyRunning) {
-					return {message : "game was already running.", gameId : request.body.gameId, success : false};
+					return {message : "game was already running.", gameId : request.body.gameId, gameState: getPongState(request.body.gameId), success : false};
 				}
 				else if (startGameResponse === PongResponses.NotInMap) {
 					return {message : "game doesn't exist.", gameId : request.body.gameId, success : false};

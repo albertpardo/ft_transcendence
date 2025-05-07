@@ -1,6 +1,18 @@
 // src/views/dashboard.ts
 import { renderHomeContent, renderProfileContent, renderPlayContent, renderTournamentContent, renderStatsContent } from './sections';
-import { doSomething, registerGame } from './buttonClicking';
+import { doSomething, registerGame, startGame } from './buttonClicking';
+
+async function gameClicker(parsedId : string) : void {
+	startGame(parsedId, function (error, response) {
+		if (error) {
+			console.error(error);
+		}
+		else {
+			response?.text().then((result) => console.log(result));
+			document.getElementById(parsedId).innerHTML = "check on the game";
+		}
+	});
+}
 
 export function initDashboard() {
   const hash = window.location.hash.replace('#', '') || 'home';
@@ -24,7 +36,7 @@ export function initDashboard() {
 	<div>
     	<main id="content-area" class="ml-64 p-6 md:p-8 lg:p-12 overflow-auto"></main>
       <button id="secret-button" class="mt-auto w-full p-3 bg-red-600 rounded-lg hover:bg-red-700 transition" hidden>click me bro</button>		
-	  <p id="registered-games-list" hidden></p>
+	  <table id="registered-games-list" hidden></table>
 	</div>
   `;
   const registeredGamesList = document.getElementById('registered-games-list')!;
@@ -36,6 +48,7 @@ export function initDashboard() {
     route();
   });
 
+  const listTableHeaders : string = "<tr><th>gameId</th><th>start the simulation button</th></tr>";
   // Secret button
 	document.getElementById('secret-button')!.addEventListener('click', () => {
 		registerGame(function (error, response) {
@@ -43,7 +56,16 @@ export function initDashboard() {
 				console.error(error);
 			}
 			else {
-				response?.text().then((result) => registeredGamesList.innerHTML += result + "<br>");
+				response?.text().then((result) => {
+					const parsedId : string = JSON.parse(result)?.gameId;
+					registeredGamesList.innerHTML = listTableHeaders +
+						"<tr><td>" + parsedId + "</td>" +
+						"<td><button id=\"" + parsedId + "\" class=\"mt-auto w-full p-3 transition\">start the game...</button></td></tr>" +
+						registeredGamesList.innerHTML.substring(listTableHeaders.length + 2);
+					// the "+ 2" is because I guess something is transforming the html along the way to make it prettier and
+					//it adds 2 additional characters, maybe they're a double newline actually.
+					document.getElementById(parsedId)!.addEventListener('click', gameClicker(parsedId));
+				});
 			}
 		});
 	});
