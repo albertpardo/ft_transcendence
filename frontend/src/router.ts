@@ -1,12 +1,12 @@
 import { renderLogin } from './views/login';
 import {
   renderHomeContent,
-  renderProfileContent,
   renderPlayContent,
   renderTournamentContent,
   renderStatsContent
 } from './views/sections';
 import { initDashboard } from './views/dashboard';
+import { renderProfileContent } from './views/profile';
 
 export function route() {
   const hash = window.location.hash.replace('#', '') || 'home';

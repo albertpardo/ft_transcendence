@@ -1,5 +1,6 @@
 // src/views/dashboard.ts
-import { renderHomeContent, renderProfileContent, renderPlayContent, renderTournamentContent, renderStatsContent } from './sections';
+import { renderHomeContent, renderPlayContent, renderTournamentContent, renderStatsContent } from './sections';
+import { renderProfileContent } from './profile';
 
 export function initDashboard() {
   const hash = window.location.hash.replace('#', '') || 'home';
