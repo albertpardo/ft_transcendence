@@ -2,7 +2,7 @@
 import { renderHomeContent, renderProfileContent, renderPlayContent, renderTournamentContent, renderStatsContent } from './sections';
 import { doSomething, registerGame, startGame } from './buttonClicking';
 
-async function gameClicker(parsedId : string) : void {
+function gameClicker(parsedId : string) : void {
 	startGame(parsedId, function (error, response) {
 		if (error) {
 			console.error(error);
@@ -64,7 +64,7 @@ export function initDashboard() {
 						registeredGamesList.innerHTML.substring(listTableHeaders.length + 2);
 					// the "+ 2" is because I guess something is transforming the html along the way to make it prettier and
 					//it adds 2 additional characters, maybe they're a double newline actually.
-					document.getElementById(parsedId)!.addEventListener('click', gameClicker(parsedId));
+					document.getElementById(parsedId)!.addEventListener('click', () => {gameClicker(parsedId)});
 				});
 			}
 		});
