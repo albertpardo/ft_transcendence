@@ -23,55 +23,55 @@
 
 // import { doSomething } from './buttonClicking';
 
-export function renderHomeContent(el: HTMLElement, bu: HTMLElement, rgl: HTMLElement) {
+export function renderHomeContent(el: HTMLElement, bu: HTMLElement, gwin: HTMLElement) {
 	el.innerHTML = `
 		<h1 class="text-3xl font-bold mb-6">Welcome to Transcendence!</h1>
 		<p class="mb-4">Sección de inicio con texto e imagen de prueba.</p>
 		<img src="https://placehold.co/1000x400/444444/ffffff?text=Demo" class="w-full rounded-lg mb-6" alt="Demo">
 	`;
 	bu.hidden = true;
-	rgl.hidden = true;
+	gwin.hidden = true;
 }
 
-export function renderProfileContent(el: HTMLElement, bu: HTMLElement, rgl: HTMLElement) {
+export function renderProfileContent(el: HTMLElement, bu: HTMLElement, gwin: HTMLElement) {
 	el.innerHTML = `
 		<h1 class="text-3xl font-bold mb-6">Your Profile</h1>
 		<p class="mb-4">Perfil (texto de ejemplo).</p>
 		<img src="https://placehold.co/1000x400/444444/ffffff?text=Demo" class="w-full rounded-lg" alt="Profile">
 	`;
 	bu.hidden = true;
-	rgl.hidden = true;
+	gwin.hidden = true;
 }
 
 // the alert doesn't work
 // the load of src views buttonclicking ts doesn't work
 // the dosomething call fails because it wasn't defined in the end
-export function renderPlayContent(el: HTMLElement, bu: HTMLElement, rgl: HTMLElement) {
+export function renderPlayContent(el: HTMLElement, bu: HTMLElement, gwin: HTMLElement) {
 	el.innerHTML = `
 		<h1 class="text-3xl font-bold mb-6">Play Pong</h1>
 		<p class="mb-4">Pong (texto de ejemplo).</p>	
 	`;
 	// on this view, show the button and the registered games list
 	bu.hidden = false;
-	rgl.hidden = false;
+	gwin.hidden = false;
 }
 
-export function renderTournamentContent(el: HTMLElement, bu: HTMLElement, rgl: HTMLElement) {
+export function renderTournamentContent(el: HTMLElement, bu: HTMLElement, gwin: HTMLElement) {
 	el.innerHTML = `
 		<h1 class="text-3xl font-bold mb-6">Tournaments</h1>
 		<p class="mb-4">Tournaments (texto de ejemplo).</p>
 		<img src="https://placehold.co/1000x400/444444/ffffff?text=Demo" class="w-full rounded-lg" alt="Tournament">
 	`;
 	bu.hidden = true;
-	rgl.hidden = true;
+	gwin.hidden = true;
 }
 
-export function renderStatsContent(el: HTMLElement, bu: HTMLElement, rgl: HTMLElement) {
+export function renderStatsContent(el: HTMLElement, bu: HTMLElement, gwin: HTMLElement) {
 	el.innerHTML = `
 		<h1 class="text-3xl font-bold mb-6">Stats</h1>
 		<p class="mb-4">Stats (texto de ejemplo).</p>
 		<img src="https://placehold.co/1000x400/444444/ffffff?text=Demo" class="w-full rounded-lg" alt="Stats">
 	`;
 	bu.hidden = true;
-	rgl.hidden = true;
+	gwin.hidden = true;
 }

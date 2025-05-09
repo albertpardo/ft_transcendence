@@ -34,12 +34,21 @@ export function initDashboard() {
 	  </div>
     </aside>
 	<div>
-    	<main id="content-area" class="ml-64 p-6 md:p-8 lg:p-12 overflow-auto"></main>
+    	<main id="content-area" class="ml-64 p-6 md:p-8 lg:p-12 overflow-auto">
+		</main>
+		<div id="game-window" hidden>
+		<svg width="100%" height="100%">
+		    <rect width="100%" height="100%" fill="red" />
+		    <circle cx="100%" cy="100%" r="150" fill="blue" stroke="black" />
+		    <polygon points="120,0 240,225 0,225" fill="green"/>
+		    <text id="game-text" x="50" y="100" font-family="Verdana" font-size="55" fill="white" stroke="black" stroke-width="2">
+				Hello!
+		    </text>
+		</svg>
+		</div>
       <button id="secret-button" class="mt-auto w-full p-3 bg-red-600 rounded-lg hover:bg-red-700 transition" hidden>click me bro</button>		
-	  <table id="registered-games-list" hidden></table>
 	</div>
   `;
-  const registeredGamesList = document.getElementById('registered-games-list')!;
 
   // Logout → vuelve a index.html
   document.getElementById('logout-btn')!.addEventListener('click', () => {
@@ -48,7 +57,6 @@ export function initDashboard() {
     route();
   });
 
-  const listTableHeaders : string = "<tr><th>gameId</th><th>start the simulation button</th></tr>";
   // Secret button
 	document.getElementById('secret-button')!.addEventListener('click', () => {
 		registerGame(function (error, response) {
@@ -58,13 +66,7 @@ export function initDashboard() {
 			else {
 				response?.text().then((result) => {
 					const parsedId : string = JSON.parse(result)?.gameId;
-					registeredGamesList.innerHTML = listTableHeaders +
-						"<tr><td>" + parsedId + "</td>" +
-						"<td><button id=\"" + parsedId + "\" class=\"mt-auto w-full p-3 transition\">start the game...</button></td></tr>" +
-						registeredGamesList.innerHTML.substring(listTableHeaders.length + 2);
-					// the "+ 2" is because I guess something is transforming the html along the way to make it prettier and
-					//it adds 2 additional characters, maybe they're a double newline actually.
-					document.getElementById(parsedId)!.addEventListener('click', () => {gameClicker(parsedId)});
+					document.getElementById('game-text').innerHTML = parsedId;
 				});
 			}
 		});
@@ -74,12 +76,13 @@ export function initDashboard() {
   // Renderizar la sección activa
   const contentArea = document.getElementById('content-area')!;
   const secretClickMeButton = document.getElementById('secret-button')!;
+  const gameWindow = document.getElementById('game-window')!;
   switch (hash) {
-    case 'profile':    renderProfileContent(contentArea, secretClickMeButton, registeredGamesList);    break;
-    case 'play':       renderPlayContent(contentArea, secretClickMeButton, registeredGamesList);       break;
-    case 'tournament': renderTournamentContent(contentArea, secretClickMeButton, registeredGamesList); break;
-    case 'stats':      renderStatsContent(contentArea, secretClickMeButton, registeredGamesList);      break;
-    default:           renderHomeContent(contentArea, secretClickMeButton, registeredGamesList);
+    case 'profile':    renderProfileContent(contentArea, secretClickMeButton, gameWindow);    break;
+    case 'play':       renderPlayContent(contentArea, secretClickMeButton, gameWindow);       break;
+    case 'tournament': renderTournamentContent(contentArea, secretClickMeButton, gameWindow); break;
+    case 'stats':      renderStatsContent(contentArea, secretClickMeButton, gameWindow);      break;
+    default:           renderHomeContent(contentArea, secretClickMeButton, gameWindow);
   }
 }
 

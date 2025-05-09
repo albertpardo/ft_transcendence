@@ -177,7 +177,7 @@ class	PongRuntime {
 };
 
 const gamesMap = new Map();
-const playerMap = new Map();
+const playersMap = new Map();
 const nullVec2 : Vector2 = {x: 0, y: 0};
 const nullBall : Ball = {speed: nullVec2, coords: nullVec2};
 const nullPaddle : Paddle = {y: 0, h: 0, d: 0};
