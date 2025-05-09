@@ -4,6 +4,7 @@ const	FRAME_TIME : number = 1/30;
 const	FRAME_TIME_MS : number = 1000 * FRAME_TIME;
 const	WINDOW_SIZE : Vector2 = {x: 1600, y: 900};
 const	PADDLE_H : number = 100;
+const	PADDLE_SPEED : number = 100;
 const	MIN_BALL_SPEED_Y : number = 100;
 
 
@@ -15,6 +16,11 @@ export enum PongResponses {
 	AddedInMap,
 	AlreadyInMap,
 	NotInMap,
+	PMoveOK,
+	NoPlayer,
+	PlayerRegistered,
+	PlayerAlreadyIn,
+	AlreadyFull,
 }
 
 interface	Vector2 {
@@ -25,8 +31,11 @@ interface	Vector2 {
 interface	Paddle {
 	y: number;
 	h: number;
-	speed: number;
+	d: number;
 };
+// d >=  1:     up;
+// d <= -1:     down;
+// d e (-1, 1): stationary
 
 interface	Ball {
 	speed: Vector2;
@@ -65,10 +74,19 @@ function	calculateVBounce(ball: Ball, paddle: Paddle) : Vector2 {
 
 
 class	PongRuntime {
+	public LplayerId : string = "";
+	public RplayerId : string = "";
 	private ball : Ball = { speed: {x: -50, y: 0}, coords: {x: WINDOW_SIZE.x/2, y: WINDOW_SIZE.y/2}};
-	private Lpaddle : Paddle = { y: (WINDOW_SIZE.y - PADDLE_H)/2, h: PADDLE_H, speed: 0 };
-	private Rpaddle : Paddle = { y: 430, h: PADDLE_H, speed: 0 };
+	private Lpaddle : Paddle = { y: (WINDOW_SIZE.y - PADDLE_H)/2, h: PADDLE_H, d: 0 };
+	private Rpaddle : Paddle = { y: 430, h: PADDLE_H, d: 0 };
 	private	whoLost : string = "none";
+
+	public LpadMove(d: number) : void {
+		this.Lpaddle.d = d;
+	}
+	public RpadMove(d: number) : void {
+		this.Rpaddle.d = d;
+	}
 
 	public gstate : State = { stateBall: this.ball, stateLP: this.Lpaddle, stateRP: this.Rpaddle, stateWhoL: this.whoLost };
 	public pongStarted : boolean = false;
@@ -112,8 +130,16 @@ class	PongRuntime {
 		this.ball.coords.x += this.ball.speed.x * FRAME_TIME;
 		this.ball.coords.y += this.ball.speed.y * FRAME_TIME;
 
-		this.Lpaddle.y += this.Lpaddle.speed * FRAME_TIME;
-		this.Rpaddle.y += this.Rpaddle.speed * FRAME_TIME;
+		if (this.Lpaddle.d >= 1) {
+			this.Lpaddle.y += FRAME_TIME * PADDLE_SPEED;
+		} else if (this.Lpaddle.d <= -1) {
+			this.Lpaddle.y -= FRAME_TIME * PADDLE_SPEED;
+		}
+		if (this.Rpaddle.d >= 1) {
+			this.Rpaddle.y += FRAME_TIME * PADDLE_SPEED;
+		} else if (this.Rpaddle.d <= -1) {
+			this.Rpaddle.y -= FRAME_TIME * PADDLE_SPEED;
+		}
 		// clamp the paddles
 		if (this.Lpaddle.y < 0) {
 			this.Lpaddle.y = 0;
@@ -149,6 +175,7 @@ class	PongRuntime {
 };
 
 const gamesMap = new Map();
+const playerMap = new Map();
 const nullVec2 : Vector2 = {x: 0, y: 0};
 const nullBall : Ball = {speed: nullVec2, coords: nullVec2};
 const nullPaddle : Paddle = {y: 0, h: 0, speed: 0};
@@ -199,4 +226,42 @@ export function	getPongState(gameId: string) : State {
 	}
 	console.error("no game found registered at " + gameId);
 	return nullState;
+}
+
+export function registerPlayer(playerId: string, gameId: string) : PongResponses {
+	if (playersMap.has(playerId)) {
+		return PongResponses.PlayerAlreadyIn;
+	}
+	if (gamesMap.has(gameId)) {
+		if (gamesMap.get(gameId).LplayerId === "") {
+			gamesMap.get(gameId).LplayerId = playerId;
+			playersMap.set(playerId, gameId);
+			return PongResponses.PlayerRegistered;
+		} else if (gamesMap.get(gameId).RplayerId === "") {
+			gamesMap.get(gameId).RplayerId = playerId;
+			playersMap.set(playerId, gameId);
+			return PongResponses.PlayerRegistered;
+		}
+		return PongResponses.AlreadyFull;
+	}
+	return PongResponses.NotInMap;
+}
+
+export function moveMyPaddle(playerId: string, d: number) : PongResponses {
+	if (playersMap.has(playerId)) {
+		const gameId = playersMap.get(playerId);
+		if (gamesMap.has(gameId)) {
+			if (gamesMap.get(gameId).LplayerId === playerId) {
+				gamesMap.get(gameId).LpadMove(d);
+			} else {
+				gamesMap.get(gameId).RpadMove(d);
+				// a very fun exploit would be moving the right player's paddle with an invalid player id;
+				// however I think the logic prevents us from getting into this fork if we have an invalid
+				// id in the first place.
+			}
+			return PongResponses.PMoveOK;
+		}
+		return PongResponses.NotInMap;
+	}
+	return PongResponses.NoPlayer;
 }
