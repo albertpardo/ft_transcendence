@@ -21,6 +21,7 @@ export enum PongResponses {
 	PlayerRegistered,
 	PlayerAlreadyIn,
 	AlreadyFull,
+	MissingPlayers,
 }
 
 interface	Vector2 {
@@ -36,6 +37,7 @@ interface	Paddle {
 // d >=  1:     up;
 // d <= -1:     down;
 // d e (-1, 1): stationary
+// since js has no integer type (yes), we'll input values like -2 and 2 to be sure
 
 interface	Ball {
 	speed: Vector2;
@@ -159,7 +161,7 @@ class	PongRuntime {
 		this.pongStarted = true;
 		while (true) {
 			this.whoLost = checkLoseConditions(this.ball);
-			if (this.whoLost != "none") {
+			if (this.whoLost !== "none") {
 				this.pongDone = true;
 				this.gstate = { stateBall: this.ball, stateLP: this.Lpaddle, stateRP: this.Rpaddle, stateWhoL: this.whoLost };
 				return ("ball lost by... " + this.whoLost);
@@ -178,18 +180,21 @@ const gamesMap = new Map();
 const playerMap = new Map();
 const nullVec2 : Vector2 = {x: 0, y: 0};
 const nullBall : Ball = {speed: nullVec2, coords: nullVec2};
-const nullPaddle : Paddle = {y: 0, h: 0, speed: 0};
+const nullPaddle : Paddle = {y: 0, h: 0, d: 0};
 const nullState : State = {stateBall: nullBall, stateLP: nullPaddle, stateRP: nullPaddle, stateWhoL: "null state"};
 
 export function startThePong(gameId: string) : PongResponses {
 	if (gamesMap.has(gameId)) {
-		if (gamesMap.get(gameId).pongStarted === true) {
-			return PongResponses.AlreadyRunning;
+		if (gamesMap.get(gameId).LplayerId !== "" && gamesMap.get(gameId).RplayerId !== "") {
+			if (gamesMap.get(gameId).pongStarted === true) {
+				return PongResponses.AlreadyRunning;
+			}
+			gamesMap.get(gameId).mainLoop();
+			return PongResponses.StartedRunning;
+//			console.log("a new game has been started at " + gameId);
+//			console.log(gamesMap);
 		}
-		gamesMap.get(gameId).mainLoop();
-		return PongResponses.StartedRunning;
-//		console.log("a new game has been started at " + gameId);
-//		console.log(gamesMap);
+		return PongResponses.MissingPlayers;
 	}
 	console.error("game not found in map. gameId and the map are as follows:");
 	console.error(gameId);
