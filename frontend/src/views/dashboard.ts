@@ -37,10 +37,10 @@ export function initDashboard() {
     	<main id="content-area" class="ml-64 p-6 md:p-8 lg:p-12 overflow-auto">
 		</main>
 		<div id="game-window" hidden>
-		<svg width="100%" height="100%">
+		<svg width="1600px" height="900px">
 		    <rect width="100%" height="100%" fill="red" />
 		    <circle cx="100%" cy="100%" r="150" fill="blue" stroke="black" />
-		    <polygon points="120,0 240,225 0,225" fill="green"/>
+		    <polygon points="120,0 240,225 0,625" fill="green"/>
 		    <text id="game-text" x="50" y="100" font-family="Verdana" font-size="55" fill="white" stroke="black" stroke-width="2">
 				Hello!
 		    </text>
