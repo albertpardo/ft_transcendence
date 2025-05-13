@@ -194,6 +194,7 @@ export function startThePong(gameId: string) : PongResponses {
 //			console.log("a new game has been started at " + gameId);
 //			console.log(gamesMap);
 		}
+		console.error("players missing");
 		return PongResponses.MissingPlayers;
 	}
 	console.error("game not found in map. gameId and the map are as follows:");
