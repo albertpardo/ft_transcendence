@@ -22,7 +22,10 @@ export enum PongResponses {
 	PlayerAlreadyIn,
 	AlreadyFull,
 	MissingPlayers,
+	YoureWaiting,
+	YoureWrong,
 }
+// lol
 
 interface	Vector2 {
 	x: number;
@@ -52,6 +55,18 @@ export interface	State {
 }
 
 
+
+export function makeid(length : number) : string {
+	 let result : string= '';
+	 const characters : string = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+	 const charactersLength : number = characters.length;
+	 let counter : number = 0;
+	 while (counter < length) {
+		 result += characters.charAt(Math.floor(Math.random() * charactersLength));
+		 counter += 1;
+	 }
+	 return result;
+}
 
 function	checkLoseConditions(ball: Ball) : string {
 	if (ball.coords.x < 0) {
@@ -182,6 +197,31 @@ const nullVec2 : Vector2 = {x: 0, y: 0};
 const nullBall : Ball = {speed: nullVec2, coords: nullVec2};
 const nullPaddle : Paddle = {y: 0, h: 0, d: 0};
 const nullState : State = {stateBall: nullBall, stateLP: nullPaddle, stateRP: nullPaddle, stateWhoL: "null state"};
+
+// will always return "you're in queue, awaiting for a game", even if there's enough players in a game already, including you.
+// this way, we'll always have to wait for a confirmation signal from the game runtime itself that the game is ready to start.
+//
+export function universalGameStarter(playerId: string) : PongResponses {
+	if (playersMap.has(playerId)) {
+		return PongResponses.PlayerAlreadyIn;
+	}
+	for (const [gameId, gameRuntime] of gamesMap) {
+		if (gameRuntime.LplayerId === "") {
+			gameRuntime.LplayerId = playerId;
+			playersMap.set(playerId, gameId);
+			return PongResponses.YoureWaiting;
+		} else if (gameRuntime.RplayerId === "") {
+			gameRuntime.RplayerId = playerId;
+			playersMap.set(playerId, gameId);
+			return PongResponses.YoureWaiting;
+		}
+	}
+	// no game available!
+	const newid : string = makeid();
+	gamesMap.set(newid, new PongRuntime);
+	gamesMap.get(newid).LplayerId = playerId;
+	return PongResponses.YoureWaiting;
+}
 
 export function startThePong(gameId: string) : PongResponses {
 	if (gamesMap.has(gameId)) {

@@ -9,7 +9,7 @@ import cors from '@fastify/cors';
 import fastifyStatic from '@fastify/static';
 import path from 'path';
 import { initDB } from './db';
-import { PongResponses, State, startThePong, addPongGameId, getPongDoneness, getPongState } from './pong';
+import { makeid, PongResponses, State, startThePong, addPongGameId, getPongDoneness, getPongState } from './pong';
 
 interface PongBodyReq {
 	gameId: string,
@@ -21,18 +21,6 @@ interface PongPlayerBodyReq {
 	reg: boolean,
 	gameId: string,
 	mov: number,
-}
-
-function makeid(length : number) : string {
-	 let result : string= '';
-	 const characters : string = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-	 const charactersLength : number = characters.length;
-	 let counter : number = 0;
-	 while (counter < length) {
-		 result += characters.charAt(Math.floor(Math.random() * charactersLength));
-		 counter += 1;
-	 }
-	 return result;
 }
 
 const startServer = async () => {
