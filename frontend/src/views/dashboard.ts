@@ -1,4 +1,5 @@
 // src/views/dashboard.ts
+import { route } from '../router';
 import { renderHomeContent, renderProfileContent, renderPlayContent, renderTournamentContent, renderStatsContent } from './sections';
 
 export function initDashboard() {
