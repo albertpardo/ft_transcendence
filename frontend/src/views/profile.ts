@@ -1,8 +1,10 @@
+//src/views/profile.ts
+
 export async function renderProfileContent(el: HTMLElement) {
-    // 1. Obtener datos del usuario (ajusta el endpoint si es necesario)
+    // Obtener datos del usuario
     let userData;
     try {
-      const res = await fetch("http://127.0.0.1:4000/api/users/id/1"); // endpoint protegido por token si aplica
+      const res = await fetch("http://127.0.0.1:4000/api/users/id/1"); // hardcoded
       if (!res.ok) throw new Error("Failed to fetch user data");
       userData = await res.json();
     } catch (err) {
@@ -116,9 +118,18 @@ export async function renderProfileContent(el: HTMLElement) {
       }
   
       try {
-        const response = await fetch("http://127.0.0.1:4000/api/users", {
-          method: "POST",
-          body: formData,
+        const response = await fetch("http://127.0.0.1:4000/api/users/id/1", {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            name,
+            nickname,
+            email,
+            password,
+            avatar: avatarPreview.src
+          })
         });
   
         if (response.ok) {
