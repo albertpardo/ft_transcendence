@@ -27,7 +27,7 @@ export async function renderProfileContent(el: HTMLElement) {
   }
 
   el.innerHTML = `
-    <div class="w-full max-w-6xl p-10 bg-gray-800 rounded-lg shadow-md mx-auto my-8">
+    <div class="w-full max-w-6xl p-10 bg-gray-900 rounded-lg shadow-md mx-auto my-8">
       <h1 class="text-4xl font-bold mb-10 text-center">Your Profile</h1>
 
       <div class="flex flex-col md:flex-row gap-12">
@@ -77,7 +77,7 @@ export async function renderProfileContent(el: HTMLElement) {
                 Save Changes
               </button>
               <button type="button" id="delete-btn"
-                      class="px-6 py-3 bg-red-800 text-white rounded-lg hover:bg-red-600 transition disabled:opacity-50" disabled>
+                      class="px-6 py-3 bg-red-800 text-white rounded-lg hover:bg-red-600 transition disabled:opacity-50 disabled:cursor-not-allowed" disabled>
                 Delete Account
               </button>
             </div>
@@ -118,12 +118,12 @@ export async function renderProfileContent(el: HTMLElement) {
       </div>
     </div>
 
-<!-- Success Toast -->
+<!-- Success Save alert -->
 <div id="success-alert" class="fixed bottom-6 right-6 z-50 hidden opacity-0 px-6 py-4 bg-green-600 text-white rounded-lg shadow-lg font-medium transition-opacity duration-500">
   Profile updated successfully!
 </div>
-<!-- Success Delete -->
-<div id="success-delete" class="fixed bottom-6 right-6 z-50 hidden opacity-0 px-6 py-4 bg-red-600 text-white rounded-lg shadow-lg font-medium transition-opacity duration-500">
+<!-- Success Delete alert-->
+<div id="success-delete" class="fixed bottom-6 right-6 z-50 hidden opacity-0 px-6 py-4 bg-green-600 text-white rounded-lg shadow-lg font-medium transition-opacity duration-500">
   Account deleted successfully!
 </div>
   `;
