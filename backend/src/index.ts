@@ -7,21 +7,19 @@ import Fastify from 'fastify';
 import type { FastifyRequest } from 'fastify';
 import cors from '@fastify/cors';
 import fastifyStatic from '@fastify/static';
+import websocket from '@fastify/websocket';
 import path from 'path';
 import { initDB } from './db';
-import { makeid, PongResponses, State, startThePong, addPongGameId, getPongDoneness, getPongState } from './pong';
+import { PongResponses, State, addPlayerCompletely, startThePong, getPongDoneness, getPongState, moveMyPaddle } from './pong';
 
 interface PongBodyReq {
-	gameId: string,
-	startGame: boolean,
-}
-
-interface PongPlayerBodyReq {
 	playerId: string,
-	reg: boolean,
-	gameId: string,
+	getIn: boolean,
 	mov: number,
 }
+// id shall come from the req and be per-user unique and persistent (jwt)
+// getIn tells do we wanna move (false) or do we wanna get into a game (true)
+// mov tells us where to move and if we wanna
 
 const startServer = async () => {
 	const fastify = Fastify({ logger: true });
@@ -35,6 +33,8 @@ const startServer = async () => {
 		prefix: '/uploads/',		 // todas las URLs /uploads/* vendrán de aquí
 		decorateReply: false
 	});
+
+	await fastify.register(websocket);
 
 	const db = await initDB();
 
@@ -140,101 +140,10 @@ const startServer = async () => {
 			});
 			return "Welcome to an \"html\" return for firefox testing purposes.<br>Enjoy your stay!";
 		});
-		fastify.post('/pong/game', async (request: FastifyRequest<{ Body: PongBodyReq }>, reply) => {
-			reply.headers({
-				"Content-Security-Policy": "default-src 'self'",
-				"Content-Type": "application/json",
+		fastify.post('/pong/game-ws', { websocket: true }, async (connection, req: FastifyRequest<{ Body: PongBodyReq }>) => {
+			connection.socket.on('message', message => {
+				connection.socket.send('Ayo twinski <3 ' + JSON.stringify(req.body));
 			});
-			console.log("hooray! new request:");
-			console.log(JSON.stringify(request.body));
-			console.log(typeof(request.body.gameId));
-			console.log(typeof(request.body.startGame));
-			console.log(request.body.gameId);
-			console.log(request.body.startGame);
-			if (request.body.gameId === "") {
-				console.log("empty id. let's create one");
-				let localGameId : string = makeid(32);
-				if (addPongGameId(localGameId) === PongResponses.AddedInMap) {
-					return {message : "new game created.", gameId : localGameId, success : true};
-				}
-				return {message : "game creation failed. please, try again.", gameId : "", success : false};
-			}
-			if (request.body.startGame === true) {
-				console.log("non-empty id, and asked for 'start game'");
-				let startGameResponse : PongResponses = startThePong(request.body.gameId);
-				if (startGameResponse === PongResponses.AlreadyRunning) {
-					return {message : "game was already running.", gameId : request.body.gameId, gameState: getPongState(request.body.gameId), success : false};
-				}
-				else if (startGameResponse === PongResponses.NotInMap) {
-					return {message : "game doesn't exist.", gameId : request.body.gameId, success : false};
-				}
-				return {message : "pong started.", gameId : request.body.gameId, success : true};
-			}
-			if (request.body.startGame === false) {
-				console.log("non-empty id, and didn't ask for 'start game'");
-				let checkOnGameResponse : PongResponses = getPongDoneness(request.body.gameId);
-				if (checkOnGameResponse === PongResponses.AlreadyRunning) {
-					return {message : "pong ongoing...", gameState : getPongState(request.body.gameId), success : true};
-				}
-				else if (checkOnGameResponse === PongResponses.StoppedRunning) {
-					return {message : "pong's lost!", gameState : getPongState(request.body.gameId), success : true};
-				}
-				else if (checkOnGameResponse === PongResponses.NotRunning) {
-					return {message : "pong wasn't started yet.", success : true};
-				}
-				return {message : "game doesn't exist.", gameId : request.body.gameId, success : false};
-			}
-			return {message : "unknown logical fork. the server is lowk cooked", success : false};
-		});
-		fastify.post('/pong/player', async (request: FastifyRequest<{ Body: PongPlayerBodyReq }>, reply) => {
-			reply.headers({
-				"Content-Security-Policy": "default-src 'self'",
-				"Content-Type": "application/json",
-			});
-			console.log("hooray! new PLAYER request:");
-			console.log(JSON.stringify(request.body));
-			console.log(typeof(request.body.playerId));
-			console.log(typeof(request.body.reg));
-			console.log(typeof(request.body.gameId));
-			console.log(typeof(request.body.mov));
-			console.log(request.body.playerId);
-			console.log(request.body.reg);
-			console.log(request.body.gameId);
-			console.log(request.body.mov);
-			if (request.body.playerId === "") {
-				console.log("empty player id");
-				return {message : "please, enter the player id", success : false};
-			}
-			if (request.body.reg === true) {
-				console.log("player ", request.body.playerId, " started registration");
-				registerPlayer()
-			}
-			if (request.body.startGame === true) {
-				console.log("non-empty id, and asked for 'start game'");
-				let startGameResponse : PongResponses = startThePong(request.body.gameId);
-				if (startGameResponse === PongResponses.AlreadyRunning) {
-					return {message : "game was already running.", gameId : request.body.gameId, gameState: getPongState(request.body.gameId), success : false};
-				}
-				else if (startGameResponse === PongResponses.NotInMap) {
-					return {message : "game doesn't exist.", gameId : request.body.gameId, success : false};
-				}
-				return {message : "pong started.", gameId : request.body.gameId, success : true};
-			}
-			if (request.body.startGame === false) {
-				console.log("non-empty id, and didn't ask for 'start game'");
-				let checkOnGameResponse : PongResponses = getPongDoneness(request.body.gameId);
-				if (checkOnGameResponse === PongResponses.AlreadyRunning) {
-					return {message : "pong ongoing...", gameState : getPongState(request.body.gameId), success : true};
-				}
-				else if (checkOnGameResponse === PongResponses.StoppedRunning) {
-					return {message : "pong's lost!", gameState : getPongState(request.body.gameId), success : true};
-				}
-				else if (checkOnGameResponse === PongResponses.NotRunning) {
-					return {message : "pong wasn't started yet.", success : true};
-				}
-				return {message : "game doesn't exist.", gameId : request.body.gameId, success : false};
-			}
-			return {message : "unknown logical fork. the server is lowk cooked", success : false};
 		});
 	};
 

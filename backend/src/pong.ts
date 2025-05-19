@@ -56,7 +56,7 @@ export interface	State {
 
 
 
-export function makeid(length : number) : string {
+function makeid(length : number) : string {
 	 let result : string= '';
 	 const characters : string = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 	 const charactersLength : number = characters.length;
@@ -201,19 +201,22 @@ const nullState : State = {stateBall: nullBall, stateLP: nullPaddle, stateRP: nu
 // will always return "you're in queue, awaiting for a game", even if there's enough players in a game already, including you.
 // this way, we'll always have to wait for a confirmation signal from the game runtime itself that the game is ready to start.
 //
-export function universalGameStarter(playerId: string) : PongResponses {
+export function addPlayerCompletely(playerId: string) : PongResponses {
 	if (playersMap.has(playerId)) {
 		return PongResponses.PlayerAlreadyIn;
+		// this would mean: ok, wait pls
 	}
 	for (const [gameId, gameRuntime] of gamesMap) {
 		if (gameRuntime.LplayerId === "") {
 			gameRuntime.LplayerId = playerId;
 			playersMap.set(playerId, gameId);
 			return PongResponses.YoureWaiting;
+			// this would mean: added you, wait
 		} else if (gameRuntime.RplayerId === "") {
 			gameRuntime.RplayerId = playerId;
 			playersMap.set(playerId, gameId);
 			return PongResponses.YoureWaiting;
+			// this would mean: added you, wait
 		}
 	}
 	// no game available!
@@ -221,8 +224,13 @@ export function universalGameStarter(playerId: string) : PongResponses {
 	gamesMap.set(newid, new PongRuntime);
 	gamesMap.get(newid).LplayerId = playerId;
 	return PongResponses.YoureWaiting;
+	// this would mean: added you, wait
 }
 
+// a sort of "admin" function. It should probably be called automatically once every X seconds
+// to make the game start while the players are waiting in the "lobby"
+//
+// i swear if this is what ubisoft does with r6... 
 export function startThePong(gameId: string) : PongResponses {
 	if (gamesMap.has(gameId)) {
 		if (gamesMap.get(gameId).LplayerId !== "" && gamesMap.get(gameId).RplayerId !== "") {
@@ -241,15 +249,6 @@ export function startThePong(gameId: string) : PongResponses {
 	console.error(gameId);
 	console.error(gamesMap);
 	return PongResponses.NotInMap;
-}
-
-export function addPongGameId(gameId: string) : PongResponses {
-	if (!(gamesMap.has(gameId))) {
-		gamesMap.set(gameId, new PongRuntime);
-		return PongResponses.AddedInMap;
-	}
-	console.error("you're already registered at " + gameId);
-	return PongResponses.AlreadyInMap;
 }
 
 export function	getPongDoneness(gameId: string) : PongResponses {
@@ -272,25 +271,6 @@ export function	getPongState(gameId: string) : State {
 	}
 	console.error("no game found registered at " + gameId);
 	return nullState;
-}
-
-export function registerPlayer(playerId: string, gameId: string) : PongResponses {
-	if (playersMap.has(playerId)) {
-		return PongResponses.PlayerAlreadyIn;
-	}
-	if (gamesMap.has(gameId)) {
-		if (gamesMap.get(gameId).LplayerId === "") {
-			gamesMap.get(gameId).LplayerId = playerId;
-			playersMap.set(playerId, gameId);
-			return PongResponses.PlayerRegistered;
-		} else if (gamesMap.get(gameId).RplayerId === "") {
-			gamesMap.get(gameId).RplayerId = playerId;
-			playersMap.set(playerId, gameId);
-			return PongResponses.PlayerRegistered;
-		}
-		return PongResponses.AlreadyFull;
-	}
-	return PongResponses.NotInMap;
 }
 
 export function moveMyPaddle(playerId: string, d: number) : PongResponses {

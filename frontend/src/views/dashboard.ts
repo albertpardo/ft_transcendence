@@ -1,20 +1,16 @@
 // src/views/dashboard.ts
 import { renderHomeContent, renderProfileContent, renderPlayContent, renderTournamentContent, renderStatsContent } from './sections';
-import { doSomething, registerGame, startGame } from './buttonClicking';
-
-function gameClicker(parsedId : string) : void {
-	startGame(parsedId, function (error, response) {
-		if (error) {
-			console.error(error);
-		}
-		else {
-			response?.text().then((result) => console.log(result));
-			document.getElementById(parsedId).innerHTML = "check on the game";
-		}
-	});
-}
+import { doSomething, registerPlayer, startGame } from './buttonClicking';
 
 export function initDashboard() {
+  //WEBSOCKET TIME!
+  const socket = new WebSocket("wss://localhost:4000");
+  socket.addEventListener.message("message", (event) => {
+	  console.log("response: ", event.data);
+  });
+  socket.addEventListener("open", (event) => {
+	  socket.send("{'hey':'bro'}");
+  });
   const hash = window.location.hash.replace('#', '') || 'home';
   const app = document.getElementById('app')!;
   app.innerHTML = `
@@ -53,23 +49,14 @@ export function initDashboard() {
   // Logout → vuelve a index.html
   document.getElementById('logout-btn')!.addEventListener('click', () => {
     localStorage.removeItem('authToken');
+	socket.close();
     window.location.hash = 'login';
     route();
   });
 
   // Secret button
 	document.getElementById('secret-button')!.addEventListener('click', () => {
-		registerGame(function (error, response) {
-			if (error) {
-				console.error(error);
-			}
-			else {
-				response?.text().then((result) => {
-					const parsedId : string = JSON.parse(result)?.gameId;
-					document.getElementById('game-text').innerHTML = parsedId;
-				});
-			}
-		});
+		registerPlayer(socket);
 	});
   
 
