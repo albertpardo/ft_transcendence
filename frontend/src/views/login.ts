@@ -45,11 +45,10 @@ export function renderLogin(appElement: HTMLElement) {
       
       console.log('Login attempt:', username, password);
       
-      // Aquí implementarías la validación real con el backend
-      // Por ahora simulamos un login exitoso
+      // Aquí se deberá implementar la validación real
       localStorage.setItem('authToken', 'fake-jwt-token');
       
-      // Redireccionar al dashboard home
+      // Redireccion al home
       window.location.hash = 'home';
     });
   }

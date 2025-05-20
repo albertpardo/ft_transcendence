@@ -1,12 +1,9 @@
+//src/router.ts
+
 import { renderLogin } from './views/login';
-import {
-  renderHomeContent,
-  renderProfileContent,
-  renderPlayContent,
-  renderTournamentContent,
-  renderStatsContent
-} from './views/sections';
+import { renderHomeContent, renderPlayContent, renderTournamentContent, renderStatsContent } from './views/sections';
 import { initDashboard } from './views/dashboard';
+import { renderProfileContent } from './views/profile';
 
 export function route() {
   const hash = window.location.hash.replace('#', '') || 'home';
@@ -19,13 +16,13 @@ export function route() {
     return;
   }
 
-  // Si está en login (no importa si autenticado o no), carga la pantalla de login
+  // Si está en login (autenticado o no), carga la pantalla de login
   if (hash === 'login') {
     renderLogin(app);
     return;
   }
 
-  // Si no es login, monta ESTRUCTURA del dashboard UNA vez
+  // Si no esta login, monta ESTRUCTURA del dashboard UNA vez
   if (!document.getElementById('sidebar')) {
     initDashboard();
   }
