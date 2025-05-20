@@ -5,15 +5,20 @@ export function	doSomething() : void {
 
 export function registerPlayer(socket: WebSocket) {
 	socket.send(JSON.stringify({
-		method: "GET",
-		headers: {
-			"Content-Type": "application/json",
-		},
-		body: JSON.stringify({
-			gameId: "",
-			startGame: false,
-		}),
+		playerId: localStorage.getItem("authToken"),
+		getIn: true,
+		mov: 0,
 	}));
+//	socket.send({
+//		method: "GET",
+//		headers: {
+//			"Content-Type": "application/json",
+//		},
+//		body: JSON.stringify({
+//			gameId: "",
+//			startGame: false,
+//		}),
+//	});
 }
 
 export function startGame(gid : string, done: (error: Error | null, res?: Response) => void) {

@@ -10,6 +10,7 @@ export function initDashboard() {
   });
   socket.addEventListener("open", (event) => {
 	  socket.send("{'hey':'bro'}");
+	  console.log("sent an opener message.");
   });
   const hash = window.location.hash.replace('#', '') || 'home';
   const app = document.getElementById('app')!;

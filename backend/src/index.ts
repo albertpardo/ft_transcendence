@@ -140,8 +140,9 @@ const startServer = async () => {
 			return "Welcome to an \"html\" return for firefox testing purposes.<br>Enjoy your stay!";
 		});
 		fastify.get('/pong/game-ws', { websocket: true }, async (connection, req: FastifyRequest<{ Body: PongBodyReq }>) => {
-			connection.socket.on('message', message => {
-				connection.socket.send('Ayo twinski <3 ' + JSON.stringify(req.body));
+//		fastify.get('/pong/game-ws', { websocket: true }, async (connection, req) => {
+			connection.on('message', message => {
+				connection.send('Ayo twinski <3 ' + message);
 			});
 		});
 	};
