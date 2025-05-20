@@ -1,10 +1,6 @@
 
 all:
-<<<<<<< HEAD
 	@echo > /dev/null
-=======
-	@echo
->>>>>>> v5-migration/dev
 	docker compose -f docker-compose.yml up --build
 #	docker compose -f docker-compose.yml up -d --build
 	
