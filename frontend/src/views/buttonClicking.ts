@@ -5,7 +5,7 @@ export function	doSomething() : void {
 
 export function registerPlayer(socket: WebSocket) {
 	socket.send(JSON.stringify({
-		method: "POST",
+		method: "GET",
 		headers: {
 			"Content-Type": "application/json",
 		},

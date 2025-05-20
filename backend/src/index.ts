@@ -4,10 +4,10 @@
 // Correcto: fastify.register(async (fastify) => { fastify.prefix('/api'); ... });
 
 import Fastify from 'fastify';
+import websocket from '@fastify/websocket';
 import type { FastifyRequest } from 'fastify';
 import cors from '@fastify/cors';
 import fastifyStatic from '@fastify/static';
-import websocket from '@fastify/websocket';
 import path from 'path';
 import { initDB } from './db';
 import { PongResponses, State, addPlayerCompletely, startThePong, getPongDoneness, getPongState, moveMyPaddle } from './pong';
@@ -23,6 +23,7 @@ interface PongBodyReq {
 
 const startServer = async () => {
 	const fastify = Fastify({ logger: true });
+	await fastify.register(websocket);
 
 	await fastify.register(cors, {
 		origin: '*'	// para desarrollo; en producción, restringe a tu dominio
@@ -33,8 +34,6 @@ const startServer = async () => {
 		prefix: '/uploads/',		 // todas las URLs /uploads/* vendrán de aquí
 		decorateReply: false
 	});
-
-	await fastify.register(websocket);
 
 	const db = await initDB();
 
@@ -140,7 +139,7 @@ const startServer = async () => {
 			});
 			return "Welcome to an \"html\" return for firefox testing purposes.<br>Enjoy your stay!";
 		});
-		fastify.post('/pong/game-ws', { websocket: true }, async (connection, req: FastifyRequest<{ Body: PongBodyReq }>) => {
+		fastify.get('/pong/game-ws', { websocket: true }, async (connection, req: FastifyRequest<{ Body: PongBodyReq }>) => {
 			connection.socket.on('message', message => {
 				connection.socket.send('Ayo twinski <3 ' + JSON.stringify(req.body));
 			});
