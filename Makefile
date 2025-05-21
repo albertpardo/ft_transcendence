@@ -1,5 +1,7 @@
 
 all:
+	@echo > /dev/null
+#	docker compose -f docker-compose.yml up --build
 	docker compose -f docker-compose.yml up -d --build
 	
 	@echo "\n▉▉▉▉▉▉▉▉▉▉ WELCOME TO TRASCENDENCE PROJECT! ▉▉▉▉▉▉▉▉▉▉\n"
