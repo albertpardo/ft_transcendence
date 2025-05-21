@@ -96,7 +96,7 @@ class  PongRuntime {
   private ball : Ball = { speed: {x: -50, y: 0}, coords: {x: WINDOW_SIZE.x/2, y: WINDOW_SIZE.y/2}};
   private Lpaddle : Paddle = { y: (WINDOW_SIZE.y - PADDLE_H)/2, h: PADDLE_H, d: 0 };
   private Rpaddle : Paddle = { y: 430, h: PADDLE_H, d: 0 };
-  private  whoLost : string = "none";
+  private whoLost : string = "none";
 
   public LpadMove(d: number) : void {
     this.Lpaddle.d = d;
@@ -193,6 +193,7 @@ class  PongRuntime {
 
 const gamesMap = new Map();
 const playersMap = new Map();
+const socksMap = new Map();
 const nullVec2 : Vector2 = {x: 0, y: 0};
 const nullBall : Ball = {speed: nullVec2, coords: nullVec2};
 const nullPaddle : Paddle = {y: 0, h: 0, d: 0};
@@ -201,54 +202,31 @@ const nullState : State = {stateBall: nullBall, stateLP: nullPaddle, stateRP: nu
 // will always return "you're in queue, awaiting for a game", even if there's enough players in a game already, including you.
 // this way, we'll always have to wait for a confirmation signal from the game runtime itself that the game is ready to start.
 //
-export function addPlayerCompletely(playerId: string) : PongResponses {
+export function addPlayerCompletely(playerId: string, sock: WebSocket) : PongResponses {
   if (playersMap.has(playerId)) {
     return PongResponses.PlayerAlreadyIn;
-    // this would mean: ok, wait pls
   }
+  socksMap.set(playerId, sock);
   for (const [gameId, gameRuntime] of gamesMap) {
     if (gameRuntime.LplayerId === "") {
       gameRuntime.LplayerId = playerId;
       playersMap.set(playerId, gameId);
+      sock.send("added: L");
       return PongResponses.YoureWaiting;
-      // this would mean: added you, wait
-    } else if (gameRuntime.RplayerId === "") {
+    }
+    else if (gameRuntime.RplayerId === "") {
       gameRuntime.RplayerId = playerId;
       playersMap.set(playerId, gameId);
+      sock.send("added: R");
       return PongResponses.YoureWaiting;
-      // this would mean: added you, wait
     }
   }
   // no game available!
   const newid : string = makeid();
   gamesMap.set(newid, new PongRuntime);
   gamesMap.get(newid).LplayerId = playerId;
+  sock.send("added: L");
   return PongResponses.YoureWaiting;
-  // this would mean: added you, wait
-}
-
-// a sort of "admin" function. It should probably be called automatically once every X seconds
-// to make the game start while the players are waiting in the "lobby"
-//
-// i swear if this is what ubisoft does with r6... 
-export function startThePong(gameId: string) : PongResponses {
-  if (gamesMap.has(gameId)) {
-    if (gamesMap.get(gameId).LplayerId !== "" && gamesMap.get(gameId).RplayerId !== "") {
-      if (gamesMap.get(gameId).pongStarted === true) {
-        return PongResponses.AlreadyRunning;
-      }
-      gamesMap.get(gameId).mainLoop();
-      return PongResponses.StartedRunning;
-//      console.log("a new game has been started at " + gameId);
-//      console.log(gamesMap);
-    }
-    console.error("players missing");
-    return PongResponses.MissingPlayers;
-  }
-  console.error("game not found in map. gameId and the map are as follows:");
-  console.error(gameId);
-  console.error(gamesMap);
-  return PongResponses.NotInMap;
 }
 
 export function  getPongDoneness(gameId: string) : PongResponses {
@@ -290,4 +268,31 @@ export function moveMyPaddle(playerId: string, d: number) : PongResponses {
     return PongResponses.NotInMap;
   }
   return PongResponses.NoPlayer;
+}
+
+export gamesReadyLoopCheck = async () => {
+  while (true) {
+    for (const [gameId, gameRuntime] of gamesMap) {
+      if (gameRuntime.LplayerId !== "" && gameRuntime.RplayerId !== "")  {
+        if (gameRuntime.pongStarted !== true) {
+          gameRuntime.mainLoop();
+          console.log("one game started: " + gameId + ", with left: " + gameRuntime.LplayerId + " and right: " + gameRuntime.RplayerId);
+          console.log("sending the appropriate message to both clientis via ws");
+          // XXX maybe do a json string here with the gamestate or something.
+          socksMap.get(gameRuntime.LplayerId).send("started");
+          socksMap.get(gameRuntime.RplayerId).send("started");
+        }
+      }
+    }
+    await sleep(5e3);
+    console.log("one gamesreadyloop iteration passed");
+  }
+}
+
+export dataStreamer = async (playerId) => {
+  const sock : WebSocket = socksMap.get(playerId);
+  const runtime : PongRuntime = gamesMap.get(playersMap.get(playerId));
+  while (true) {
+    sock.send(runtime.gamestate) // TODO FIXME actual gamestate
+  }
 }

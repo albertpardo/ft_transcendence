@@ -10,7 +10,7 @@ import cors from '@fastify/cors';
 import fastifyStatic from '@fastify/static';
 import path from 'path';
 import { initDB } from './db';
-import { PongResponses, State, addPlayerCompletely, startThePong, getPongDoneness, getPongState, moveMyPaddle } from './pong';
+import { PongResponses, State, addPlayerCompletely, startThePong, getPongDoneness, getPongState, moveMyPaddle, gamesReadyLoopCheck } from './pong';
 
 interface PongBodyReq {
   playerId: string,
@@ -39,6 +39,9 @@ const startServer = async () => {
 
   // inyectar la instancia de db para usarla en rutas
   fastify.decorate('db', db);
+
+  // start the meta loop of checking if any of the games are full enough to be started.
+  gamesReadyLoopCheck();
 
   // Registra un plugin para prefijar las rutas API con '/api'
   const apiRoutes = async (fastify) => {
@@ -131,7 +134,6 @@ const startServer = async () => {
       }
     });
 
-    // temporary pong logic. permanent logic will have a constant sent-from-server stream of gamestate
     fastify.get('/pong', async (request, reply) => {
       reply.headers({
         "Content-Security-Policy": "default-src 'self'",
@@ -139,10 +141,29 @@ const startServer = async () => {
       });
       return "Welcome to an \"html\" return for firefox testing purposes.<br>Enjoy your stay!";
     });
-    fastify.get('/pong/game-ws', { websocket: true }, async (connection, req: FastifyRequest<{ Body: PongBodyReq }>) => {
-//    fastify.get('/pong/game-ws', { websocket: true }, async (connection, req) => {
-      connection.on('message', message => {
-        connection.send('Ayo twinski <3 ' + message);
+    fastify.get('/pong/game-ws', { websocket: true }, async (sock, req: FastifyRequest<{ Body: PongBodyReq }>) => {
+//  fastify.get('/pong/game-ws', { websocket: true }, async (sock, req) => {
+      sock.on('message', message => {
+        sock.send("connected: " + message);
+        let jsonMsg = JSON.parse(message);
+        let playerId = jsonMsg?.playerId;
+        let getIn = jsonMsg?.getIn;
+        let mov = jsonMsg?.mov;
+        if (typeof playerId !== "undefined" && playerId !== "") {
+          if (typeof getIn !== "undefined" && getIn === true) {
+            const resp : PongResponses = addPlayerCompletely(playerId, sock);
+            if (resp === PongResponses.YoureWaiting) {
+              // TODO FIXME make it only be streaming AFTER the game has started. so, maybe launch it from the gamesreadyloopcheck?
+              dataStreamer(playerId);
+            }
+          }
+          else if (typeof mov !== "undefined") {
+            moveMyPaddle(playerId, mov);
+          }
+        }
+        else {
+          sock.send("error: must have a player id (playerId)");
+        }
       });
     });
   };
