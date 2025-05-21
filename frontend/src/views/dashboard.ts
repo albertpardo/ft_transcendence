@@ -6,17 +6,17 @@ export function initDashboard() {
   //WEBSOCKET TIME!
   const socket = new WebSocket("ws://127.0.0.1:4000/api/pong/game-ws");
   socket.addEventListener("message", (event) => {
-	  console.log("response: ", event.data);
+    console.log("response: ", event.data);
   });
   socket.addEventListener("open", (event) => {
-	  socket.send("{'hey':'bro'}");
-	  console.log("sent an opener message.");
+    socket.send("{'hey':'bro'}");
+    console.log("sent an opener message.");
   });
   const hash = window.location.hash.replace('#', '') || 'home';
   const app = document.getElementById('app')!;
   app.innerHTML = `
     <aside id="sidebar" class="fixed left-0 top-0 bottom-0 w-64 bg-gray-900 p-6 flex flex-col">
-	<div>
+  <div>
       <h2 class="text-2xl font-bold mb-8 text-center">Transcendence</h2>
       <nav class="flex-grow space-y-3">
         <a href="#home" class="block p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition ${hash === 'home' ? 'bg-blue-600' : 'bg-gray-700'}">Dashboard</a>
@@ -28,37 +28,37 @@ export function initDashboard() {
       <button id="logout-btn" class="mt-auto w-full p-3 bg-red-600 rounded-lg hover:bg-red-700 transition">
         Logout
       </button>
-	  </div>
+    </div>
     </aside>
-	<div>
-    	<main id="content-area" class="ml-64 p-6 md:p-8 lg:p-12 overflow-auto">
-		</main>
-        <button id="secret-button" class="mt-auto w-full p-3 bg-red-600 rounded-lg hover:bg-red-700 transition" hidden>click me bro</button>		
-		<div id="game-window" hidden>
-		<svg width="1280px" height="720px">
-		    <rect width="100%" height="100%" fill="red" />
-		    <circle cx="100%" cy="100%" r="150" fill="blue" stroke="black" />
-		    <polygon points="120,0 240,225 0,625" fill="green"/>
-		    <text id="game-text" x="50" y="100" font-family="Verdana" font-size="55" fill="white" stroke="black" stroke-width="2">
-				Hello!
-		    </text>
-		</svg>
-		</div>
-	</div>
+  <div>
+      <main id="content-area" class="ml-64 p-6 md:p-8 lg:p-12 overflow-auto">
+    </main>
+        <button id="secret-button" class="mt-auto w-full p-3 bg-red-600 rounded-lg hover:bg-red-700 transition" hidden>click me bro</button>    
+    <div id="game-window" hidden>
+    <svg width="1280px" height="720px">
+        <rect width="100%" height="100%" fill="red" />
+        <circle cx="100%" cy="100%" r="150" fill="blue" stroke="black" />
+        <polygon points="120,0 240,225 0,625" fill="green"/>
+        <text id="game-text" x="50" y="100" font-family="Verdana" font-size="55" fill="white" stroke="black" stroke-width="2">
+        Hello!
+        </text>
+    </svg>
+    </div>
+  </div>
   `;
 
   // Logout → vuelve a index.html
   document.getElementById('logout-btn')!.addEventListener('click', () => {
     localStorage.removeItem('authToken');
-	socket.close();
+  socket.close();
     window.location.hash = 'login';
     route();
   });
 
   // Secret button
-	document.getElementById('secret-button')!.addEventListener('click', () => {
-		registerPlayer(socket);
-	});
+  document.getElementById('secret-button')!.addEventListener('click', () => {
+    registerPlayer(socket);
+  });
   
 
   // Renderizar la sección activa
