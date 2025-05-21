@@ -109,7 +109,7 @@ const startServer = async () => {
         }
         return { success: true };
       } catch (err) {
-        console.error('Error completo:', err);
+        console.error('Error:', err);
         reply.code(400);
         return { error: 'Error updating user', details: err };
       }

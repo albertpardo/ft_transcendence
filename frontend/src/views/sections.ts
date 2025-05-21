@@ -33,19 +33,6 @@ export function renderHomeContent(el: HTMLElement, bu: HTMLElement, gwin: HTMLEl
   gwin.hidden = true;
 }
 
-export function renderProfileContent(el: HTMLElement, bu: HTMLElement, gwin: HTMLElement) {
-  el.innerHTML = `
-    <h1 class="text-3xl font-bold mb-6">Your Profile</h1>
-    <p class="mb-4">Perfil (texto de ejemplo).</p>
-    <img src="https://placehold.co/1000x400/444444/ffffff?text=Demo" class="w-full rounded-lg" alt="Profile">
-  `;
-  bu.hidden = true;
-  gwin.hidden = true;
-}
-
-// the alert doesn't work
-// the load of src views buttonclicking ts doesn't work
-// the dosomething call fails because it wasn't defined in the end
 export function renderPlayContent(el: HTMLElement, bu: HTMLElement, gwin: HTMLElement) {
   el.innerHTML = `
     <h1 class="text-3xl font-bold mb-6">Play Pong</h1>
