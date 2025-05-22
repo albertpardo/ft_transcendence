@@ -10,7 +10,7 @@ import cors from '@fastify/cors';
 import fastifyStatic from '@fastify/static';
 import path from 'path';
 import { initDB } from './db';
-import { PongResponses, State, addPlayerCompletely, startThePong, getPongDoneness, getPongState, moveMyPaddle, gamesReadyLoopCheck } from './pong';
+import { PongResponses, State, addPlayerCompletely, getPongDoneness, getPongState, moveMyPaddle, gamesReadyLoopCheck, dataStreamer } from './pong';
 
 interface PongBodyReq {
   playerId: string,
@@ -142,7 +142,6 @@ const startServer = async () => {
       return "Welcome to an \"html\" return for firefox testing purposes.<br>Enjoy your stay!";
     });
     fastify.get('/pong/game-ws', { websocket: true }, async (sock, req: FastifyRequest<{ Body: PongBodyReq }>) => {
-//  fastify.get('/pong/game-ws', { websocket: true }, async (sock, req) => {
       sock.on('message', message => {
         sock.send("connected: " + message);
         let jsonMsg = JSON.parse(message);
@@ -152,10 +151,10 @@ const startServer = async () => {
         if (typeof playerId !== "undefined" && playerId !== "") {
           if (typeof getIn !== "undefined" && getIn === true) {
             const resp : PongResponses = addPlayerCompletely(playerId, sock);
-            if (resp === PongResponses.YoureWaiting) {
-              // TODO FIXME make it only be streaming AFTER the game has started. so, maybe launch it from the gamesreadyloopcheck?
-              dataStreamer(playerId);
-            }
+//          if (resp === PongResponses.YoureWaiting) {
+//            // TODO FIXME make it only be streaming AFTER the game has started. so, maybe launch it from the gamesreadyloopcheck?
+//            dataStreamer(playerId);
+//          }
           }
           else if (typeof mov !== "undefined") {
             moveMyPaddle(playerId, mov);

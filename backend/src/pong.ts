@@ -194,6 +194,7 @@ class  PongRuntime {
 const gamesMap = new Map();
 const playersMap = new Map();
 const socksMap = new Map();
+const needToSendStartedMap = new Map();
 const nullVec2 : Vector2 = {x: 0, y: 0};
 const nullBall : Ball = {speed: nullVec2, coords: nullVec2};
 const nullPaddle : Paddle = {y: 0, h: 0, d: 0};
@@ -207,6 +208,7 @@ export function addPlayerCompletely(playerId: string, sock: WebSocket) : PongRes
     return PongResponses.PlayerAlreadyIn;
   }
   socksMap.set(playerId, sock);
+  needToSendStartedMap.set(playerId, true);
   for (const [gameId, gameRuntime] of gamesMap) {
     if (gameRuntime.LplayerId === "") {
       gameRuntime.LplayerId = playerId;
@@ -222,7 +224,7 @@ export function addPlayerCompletely(playerId: string, sock: WebSocket) : PongRes
     }
   }
   // no game available!
-  const newid : string = makeid();
+  const newid : string = makeid(32);
   gamesMap.set(newid, new PongRuntime);
   gamesMap.get(newid).LplayerId = playerId;
   sock.send("added: L");
@@ -270,17 +272,21 @@ export function moveMyPaddle(playerId: string, d: number) : PongResponses {
   return PongResponses.NoPlayer;
 }
 
-export gamesReadyLoopCheck = async () => {
+export const gamesReadyLoopCheck = async () => {
   while (true) {
     for (const [gameId, gameRuntime] of gamesMap) {
       if (gameRuntime.LplayerId !== "" && gameRuntime.RplayerId !== "")  {
-        if (gameRuntime.pongStarted !== true) {
+        if (gameRuntime.pongStarted !== true
+            && needToSendStartedMap.get(gameRuntime.LplayerId) === true
+            && needToSendStartedMap.get(gameRuntime.RplayerId) === true) {
           gameRuntime.mainLoop();
           console.log("one game started: " + gameId + ", with left: " + gameRuntime.LplayerId + " and right: " + gameRuntime.RplayerId);
           console.log("sending the appropriate message to both clientis via ws");
           // XXX maybe do a json string here with the gamestate or something.
           socksMap.get(gameRuntime.LplayerId).send("started");
           socksMap.get(gameRuntime.RplayerId).send("started");
+          needToSendStartedMap.set(gameRuntime.LplayerId, false);
+          needToSendStartedMap.set(gameRuntime.RplayerId, false);
         }
       }
     }
@@ -289,10 +295,10 @@ export gamesReadyLoopCheck = async () => {
   }
 }
 
-export dataStreamer = async (playerId) => {
+export const dataStreamer = async (playerId) => {
   const sock : WebSocket = socksMap.get(playerId);
   const runtime : PongRuntime = gamesMap.get(playersMap.get(playerId));
   while (true) {
-    sock.send(runtime.gamestate) // TODO FIXME actual gamestate
+    sock.send(JSON.stringify(runtime.gstate));
   }
 }

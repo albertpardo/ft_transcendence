@@ -10,14 +10,14 @@ export function initDashboard() {
     console.log("response: ", event.data);
   });
   socket.addEventListener("open", (event) => {
-    socket.send("{'hey':'bro'}");
+    socket.send(JSON.stringify({hey:'bro'}));
     console.log("sent an opener message.");
   });
   const hash = window.location.hash.replace('#', '') || 'home';
   const app = document.getElementById('app')!;
   
   app.innerHTML = `
-    <!-- Mobile Header with Menu Toggle -->
+    <!-- Mobile Header -->
     <header class="md:hidden fixed top-0 left-0 right-0 bg-gray-900 z-50 p-4 flex items-center justify-between">
       <h1 class="text-xl font-bold text-white">Transcendence</h1>
       <button id="mobile-menu-toggle" class="text-white p-2 hover:bg-gray-700 rounded-lg transition">
@@ -36,7 +36,6 @@ export function initDashboard() {
       -translate-x-full md:translate-x-0
       flex flex-col
     ">
-      <!-- Mobile close button -->
       <div class="md:hidden flex justify-end mb-4">
         <button id="mobile-menu-close" class="text-white p-2 hover:bg-gray-700 rounded-lg transition">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -44,97 +43,51 @@ export function initDashboard() {
           </svg>
         </button>
       </div>
-
-      <!-- Logo/Title -->
       <h2 class="text-xl md:text-2xl font-bold mb-6 md:mb-8 text-center text-white">Transcendence</h2>
-      
-      <!-- Navigation -->
       <nav class="flex-grow space-y-2 md:space-y-3">
-        <a href="#home" class="
-          nav-link block p-3 md:p-4 rounded-lg text-center font-medium 
-          hover:bg-blue-500 transition text-white
-          ${hash === 'home' ? 'bg-blue-600' : 'bg-gray-700'}
-        ">
-          <span class="md:hidden">🏠</span>
-          <span class="hidden md:inline">Dashboard</span>
-          <span class="md:hidden ml-2">Dashboard</span>
-        </a>
-        <a href="#profile" class="
-          nav-link block p-3 md:p-4 rounded-lg text-center font-medium 
-          hover:bg-blue-500 transition text-white
-          ${hash === 'profile' ? 'bg-blue-600' : 'bg-gray-700'}
-        ">
-          <span class="md:hidden">👤</span>
-          <span class="hidden md:inline">Profile</span>
-          <span class="md:hidden ml-2">Profile</span>
-        </a>
-        <a href="#play" class="
-          nav-link block p-3 md:p-4 rounded-lg text-center font-medium 
-          hover:bg-blue-500 transition text-white
-          ${hash === 'play' ? 'bg-blue-600' : 'bg-gray-700'}
-        ">
-          <span class="md:hidden">🎮</span>
-          <span class="hidden md:inline">Play Pong</span>
-          <span class="md:hidden ml-2">Play Pong</span>
-        </a>
-        <a href="#tournament" class="
-          nav-link block p-3 md:p-4 rounded-lg text-center font-medium 
-          hover:bg-blue-500 transition text-white
-          ${hash === 'tournament' ? 'bg-blue-600' : 'bg-gray-700'}
-        ">
-          <span class="md:hidden">🏆</span>
-          <span class="hidden md:inline">Tournament</span>
-          <span class="md:hidden ml-2">Tournament</span>
-        </a>
-        <a href="#stats" class="
-          nav-link block p-3 md:p-4 rounded-lg text-center font-medium 
-          hover:bg-blue-500 transition text-white
-          ${hash === 'stats' ? 'bg-blue-600' : 'bg-gray-700'}
-        ">
-          <span class="md:hidden">📊</span>
-          <span class="hidden md:inline">Stats</span>
-          <span class="md:hidden ml-2">Stats</span>
-        </a>
+        <a href="#home" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='home'?'bg-blue-600':'bg-gray-700'}">Dashboard</a>
+        <a href="#profile" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='profile'?'bg-blue-600':'bg-gray-700'}">Profile</a>
+        <a href="#play" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='play'?'bg-blue-600':'bg-gray-700'}">Play Pong</a>
+        <a href="#tournament" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='tournament'?'bg-blue-600':'bg-gray-700'}">Tournament</a>
+        <a href="#stats" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='stats'?'bg-blue-600':'bg-gray-700'}">Stats</a>
       </nav>
-      
-      <!-- Logout Button -->
-      <button id="logout-btn" class="
-        mt-auto w-full p-3 bg-red-600 rounded-lg 
-        hover:bg-red-700 transition text-white font-medium
-      ">
-        <span class="md:hidden">🚪</span>
-        <span class="hidden md:inline">Logout</span>
-        <span class="md:hidden ml-2">Logout</span>
-      </button>
-    </div>
+      <button id="logout-btn" class="mt-auto w-full p-3 bg-red-600 rounded-lg hover:bg-red-700 transition text-white font-medium">Logout</button>
     </aside>
 
-    <!-- Backdrop for mobile menu -->
-    <div id="mobile-backdrop" class="
-      md:hidden fixed inset-0 bg-black bg-opacity-50 z-30
-      opacity-0 pointer-events-none transition-opacity duration-300
-    "></div>
+    <!-- Mobile Backdrop -->
+    <div id="mobile-backdrop" class="md:hidden fixed inset-0 bg-black bg-opacity-50 z-30 opacity-0 pointer-events-none transition-opacity duration-300"></div>
 
-    <!-- Main Content Area -->
-    <main id="content-area" class="
-      pt-16 md:pt-0 md:ml-64 
-      p-4 md:p-6 lg:p-8 xl:p-12 
-      min-h-screen overflow-auto
-      bg-gray-900
-    ">
-    </main>
+    <!-- Main Content -->
+    <main id="content-area" class="pt-16 md:pt-0 md:ml-64 p-4 md:p-6 lg:p-8 xl:p-12 min-h-screen overflow-auto bg-gray-900"></main>
 
     <!-- Hidden Game Area -->
-    <button id="secret-button" class="mt-auto w-full p-3 bg-red-600 rounded-lg hover:bg-red-700 transition" hidden>click me bro</button>    
-    <div id="game-window" hidden>
-    <svg width="1280px" height="720px">
-      <rect width="100%" height="100%" fill="red" />
-      <circle cx="100%" cy="100%" r="150" fill="blue" stroke="black" />
-      <polygon points="120,0 240,225 0,625" fill="green"/>
-      <text id="game-text" x="50" y="100" font-family="Verdana" font-size="55" fill="white" stroke="black" stroke-width="2">
-      Hello!
-      </text>
-    </svg>
+    <div id="game-area" class="flex flex-col items-center justify-center" hidden>
+      <div id="game-window" class="relative w-[1280px] h-[720px]">
+
+        <!-- Left Controls -->
+        <div class="absolute left-0 top-1/2 transform -translate-y-1/2 flex flex-col space-y-4 z-10">
+          <button id="left-up" class="bg-white text-black p-3 rounded shadow">^</button>
+          <button id="left-down" class="bg-white text-black p-3 rounded shadow">v</button>
+        </div>
+
+        <!-- SVG Field -->
+        <svg width="1280" height="720">
+          <rect width="100%" height="100%" fill="red" />
+          <circle cx="100%" cy="100%" r="150" fill="blue" stroke="black" />
+          <polygon points="120,0 240,225 0,625" fill="green"/>
+          <text id="game-text" x="50" y="100" font-family="Verdana" font-size="55" fill="white" stroke="black" stroke-width="2">
+            Hello!
+          </text>
+        </svg>
+
+        <!-- Right Controls -->
+        <div class="absolute right-0 top-1/2 transform -translate-y-1/2 flex flex-col space-y-4 z-10">
+          <button id="right-up" class="bg-white text-black p-3 rounded shadow">^</button>
+          <button id="right-down" class="bg-white text-black p-3 rounded shadow">v</button>
+        </div>
+
+      </div>
+      <button id="secret-button" class="mt-6 p-3 bg-red-600 rounded-lg hover:bg-red-700 transition text-white font-medium">click me bro</button>
     </div>
   `;
 
@@ -196,13 +149,15 @@ export function initDashboard() {
   // Render active section
   const contentArea = document.getElementById('content-area')!;
   const secretClickMeButton = document.getElementById('secret-button')!;
+  const gameArea = document.getElementById('game-area')!;
   const gameWindow = document.getElementById('game-window')!;
+  console.log("game window is " + gameWindow);
   switch (hash) {
-    case 'profile':    renderProfileContent(contentArea, secretClickMeButton, gameWindow);    break;
-    case 'play':       renderPlayContent(contentArea, secretClickMeButton, gameWindow);       break;
-    case 'tournament': renderTournamentContent(contentArea, secretClickMeButton, gameWindow); break;
-    case 'stats':      renderStatsContent(contentArea, secretClickMeButton, gameWindow);      break;
-    default:           renderHomeContent(contentArea, secretClickMeButton, gameWindow);
+    case 'profile':    renderProfileContent(contentArea, secretClickMeButton, gameArea, gameWindow);    break;
+    case 'play':       renderPlayContent(contentArea, secretClickMeButton, gameArea, gameWindow);       break;
+    case 'tournament': renderTournamentContent(contentArea, secretClickMeButton, gameArea, gameWindow); break;
+    case 'stats':      renderStatsContent(contentArea, secretClickMeButton, gameArea, gameWindow);      break;
+    default:           renderHomeContent(contentArea, secretClickMeButton, gameArea, gameWindow);
   }
 }
 

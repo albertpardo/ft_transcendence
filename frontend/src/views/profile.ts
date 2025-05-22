@@ -1,4 +1,7 @@
-export async function renderProfileContent(el: HTMLElement) {
+export async function renderProfileContent(el: HTMLElement, bu: HTMLElement, gArea: HTMLElement, gWin: HTMLElement) {
+  bu.hidden = true;
+  gArea.hidden = true;
+  gWin.hidden = true;
   const userId = localStorage.getItem('userId') || sessionStorage.getItem('userId');
   const authToken = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
 
