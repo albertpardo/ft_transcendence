@@ -143,7 +143,7 @@ const startServer = async () => {
     });
     fastify.get('/pong/game-ws', { websocket: true }, async (sock, req: FastifyRequest<{ Body: PongBodyReq }>) => {
       sock.on('message', message => {
-        sock.send("connected: " + message);
+        sock.send("connected");
         let jsonMsg = JSON.parse(message);
         let playerId = jsonMsg?.playerId;
         let getIn = jsonMsg?.getIn;
@@ -157,7 +157,7 @@ const startServer = async () => {
           }
         }
         else {
-          sock.send("error: must have a player id (playerId)");
+          sock.send("error");
         }
       });
     });

@@ -46,7 +46,7 @@ export function renderLogin(appElement: HTMLElement) {
       console.log('Login attempt:', username, password);
       
       // Aquí se deberá implementar la validación real
-      localStorage.setItem('authToken', 'fake-jwt-token');
+      localStorage.setItem('authToken', 'fake-jwt-token' + Date.now());
       
       // Redireccion al home
       window.location.hash = 'home';

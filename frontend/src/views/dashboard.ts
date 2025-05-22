@@ -2,17 +2,9 @@
 import { doSomething, registerPlayer, startGame } from './buttonClicking';
 import { renderHomeContent, renderPlayContent, renderTournamentContent, renderStatsContent } from './sections';
 import { renderProfileContent } from './profile';
+import { State, nullState } from './pongrender';
 
 export function initDashboard() {
-  //WEBSOCKET TIME!
-  const socket = new WebSocket("ws://127.0.0.1:4000/api/pong/game-ws");
-  socket.addEventListener("message", (event) => {
-    console.log("response: ", event.data);
-  });
-  socket.addEventListener("open", (event) => {
-    socket.send(JSON.stringify({hey:'bro'}));
-    console.log("sent an opener message.");
-  });
   const hash = window.location.hash.replace('#', '') || 'home';
   const app = document.getElementById('app')!;
 
@@ -68,24 +60,25 @@ export function initDashboard() {
 
         <!-- Left Controls -->
         <div class="absolute left-0 top-1/2 transform -translate-y-1/2 flex flex-col space-y-4 z-10">
-          <button id="left-up" class="bg-white text-black p-3 rounded shadow">^</button>
-          <button id="left-down" class="bg-white text-black p-3 rounded shadow">v</button>
+          <button id="left-up" class="bg-white text-black p-3 rounded shadow" hidden>^</button>
+          <button id="left-down" class="bg-white text-black p-3 rounded shadow" hidden>v</button>
         </div>
 
         <!-- SVG Field -->
         <svg width="1280" height="720">
-          <rect width="100%" height="100%" fill="red" />
-          <circle cx="100%" cy="100%" r="150" fill="blue" stroke="black" />
-          <polygon points="120,0 240,225 0,625" fill="green"/>
-          <text id="game-text" x="50" y="100" font-family="Verdana" font-size="55" fill="white" stroke="black" stroke-width="2">
-            Hello!
+          <rect width="100%" height="100%" fill="black" />
+          <rect id="lpad" x="40" y="310" width="10" height="100" fill="white" />
+          <rect id="rpad" x="1230" y="310" width="10" height="100" fill="white" />
+          <circle id="ball" cx="640" cy="360" r="3" fill="white" />
+          <text id="game-text" x="640" y="60" font-family="Monospace" font-size="40" fill="white" text-anchor=middle>
+            0 : 0
           </text>
         </svg>
 
         <!-- Right Controls -->
         <div class="absolute right-0 top-1/2 transform -translate-y-1/2 flex flex-col space-y-4 z-10">
-          <button id="right-up" class="bg-white text-black p-3 rounded shadow">^</button>
-          <button id="right-down" class="bg-white text-black p-3 rounded shadow">v</button>
+          <button id="right-up" class="bg-white text-black p-3 rounded shadow" hidden>^</button>
+          <button id="right-down" class="bg-white text-black p-3 rounded shadow" hidden>v</button>
         </div>
 
       </div>
@@ -93,6 +86,41 @@ export function initDashboard() {
     </div>
   `;
 
+  const leftUpArrow: HTMLElement = document.getElementById("left-up");
+  const leftDownArrow : HTMLElement = document.getElementById("left-down");
+  const rightUpArrow : HTMLElement = document.getElementById("right-up");
+  const rightDownArrow : HTMLElement = document.getElementById("right-down");
+  //WEBSOCKET TIME!
+  const socket = new WebSocket("ws://127.0.0.1:4000/api/pong/game-ws");
+  let state : State = nullState;
+  let playerSide : string = "tbd";
+  let started : boolean = false;
+  socket.addEventListener("message", (event) => {
+    console.log("I, a", localStorage.getItem("authToken"), "tokened player, receive:", event.data);
+    // TODO maybe a try catch? idk if it'd crash or something on a wrong input
+    switch (event.data) {
+      case "connected":
+        break;
+      case "added: L":
+        playerSide = "l";
+        leftUpArrow.hidden = false;
+        leftDownArrow.hidden = false;
+        break;
+      case "added: R":
+        playerSide = "r";
+        rightUpArrow.hidden = false;
+        rightDownArrow.hidden = false;
+        break;
+      case "started":
+        started = true;
+        break;
+      case "error":
+        console.log("some error returned from the server");
+        break;
+      default:
+        state = JSON.parse(event.data);
+    }
+  });
   // Mobile menu functionality
   const mobileMenuToggle = document.getElementById('mobile-menu-toggle')!;
   const mobileMenuClose = document.getElementById('mobile-menu-close')!;
@@ -137,7 +165,7 @@ export function initDashboard() {
   // Logout functionality
   document.getElementById('logout-btn')!.addEventListener('click', () => {
     localStorage.removeItem('authToken');
-  socket.close();
+    socket.close();
     window.location.hash = 'login';
     route();
   });
@@ -153,7 +181,6 @@ export function initDashboard() {
   const secretClickMeButton = document.getElementById('secret-button')!;
   const gameArea = document.getElementById('game-area')!;
   const gameWindow = document.getElementById('game-window')!;
-  console.log("game window is " + gameWindow);
   switch (hash) {
     case 'profile':    renderProfileContent(contentArea, secretClickMeButton, gameArea, gameWindow);    break;
     case 'play':       renderPlayContent(contentArea, secretClickMeButton, gameArea, gameWindow);       break;

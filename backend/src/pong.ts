@@ -2,7 +2,8 @@ const  ALPHA_MAX : number = 5*Math.PI/11;
 const  sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const  FRAME_TIME : number = 1/30;
 const  FRAME_TIME_MS : number = 1000 * FRAME_TIME;
-const  WINDOW_SIZE : Vector2 = {x: 1600, y: 900};
+const  WINDOW_SIZE : Vector2 = {x: 1180, y: 720};
+// the REAL window size is +50 pixels on both sides to allow for aesthetics
 const  PADDLE_H : number = 100;
 const  PADDLE_SPEED : number = 100;
 const  MIN_BALL_SPEED_Y : number = 100;
@@ -27,12 +28,12 @@ export enum PongResponses {
 }
 // lol
 
-interface  Vector2 {
+export interface  Vector2 {
   x: number;
   y: number;
 };
 
-interface  Paddle {
+export interface  Paddle {
   y: number;
   h: number;
   d: number;
@@ -42,7 +43,7 @@ interface  Paddle {
 // d e (-1, 1): stationary
 // since js has no integer type (yes), we'll input values like -2 and 2 to be sure
 
-interface  Ball {
+export interface  Ball {
   speed: Vector2;
   coords: Vector2;
 };
@@ -95,7 +96,7 @@ class  PongRuntime {
   public RplayerId : string = "";
   private ball : Ball = { speed: {x: -50, y: 0}, coords: {x: WINDOW_SIZE.x/2, y: WINDOW_SIZE.y/2}};
   private Lpaddle : Paddle = { y: (WINDOW_SIZE.y - PADDLE_H)/2, h: PADDLE_H, d: 0 };
-  private Rpaddle : Paddle = { y: 430, h: PADDLE_H, d: 0 };
+  private Rpaddle : Paddle = { y: (WINDOW_SIZE.y - PADDLE_H)/2 + 20, h: PADDLE_H, d: 0 };
   private whoLost : string = "none";
 
   public LpadMove(d: number) : void {
@@ -320,5 +321,8 @@ export const dataStreamer = async (playerId) => {
     sock.send(JSON.stringify(runtime.gstate));
 //  console.log(runtime.gstate);
     await sleep(FRAME_TIME_MS);
+    if (runtime.pongDone === true) {
+      break ;
+    }
   }
 }
