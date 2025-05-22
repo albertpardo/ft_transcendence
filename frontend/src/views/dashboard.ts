@@ -90,9 +90,15 @@ export function initDashboard() {
   const leftDownArrow : HTMLElement = document.getElementById("left-down");
   const rightUpArrow : HTMLElement = document.getElementById("right-up");
   const rightDownArrow : HTMLElement = document.getElementById("right-down");
+  let ball : HTMLElement = document.getElementById("ball");
+  let lpad : HTMLElement = document.getElementById("lpad");
+  let rpad : HTMLElement = document.getElementById("rpad");
+  console.log(ball);
+  console.log(lpad);
+  console.log(rpad);
   //WEBSOCKET TIME!
   const socket = new WebSocket("ws://127.0.0.1:4000/api/pong/game-ws");
-  let state : State = nullState;
+  let gameState : State = nullState;
   let playerSide : string = "tbd";
   let started : boolean = false;
   socket.addEventListener("message", (event) => {
@@ -118,7 +124,11 @@ export function initDashboard() {
         console.log("some error returned from the server");
         break;
       default:
-        state = JSON.parse(event.data);
+        gameState = JSON.parse(event.data);
+        ball.cx.animVal.value = gameState.stateBall.coords.x;
+        ball.cy.animVal.value = 1280 - gameState.stateBall.coords.y;
+        lpad.y.animVal.value = gameState.stateLP.y;
+        rpad.y.animVal.value = gameState.stateRP.y;
     }
   });
   // Mobile menu functionality
