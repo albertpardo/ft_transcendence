@@ -15,7 +15,7 @@ export function initDashboard() {
   });
   const hash = window.location.hash.replace('#', '') || 'home';
   const app = document.getElementById('app')!;
-  
+
   app.innerHTML = `
     <!-- Mobile Header -->
     <header class="md:hidden fixed top-0 left-0 right-0 bg-gray-900 z-50 p-4 flex items-center justify-between">
@@ -62,6 +62,8 @@ export function initDashboard() {
 
     <!-- Hidden Game Area -->
     <div id="game-area" class="flex flex-col items-center justify-center" hidden>
+      <h1 class="text-3xl font-bold mb-6" align=center>Play Pong</h1>
+      <p class="mb-4" align=center>Pong (texto de ejemplo).</p>
       <div id="game-window" class="relative w-[1280px] h-[720px]">
 
         <!-- Left Controls -->
@@ -144,7 +146,7 @@ export function initDashboard() {
   document.getElementById('secret-button')!.addEventListener('click', () => {
     registerPlayer(socket);
   });
-  
+
 
   // Render active section
   const contentArea = document.getElementById('content-area')!;

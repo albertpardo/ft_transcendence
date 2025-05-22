@@ -37,8 +37,6 @@ export function renderHomeContent(el: HTMLElement, bu: HTMLElement, gArea: HTMLE
 
 export function renderPlayContent(el: HTMLElement, bu: HTMLElement, gArea: HTMLElement, gWin: HTMLElement) {
   el.innerHTML = `
-    <h1 class="text-3xl font-bold mb-6">Play Pong</h1>
-    <p class="mb-4">Pong (texto de ejemplo).</p>  
   `;
   // on this view, show the button and the registered games list
   bu.hidden = false;
