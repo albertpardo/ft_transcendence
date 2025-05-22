@@ -151,10 +151,6 @@ const startServer = async () => {
         if (typeof playerId !== "undefined" && playerId !== "") {
           if (typeof getIn !== "undefined" && getIn === true) {
             const resp : PongResponses = addPlayerCompletely(playerId, sock);
-//          if (resp === PongResponses.YoureWaiting) {
-//            // TODO FIXME make it only be streaming AFTER the game has started. so, maybe launch it from the gamesreadyloopcheck?
-//            dataStreamer(playerId);
-//          }
           }
           else if (typeof mov !== "undefined") {
             moveMyPaddle(playerId, mov);

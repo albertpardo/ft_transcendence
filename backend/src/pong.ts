@@ -204,7 +204,11 @@ const nullState : State = {stateBall: nullBall, stateLP: nullPaddle, stateRP: nu
 // this way, we'll always have to wait for a confirmation signal from the game runtime itself that the game is ready to start.
 //
 export function addPlayerCompletely(playerId: string, sock: WebSocket) : PongResponses {
+  for (const [p, g] of playersMap) {
+    console.log("p:", p, "g:", g);
+  }
   if (playersMap.has(playerId)) {
+    console.log("oh no! player id", playerId, "already in")!
     return PongResponses.PlayerAlreadyIn;
   }
   socksMap.set(playerId, sock);
@@ -212,7 +216,12 @@ export function addPlayerCompletely(playerId: string, sock: WebSocket) : PongRes
   for (const [gameId, gameRuntime] of gamesMap) {
     if (gameRuntime.LplayerId === "") {
       gameRuntime.LplayerId = playerId;
+      console.log("about to add p:", playerId, "with", gameId);
       playersMap.set(playerId, gameId);
+      console.log("done! now, the map is:");
+      for (const [p, g] of playersMap) {
+        console.log(" p:", p, "g:", g);
+      }
       sock.send("added: L");
       return PongResponses.YoureWaiting;
     }
@@ -224,9 +233,15 @@ export function addPlayerCompletely(playerId: string, sock: WebSocket) : PongRes
     }
   }
   // no game available!
+  console.log("no games available. creating...");
   const newid : string = makeid(32);
   gamesMap.set(newid, new PongRuntime);
   gamesMap.get(newid).LplayerId = playerId;
+  playersMap.set(playerId, newid);
+  console.log("done! now, the map is:");
+  for (const [p, g] of playersMap) {
+    console.log(" p:", p, "g:", g);
+  }
   sock.send("added: L");
   return PongResponses.YoureWaiting;
 }
@@ -303,7 +318,7 @@ export const dataStreamer = async (playerId) => {
   const runtime : PongRuntime = gamesMap.get(playersMap.get(playerId));
   while (true) {
     sock.send(JSON.stringify(runtime.gstate));
-    console.log(runtime.gstate);
+//  console.log(runtime.gstate);
     await sleep(FRAME_TIME_MS);
   }
 }
