@@ -94,7 +94,7 @@ function  calculateVBounce(ball: Ball, paddle: Paddle) : Vector2 {
 class  PongRuntime {
   public LplayerId : string = "";
   public RplayerId : string = "";
-  private ball : Ball = { speed: {x: -50, y: 0}, coords: {x: WINDOW_SIZE.x/2, y: WINDOW_SIZE.y/2}};
+  private ball : Ball = { speed: {x: -200, y: 0}, coords: {x: WINDOW_SIZE.x/2, y: WINDOW_SIZE.y/2}};
   private Lpaddle : Paddle = { y: (WINDOW_SIZE.y - PADDLE_H)/2, h: PADDLE_H, d: 0 };
   private Rpaddle : Paddle = { y: (WINDOW_SIZE.y - PADDLE_H)/2 + 20, h: PADDLE_H, d: 0 };
   private whoLost : string = "none";
