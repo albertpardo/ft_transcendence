@@ -287,6 +287,9 @@ export const gamesReadyLoopCheck = async () => {
           socksMap.get(gameRuntime.RplayerId).send("started");
           needToSendStartedMap.set(gameRuntime.LplayerId, false);
           needToSendStartedMap.set(gameRuntime.RplayerId, false);
+          await sleep(300);
+          dataStreamer(gameRuntime.LplayerId);
+          dataStreamer(gameRuntime.RplayerId);
         }
       }
     }
@@ -300,5 +303,7 @@ export const dataStreamer = async (playerId) => {
   const runtime : PongRuntime = gamesMap.get(playersMap.get(playerId));
   while (true) {
     sock.send(JSON.stringify(runtime.gstate));
+    console.log(runtime.gstate);
+    await sleep(FRAME_TIME_MS);
   }
 }
