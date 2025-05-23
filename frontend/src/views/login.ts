@@ -137,36 +137,58 @@ export function renderLogin(appElement: HTMLElement) {
       
       try {
         // Try real API first
-        const response = await fetch('http://localhost:4000/api/login', {
+        const response = await fetch('https://localhost:8443/api/login', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ username, password }),
+          credentials: 'include'
         });
 
-        if (!response.ok) {
+        /* if (!response.ok) {
           const errorData = await response.json();
           throw new Error(errorData.message || 'Login failed');
-        }
+        } */
+       const data = await response.json();
+       localStorage.setItem('authToken', data.token);
+       localStorage.setItem('user', JSON.stringify({ 
+            username,
+            name: data.user?.name || username,
+            avatar: data.user?.avatar || `https://i.pravatar.cc/150?u=${username}`
+          }));
+          window.location.hash = 'home';
+     /*   if (response.ok) {
+          } else if (!response.ok) {
+            // If API fails, use mock data
+            throw new Error('API not available - using mock');
+          } */
 
-        const data = await response.json();
+        //const data = await response.json();
+        
+      } catch (error) {
+        errorElement.textContent = error instanceof Error ? error.message : 'Login failed';
+        errorElement.classList.remove('hidden');
+        //console.warn('Using mock login:', error);
+        
+        // Mock successful login response
+        //await new Promise(resolve => setTimeout(resolve, 500));
         
         // Store the authentication token
-        localStorage.setItem('authToken', data.token || 'mock-token');
-        localStorage.setItem('user', JSON.stringify({
+        /* localStorage.setItem('authToken', 'mock-token');
+        localStorage.setItem('user', JSON.stringify({ 
           username,
-          name: username,
+          name: 'Mock User',
           avatar: `https://i.pravatar.cc/150?u=${username}`
         }));
         
         // Redirect to home
-        window.location.hash = 'home';
-      } catch (error) {
-        console.error('Login error:', error);
+        window.location.hash = 'home'; */
+     /*  } catch (error) {
+        console.error('Login error:', error); */
         
         // Fallback to mock if API is not available
-        if (error.message.includes('Failed to fetch')) {
+       /*  if (error.message.includes('Failed to fetch')) {
           console.warn('API not available, using mock login');
           await new Promise(resolve => setTimeout(resolve, 1000));
           localStorage.setItem('authToken', 'mock-jwt-token');
@@ -180,7 +202,7 @@ export function renderLogin(appElement: HTMLElement) {
           // Show error message
           errorElement.textContent = error instanceof Error ? error.message : 'Login failed';
           errorElement.classList.remove('hidden');
-        }
+        } */
       } finally {
         submitButton.disabled = false;
         submitButton.textContent = 'Sign in';
@@ -217,8 +239,47 @@ export function renderLogin(appElement: HTMLElement) {
       registerButton.textContent = 'Registering...';
       
       try {
+        const response = await fetch('https://localhost:8443/api/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, username, email ,password }),
+          credentials: 'include'
+        });
+
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Registration failed');
+        }
+        const data = await response.json();
+
+        errorElement.textContent = 'Registration successful! Please login.';
+        errorElement.classList.remove('hidden');
+        errorElement.classList.add('text-green-500');
+        // Switch back to login form
+        if (loginForm && registerForm && toggleForm && toggleFormText) {
+          loginForm.classList.remove('hidden');
+          registerForm.classList.add('hidden');
+          toggleFormText.textContent = 'Already have an account? ';
+          toggleForm.textContent = 'Login now';
+        }
+        // Clear form
+        (document.getElementById('reg-name') as HTMLInputElement).value = '';
+        (document.getElementById('reg-username') as HTMLInputElement).value = '';
+        (document.getElementById('reg-email') as HTMLInputElement).value = '';
+        (document.getElementById('reg-password') as HTMLInputElement).value = '';
+      } catch (error) {
+        errorElement.textContent = error instanceof Error ? error.message : 'Registration failed';
+        errorElement.classList.remove('hidden');
+      } finally {
+        registerButton.disabled = false;
+        registerButton.textContent = 'Register';
+      }
+
+      // Mock registration response below
+/*       try {
         // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
+       // await new Promise(resolve => setTimeout(resolve, 1000));
         
         // Mock successful registration
         errorElement.textContent = 'Registration successful! Please login.';
@@ -244,7 +305,7 @@ export function renderLogin(appElement: HTMLElement) {
       } finally {
         registerButton.disabled = false;
         registerButton.textContent = 'Register';
-      }
+      } */
     });
   }
 }

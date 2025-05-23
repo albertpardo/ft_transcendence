@@ -1,13 +1,13 @@
 
 all:
 	@echo > /dev/null
-#	docker compose -f docker-compose.yml up --build
-	docker compose -f docker-compose.yml up -d --build
+	docker compose -f docker-compose.yml up --build
+#	docker compose -f docker-compose.yml up -d --build
 	
 	@echo "\n▉▉▉▉▉▉▉▉▉▉ WELCOME TO TRASCENDENCE PROJECT! ▉▉▉▉▉▉▉▉▉▉\n"
 	@echo "To check the system status run: make status\n"
-	@echo "Access to user API(back) at: http://127.0.0.1:4000/api"
-	@echo "Access to profile view(front) at: http://127.0.0.1:3000"
+	@echo "Access to user API(back) at: https://127.0.0.1:4000/api"
+	@echo "Access to profile view(front) at: https://127.0.0.1:3000"
 
 down:
 	docker compose -f docker-compose.yml down

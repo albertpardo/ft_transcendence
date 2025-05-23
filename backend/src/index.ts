@@ -4,18 +4,28 @@
 // Correcto: fastify.register(async (fastify) => { fastify.prefix('/api'); ... });
 
 import Fastify from 'fastify';
+import type { FastifyRequest } from 'fastify';
 import cors from '@fastify/cors';
 import fastifyStatic from '@fastify/static';
 import path from 'path';
+import { fileURLToPath } from 'url';
+
+//const __dirname = path.dirname(__filename);
 import { initDB } from './db';
 
 const startServer = async () => {
   const fastify = Fastify({ logger: true });
 
   await fastify.register(cors, {
-    origin: '*'  // para desarrollo; en producción, restringe a tu dominio
+    origin: 'http://127.0.0.1:3000',  // para desarrollo; en producción, restringe a tu dominio
+		credentials: true,
+		methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+		allowedHeaders: ['Content-Type', 'Authorization'],
+		//allowedHeaders: ['Content-Type', 'Cache-Control'],
   });
 
+	
+	console.log(__dirname);
   await fastify.register(fastifyStatic, {
     root: path.join(__dirname, '..', 'uploads'),
     prefix: '/uploads/',     // todas las URLs /uploads/* vendrán de aquí
@@ -29,6 +39,15 @@ const startServer = async () => {
 
   // Registra un plugin para prefijar las rutas API con '/api'
   const apiRoutes = async (fastify) => {
+		fastify.options('*', async (request, reply) => {
+			reply
+				.header('Access-Control-Allow-Origin', 'http://127.0.0.1:3000')
+				.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS')
+				.header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+				.header('Access-Control-Allow-Credentials', 'true')
+				.code(204)
+				.send();
+		});
     // GET HOME
     fastify.get('/', async (request, reply) => {
       return {message : "Welcome to the transcendence API!"};
@@ -74,9 +93,9 @@ const startServer = async () => {
     
     // POST USERS
     fastify.post('/users', async (request, reply) => {
-      const { name, nickname, email, password, avatar } = request.body as any;
+      const { name, username, email, password, avatar } = request.body as any;
       try {
-        await db.run('INSERT INTO users (name, nickname, email, password, avatar) VALUES (?, ?, ?, ?, ?)', [name, nickname, email, password, avatar]);
+        await db.run('INSERT INTO users (name, username, email, password, avatar) VALUES (?, ?, ?, ?, ?)', [name, username, email, password, avatar]);
         return { success: true };
       } catch (err) {
         reply.code(400);
@@ -87,9 +106,9 @@ const startServer = async () => {
     // PUT USERS
     fastify.put('/users/id/:id', async (request, reply) => {
       const { id } = request.params as any;
-      const { name, nickname, email, password, avatar} = request.body as any;
+      const { name, username, email, password, avatar} = request.body as any;
       try {
-        const result = await db.run('UPDATE users SET name = ?, nickname = ?, email = ?, password = ?, avatar = ? WHERE id = ?', [name, nickname, email, password, avatar, id]);
+        const result = await db.run('UPDATE users SET name = ?, username = ?, email = ?, password = ?, avatar = ? WHERE id = ?', [name, username, email, password, avatar, id]);
         if (result.changes === 0) {
           reply.code(404);
           return { error: 'User not found' };
@@ -117,9 +136,23 @@ const startServer = async () => {
         return { error: 'Error deleting user', details: err };
       }
     });
+		
+		fastify.post('/login', async (request, reply) => {
+			const { username, password } = request.body as any;
+			try {
+				const user = await db.get('SELECT * FROM users WHERE username = ? AND password = ?', [username, password]);
+				if (!user) {
+					reply.code(401);
+					return { error: 'Invalid username or password' };
+				}
+				return { success: true, user };
+			} catch (err) {
+				reply.code(500);
+				return { error: 'Login failed', details: err };
+			}
+		});
   };
 
-  // Registra las rutas API con prefijo '/api'
   fastify.register(apiRoutes, { prefix: '/api' });
 
   await fastify.listen({ port: 4000, host: '0.0.0.0' });

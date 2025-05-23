@@ -14,6 +14,7 @@ services:
     environment:
       - NODE_ENV=development
       - DATABASE_URL=sqlite:///app/data/database.db
+      # - NODE_DEBUG=cluster,net,http,fs,tls,module,timers
     networks:
       - app-network
     restart: unless-stopped
