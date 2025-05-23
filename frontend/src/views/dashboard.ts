@@ -1,5 +1,5 @@
 // src/views/dashboard.ts
-import { doSomething, registerPlayer, startGame } from './buttonClicking';
+import { registerPlayer, movePaddle } from './buttonClicking';
 import { renderHomeContent, renderPlayContent, renderTournamentContent, renderStatsContent } from './sections';
 import { renderProfileContent } from './profile';
 import { State, nullState } from './pongrender';
@@ -54,8 +54,6 @@ export function initDashboard() {
 
     <!-- Hidden Game Area -->
     <div id="game-area" class="flex flex-col items-center justify-center" hidden>
-      <h1 class="text-3xl font-bold mb-6" align=center>Play Pong</h1>
-      <p class="mb-4" align=center>Pong (texto de ejemplo).</p>
       <div id="game-window" class="relative w-[1280px] h-[720px]">
 
         <!-- Left Controls -->
@@ -70,8 +68,11 @@ export function initDashboard() {
           <rect id="lpad" x="40" y="310" width="10" height="100" fill="white" />
           <rect id="rpad" x="1230" y="310" width="10" height="100" fill="white" />
           <circle id="ball" cx="640" cy="360" r="3" fill="white" />
-          <text id="game-text" x="640" y="60" font-family="Monospace" font-size="40" fill="white" text-anchor=middle>
+          <text id="score-text" x="640" y="60" font-family="Monospace" font-size="40" fill="white" text-anchor=middle>
             0 : 0
+          </text>
+          <text id="game-text" x="640" y="200" font-family="Sans-serif" font-size="60" fill="white" text-anchor=middle>
+            Placeholder text
           </text>
         </svg>
 
@@ -82,7 +83,7 @@ export function initDashboard() {
         </div>
 
       </div>
-      <button id="secret-button" class="mt-6 p-3 bg-red-600 rounded-lg hover:bg-red-700 transition text-white font-medium">click me bro</button>
+      <button id="start-button" class="mt-6 p-3 bg-red-600 rounded-lg hover:bg-red-700 transition text-white font-medium">click me bro</button>
     </div>
   `;
 
@@ -90,9 +91,13 @@ export function initDashboard() {
   const leftDownArrow : HTMLElement = document.getElementById("left-down");
   const rightUpArrow : HTMLElement = document.getElementById("right-up");
   const rightDownArrow : HTMLElement = document.getElementById("right-down");
-  let ball : HTMLElement = document.getElementById("ball");
-  let lpad : HTMLElement = document.getElementById("lpad");
-  let rpad : HTMLElement = document.getElementById("rpad");
+  const ball : HTMLElement = document.getElementById("ball");
+  const lpad : HTMLElement = document.getElementById("lpad");
+  const rpad : HTMLElement = document.getElementById("rpad");
+  let gameText : HTMLElement = document.getElementById("game-text");
+  gameText.style.visibility = "hidden";
+  // for some reason, doing a .hidden = false or true on this doesn't work.
+  const scoreText : HTMLElement = document.getElementById("score-text");
   console.log(ball);
   console.log(lpad);
   console.log(rpad);
@@ -106,6 +111,7 @@ export function initDashboard() {
     // TODO maybe a try catch? idk if it'd crash or something on a wrong input
     switch (event.data) {
       case "connected":
+        console.log("Welcome to pong.");
         break;
       case "added: L":
         playerSide = "l";
@@ -129,6 +135,28 @@ export function initDashboard() {
         ball.setAttribute("cy", gameState.stateBall.coords.y)
         lpad.setAttribute("y", gameState.stateLP.y)
         rpad.setAttribute("y", gameState.stateRP.y)
+        if (gameState.stateWhoL !== "none") {
+          gameText.style.visibility = "visible";
+          if (playerSide === "l") {
+            switch (gameState.stateWhoL) {
+              case "left":
+                gameText.innerHTML = "You lost the round.";
+                break;
+              case "right":
+                gameText.innerHTML = "You won the round!";
+                break;
+            }
+          } else if (playerSide === "r") {
+            switch (gameState.stateWhoL) {
+              case "right":
+                gameText.innerHTML = "You lost the round.";
+                break;
+              case "left":
+                gameText.innerHTML = "You won the round!";
+                break;
+            }
+          }
+        }
     }
   });
   // Mobile menu functionality
@@ -181,22 +209,70 @@ export function initDashboard() {
   });
 
   // Secret button (start the game, etc. this is for the game section)
-  document.getElementById('secret-button')!.addEventListener('click', () => {
+  document.getElementById('start-button')!.addEventListener('click', () => {
     registerPlayer(socket);
   });
 
+  leftUpArrow.addEventListener('mousedown', () => {
+    movePaddle(socket, -2);
+  });
+
+  leftUpArrow.addEventListener('mouseup', () => {
+    movePaddle(socket, 0);
+  });
+
+  leftUpArrow.addEventListener('mouseleave', () => {
+    movePaddle(socket, 0);
+  });
+
+  leftDownArrow.addEventListener('mousedown', () => {
+    movePaddle(socket, 2);
+  });
+
+  leftDownArrow.addEventListener('mouseup', () => {
+    movePaddle(socket, 0);
+  });
+
+  leftDownArrow.addEventListener('mouseleave', () => {
+    movePaddle(socket, 0);
+  });
+
+  rightUpArrow.addEventListener('mousedown', () => {
+    movePaddle(socket, -2);
+  });
+
+  rightUpArrow.addEventListener('mouseup', () => {
+    movePaddle(socket, 0);
+  });
+
+  rightUpArrow.addEventListener('mouseleave', () => {
+    movePaddle(socket, 0);
+  });
+
+  rightDownArrow.addEventListener('mousedown', () => {
+    movePaddle(socket, 2);
+  });
+
+  rightDownArrow.addEventListener('mouseup', () => {
+    movePaddle(socket, 0);
+  });
+
+  rightDownArrow.addEventListener('mouseleave', () => {
+    movePaddle(socket, 0);
+  });
 
   // Render active section
   const contentArea = document.getElementById('content-area')!;
-  const secretClickMeButton = document.getElementById('secret-button')!;
+  const startButton = document.getElementById('start-button')!;
   const gameArea = document.getElementById('game-area')!;
   const gameWindow = document.getElementById('game-window')!;
+  console.log(startButton);
   switch (hash) {
-    case 'profile':    renderProfileContent(contentArea, secretClickMeButton, gameArea, gameWindow);    break;
-    case 'play':       renderPlayContent(contentArea, secretClickMeButton, gameArea, gameWindow);       break;
-    case 'tournament': renderTournamentContent(contentArea, secretClickMeButton, gameArea, gameWindow); break;
-    case 'stats':      renderStatsContent(contentArea, secretClickMeButton, gameArea, gameWindow);      break;
-    default:           renderHomeContent(contentArea, secretClickMeButton, gameArea, gameWindow);
+    case 'profile':    renderProfileContent(contentArea, startButton, gameArea, gameWindow);    break;
+    case 'play':       renderPlayContent(contentArea, startButton, gameArea, gameWindow);       break;
+    case 'tournament': renderTournamentContent(contentArea, startButton, gameArea, gameWindow); break;
+    case 'stats':      renderStatsContent(contentArea, startButton, gameArea, gameWindow);      break;
+    default:           renderHomeContent(contentArea, startButton, gameArea, gameWindow);
   }
 }
 

@@ -6,7 +6,7 @@ const WINDOW_SIZE : Vector2 = {x: 1280, y: 720};
 const PADDLE_H : number = 100;
 const PADDLE_X : number = 50;
 // a shift for the paddles. makes them be not at the very border
-const PADDLE_SPEED : number = 100;
+const PADDLE_SPEED : number = 300;
 const MIN_BALL_SPEED_Y : number = 100;
 
 
