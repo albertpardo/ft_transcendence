@@ -1,12 +1,13 @@
-const  ALPHA_MAX : number = 5*Math.PI/11;
-const  sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-const  FRAME_TIME : number = 1/30;
-const  FRAME_TIME_MS : number = 1000 * FRAME_TIME;
-const  WINDOW_SIZE : Vector2 = {x: 1180, y: 720};
-// the REAL window size is +50 pixels on both sides to allow for aesthetics
-const  PADDLE_H : number = 100;
-const  PADDLE_SPEED : number = 100;
-const  MIN_BALL_SPEED_Y : number = 100;
+const ALPHA_MAX : number = 5*Math.PI/11;
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+const FRAME_TIME : number = 1/30;
+const FRAME_TIME_MS : number = 1000 * FRAME_TIME;
+const WINDOW_SIZE : Vector2 = {x: 1280, y: 720};
+const PADDLE_H : number = 100;
+const PADDLE_X : number = 50;
+// a shift for the paddles. makes them be not at the very border
+const PADDLE_SPEED : number = 100;
+const MIN_BALL_SPEED_Y : number = 100;
 
 
 export enum PongResponses {
@@ -28,12 +29,12 @@ export enum PongResponses {
 }
 // lol
 
-export interface  Vector2 {
+export interface Vector2 {
   x: number;
   y: number;
 };
 
-export interface  Paddle {
+export interface Paddle {
   y: number;
   h: number;
   d: number;
@@ -43,12 +44,12 @@ export interface  Paddle {
 // d e (-1, 1): stationary
 // since js has no integer type (yes), we'll input values like -2 and 2 to be sure
 
-export interface  Ball {
+export interface Ball {
   speed: Vector2;
   coords: Vector2;
 };
 
-export interface  State {
+export interface State {
   stateBall: Ball;
   stateLP: Paddle;
   stateRP: Paddle;
@@ -69,7 +70,7 @@ function makeid(length : number) : string {
    return result;
 }
 
-function  checkLoseConditions(ball: Ball) : string {
+function checkLoseConditions(ball: Ball) : string {
   if (ball.coords.x < 0) {
     return "left";
   }
@@ -79,11 +80,11 @@ function  checkLoseConditions(ball: Ball) : string {
   return "none";
 }
 
-function  calculateVBounce(ball: Ball, paddle: Paddle) : Vector2 {
+function calculateVBounce(ball: Ball, paddle: Paddle) : Vector2 {
   let  proportion : number = (ball.coords.y - paddle.y) / (paddle.h);
   proportion *= 2;
   proportion -= 1;
-  if (Math.abs(ball.speed.y) < 0.001) {
+  if (Math.abs(ball.speed.y) < MIN_BALL_SPEED_Y/10) {
     ball.speed.y = MIN_BALL_SPEED_Y;
   }
   return { x: -ball.speed.x, y: Math.sin(ALPHA_MAX * proportion) * Math.abs(ball.speed.y)};
@@ -91,7 +92,7 @@ function  calculateVBounce(ball: Ball, paddle: Paddle) : Vector2 {
 
 
 
-class  PongRuntime {
+class PongRuntime {
   public LplayerId : string = "";
   public RplayerId : string = "";
   private ball : Ball = { speed: {x: -200, y: 0}, coords: {x: WINDOW_SIZE.x/2, y: WINDOW_SIZE.y/2}};
@@ -111,13 +112,11 @@ class  PongRuntime {
   public pongDone : boolean = false;
 
   private updatePositions() : void {
-    // ball bounces/fly-outs collision only check
     if (this.ball.speed.x < 0) {
-      if (this.ball.speed.x * FRAME_TIME + this.ball.coords.x < 0) {
-//        console.log("left exit imminent! paddle: ", this.Lpaddle);
-        // we will be exiting the screen if so
+      if (this.ball.speed.x * FRAME_TIME + this.ball.coords.x < PADDLE_X) {
+//        console.log("left paddle imminent! : ", this.Lpaddle);
         if ((this.ball.coords.y - this.Lpaddle.y >= 0) && (this.ball.coords.y - this.Lpaddle.y <= this.Lpaddle.h)) {
-          // bounce off the left pad, to NOT exit the screen then :)
+          // bounce off the left pad
           this.ball.speed = calculateVBounce(this.ball, this.Lpaddle);
         }
         else {
@@ -128,7 +127,7 @@ class  PongRuntime {
       }
     }
     else if (this.ball.speed.x > 0) {
-      if (this.ball.speed.x * FRAME_TIME + this.ball.coords.x > WINDOW_SIZE.x) {
+      if (this.ball.speed.x * FRAME_TIME + this.ball.coords.x > WINDOW_SIZE.x - PADDLE_X) {
         if ((this.ball.coords.y - this.Rpaddle.y >= 0) && (this.ball.coords.y - this.Rpaddle.y <= this.Rpaddle.h)) {
           // bounce off the right pad
           this.ball.speed = calculateVBounce(this.ball, this.Rpaddle);
@@ -322,6 +321,7 @@ export const dataStreamer = async (playerId) => {
 //  console.log(runtime.gstate);
     await sleep(FRAME_TIME_MS);
     if (runtime.pongDone === true) {
+      sock.send(JSON.stringify(runtime.gstate));
       break ;
     }
   }

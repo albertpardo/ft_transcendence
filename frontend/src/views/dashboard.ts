@@ -125,7 +125,7 @@ export function initDashboard() {
         break;
       default:
         gameState = JSON.parse(event.data);
-        ball.setAttribute("cx", 50 + gameState.stateBall.coords.x)
+        ball.setAttribute("cx", gameState.stateBall.coords.x)
         ball.setAttribute("cy", gameState.stateBall.coords.y)
         lpad.setAttribute("y", gameState.stateLP.y)
         rpad.setAttribute("y", gameState.stateRP.y)
