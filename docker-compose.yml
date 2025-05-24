@@ -1,43 +1,46 @@
-version: '3.8'
-
 services:
   api-gateway:
-    build: ./api-gateway
+    build: ./backend/api-gateway
     ports:
       - "8443:8443"     # TLS port exposed to host
     depends_on:
       - user_management
-      - game_service
-      - chat_service
+#      - game_service
     volumes:
-      - ./api-gateway:/app
+      - ./backend/api-gateway:/app
       - /app/node_modules      # use container-installed deps
     env_file:
-      - .env
+      - ./backend/api-gateway/.env
     restart: always
     networks:
       - backend
 
   user_management:
-    build: ./user_management
+    build: ./backend/microservices/user_management
     expose:
       - "9001"
+    volumes:
+      - ./backend/microservices/user_management:/app
+      - /app/node_modules      # use container-installed deps
+    environment:
+      - ./backend/microservices/user_management/.env
+    restart: always
     networks:
       - backend
 
-  game_service:
-    build: ./game_service
-    expose:
-      - "9002"
-    networks:
-      - backend
+#  game_service:
+#    build: ./game_service
+#    expose:
+#      - "9002"
+#    networks:
+#      - backend
 
-  chat_service:
-    build: ./chat_service
-    expose:
-      - "9003"
-    networks:
-      - backend
+#  chat_service:
+#    build: ./chat_service
+#    expose:
+#      - "9003"
+#    networks:
+#      - backend
 
 networks:
   backend:

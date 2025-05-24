@@ -7,21 +7,21 @@ import { Readable } from 'stream';
 export default fp(async function (fastify: FastifyInstance) {
     // register proxy: without onResponse
     fastify.register(fastifyHttpProxy, {
-        upstream: 'http://localhost:9001',
+        upstream: 'http://user_management:9001',
         prefix: '/api/login',
         rewritePrefix: '/api/user/login',
         http2: false,
     });
 
     fastify.register(fastifyHttpProxy, {
-        upstream: 'http://localhost:9001',
+        upstream: 'http://user_management:9001',
         prefix: '/api/signup',
         rewritePrefix: '/api/user/signup',
         http2: false
     });
 
     fastify.register(fastifyHttpProxy, {
-        upstream: 'http://localhost:9001',
+        upstream: 'http://user_management:9001',
         prefix: '/api/profile',
         rewritePrefix: '/api/user/profile',
         http2: false

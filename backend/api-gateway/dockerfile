@@ -14,7 +14,7 @@ COPY package*.json ./
 RUN npm install
 
 # Install ts-node & typescript globally (or via devDeps)
-RUN npm install -g ts-node typescript
+RUN npm install -g ts-node typescript ts-node-dev
 
 # Copy source code & certs
 COPY . .
