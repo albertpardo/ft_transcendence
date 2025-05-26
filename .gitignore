@@ -150,3 +150,6 @@ git-script.sh
 
 # Desktop Services Store
 .DS_Store
+
+backend/package-lock.json
+frontend/package-lock.json

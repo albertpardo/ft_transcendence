@@ -1,7 +1,8 @@
 const userService = require('../services/userService');
 
 exports.signup = async (request, reply) => {
-    const { username, password, nickname, email } = request.body;
+    console.log("we have arrived at the signup function handler");
+    const { nickname, username, email, password } = JSON.parse(request.body);
     const result = await userService.signup(username, password, nickname, email);
     if (result.error) return reply.code(400).send(result);
     return reply.send(result);

@@ -20,20 +20,36 @@ const server = Fastify ({
     https: tlsConfig,
 })
 
+// what i want:
+/*     fastify.options('*', async (request, reply) => {
+        reply
+            .header('Access-Control-Allow-Origin', '*')
+            .header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS')
+            .header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+            .header('Access-Control-Allow-Credentials', 'true')
+            .code(204)
+            .send();
+    });
+    */
+
 //register plugins
 async function registerPlugin() {
     await server.register(fastifyCors, {
     //    origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
-        origin: true,
-        methods: ['GET', 'POST'],
-        credentials: true
+        origin: "*",
+//        methods: ['GET', 'POST', 'OPTIONS'],
+        credentials: true,
+        allowedHeaders: 'Content-Type,Authorization',
     })
     //JWT middleware
     await server.register(jwt)
     await server.register(rateLimitPlugin)
 
     await server.register(authHook)
+
+    console.log("if you get here, then it should start working!");
     await server.register(proxyPlugin)
+    console.log("if you get here, then it should stop working!");
 }
 
 //start service (using HTTPS)

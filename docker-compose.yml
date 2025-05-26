@@ -1,4 +1,21 @@
 services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: transcendence_frontend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api-gateway
+    networks:
+      - backend
+    restart: unless-stopped
+    command: npm run dev
+
   api-gateway:
     build: ./backend/api-gateway
     ports:
@@ -44,4 +61,5 @@ services:
 
 networks:
   backend:
+    name: backend
     driver: bridge

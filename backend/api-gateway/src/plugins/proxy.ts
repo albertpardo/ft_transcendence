@@ -5,23 +5,25 @@ import getRawBody from 'raw-body';
 import { Readable } from 'stream';
 
 export default fp(async function (fastify: FastifyInstance) {
+    console.log("if you get here, then it worked!");
+
     // register proxy: without onResponse
     fastify.register(fastifyHttpProxy, {
-        upstream: 'http://user_management:9001',
+        upstream: 'https://user_management:9001',
         prefix: '/api/login',
         rewritePrefix: '/api/user/login',
         http2: false,
     });
 
     fastify.register(fastifyHttpProxy, {
-        upstream: 'http://user_management:9001',
+        upstream: 'https://user_management:9001',
         prefix: '/api/signup',
         rewritePrefix: '/api/user/signup',
         http2: false
     });
 
     fastify.register(fastifyHttpProxy, {
-        upstream: 'http://user_management:9001',
+        upstream: 'https://user_management:9001',
         prefix: '/api/profile',
         rewritePrefix: '/api/user/profile',
         http2: false
@@ -92,7 +94,7 @@ export default fp(async function (fastify: FastifyInstance) {
 export default fp(async function (fastify: FastifyInstance) {
     //login proxy: forward /api/login to /api/user/login of the microservice user_management
     fastify.register(fastifyHttpProxy, {
-        upstream: 'http://localhost:9001',
+        upstream: 'https://localhost:9001',
         prefix: '/api/login',
         rewritePrefix: '/api/user/login', //rewrite the path
         http2: false,

@@ -42,7 +42,7 @@
       const password = document.getElementById('login-password').value;
 
       try {
-        const res = await fetch('https://localhost:8443/api/login', {
+        const res = await fetch('http://localhost:8443/api/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username, password })
@@ -65,7 +65,7 @@
       const nickname = document.getElementById('signup-nickname').value;
 
       try {
-        const res = await fetch('https://localhost:8443/api/signup', {
+        const res = await fetch('http://localhost:8443/api/signup', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username, password, email, nickname })
@@ -83,7 +83,7 @@
     profileBtn.addEventListener('click', async () => {
       if (!token) return;
       try {
-        const res = await fetch('https://localhost:8443/api/profile', {
+        const res = await fetch('http://localhost:8443/api/profile', {
           method: 'GET',
           headers: { Authorization: `Bearer ${token}` }
         });
