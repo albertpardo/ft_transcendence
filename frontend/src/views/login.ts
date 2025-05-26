@@ -137,7 +137,7 @@ export function renderLogin(appElement: HTMLElement) {
       
       try {
         // Try real API first
-        const response = await fetch('http://localhost:8443/api/login', {
+        const response = await fetch('https://localhost:8443/api/login', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -239,8 +239,7 @@ export function renderLogin(appElement: HTMLElement) {
       registerButton.textContent = 'Registering...';
       
       try {
-        console.log("trying to signup");
-        const response = await fetch('http://127.0.0.1:8443/api/signup',
+        const response = await fetch('https://localhost:8443/api/signup',
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json',

@@ -5,7 +5,7 @@ all:
 	
 	@echo "\n▉▉▉▉▉▉▉▉▉▉ WELCOME TO TRASCENDENCE PROJECT! ▉▉▉▉▉▉▉▉▉▉\n"
 	@echo "To check the system status run: make status\n"
-	@echo "Access to user API(back) at: http://127.0.0.1:8443/api"
+	@echo "Access to user API(back) at: https://127.0.0.1:8443/api"
 	@echo "Access to profile view(front) at: http://127.0.0.1:3000"
 
 down:

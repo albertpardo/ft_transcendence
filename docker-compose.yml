@@ -18,6 +18,7 @@ services:
 
   api-gateway:
     build: ./backend/api-gateway
+    container_name: trans_api-gateway
     ports:
       - "8443:8443"     # TLS port exposed to host
     depends_on:
@@ -34,6 +35,7 @@ services:
 
   user_management:
     build: ./backend/microservices/user_management
+    container_name: trans_user_management
     expose:
       - "9001"
     volumes:
