@@ -141,9 +141,12 @@ export function renderLogin(appElement: HTMLElement) {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Accept': 'application/json,application/html,text/html,*/*',
+            'Origin': 'https://127.0.0.1:3000/',
           },
           body: JSON.stringify({ username, password }),
-          credentials: 'include'
+          credentials: 'include',
+          mode: 'cors',
         });
 
         const data = await response.json();
@@ -245,13 +248,14 @@ export function renderLogin(appElement: HTMLElement) {
         const response = await fetch('https://localhost:8443/api/signup',
           {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json',
+            headers: {
+              'Content-Type': 'application/json',
               'Accept': 'application/json,application/html,text/html,*/*',
-              'Origin': 'http://127.0.0.1:3000/',
+              'Origin': 'https://127.0.0.1:3000/',
             },
             body: JSON.stringify({ name, username, email ,password }),
             credentials: 'include',
-            //mode: 'cors',
+            mode: 'cors',
         });
 
 

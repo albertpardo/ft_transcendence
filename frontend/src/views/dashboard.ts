@@ -103,7 +103,7 @@ export function initDashboard() {
   console.log(lpad);
   console.log(rpad);
   //WEBSOCKET TIME!
-  const socket = new WebSocket("ws://127.0.0.1:4000/api/pong/game-ws");
+  const socket = new WebSocket("wss://127.0.0.1:9002/api/pong/game-ws");
   let gameState : State = nullState;
   let playerSide : string = "tbd";
   let started : boolean = false;

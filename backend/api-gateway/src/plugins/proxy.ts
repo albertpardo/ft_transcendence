@@ -27,6 +27,12 @@ export default fp(async function (fastify: FastifyInstance) {
         http2: false
     });
 
+    fastify.register(fastifyHttpProxy, {
+        upstream: 'ws://game_service:9002',
+        prefix: '/api/pong/game-ws',
+        http2: false,
+    });
+
     // inject token: for login & token generation after signup
     // block and modify response
     fastify.addHook('onSend', async (req, reply, payload) => {
