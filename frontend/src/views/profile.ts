@@ -21,15 +21,18 @@ export async function renderProfileContent(el: HTMLElement) {
 
   let userData;
   //let userData: { name: any; nickname: any; email: any; password?: "" | undefined; avatar: any; createAt: any; };
-  try {
-    const res = await fetch(`https://127.0.0.1:8443/api/profile/${userId}`);
-    headers: {
-      "Authorization: " `Bearer ${authToken}`
-  }
-    console.log("userId", userId);
-    if (!res.ok) throw new Error("Failed to fetch user data");
-    userData = await res.json();
-  } catch (err) {
+    //
+    try {
+    //const res = await fetch(`https://127.0.0.1:8443/api/users/id/${userId}`, {
+   // const res = await fetch(`https://127.0.0.1:8443/api/profile/${userId}`, {
+      const res = await fetch(`https://127.0.0.1:8443/api/profile/`, {
+          headers: {
+              "Authorization": `Bearer ${authToken}`
+          }
+      });
+      if (!res.ok) throw new Error("Failed to fetch user data");
+      userData = await res.json();
+    }  catch (err) {
     console.error(err);
     el.innerHTML = `<p class="text-red-500">Error loading profile. Please try again later.</p>`;
     return;
