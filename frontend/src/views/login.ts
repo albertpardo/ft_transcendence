@@ -146,11 +146,14 @@ export function renderLogin(appElement: HTMLElement) {
           credentials: 'include'
         });
 
-        /* if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.message || 'Login failed');
-        } */
-       const data = await response.json();
+        const data = await response.json();
+
+        if (!response.ok || data.error) {
+          throw new Error(data.error || 'Login failed');
+//          const errorData = await response.json();
+//          throw new Error(errorData.message || 'Login failed');
+        }
+       
        localStorage.setItem('authToken', data.token);
        localStorage.setItem('user', JSON.stringify({ 
             username,

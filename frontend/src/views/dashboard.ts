@@ -1,5 +1,6 @@
 // src/views/dashboard.ts
 import { registerPlayer, movePaddle } from './buttonClicking';
+import { route } from '../router';
 import { renderHomeContent, renderPlayContent, renderTournamentContent, renderStatsContent } from './sections';
 import { renderProfileContent } from './profile';
 import { State, nullState } from './pongrender';
