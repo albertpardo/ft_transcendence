@@ -1,10 +1,31 @@
 export async function renderProfileContent(el: HTMLElement) {
-  const userId = localStorage.getItem('userId') || sessionStorage.getItem('userId');
+ // const userId = localStorage.getItem('userId') || sessionStorage.getItem('userId');
   const authToken = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+  console.log('Stored authToken:', localStorage.getItem('authToken'), sessionStorage.getItem('authToken'));
+  
+  if (!authToken) {
+    el.innerHTML = `<p class="text-red-500">Error: User not authenticated. Please log in.</p>`;
+    return;
+  }
+  
+  const payload = JSON.parse(atob(authToken.split('.')[1]));
+  const userId = payload.userId;
+  console.log('Stored userId:', localStorage.getItem('userId'), sessionStorage.getItem('userId'));
+
+  console.log("Extracted userId:", userId);
+
+  if (!userId) {
+    el.innerHTML = `<p class="text-red-500">Error: User not authenticated. Please log in.</p>`;
+    return;
+  }
 
   let userData;
+  //let userData: { name: any; nickname: any; email: any; password?: "" | undefined; avatar: any; createAt: any; };
   try {
-    const res = await fetch(`http://127.0.0.1:4000/api/users/id/1`);
+    const res = await fetch(`https://127.0.0.1:8443/api/profile/${userId}`);
+    headers: {
+      "Authorization: " `Bearer ${authToken}`
+  }
     console.log("userId", userId);
     if (!res.ok) throw new Error("Failed to fetch user data");
     userData = await res.json();
@@ -13,7 +34,7 @@ export async function renderProfileContent(el: HTMLElement) {
     el.innerHTML = `<p class="text-red-500">Error loading profile. Please try again later.</p>`;
     return;
   }
-
+ 
   const { name, nickname, email, password = "", avatar, createAt } = userData;
 
   let memberSince = "Member since: ";
@@ -170,7 +191,7 @@ export async function renderProfileContent(el: HTMLElement) {
     saveModal.classList.remove("hidden");
   });
 
-  cancelSaveBtn.addEventListener("click", () => {
+  cancelSaveBtn.addEventListener("click", async () => {
     saveModal.classList.add("hidden");
   });
 
@@ -189,10 +210,11 @@ export async function renderProfileContent(el: HTMLElement) {
     };
 
     try {
-      const response = await fetch(`http://127.0.0.1:4000/api/users/id/1`, {
+      const response = await fetch(`https://127.0.0.1:8443/api/users/id/${userId}`, {
         method: "PUT",
         headers: { 
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${authToken}`
         },
         credentials: 'include',
         body: JSON.stringify(updatedData)
@@ -211,8 +233,8 @@ export async function renderProfileContent(el: HTMLElement) {
         // Auto-hide after 4 seconds
         setTimeout(() => {
           successAlert.classList.add("opacity-0");
-          setTimeout(() => successAlert.classList.add("hidden"), 500); // Wait for fade-out
-        }, 4000);
+          setTimeout(() => successAlert.classList.add("hidden"), 500); // Wait for fade-oust
+        }, 8443);
         
 
         inputs.forEach((input) => (input.disabled = true));
@@ -240,8 +262,11 @@ export async function renderProfileContent(el: HTMLElement) {
 
   confirmDeleteBtn.addEventListener("click", async () => {
     try {
-      const response = await fetch(`http://127.0.0.1:4000/api/users/id/1`, {
-        method: "DELETE"
+      const response = await fetch(`https://127.0.0.1:8443/api/users/id/${userId}`, {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${authToken}`
+        }
       });
 
       if (response.ok) {
@@ -254,8 +279,8 @@ export async function renderProfileContent(el: HTMLElement) {
         // Auto-hide after 4 seconds
         setTimeout(() => {
           successDelete.classList.add("opacity-0");
-          setTimeout(() => successDelete.classList.add("hidden"), 500); // Wait for fade-out
-        }, 4000);
+          setTimeout(() => successDelete.classList.add("hidden"), 500); // Wait for fade-oust
+        }, 8443);
         deleteModal.classList.add("hidden");
         localStorage.removeItem('userId');
         localStorage.removeItem('authToken');
