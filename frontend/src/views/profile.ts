@@ -1,3 +1,4 @@
+//process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 export async function renderProfileContent(el: HTMLElement) {
  // const userId = localStorage.getItem('userId') || sessionStorage.getItem('userId');
   const authToken = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
@@ -10,7 +11,8 @@ export async function renderProfileContent(el: HTMLElement) {
   
   const payload = JSON.parse(atob(authToken.split('.')[1]));
   const userId = payload.userId;
-  console.log('Stored userId:', localStorage.getItem('userId'), sessionStorage.getItem('userId'));
+  console.log('JWT payload:', payload);
+ // console.log('Stored userId:', localStorage.getItem('userId'), sessionStorage.getItem('userId'));
 
   console.log("Extracted userId:", userId);
 
@@ -25,10 +27,14 @@ export async function renderProfileContent(el: HTMLElement) {
     try {
     //const res = await fetch(`https://127.0.0.1:8443/api/users/id/${userId}`, {
    // const res = await fetch(`https://127.0.0.1:8443/api/profile/${userId}`, {
-      const res = await fetch(`https://127.0.0.1:8443/api/profile/`, {
+      const res = await fetch(`https://127.0.0.1:8443/api/profile`, {
           headers: {
-              "Authorization": `Bearer ${authToken}`
-          }
+              "Authorization": `Bearer ${authToken}`,
+              "Content-Type": "application/json",
+              "Accept": "application/json"
+          },
+          credentials: 'include',
+          mode: 'cors'
       });
       if (!res.ok) throw new Error("Failed to fetch user data");
       userData = await res.json();
@@ -213,7 +219,8 @@ export async function renderProfileContent(el: HTMLElement) {
     };
 
     try {
-      const response = await fetch(`https://127.0.0.1:8443/api/users/id/${userId}`, {
+//    const response = await fetch(`https://127.0.0.1:8443/api/users/id/${userId}`, {
+      const response = await fetch(`https://127.0.0.1:8443/api/profile`, {
         method: "PUT",
         headers: { 
           "Content-Type": "application/json",
@@ -222,6 +229,11 @@ export async function renderProfileContent(el: HTMLElement) {
         credentials: 'include',
         body: JSON.stringify(updatedData)
       });
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Error deleting account:", errorData);
+        throw new Error(errorData.message || "Failed to delete account");
+      }
 
       if (response.ok) {
         displayUsername.textContent = nameInput.value;
@@ -265,12 +277,18 @@ export async function renderProfileContent(el: HTMLElement) {
 
   confirmDeleteBtn.addEventListener("click", async () => {
     try {
-      const response = await fetch(`https://127.0.0.1:8443/api/users/id/${userId}`, {
+      const response = await fetch(`https://127.0.0.1:8443/api/profile`, {
+//   const response = await fetch(`https://127.0.0.1:8443/api/users/id/${userId}`, {
         method: "DELETE",
         headers: {
           "Authorization": `Bearer ${authToken}`
         }
       });
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Error deleting account:", errorData);
+        throw new Error(errorData.message || "Failed to delete account");
+      }
 
       if (response.ok) {
         // alert("Account deleted successfully");

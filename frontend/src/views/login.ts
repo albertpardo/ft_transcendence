@@ -154,6 +154,7 @@ export function renderLogin(appElement: HTMLElement) {
         }
        
        localStorage.setItem('authToken', data.token);
+       localStorage.setItem('userId', data.user.id);
        localStorage.setItem('user', JSON.stringify({ 
             username,
             name: data.user?.name || username,
