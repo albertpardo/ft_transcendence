@@ -1,8 +1,8 @@
 
 all:
 	@echo > /dev/null
-	docker compose -f docker-compose.yml up --build
-	
+  #	docker compose -f docker-compose.yml up --build
+	docker compose -f docker-compose.yml up -d --build
 	@echo "\n▉▉▉▉▉▉▉▉▉▉ WELCOME TO TRASCENDENCE PROJECT! ▉▉▉▉▉▉▉▉▉▉\n"
 	@echo "To check the system status run: make status\n"
 	@echo "Access to user API(back) at: https://127.0.0.1:8443/api"

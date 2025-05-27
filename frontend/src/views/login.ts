@@ -5,8 +5,7 @@ export function renderLogin(appElement: HTMLElement) {
         <div class="text-center">
           <h1 class="text-3xl font-extrabold text-white">Transcendence</h1>
           <p class="mt-2 text-gray-400">Sign in to your account</p>
-        </div>
-        
+        </div>       
         <!-- Login Form -->
         <form class="mt-8 space-y-6" id="login-form">
           <div>

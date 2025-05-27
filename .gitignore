@@ -146,6 +146,7 @@ git-script.sh
 # backend/.gitignore
 #database.db
 
+
 .vscode/
 
 # Desktop Services Store
@@ -153,3 +154,4 @@ git-script.sh
 
 backend/package-lock.json
 frontend/package-lock.json
+
