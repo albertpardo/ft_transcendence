@@ -1,4 +1,5 @@
 // src/views/dashboard.ts
+import { route } from '../router';
 import { renderHomeContent, renderPlayContent, renderTournamentContent, renderStatsContent } from './sections';
 import { renderProfileContent } from './profile';
 

@@ -1,24 +1,4 @@
 services:
-  backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    container_name: transcendence_backend
-    volumes:
-      - backend-data:/app/data
-      - ./backend:/app
-      - /app/node_modules
-      - ./backend/uploads:/app/uploads
-    ports:
-      - "4000:4000"
-    environment:
-      - NODE_ENV=development
-      - DATABASE_URL=sqlite:///app/data/database.db
-    networks:
-      - app-network
-    restart: unless-stopped
-    command: npm run dev
-
   frontend:
     build:
       context: ./frontend
@@ -30,16 +10,58 @@ services:
     ports:
       - "3000:3000"
     depends_on:
-      - backend
+      - api-gateway
     networks:
-      - app-network
+      - backend
     restart: unless-stopped
     command: npm run dev
 
-networks:
-  app-network:
-    driver: bridge
+  api-gateway:
+    build: ./backend/api-gateway
+    container_name: trans_api-gateway
+    ports:
+      - "8443:8443"     # TLS port exposed to host
+    depends_on:
+      - user_management
+#      - game_service
+    volumes:
+      - ./backend/api-gateway:/app
+      - /app/node_modules      # use container-installed deps
+    env_file:
+      - ./backend/api-gateway/.env
+    restart: always
+    networks:
+      - backend
 
-volumes:
-  backend-data:
-    driver: local
+  user_management:
+    build: ./backend/microservices/user_management
+    container_name: trans_user_management
+    expose:
+      - "9001"
+    volumes:
+      - ./backend/microservices/user_management:/app
+      - /app/node_modules      # use container-installed deps
+    environment:
+      - ./backend/microservices/user_management/.env
+    restart: always
+    networks:
+      - backend
+
+#  game_service:
+#    build: ./game_service
+#    expose:
+#      - "9002"
+#    networks:
+#      - backend
+
+#  chat_service:
+#    build: ./chat_service
+#    expose:
+#      - "9003"
+#    networks:
+#      - backend
+
+networks:
+  backend:
+    name: backend
+    driver: bridge
