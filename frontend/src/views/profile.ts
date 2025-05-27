@@ -194,7 +194,10 @@ export async function renderProfileContent(el: HTMLElement, bu: HTMLElement, gAr
     try {
       const response = await fetch(`http://127.0.0.1:4000/api/users/id/1`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json"
+        },
+        credentials: 'include',
         body: JSON.stringify(updatedData)
       });
 

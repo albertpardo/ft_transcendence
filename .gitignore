@@ -147,3 +147,9 @@ git-script.sh
 #database.db
 
 .vscode/
+
+# Desktop Services Store
+.DS_Store
+
+backend/package-lock.json
+frontend/package-lock.json

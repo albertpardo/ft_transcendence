@@ -8,8 +8,6 @@
     "@fastify/websocket": "^11.0.2",
     "fastify": "^5.3.3",
     "fastify-plugin": "^5.0.1",
-    "sqlite": "^4.1.2",
-    "sqlite3": "^5.1.7",
     "typescript": "^5.3.3"
   },
   "scripts": {
