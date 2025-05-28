@@ -8,6 +8,7 @@ const PADDLE_X : number = 50;
 // a shift for the paddles. makes them be not at the very border
 const PADDLE_SPEED : number = 300;
 const MIN_BALL_SPEED_Y : number = 100;
+const INTER_ROUND_COOLDOWN_TIME_MS : number = 1000 * 3;
 
 
 export enum PongResponses {
@@ -54,6 +55,8 @@ export interface State {
   stateLP: Paddle;
   stateRP: Paddle;
   stateWhoL: string;
+  stateScoreL: number;
+  stateScoreR: number;
 }
 
 
@@ -97,8 +100,21 @@ class PongRuntime {
   public RplayerId : string = "";
   private ball : Ball = { speed: {x: -200, y: 0}, coords: {x: WINDOW_SIZE.x/2, y: WINDOW_SIZE.y/2}};
   private Lpaddle : Paddle = { y: (WINDOW_SIZE.y - PADDLE_H)/2, h: PADDLE_H, d: 0 };
-  private Rpaddle : Paddle = { y: (WINDOW_SIZE.y - PADDLE_H)/2 + 20, h: PADDLE_H, d: 0 };
+  private Rpaddle : Paddle = { y: (WINDOW_SIZE.y - PADDLE_H)/2, h: PADDLE_H, d: 0 };
   private whoLost : string = "none";
+  private scoreL : number = 0;
+  private scoreR : number = 0;
+
+  private resetGame() : void {
+    if (this.whoLost === "right") {
+      this.ball = { speed: {x: 200, y: 0}, coords: {x: WINDOW_SIZE.x/2, y: WINDOW_SIZE.y/2}};
+    } else {
+      this.ball = { speed: {x: -200, y: 0}, coords: {x: WINDOW_SIZE.x/2, y: WINDOW_SIZE.y/2}};
+    }
+    this.Lpaddle = { y: (WINDOW_SIZE.y - PADDLE_H)/2, h: PADDLE_H, d: 0 };
+    this.Rpaddle = { y: (WINDOW_SIZE.y - PADDLE_H)/2, h: PADDLE_H, d: 0 };
+    this.whoLost = "none";
+  }
 
   public LpadMove(d: number) : void {
     this.Lpaddle.d = d;
@@ -107,7 +123,7 @@ class PongRuntime {
     this.Rpaddle.d = d;
   }
 
-  public gstate : State = { stateBall: this.ball, stateLP: this.Lpaddle, stateRP: this.Rpaddle, stateWhoL: this.whoLost };
+  public gstate : State = { stateBall: this.ball, stateLP: this.Lpaddle, stateRP: this.Rpaddle, stateWhoL: this.whoLost, stateScoreL: this.scoreL, stateScoreR: this.scoreR };
   public pongStarted : boolean = false;
   public pongDone : boolean = false;
 
@@ -177,15 +193,27 @@ class PongRuntime {
     while (true) {
       this.whoLost = checkLoseConditions(this.ball);
       if (this.whoLost !== "none") {
-        this.pongDone = true;
-        this.gstate = { stateBall: this.ball, stateLP: this.Lpaddle, stateRP: this.Rpaddle, stateWhoL: this.whoLost };
-        return ("ball lost by... " + this.whoLost);
-        // in real world, this here would restart the game instead of just breaking.
+        if (this.whoLost === "left") {
+          this.scoreR += 1;
+        }
+        else {
+          this.scoreL += 1;
+        }
+        this.gstate = { stateBall: this.ball, stateLP: this.Lpaddle, stateRP: this.Rpaddle, stateWhoL: this.whoLost, stateScoreL: this.scoreL, stateScoreR: this.scoreR };
+        console.log("ball lost by...", this.whoLost);
+        await sleep(INTER_ROUND_COOLDOWN_TIME_MS);
+        if (this.scoreL > 3 || this.scoreR > 3) {
+          this.pongDone = true;
+          console.log("game done.");
+          this.gstate = nullState;
+          this.gstate.stateScoreL = this.scoreL;
+          this.gstate.stateScoreR = this.scoreR;
+          return ;
+        }
+        this.resetGame();
       }
       this.updatePositions();
-//      console.log("ball speed: ", this.ball.speed);
-//      console.log("ball coords:", this.ball.coords);
-      this.gstate = { stateBall: this.ball, stateLP: this.Lpaddle, stateRP: this.Rpaddle, stateWhoL: this.whoLost };
+      this.gstate = { stateBall: this.ball, stateLP: this.Lpaddle, stateRP: this.Rpaddle, stateWhoL: this.whoLost, stateScoreL: this.scoreL, stateScoreR: this.scoreR };
       await sleep(FRAME_TIME_MS);
     };
   };
@@ -198,7 +226,7 @@ const needToSendStartedMap = new Map();
 const nullVec2 : Vector2 = {x: 0, y: 0};
 const nullBall : Ball = {speed: nullVec2, coords: nullVec2};
 const nullPaddle : Paddle = {y: 0, h: 0, d: 0};
-const nullState : State = {stateBall: nullBall, stateLP: nullPaddle, stateRP: nullPaddle, stateWhoL: "null state"};
+const nullState : State = {stateBall: nullBall, stateLP: nullPaddle, stateRP: nullPaddle, stateWhoL: "null state", stateScoreL: 0, stateScoreR: 0};
 
 // will always return "you're in queue, awaiting for a game", even if there's enough players in a game already, including you.
 // this way, we'll always have to wait for a confirmation signal from the game runtime itself that the game is ready to start.
@@ -211,7 +239,9 @@ export function addPlayerCompletely(playerId: string, sock: WebSocket) : PongRes
     console.log("oh no! player id", playerId, "already in")!
     return PongResponses.PlayerAlreadyIn;
   }
-  socksMap.set(playerId, sock);
+  if (socksMap.has(playerId) === false) {
+    socksMap.set(playerId, sock);
+  }
   needToSendStartedMap.set(playerId, true);
   for (const [gameId, gameRuntime] of gamesMap) {
     if (gameRuntime.LplayerId === "") {
@@ -302,7 +332,7 @@ export const gamesReadyLoopCheck = async () => {
           socksMap.get(gameRuntime.RplayerId).send("started");
           needToSendStartedMap.set(gameRuntime.LplayerId, false);
           needToSendStartedMap.set(gameRuntime.RplayerId, false);
-          await sleep(300);
+          await sleep(100);
           dataStreamer(gameRuntime.LplayerId);
           dataStreamer(gameRuntime.RplayerId);
         }
@@ -322,6 +352,13 @@ export const dataStreamer = async (playerId) => {
     await sleep(FRAME_TIME_MS);
     if (runtime.pongDone === true) {
       sock.send(JSON.stringify(runtime.gstate));
+      if (runtime.LplayerId === playerId) {
+        // only delete the game id if the datastreamer is from the left to avoid double delete
+        // XXX TODO leaks?
+//        delete gamesMap.get(playersMap.get(playerId));
+        gamesMap.delete(playersMap.get(playerId));
+      }
+      playersMap.delete(playerId);
       break ;
     }
   }

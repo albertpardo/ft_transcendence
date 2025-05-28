@@ -27,9 +27,11 @@ export interface  State {
   stateLP: Paddle;
   stateRP: Paddle;
   stateWhoL: string;
+  stateScoreL: number;
+  stateScoreR: number;
 }
 
 const nullVec2 : Vector2 = {x: 0, y: 0};
 const nullBall : Ball = {speed: nullVec2, coords: nullVec2};
 const nullPaddle : Paddle = {y: 0, h: 0, d: 0};
-export const nullState : State = {stateBall: nullBall, stateLP: nullPaddle, stateRP: nullPaddle, stateWhoL: "null state"};
+export const nullState : State = {stateBall: nullBall, stateLP: nullPaddle, stateRP: nullPaddle, stateWhoL: "null state", stateScoreL: 0, stateScoreR: 0};
