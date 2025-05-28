@@ -103,12 +103,13 @@ export function initDashboard() {
   console.log(lpad);
   console.log(rpad);
   //WEBSOCKET TIME!
-  const socket = new WebSocket("wss://127.0.0.1:9002/api/pong/game-ws");
+  const socket = new WebSocket("https://127.0.0.1:8443/api/pong/game-ws", [localStorage.getItem("authToken")]);
+  //const socket = new WebSocket("https://127.0.0.1:8443/api/pong/game-ws");
   let gameState : State = nullState;
   let playerSide : string = "tbd";
   let started : boolean = false;
   socket.addEventListener("message", (event) => {
-    console.log("I, a", localStorage.getItem("authToken"), "tokened player, receive:", event.data);
+    console.log("I, a tokened player, receive:", event.data);
     // TODO maybe a try catch? idk if it'd crash or something on a wrong input
     switch (event.data) {
       case "connected":

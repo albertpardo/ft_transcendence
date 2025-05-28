@@ -18,7 +18,9 @@ const startServer = async () => {
   await fastify.register(websocket);
 
   await fastify.register(cors, {
-    origin: '*'  // para desarrollo; en producción, restringe a tu dominio
+    origin: ['https://localhost:3000', 'https://127.0.0.1:3000'],
+    credentials: true,
+    allowedHeaders: 'Access-Content-Allow-Origin,Content-Type,Authorization,Upgrade',
   });
 
   // start the meta loop of checking if any of the games are full enough to be started.

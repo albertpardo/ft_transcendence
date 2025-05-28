@@ -28,8 +28,19 @@ export default fp(async function (fastify: FastifyInstance) {
     });
 
     fastify.register(fastifyHttpProxy, {
-        upstream: 'ws://game_service:9002',
+        upstream: 'http://game_service:9002',
+        prefix: '/api/pong',
+        rewritePrefix: '/api/pong',
+        httpMethods: ['GET'],
+        http2: false,
+    });
+
+    fastify.register(fastifyHttpProxy, {
+        upstream: 'http://game_service:9002',
         prefix: '/api/pong/game-ws',
+        rewritePrefix: '/api/pong/game-ws',
+        httpMethods: ['GET'],
+        websocket: true,
         http2: false,
     });
 
