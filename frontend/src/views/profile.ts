@@ -2,11 +2,24 @@ export async function renderProfileContent(el: HTMLElement) {
   const userId = localStorage.getItem('userId') || sessionStorage.getItem('userId');
   const authToken = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
 
+  if (!authToken) {
+    el.innerHTML = `<p class="text-red-500">You're not logged in. Please log in again.</p>`;
+    return;
+  }
+
   let userData;
   try {
-    const res = await fetch(`http://127.0.0.1:4000/api/users/id/1`);
+    const res = await fetch(`https://localhost:8443/api/profile`, {
+      method: 'GET',
+      headers: {
+        "Authorization": `Bearer ${authToken}`,
+        "Content-Type": "application/json"
+      },
+      credentials: 'include'
+    });
     console.log("userId", userId);
     if (!res.ok) throw new Error("Failed to fetch user data");
+
     userData = await res.json();
   } catch (err) {
     console.error(err);
@@ -14,7 +27,7 @@ export async function renderProfileContent(el: HTMLElement) {
     return;
   }
 
-  const { name, nickname, email, password = "", avatar, createAt } = userData;
+  const { username, nickname, email, password = "", avatar, createAt } = userData;
 
   let memberSince = "Member since: ";
   if (createAt) {
@@ -35,7 +48,7 @@ export async function renderProfileContent(el: HTMLElement) {
           <div class="bg-gray-800 p-6 rounded-lg w-full flex flex-col items-center">
             <img id="avatar-preview" src="${avatar || '/public/assets/images/default-avatar.png'}"
                  alt="Profile Avatar" class="w-40 h-40 rounded-full border-4 border-blue-600 mb-6">
-            <h2 id="display-username" class="text-3xl font-bold mt-2">${name}</h2>
+            <h2 id="display-username" class="text-3xl font-bold mt-2">${username}</h2>
             <p class="text-gray-400 text-lg mt-2">@${nickname}</p>
             <p class="text-gray-300 mt-4 text-center">${memberSince}</p>
             <button id="edit-btn"
@@ -47,8 +60,8 @@ export async function renderProfileContent(el: HTMLElement) {
 
           <form id="profile-form" class="space-y-6">
             <div>
-              <label class="block text-white mb-1" for="form-name">Name</label>
-              <input id="form-name" type="text" value="${name}"
+              <label class="block text-white mb-1" for="form-username">UserName</label>
+              <input id="form-username" type="text" value="${username}"
                      class="w-full p-3 rounded-lg bg-gray-700 text-gray-400 disabled:bg-gray-700 disabled:text-gray-400 enabled:bg-gray-600 enabled:text-white transition-colors" disabled />
             </div>
             <div>
@@ -175,13 +188,13 @@ export async function renderProfileContent(el: HTMLElement) {
   });
 
   confirmSaveBtn.addEventListener("click", async () => {
-    const nameInput = document.getElementById("form-name") as HTMLInputElement;
+    const usernameInput = document.getElementById("form-username") as HTMLInputElement;
     const nicknameInput = document.getElementById("form-nickname") as HTMLInputElement;
     const emailInput = document.getElementById("form-email") as HTMLInputElement;
     const passwordInput = document.getElementById("form-password") as HTMLInputElement;
 
     const updatedData = {
-      name: nameInput.value,
+      username: usernameInput.value,
       nickname: nicknameInput.value,
       email: emailInput.value,
       password: passwordInput.value,
@@ -189,7 +202,7 @@ export async function renderProfileContent(el: HTMLElement) {
     };
 
     try {
-      const response = await fetch(`http://127.0.0.1:4000/api/users/id/1`, {
+      const response = await fetch(`https://localhost:8443/api/profile`, {
         method: "PUT",
         headers: { 
           "Content-Type": "application/json"
@@ -199,7 +212,7 @@ export async function renderProfileContent(el: HTMLElement) {
       });
 
       if (response.ok) {
-        displayUsername.textContent = nameInput.value;
+        displayUsername.textContent = usernameInput.value;
         const nicknameDisplay = displayUsername.nextElementSibling;
         if (nicknameDisplay) nicknameDisplay.textContent = `@${nicknameInput.value}`;
         const successAlert = document.getElementById("success-alert")!;
@@ -240,8 +253,9 @@ export async function renderProfileContent(el: HTMLElement) {
 
   confirmDeleteBtn.addEventListener("click", async () => {
     try {
-      const response = await fetch(`http://127.0.0.1:4000/api/users/id/1`, {
-        method: "DELETE"
+      const response = await fetch(`https://localhost:8443/api/profile`, {
+        method: "DELETE",
+        credentials: 'include'
       });
 
       if (response.ok) {
