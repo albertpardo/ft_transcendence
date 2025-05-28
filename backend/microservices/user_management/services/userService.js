@@ -37,7 +37,9 @@ exports.getProfile = async (userId) => {
 
     return {
         userId: user.id,
+        username: user.username,
         nickname: user.nickname || user.username,
-        email: user.email
+        email: user.email,
+        password: user.password
     };
 }
