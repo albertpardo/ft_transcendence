@@ -137,8 +137,10 @@ export function initDashboard() {
         ball.setAttribute("cy", gameState.stateBall.coords.y)
         lpad.setAttribute("y", gameState.stateLP.y)
         rpad.setAttribute("y", gameState.stateRP.y)
+
         if (gameState.stateWhoL !== "none") {
           gameText.style.visibility = "visible";
+          scoreText.innerHTML = "" + gameState.stateScoreL + " : " + gameState.stateScoreR;
           if (playerSide === "l") {
             switch (gameState.stateWhoL) {
               case "left":
@@ -158,6 +160,12 @@ export function initDashboard() {
                 break;
             }
           }
+        }
+        else if (gameState.whoLost !== "null state") {
+          gameText.style.visibility = "hidden";
+        }
+        else {
+          scoreText.innerHTML = "" + gameState.stateScoreL + " : " + gameState.stateScoreR;
         }
     }
   });
