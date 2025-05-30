@@ -132,13 +132,17 @@ export function initDashboard() {
         console.log("some error returned from the server");
         break;
       default:
+        // FIXME
+        // 1. check whose side you're on better. double buttons sometimes appear.
+        // 2. position resets to abosolute zero, it should go to default instead.
+        // 3. the button text should be clearer in what it does, the endgame text should say that the match is over.
         gameState = JSON.parse(event.data);
-        ball.setAttribute("cx", gameState.stateBall.coords.x)
-        ball.setAttribute("cy", gameState.stateBall.coords.y)
-        lpad.setAttribute("y", gameState.stateLP.y)
-        rpad.setAttribute("y", gameState.stateRP.y)
+        ball.setAttribute("cx", gameState.stateBall.coords.x);
+        ball.setAttribute("cy", gameState.stateBall.coords.y);
+        lpad.setAttribute("y", gameState.stateLP.y);
+        rpad.setAttribute("y", gameState.stateRP.y);
 
-        if (gameState.stateWhoL !== "none") {
+        if (gameState.stateWhoL !== "none" && gameState.stateWhoL !== "null state") {
           gameText.style.visibility = "visible";
           scoreText.innerHTML = "" + gameState.stateScoreL + " : " + gameState.stateScoreR;
           if (playerSide === "l") {
@@ -161,11 +165,15 @@ export function initDashboard() {
             }
           }
         }
-        else if (gameState.whoLost !== "null state") {
+        else if (gameState.stateWhoLost !== "null state") {
           gameText.style.visibility = "hidden";
         }
         else {
           scoreText.innerHTML = "" + gameState.stateScoreL + " : " + gameState.stateScoreR;
+          ball.setAttribute("cx", 640);
+          ball.setAttribute("cy", 360);
+          lpad.setAttribute("y", 310);
+          rpad.setAttribute("y", 310);
         }
     }
   });
