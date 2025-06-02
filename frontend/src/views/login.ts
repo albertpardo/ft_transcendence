@@ -33,10 +33,10 @@ export function renderLogin(appElement: HTMLElement) {
         <!-- Registration Form (hidden by default) -->
         <form class="mt-8 space-y-6 hidden" id="register-form">
           <div>
-            <label for="reg-name" class="sr-only">Full Name</label>
-            <input id="reg-name" name="name" type="text" required 
+            <label for="reg-nickname" class="sr-only">Nick Name</label>
+            <input id="reg-nickname" name="nickname" type="text" required 
               class="w-full px-3 py-2 text-gray-200 bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
-              placeholder="Full Name">
+              placeholder="Nick Name">
           </div>
           <div>
             <label for="reg-username" class="sr-only">Username</label>
@@ -158,57 +158,19 @@ export function renderLogin(appElement: HTMLElement) {
         }
        
        localStorage.setItem('authToken', data.token);
+	     localStorage.setItem('userId', data.user?.id);
        localStorage.setItem('user', JSON.stringify({ 
-            username,
-            name: data.user?.name || username,
+            username: data.user?.username || username,
+            nickname: data.user?.nickname || username,
             avatar: data.user?.avatar || `https://i.pravatar.cc/150?u=${username}`
           }));
           window.location.hash = 'home';
-     /*   if (response.ok) {
-          } else if (!response.ok) {
-            // If API fails, use mock data
-            throw new Error('API not available - using mock');
-          } */
-
-        //const data = await response.json();
+    
         
       } catch (error) {
         errorElement.textContent = error instanceof Error ? error.message : 'Login failed';
         errorElement.classList.remove('hidden');
-        //console.warn('Using mock login:', error);
-        
-        // Mock successful login response
-        //await new Promise(resolve => setTimeout(resolve, 500));
-        
-        // Store the authentication token
-        /* localStorage.setItem('authToken', 'mock-token');
-        localStorage.setItem('user', JSON.stringify({ 
-          username,
-          name: 'Mock User',
-          avatar: `https://i.pravatar.cc/150?u=${username}`
-        }));
-        
-        // Redirect to home
-        window.location.hash = 'home'; */
-     /*  } catch (error) {
-        console.error('Login error:', error); */
-        
-        // Fallback to mock if API is not available
-       /*  if (error.message.includes('Failed to fetch')) {
-          console.warn('API not available, using mock login');
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          localStorage.setItem('authToken', 'mock-jwt-token');
-          localStorage.setItem('user', JSON.stringify({
-            username,
-            name: 'Mock User',
-            avatar: `https://i.pravatar.cc/150?u=${username}`
-          }));
-          window.location.hash = 'home';
-        } else {
-          // Show error message
-          errorElement.textContent = error instanceof Error ? error.message : 'Login failed';
-          errorElement.classList.remove('hidden');
-        } */
+       
       } finally {
         submitButton.disabled = false;
         submitButton.textContent = 'Sign in';
@@ -222,7 +184,7 @@ export function renderLogin(appElement: HTMLElement) {
     registerForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       
-      const name = (document.getElementById('reg-name') as HTMLInputElement).value;
+      const nickname = (document.getElementById('reg-nickname') as HTMLInputElement).value;
       const username = (document.getElementById('reg-username') as HTMLInputElement).value;
       const email = (document.getElementById('reg-email') as HTMLInputElement).value;
       const password = (document.getElementById('reg-password') as HTMLInputElement).value;
@@ -234,7 +196,7 @@ export function renderLogin(appElement: HTMLElement) {
       errorElement.textContent = '';
       
       // Simple validation
-      if (!name || !username || !email || !password) {
+      if (!nickname || !username || !email || !password) {
         errorElement.textContent = 'Please fill all fields';
         errorElement.classList.remove('hidden');
         return;
@@ -253,7 +215,7 @@ export function renderLogin(appElement: HTMLElement) {
               'Accept': 'application/json,application/html,text/html,*/*',
               'Origin': 'https://127.0.0.1:3000/',
             },
-            body: JSON.stringify({ name, username, email ,password }),
+            body: JSON.stringify({ nickname, username, email ,password }),
             credentials: 'include',
             mode: 'cors',
         });
@@ -277,7 +239,7 @@ export function renderLogin(appElement: HTMLElement) {
           toggleForm.textContent = 'Login now';
         }
         // Clear form
-        (document.getElementById('reg-name') as HTMLInputElement).value = '';
+        (document.getElementById('reg-nickname') as HTMLInputElement).value = '';
         (document.getElementById('reg-username') as HTMLInputElement).value = '';
         (document.getElementById('reg-email') as HTMLInputElement).value = '';
         (document.getElementById('reg-password') as HTMLInputElement).value = '';
@@ -289,36 +251,7 @@ export function renderLogin(appElement: HTMLElement) {
         registerButton.textContent = 'Register';
       }
 
-      // Mock registration response below
-/*       try {
-        // Simulate API delay
-       // await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        // Mock successful registration
-        errorElement.textContent = 'Registration successful! Please login.';
-        errorElement.classList.remove('hidden');
-        errorElement.classList.add('text-green-500');
-        
-        // Switch back to login form
-        if (loginForm && registerForm && toggleForm && toggleFormText) {
-          loginForm.classList.remove('hidden');
-          registerForm.classList.add('hidden');
-          toggleFormText.textContent = 'Don\'t have an account? ';
-          toggleForm.textContent = 'Register now';
-        }
-        
-        // Clear form
-        (document.getElementById('reg-name') as HTMLInputElement).value = '';
-        (document.getElementById('reg-username') as HTMLInputElement).value = '';
-        (document.getElementById('reg-email') as HTMLInputElement).value = '';
-        (document.getElementById('reg-password') as HTMLInputElement).value = '';
-      } catch (error) {
-        errorElement.textContent = 'Registration failed (mock response)';
-        errorElement.classList.remove('hidden');
-      } finally {
-        registerButton.disabled = false;
-        registerButton.textContent = 'Register';
-      } */
+
     });
   }
 }
