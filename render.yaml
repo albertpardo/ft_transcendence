@@ -15,7 +15,9 @@ services:
       - key: NODE_ENV
         value: production
       - key: PORT
-        value: "3000" 
+        value: "3000"
+      - key: VITE_API_BASE_URL
+        value: https://api-gateway-71gx.onrender.com
     healthCheckPath: /
     # ports: 
     #   - 3000
@@ -35,10 +37,8 @@ services:
     envVars:
       - key: PORT
         value: "8443"
-      - key: JWT_SECRET
-        value: ""
       - key: API_BASE_URL
-        value: ""
+        value: https://api-gateway-71gx.onrender.com
     healthCheckPath: /health
     # ports:
     #   - 8443
