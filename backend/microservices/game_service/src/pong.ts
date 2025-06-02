@@ -205,9 +205,15 @@ class PongRuntime {
         if (this.scoreL > 3 || this.scoreR > 3) {
           this.pongDone = true;
           console.log("game done.");
-          this.gstate = nullState;
-          this.gstate.stateScoreL = this.scoreL;
-          this.gstate.stateScoreR = this.scoreR;
+          if (this.whoLost === "left") {
+            this.gstate.stateWhoL = "left fully";
+          }
+          else {
+            this.gstate.stateWhoL = "right fully";
+          }
+//          this.gstate = nullState;
+//          this.gstate.stateScoreL = this.scoreL;
+//          this.gstate.stateScoreR = this.scoreR;
           return ;
         }
         this.resetGame();

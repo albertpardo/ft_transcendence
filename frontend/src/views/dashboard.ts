@@ -110,20 +110,30 @@ export function initDashboard() {
   let started : boolean = false;
   socket.addEventListener("message", (event) => {
     console.log("I, a tokened player, receive:", event.data);
-    // TODO maybe a try catch? idk if it'd crash or something on a wrong input
+    // XXX maybe a try catch? idk if it'd crash or something on a wrong input
     switch (event.data) {
       case "connected":
         console.log("Welcome to pong.");
         break;
       case "added: L":
+        started = false;
         playerSide = "l";
         leftUpArrow.hidden = false;
         leftDownArrow.hidden = false;
+        rightUpArrow.hidden = true;
+        rightDownArrow.hidden = true;
+        gameText.style.visibility = "hidden";
+        scoreText.innerHTML = "" + 0 + " : " + 0;
         break;
       case "added: R":
+        started = false;
         playerSide = "r";
         rightUpArrow.hidden = false;
         rightDownArrow.hidden = false;
+        leftUpArrow.hidden = true;
+        leftDownArrow.hidden = true;
+        gameText.style.visibility = "hidden";
+        scoreText.innerHTML = "" + 0 + " : " + 0;
         break;
       case "started":
         started = true;
@@ -153,6 +163,14 @@ export function initDashboard() {
               case "right":
                 gameText.innerHTML = "You won the round!";
                 break;
+              case "left fully":
+                started = false;
+                gameText.innerHTML = "You lost the game.";
+                break;
+              case "right fully":
+                started = false;
+                gameText.innerHTML = "You won the game!";
+                break;
             }
           } else if (playerSide === "r") {
             switch (gameState.stateWhoL) {
@@ -162,18 +180,20 @@ export function initDashboard() {
               case "left":
                 gameText.innerHTML = "You won the round!";
                 break;
+              case "right fully":
+                started = false;
+                gameText.innerHTML = "You lost the game.";
+                break;
+              case "left fully":
+                started = false;
+                gameText.innerHTML = "You won the game!";
+                break;
             }
           }
         }
-        else if (gameState.stateWhoLost !== "null state") {
-          gameText.style.visibility = "hidden";
-        }
         else {
+          gameText.style.visibility = "hidden";
           scoreText.innerHTML = "" + gameState.stateScoreL + " : " + gameState.stateScoreR;
-          ball.setAttribute("cx", 640);
-          ball.setAttribute("cy", 360);
-          lpad.setAttribute("y", 310);
-          rpad.setAttribute("y", 310);
         }
     }
   });
