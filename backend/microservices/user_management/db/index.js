@@ -1,5 +1,6 @@
 const db = require('better-sqlite3')('./users.db');
 
+// TODO make the id a "TEXT PRIMARY KEY UNIQUE", make all the corresponding changes in all the api.
 const init = db.prepare(`
     CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
