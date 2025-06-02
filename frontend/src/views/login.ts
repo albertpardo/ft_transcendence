@@ -83,6 +83,7 @@ export function renderLogin(appElement: HTMLElement) {
   const toggleFormText = document.getElementById('toggle-form-text');
   const loginForm = document.getElementById('login-form') as HTMLFormElement;
   const registerForm = document.getElementById('register-form') as HTMLFormElement;
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   if (toggleForm && loginForm && registerForm && toggleFormText) {
     toggleForm.addEventListener('click', (e) => {
@@ -136,7 +137,7 @@ export function renderLogin(appElement: HTMLElement) {
       
       try {
         // Try real API first
-        const response = await fetch('https://localhost:8443/api/login', {
+        const response = await fetch(`${API_BASE_URL}/api/login`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -203,12 +204,13 @@ export function renderLogin(appElement: HTMLElement) {
       registerButton.textContent = 'Registering...';
       
       try {
-        const response = await fetch('https://localhost:8443/api/signup',
+        const response = await fetch(`${API_BASE_URL}/api/signup`,
           {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json',
+            headers: { 
+              'Content-Type': 'application/json',
               'Accept': 'application/json,application/html,text/html,*/*',
-              'Origin': 'http://127.0.0.1:3000/',
+              // 'Origin': 'http://127.0.0.1:3000/',
             },
             body: JSON.stringify({ nickname, username, email ,password }),
             credentials: 'include',

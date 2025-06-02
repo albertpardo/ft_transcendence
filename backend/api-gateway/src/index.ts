@@ -23,7 +23,16 @@ const server = Fastify ({
 //register plugins
 async function registerPlugin() {
     await server.register(fastifyCors, {
-        origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
+        origin: (origin, cb) => {
+            // allow no origin (like curl) or dev frontend origins
+            if (!origin || ['http://localhost:3000', 'http://127.0.0.1:3000'].includes(origin)) {
+              cb(null, true);
+            } else {
+              cb(new Error("Not allowed by CORS"), false);
+            }
+          },
+
+        // origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
     //    origin: "*",
 //        methods: ['GET', 'POST', 'OPTIONS'],
         credentials: true,
