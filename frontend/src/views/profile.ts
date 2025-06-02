@@ -18,7 +18,7 @@ export async function renderProfileContent(el: HTMLElement) {
       },
       credentials: 'include'
     });
-   
+
     if (!res.ok) throw new Error("Failed to fetch user data");
 
     userData = await res.json();
