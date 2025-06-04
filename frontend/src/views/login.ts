@@ -150,6 +150,7 @@ export function renderLogin(appElement: HTMLElement) {
         });
 
         const data = await response.json();
+        console.log("in login, received data:", data);
 
         if (!response.ok || data.error) {
           throw new Error(data.error || 'Login failed');
@@ -158,7 +159,7 @@ export function renderLogin(appElement: HTMLElement) {
         }
        
        localStorage.setItem('authToken', data.token);
-	     localStorage.setItem('userId', data.user?.id);
+	     localStorage.setItem('userId', data.id);
        localStorage.setItem('user', JSON.stringify({ 
             username: data.user?.username || username,
             nickname: data.user?.nickname || username,

@@ -18,7 +18,9 @@ function getUserByUsernameOrEmail(username, email) {
 
 function getUserByUsername(username) {
     const stmt = db.prepare('SELECT * FROM users WHERE username = ?');
-    return stmt.get(username);
+	const info = stmt.get(username);
+	console.log(info);
+    return info;
 }
 
 function getNickname(nickname) {

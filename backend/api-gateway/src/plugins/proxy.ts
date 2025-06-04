@@ -78,8 +78,9 @@ export default fp(async function (fastify: FastifyInstance) {
 
                 // return new JSON response
                 return JSON.stringify({
-                    token,
-                    user: body.username
+                    id: body.id,
+                    token: token,
+                    user: body.username,
                 });
             } catch (err) {
                 console.error('⚠️ Failed to parse payload or generate token:', err);
