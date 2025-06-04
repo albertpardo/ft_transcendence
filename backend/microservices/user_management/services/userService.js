@@ -23,7 +23,9 @@ exports.signup = async (username, password, nickname, email) => {
 
     const hashed = await bcrypt.hash(password, 10);
 	const localid = makeid(64);
-    const user = db.createUser({ localid, username, password: hashed, nickname, email});
+	console.log("localid from the backend/microservices/user_management/services/userService.js is...");
+	console.log(localid);
+    const user = db.createUser({ id: localid, username, password: hashed, nickname, email});
     return { id: user.id, username: user.username };
 }
 

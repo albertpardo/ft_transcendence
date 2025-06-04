@@ -31,10 +31,15 @@ function getUserById(id) {
     return stmt.get(id);
 }
 
-function createUser({ username, password, nickname, email }) {
-    const stmt = db.prepare('INSERT INTO users (username, password, nickname, email) VALUES (?, ?, ?, ?)');
-    const info = stmt.run(username, password, nickname, email);
-    return { id: info.lastInsertRowid, username };
+function createUser({ id, username, password, nickname, email }) {
+	console.log("the id is...", id);
+    const stmt = db.prepare('INSERT INTO users (id, username, password, nickname, email) VALUES (?, ?, ?, ?, ?)');
+    const info = stmt.run(id, username, password, nickname, email);
+	const stmt2 = db.prepare('SELECT * FROM users WHERE id = ?');
+	const info2 = stmt2.all(id);
+	console.log("You're about to witness stmt2's results:");
+	console.log(info2);
+    return { id: info2[0].id, username };
 }
 
 module.exports = {
