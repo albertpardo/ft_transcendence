@@ -2,7 +2,7 @@ import Fastify from 'fastify';
 import websocket from '@fastify/websocket';
 import type { FastifyRequest } from 'fastify';
 import cors from '@fastify/cors';
-import { PongResponses, State, addPlayerCompletely, getPongDoneness, getPongState, moveMyPaddle, gamesReadyLoopCheck, dataStreamer } from './pong';
+import { PongResponses, State, addPlayerCompletely, removeTheSock, getPongDoneness, getPongState, moveMyPaddle, gamesReadyLoopCheck, dataStreamer } from './pong';
 
 interface PongBodyReq {
   playerId: string,
@@ -53,6 +53,11 @@ const startServer = async () => {
         else {
           sock.send("error");
         }
+      });
+      sock.on('close', event => {
+        console.log("sock on close. event:");
+        console.log(event);
+        removeTheSock(sock);
       });
     });
   };
