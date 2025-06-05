@@ -28,13 +28,16 @@ export function route() {
   }
 
   // Renderiza el contenido según la sección
-  const content = document.getElementById('content-area')!;
+  const contentArea = document.getElementById('content-area')!;
+  const startButton = document.getElementById('start-button')!;
+  const gameArea = document.getElementById('game-area')!;
+  const gameWindow = document.getElementById('game-window')!;
   switch (hash) {
-    case 'profile':    renderProfileContent(content);    break;
-    case 'play':       renderPlayContent(content);       break;
-    case 'tournament': renderTournamentContent(content); break;
-    case 'stats':      renderStatsContent(content);      break;
-    default:           renderHomeContent(content);
+    case 'profile':    renderProfileContent(contentArea, startButton, gameArea, gameWindow);    break;
+    case 'play':       renderPlayContent(contentArea, startButton, gameArea, gameWindow);       break;
+    case 'tournament': renderTournamentContent(contentArea, startButton, gameArea, gameWindow); break;
+    case 'stats':      renderStatsContent(contentArea, startButton, gameArea, gameWindow);      break;
+    default:           renderHomeContent(contentArea, startButton, gameArea, gameWindow);
   }
 
   // Actualiza el estado activo de los links del sidebar
