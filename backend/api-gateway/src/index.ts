@@ -30,7 +30,8 @@ async function registerPlugin() {
               'http://127.0.0.1:3000',
               'https://localhost:3000', 
               'https://127.0.0.1:3000'
-                ].includes(origin)) {
+             ].includes(origin)) {
+
               cb(null, true);
             } else {
               cb(new Error("Not allowed by CORS"), false);
