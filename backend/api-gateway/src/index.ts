@@ -30,7 +30,7 @@ async function registerPlugin() {
               'http://127.0.0.1:3000',
               'https://localhost:3000', 
               'https://127.0.0.1:3000'
-].includes(origin)) {
+                ].includes(origin)) {
               cb(null, true);
             } else {
               cb(new Error("Not allowed by CORS"), false);
@@ -38,7 +38,7 @@ async function registerPlugin() {
           },
 
         credentials: true,
-        allowedHeaders: 'Content-Type,Authorization',
+        allowedHeaders: 'Access-Content-Allow-Origin,Content-Type,Authorization,Upgrade',
     })
     //JWT middleware
     await server.register(jwt)
@@ -54,7 +54,7 @@ async function start() {
         await registerPlugin()
 
         //register routes
-        server.register(exampleRoutes, { prefix: '/api' })
+        await server.register(exampleRoutes, { prefix: '/api' })
 
         // print all the routes
         await server.ready()

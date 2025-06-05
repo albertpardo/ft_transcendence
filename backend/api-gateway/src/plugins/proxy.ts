@@ -27,6 +27,23 @@ export default fp(async function (fastify: FastifyInstance) {
         http2: false
     });
 
+    fastify.register(fastifyHttpProxy, {
+        upstream: 'http://game_service:9002',
+        prefix: '/api/pong',
+        rewritePrefix: '/api/pong',
+        httpMethods: ['GET'],
+        http2: false,
+    });
+
+    fastify.register(fastifyHttpProxy, {
+        upstream: 'http://game_service:9002',
+        prefix: '/api/pong/game-ws',
+        rewritePrefix: '/api/pong/game-ws',
+        httpMethods: ['GET'],
+        websocket: true,
+        http2: false,
+    });
+
     // inject token: for login & token generation after signup
     // block and modify response
     fastify.addHook('onSend', async (req, reply, payload) => {
@@ -35,11 +52,16 @@ export default fp(async function (fastify: FastifyInstance) {
                 let body;
                 //if payload is Readable, transform it into string with raw-bady
                 if (payload && typeof (payload as Readable).read === 'function') {
+                    console.log("if");
                     const raw = await getRawBody(payload as Readable);
                     body = JSON.parse(raw.toString());
+                    console.log(raw, typeof raw);
+                    console.log(raw.toString());
                 } else if (typeof payload === 'string') {
+                    console.log("else");
                     body = JSON.parse(payload);
                 } else {
+                    console.log("else 2");
                     body = payload;
                 }
                 console.log('📦 Final parsed payload:', body);
@@ -56,8 +78,9 @@ export default fp(async function (fastify: FastifyInstance) {
 
                 // return new JSON response
                 return JSON.stringify({
-                    token,
-                    user: body.username
+                    id: body.id,
+                    token: token,
+                    user: body.username,
                 });
             } catch (err) {
                 console.error('⚠️ Failed to parse payload or generate token:', err);

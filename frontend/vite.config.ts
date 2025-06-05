@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
-import fs from 'fs'
+import fs from 'fs';
 
 export default defineConfig({
   server: {
@@ -11,10 +11,9 @@ export default defineConfig({
       key: fs.readFileSync('certs/front.key'),
       cert: fs.readFileSync('certs/front.cert'),
     },
-
     proxy: {
       '/api': {
-        target: 'https://backend:8443', // Cambia esto al puerto de tu backend',
+        target: 'https://backend:8443',
         changeOrigin: true,
         // rewrite: (path) => path.replace(/^\/api/, '')
       }
