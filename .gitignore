@@ -199,3 +199,4 @@ git-script.sh
 # backend/package-lock.json
 # frontend/package-lock.json
 package-lock.json
+backend/microservices/user_management/users.db

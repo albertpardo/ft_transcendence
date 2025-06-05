@@ -34,4 +34,17 @@ module.exports = async function exampleRoutes(fastify: FastifyInstance) {
         const body = request.body as { name: string };
         return { message: `✅✅Hello, ${body.name}` };
     });
+    fastify.get('/api/health', async (request: FastifyRequest, reply: FastifyReply) => {
+        // Health check endpoint
+        console.log('Health check endpoint hit');
+        reply.header('Content-Type', 'application/json');
+        return { status: 'ok' };
+    });
+   /*  fastify.get('/health', async (request, reply) => {
+    // Health check endpoint
+    console.log('Health check endpoint hit');
+    reply.header('Content-Type', 'application/json');
+
+  return { status: 'ok' };
+}); */
 };
