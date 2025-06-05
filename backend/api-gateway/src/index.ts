@@ -38,7 +38,7 @@ async function registerPlugin() {
           },
 
         credentials: true,
-        allowedHeaders: 'Access-Content-Allow-Origin,Content-Type,Authorization,Upgrade',
+        allowedHeaders: 'Access-Content-Allow-Origin,Content-Type,Authorization,Upgrade,use-me-to-authorize',
     })
     //JWT middleware
     await server.register(jwt)

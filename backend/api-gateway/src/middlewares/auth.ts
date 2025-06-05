@@ -19,6 +19,11 @@ export async function authMiddleware(req: FastifyRequest, reply: FastifyReply) {
           req.headers['authorization'] = "Bearer " + req.headers['sec-websocket-protocol'];
           delete req.headers['sec-websocket-protocol'];
         }
+       
+        if (req.headers['authorization'] === "Bearer undefined") {
+            req.headers['authorization'] = req.headers['use-me-to-authorize'];
+            delete req.headers['use-me-to-authorize'];
+        }
         await req.jwtVerify(); //verfication by secret automatically
         console.log('✅ JWT verified, user:', req.user);
 

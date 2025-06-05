@@ -34,7 +34,6 @@ function getUserById(id) {
 }
 
 function createUser({ id, username, password, nickname, email }) {
-	console.log("the id is...", id);
     const stmt = db.prepare('INSERT INTO users (id, username, password, nickname, email) VALUES (?, ?, ?, ?, ?)');
     const info = stmt.run(id, username, password, nickname, email);
 	const stmt2 = db.prepare('SELECT * FROM users WHERE id = ?');

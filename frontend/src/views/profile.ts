@@ -3,7 +3,7 @@ export async function renderProfileContent(el: HTMLElement, bu: HTMLElement, gAr
   gArea.hidden = true;
   gWin.hidden = true;
   const userId = localStorage.getItem('userId') || sessionStorage.getItem('userId');
-  const authToken = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+  const authToken : string = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   if (!authToken) {
@@ -12,14 +12,16 @@ export async function renderProfileContent(el: HTMLElement, bu: HTMLElement, gAr
   }
 
   let userData;
+  const authstringheader : string = "Bearer " + authToken;
   try {
     const res = await fetch(`${API_BASE_URL}/api/profile`, {
       method: 'GET',
       headers: {
-        "Authorization": `Bearer ${authToken}`,
-        "Content-Type": "application/json"
+        "Use-me-to-authorize": authstringheader,
+        "Content-Type": "application/json",
       },
-      credentials: 'include'
+      credentials: 'include',
+      mode: 'cors',
     });
 
     if (!res.ok) throw new Error("Failed to fetch user data");
