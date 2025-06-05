@@ -200,3 +200,4 @@ git-script.sh
 # frontend/package-lock.json
 package-lock.json
 backend/microservices/user_management/users.db
+*users.db

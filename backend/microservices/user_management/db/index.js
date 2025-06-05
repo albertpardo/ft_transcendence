@@ -1,4 +1,22 @@
-const db = require('better-sqlite3')('./users.db');
+const fs = require('fs');
+const path = require('path');
+const betterSqlite = require('better-sqlite3'); //('./users.db');
+
+const dbPath = process.env.NODE_ENV === 'production'
+    ?  '/opt/render/.cache/sqlite/users.db' : path.join(__dirname, 'users.db');
+
+
+try {
+    if (process.env.NODE_ENV === 'production') {
+      fs.mkdirSync('/opt/render/.cache/sqlite', { recursive: true });
+      console.log('✅ Ensured SQLite directory exists');
+    }
+    const db = betterSqlite(dbPath);
+    console.log(`✅ Connected to SQLite database at ${dbPath}`);
+} catch (err) {
+    console.error('❌ Failed to initialize database:', err);
+    process.exit(1);
+}
 
 const init = db.prepare(`
     CREATE TABLE IF NOT EXISTS users (
@@ -41,5 +59,6 @@ module.exports = {
     getUserByUsername,
     getUserById,
     getNickname,
-    createUser
+    createUser,
+    db, 
 };

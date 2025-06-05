@@ -17,6 +17,8 @@ RUN npm install
 
 # copy all the project files
 COPY . .
+# not sure
+RUN mkdir -p /opt/render/.cache/sqlite
 
 # expose the container port (must be consistent with the service listening port)
 EXPOSE 9001
