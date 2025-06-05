@@ -3,6 +3,7 @@ import websocket from '@fastify/websocket';
 import type { FastifyRequest } from 'fastify';
 import cors from '@fastify/cors';
 import { PongResponses, State, addPlayerCompletely, removeTheSock, getPongDoneness, getPongState, moveMyPaddle, gamesReadyLoopCheck, dataStreamer } from './pong';
+import { historyMain } from './history';
 
 interface PongBodyReq {
   playerId: string,
@@ -14,6 +15,7 @@ interface PongBodyReq {
 // mov tells us where to move and if we wanna
 
 const startServer = async () => {
+  await historyMain();
   const fastify = Fastify({ logger: true });
   await fastify.register(websocket);
 
