@@ -52,16 +52,11 @@ export default fp(async function (fastify: FastifyInstance) {
                 let body;
                 //if payload is Readable, transform it into string with raw-bady
                 if (payload && typeof (payload as Readable).read === 'function') {
-                    console.log("if");
                     const raw = await getRawBody(payload as Readable);
                     body = JSON.parse(raw.toString());
-                    console.log(raw, typeof raw);
-                    console.log(raw.toString());
                 } else if (typeof payload === 'string') {
-                    console.log("else");
                     body = JSON.parse(payload);
                 } else {
-                    console.log("else 2");
                     body = payload;
                 }
                 console.log('📦 Final parsed payload:', body);

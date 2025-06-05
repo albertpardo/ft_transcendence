@@ -19,7 +19,7 @@ function getUserByUsernameOrEmail(username, email) {
 function getUserByUsername(username) {
     const stmt = db.prepare('SELECT * FROM users WHERE username = ?');
 	const info = stmt.get(username);
-	console.log(info);
+//	console.log(info);
     return info;
 }
 
@@ -39,8 +39,8 @@ function createUser({ id, username, password, nickname, email }) {
     const info = stmt.run(id, username, password, nickname, email);
 	const stmt2 = db.prepare('SELECT * FROM users WHERE id = ?');
 	const info2 = stmt2.all(id);
-	console.log("You're about to witness stmt2's results:");
-	console.log(info2);
+//	console.log("You're about to witness stmt2's results:");
+//	console.log(info2);
     return { id: info2[0].id, username };
 }
 
