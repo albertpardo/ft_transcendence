@@ -84,7 +84,7 @@ export function initDashboard() {
         </div>
 
       </div>
-      <button id="start-button" class="mt-6 p-3 bg-red-600 rounded-lg hover:bg-red-700 transition text-white font-medium">click me bro</button>
+      <button id="start-button" class="mt-6 p-3 bg-red-600 rounded-lg hover:bg-red-700 transition text-white font-medium">click to join or reconnect</button>
     </div>
   `;
 
@@ -99,9 +99,9 @@ export function initDashboard() {
   gameText.style.visibility = "hidden";
   // for some reason, doing a .hidden = false or true on this doesn't work.
   const scoreText : HTMLElement = document.getElementById("score-text");
-  console.log(ball);
-  console.log(lpad);
-  console.log(rpad);
+//  console.log(ball);
+//  console.log(lpad);
+//  console.log(rpad);
   //WEBSOCKET TIME!
   const socket = new WebSocket("https://127.0.0.1:8443/api/pong/game-ws", [localStorage.getItem("authToken")]);
   //const socket = new WebSocket("https://127.0.0.1:8443/api/pong/game-ws");
@@ -109,11 +109,11 @@ export function initDashboard() {
   let playerSide : string = "tbd";
   let started : boolean = false;
   socket.addEventListener("message", (event) => {
-    console.log("I, a tokened player, receive:", event.data);
+//    console.log("I, a tokened player, receive:", event.data);
     // XXX maybe a try catch? idk if it'd crash or something on a wrong input
     switch (event.data) {
       case "connected":
-        console.log("Welcome to pong.");
+//        console.log("Welcome to pong.");
         break;
       case "added: L":
         started = false;
@@ -139,13 +139,9 @@ export function initDashboard() {
         started = true;
         break;
       case "error":
-        console.log("some error returned from the server");
+//        console.log("some error returned from the server");
         break;
       default:
-        // FIXME
-        // 1. check whose side you're on better. double buttons sometimes appear.
-        // 2. position resets to abosolute zero, it should go to default instead.
-        // 3. the button text should be clearer in what it does, the endgame text should say that the match is over.
         gameState = JSON.parse(event.data);
         ball.setAttribute("cx", gameState.stateBall.coords.x);
         ball.setAttribute("cy", gameState.stateBall.coords.y);
@@ -304,7 +300,6 @@ export function initDashboard() {
   const startButton = document.getElementById('start-button')!;
   const gameArea = document.getElementById('game-area')!;
   const gameWindow = document.getElementById('game-window')!;
-  console.log(startButton);
   switch (hash) {
     case 'profile':    renderProfileContent(contentArea, startButton, gameArea, gameWindow);    break;
     case 'play':       renderPlayContent(contentArea, startButton, gameArea, gameWindow);       break;

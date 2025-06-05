@@ -55,8 +55,6 @@ const startServer = async () => {
         }
       });
       sock.on('close', event => {
-        console.log("sock on close. event:");
-        console.log(event);
         removeTheSock(sock);
       });
     });

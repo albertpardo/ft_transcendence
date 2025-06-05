@@ -6,9 +6,9 @@ export function registerPlayer(socket: WebSocket) {
     getIn: true,
     mov: 0,
   });
-  console.log("sending ts:", stuff);
   socket.send(stuff);
 }
+// with a variable for debug purposes ^
 
 export function movePaddle(socket: WebSocket, d: number) {
   socket.send(JSON.stringify({

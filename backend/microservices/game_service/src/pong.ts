@@ -220,11 +220,11 @@ class PongRuntime {
           stateScoreL: this.scoreL,
           stateScoreR: this.scoreR,
         };
-        console.log("ball lost by...", this.whoLost);
+//        console.log("ball lost by...", this.whoLost);
         await sleep(INTER_ROUND_COOLDOWN_TIME_MS);
         if (this.scoreL > 3 || this.scoreR > 3) {
           this.pongDone = true;
-          console.log("game done.");
+//          console.log("game done.");
           if (this.whoLost === "left") {
             this.gstate.stateWhoL = "left fully";
           }
@@ -274,14 +274,14 @@ const nullState : State = {
 // this way, we'll always have to wait for a confirmation signal from the game runtime itself that the game is ready to start.
 //
 export function addPlayerCompletely(playerId: string, sock: WebSocket) : PongResponses {
-  for (const [p, g] of playersMap) {
-    console.log("p:", p, "g:", g);
-  }
+//  for (const [p, g] of playersMap) {
+//    console.log("p:", p, "g:", g);
+//  }
   if (playersMap.has(playerId)) {
-    console.log("oh no! player id", playerId, "already in!");
+//    console.log("oh no! player id", playerId, "already in!");
     if (socksMap.has(playerId) === false) {
       socksMap.set(playerId, sock);
-      console.log("...however, they were most likely disconnected. re-connected now!");
+//      console.log("...however, they were most likely disconnected. re-connected now!");
       const currentRT : PongRuntime = gamesMap.get(playersMap.get(playerId));
       if (playerId === currentRT.LplayerId) {
         sock.send("added: L");
@@ -299,12 +299,12 @@ export function addPlayerCompletely(playerId: string, sock: WebSocket) : PongRes
   for (const [gameId, gameRuntime] of gamesMap) {
     if (gameRuntime.LplayerId === "") {
       gameRuntime.LplayerId = playerId;
-      console.log("about to add p:", playerId, "with", gameId);
+//      console.log("about to add p:", playerId, "with", gameId);
       playersMap.set(playerId, gameId);
-      console.log("done! now, the map is:");
-      for (const [p, g] of playersMap) {
-        console.log(" p:", p, "g:", g);
-      }
+//      console.log("done! now, the map is:");
+//      for (const [p, g] of playersMap) {
+//        console.log(" p:", p, "g:", g);
+//      }
       sock.send("added: L");
       return PongResponses.YoureWaiting;
     }
@@ -316,14 +316,14 @@ export function addPlayerCompletely(playerId: string, sock: WebSocket) : PongRes
     }
   }
   // no game available!
-  console.log("no games available. creating...");
+//  console.log("no games available. creating...");
   const newid : string = makeid(32);
   gamesMap.set(newid, new PongRuntime);
   gamesMap.get(newid).LplayerId = playerId;
   playersMap.set(playerId, newid);
-  console.log("done! now, the map is:");
+//  console.log("done! now, the map is:");
   for (const [p, g] of playersMap) {
-    console.log(" p:", p, "g:", g);
+//    console.log(" p:", p, "g:", g);
   }
   sock.send("added: L");
   return PongResponses.YoureWaiting;
@@ -333,11 +333,11 @@ export function removeTheSock(sock: WebSocket) : void {
   for (const [p, s] of socksMap) {
     if (s === sock) {
       socksMap.delete(p);
-      console.log("player", p, "got their sock removed");
+//      console.log("player", p, "got their sock removed");
       return ;
     }
   }
-  console.log("removing sock failed for some reason");
+//  console.log("removing sock failed for some reason");
   return ;
 }
 
@@ -351,7 +351,7 @@ export function getPongDoneness(gameId: string) : PongResponses {
     }
     return PongResponses.NotRunning;
   }
-  console.error("no game found registered at " + gameId);
+//  console.error("no game found registered at " + gameId);
   return PongResponses.NotInMap;
 }
 
@@ -359,7 +359,7 @@ export function  getPongState(gameId: string) : State {
   if (gamesMap.has(gameId)) {
     return (gamesMap.get(gameId).gstate);
   }
-  console.error("no game found registered at " + gameId);
+//  console.error("no game found registered at " + gameId);
   return nullState;
 }
 
@@ -390,8 +390,8 @@ export const gamesReadyLoopCheck = async () => {
             && needToSendStartedMap.get(gameRuntime.LplayerId) === true
             && needToSendStartedMap.get(gameRuntime.RplayerId) === true) {
           gameRuntime.mainLoop();
-          console.log("one game started: " + gameId + ", with left: " + gameRuntime.LplayerId + " and right: " + gameRuntime.RplayerId);
-          console.log("sending the appropriate message to both clientis via ws");
+//          console.log("one game started: " + gameId + ", with left: " + gameRuntime.LplayerId + " and right: " + gameRuntime.RplayerId);
+//          console.log("sending the appropriate message to both clientis via ws");
           // XXX maybe do a json string here with the gamestate or something.
           socksMap.get(gameRuntime.LplayerId).send("started");
           socksMap.get(gameRuntime.RplayerId).send("started");
@@ -404,7 +404,7 @@ export const gamesReadyLoopCheck = async () => {
       }
     }
     await sleep(5e3);
-    console.log("one gamesreadyloop iteration passed");
+//    console.log("one gamesreadyloop iteration passed");
   }
 }
 
@@ -412,7 +412,7 @@ const waitingForReconnect = async (playerId) => {
   while (socksMap.has(playerId) === false) {
     await sleep(3*1000);
   }
-  console.log("sock was finally detected for", playerId);
+//  console.log("sock was finally detected for", playerId);
 }
 
 export const dataStreamer = async (playerId) => {
@@ -420,7 +420,7 @@ export const dataStreamer = async (playerId) => {
   const runtime : PongRuntime = gamesMap.get(playersMap.get(playerId));
   while (true) {
     if (socksMap.has(playerId) === false) {
-      console.log("player", playerId, "has currently no socks available.");
+//      console.log("player", playerId, "has currently no socks available.");
       await waitingForReconnect(playerId);
       sock = socksMap.get(playerId);
     }

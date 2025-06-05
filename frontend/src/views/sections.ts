@@ -24,7 +24,6 @@
 // import { doSomething } from './buttonClicking';
 
 export function renderHomeContent(el: HTMLElement, bu: HTMLElement, gArea: HTMLElement, gWin: HTMLElement) {
-  console.log("gwin is ", gWin);
   el.innerHTML = `
     <h1 class="text-3xl font-bold mb-6">Welcome to Transcendence!</h1>
     <p class="mb-4">Sección de inicio con texto e imagen de prueba.</p>

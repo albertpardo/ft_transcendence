@@ -151,7 +151,7 @@ export function renderLogin(appElement: HTMLElement) {
         });
 
         const data = await response.json();
-        console.log("in login, received data:", data);
+//        console.log("in login, received data:", data);
 
         if (!response.ok || data.error) {
           throw new Error(data.error || 'Login failed');
@@ -223,7 +223,7 @@ export function renderLogin(appElement: HTMLElement) {
         });
 
 
-        console.log(response);
+//        console.log(response);
         if (!response.ok) {
           const errorData = await response.json();
           throw new Error(errorData.message || 'Registration failed');
