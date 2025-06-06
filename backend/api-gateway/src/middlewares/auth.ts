@@ -10,6 +10,10 @@ export async function authMiddleware(req: FastifyRequest, reply: FastifyReply) {
     console.log("🔍 jwtVerify type in middleware:", typeof req.jwtVerify);
     console.log("🔍🔍🔍 All keys on req:", Object.keys(req));
 
+    console.log('🔍 Full headers before jwtVerify:', req.headers);
+    console.log('🔍 Authorization Header:', req.headers['authorization']);
+
+
     // if requested URL is public, skip auth
     const publicPaths = ['/api/signup', '/api/login', '/api/public'];
     if (publicPaths.some(path => req.url?.startsWith(path))) return;
@@ -20,10 +24,15 @@ export async function authMiddleware(req: FastifyRequest, reply: FastifyReply) {
           delete req.headers['sec-websocket-protocol'];
         }
        
-        if (req.headers['authorization'] === "Bearer undefined") {
+        if (!req.headers['authorization'] || req.headers['authorization'] === "Bearer undefined" &&
+            req.headers['use-me-to-authorize']
+        ) {
             req.headers['authorization'] = req.headers['use-me-to-authorize'];
             delete req.headers['use-me-to-authorize'];
         }
+        console.log('🔍 Raw Authorization Header:', JSON.stringify(req.headers.authorization));
+        console.log('🔍 JWT Secret in use:', process.env.JWT_SECRET);
+
         await req.jwtVerify(); //verfication by secret automatically
         console.log('✅ JWT verified, user:', req.user);
 

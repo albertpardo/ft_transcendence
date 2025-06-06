@@ -34,6 +34,8 @@ exports.getProfile = async (request, reply) => {
 }
 
 exports.updateProfile = async (request, reply) => {
+    console.log('🧩 updateProfile triggered');
+    console.log('📦 userId from header:', request.headers['x-user-id']);
     const userId = request.headers['x-user-id'];
     if (!userId) return reply.code(401).send({ error: 'Unauthorized' });
 
