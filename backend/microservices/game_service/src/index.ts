@@ -35,24 +35,41 @@ const startServer = async () => {
       });
       return "Welcome to an \"html\" return for firefox testing purposes.<br>Enjoy your stay!";
     });
+    fastify.post('/pong', async (req: FastifyRequest<{ Body: PongBodyReq }>, reply) => {
+      let jsonMsg = JSON.parse(req.body);
+      let playerId = jsonMsg?.playerId;
+      let getIn = jsonMsg?.getIn;
+      let mov = jsonMsg?.mov;
+      if (typeof playerId !== "undefined" && playerId !== "") {
+        if (typeof getIn !== "undefined" && getIn === true) {
+          const resp : PongResponses = addPlayerCompletely(playerId, sock);
+        }
+        else if (typeof mov !== "undefined") {
+          moveMyPaddle(playerId, mov);
+        }
+      }
+      else {
+        sock.send("error");
+      }
+    });
     fastify.get('/pong/game-ws', { websocket: true }, async (sock, req: FastifyRequest<{ Body: PongBodyReq }>) => {
       sock.on('message', message => {
         sock.send("connected");
-        let jsonMsg = JSON.parse(message);
-        let playerId = jsonMsg?.playerId;
-        let getIn = jsonMsg?.getIn;
-        let mov = jsonMsg?.mov;
-        if (typeof playerId !== "undefined" && playerId !== "") {
-          if (typeof getIn !== "undefined" && getIn === true) {
-            const resp : PongResponses = addPlayerCompletely(playerId, sock);
-          }
-          else if (typeof mov !== "undefined") {
-            moveMyPaddle(playerId, mov);
-          }
-        }
-        else {
-          sock.send("error");
-        }
+//        let jsonMsg = JSON.parse(message);
+//        let playerId = jsonMsg?.playerId;
+//        let getIn = jsonMsg?.getIn;
+//        let mov = jsonMsg?.mov;
+//        if (typeof playerId !== "undefined" && playerId !== "") {
+//          if (typeof getIn !== "undefined" && getIn === true) {
+//            const resp : PongResponses = addPlayerCompletely(playerId, sock);
+//          }
+//          else if (typeof mov !== "undefined") {
+//            moveMyPaddle(playerId, mov);
+//          }
+//        }
+//        else {
+//          sock.send("error");
+//        }
       });
       sock.on('close', event => {
         removeTheSock(sock);

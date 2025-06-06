@@ -26,6 +26,7 @@ export async function authMiddleware(req: FastifyRequest, reply: FastifyReply) {
         }
         await req.jwtVerify(); //verfication by secret automatically
         console.log('✅ JWT verified, user:', req.user);
+        console.log('req.url was:', req.url);
 
         //inject user ID or username into headers (for downstream services)
         const userId = (req.user as any)?.userId;
