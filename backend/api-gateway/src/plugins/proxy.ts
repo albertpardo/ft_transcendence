@@ -9,7 +9,6 @@ export default fp(async function (fastify: FastifyInstance) {
     fastify.register(fastifyHttpProxy, {
         
         upstream: process.env.USER_MANAGEMENT_URL,
-        //upstream: 'http://user_management:9001',
         prefix: '/api/login',
         rewritePrefix: '/api/user/login',
         http2: false,
@@ -29,13 +28,10 @@ export default fp(async function (fastify: FastifyInstance) {
         http2: false
     });
 
-    // inject token: for login & token generation after signup
-    // block and modify response
     fastify.addHook('onSend', async (req, reply, payload) => {
         if ((req.url.startsWith('/api/login') || req.url.startsWith('/api/signup')) && reply.statusCode === 200) {
             try {
                 let body;
-                //if payload is Readable, transform it into string with raw-bady
                 if (payload && typeof (payload as Readable).read === 'function') {
                     const raw = await getRawBody(payload as Readable);
                     body = JSON.parse(raw.toString());
@@ -46,9 +42,6 @@ export default fp(async function (fastify: FastifyInstance) {
                 }
                 console.log('📦 Final parsed payload:', body);
  
-            //    const data = typeof payload === 'string' ? JSON.parse(payload) : payload;
-            //    console.log('📦 Login/signup response payload:', data);
-
                 if (!body.id || !body.username) {
                     console.warn('⚠️ No id or username found in payload!');
                     return payload;
@@ -56,7 +49,6 @@ export default fp(async function (fastify: FastifyInstance) {
 
                 const token = fastify.jwt.sign({ userId: body.id });
 
-                // return new JSON response
                 return JSON.stringify({
                     token,
                     user: body.username
