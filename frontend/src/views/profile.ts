@@ -1,6 +1,10 @@
-export async function renderProfileContent(el: HTMLElement) {
+export async function renderProfileContent(el: HTMLElement, bu: HTMLElement, gArea: HTMLElement, gWin: HTMLElement) {
+  bu.hidden = true;
+  gArea.hidden = true;
+  gWin.hidden = true;
   const userId = localStorage.getItem('userId') || sessionStorage.getItem('userId');
-  const authToken = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+  const authToken : string = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   if (!authToken) {
     el.innerHTML = `<p class="text-red-500">You're not logged in. Please log in again.</p>`;
@@ -8,16 +12,18 @@ export async function renderProfileContent(el: HTMLElement) {
   }
 
   let userData;
+  const authstringheader : string = "Bearer " + authToken;
   try {
-    const res = await fetch(`https://localhost:8443/api/profile`, {
+    const res = await fetch(`${API_BASE_URL}/api/profile`, {
       method: 'GET',
       headers: {
-        "Authorization": `Bearer ${authToken}`,
-        "Content-Type": "application/json"
+        "Use-me-to-authorize": authstringheader,
+        "Content-Type": "application/json",
       },
-      credentials: 'include'
+      credentials: 'include',
+      mode: 'cors',
     });
-   
+
     if (!res.ok) throw new Error("Failed to fetch user data");
 
     userData = await res.json();
@@ -202,7 +208,7 @@ export async function renderProfileContent(el: HTMLElement) {
     };
 
     try {
-      const response = await fetch(`https://localhost:8443/api/profile`, {
+      const response = await fetch(`${API_BASE_URL}/api/profile`, {
         method: "PUT",
         headers: { 
           "Content-Type": "application/json"
@@ -253,7 +259,7 @@ export async function renderProfileContent(el: HTMLElement) {
 
   confirmDeleteBtn.addEventListener("click", async () => {
     try {
-      const response = await fetch(`https://localhost:8443/api/profile`, {
+      const response = await fetch(`${API_BASE_URL}/api/profile`, {
         method: "DELETE",
         credentials: 'include'
       });

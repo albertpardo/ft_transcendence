@@ -27,6 +27,23 @@ export default fp(async function (fastify: FastifyInstance) {
         http2: false
     });
 
+    fastify.register(fastifyHttpProxy, {
+        upstream: 'http://game_service:9002',
+        prefix: '/api/pong',
+        rewritePrefix: '/api/pong',
+        httpMethods: ['GET'],
+        http2: false,
+    });
+
+    fastify.register(fastifyHttpProxy, {
+        upstream: 'http://game_service:9002',
+        prefix: '/api/pong/game-ws',
+        rewritePrefix: '/api/pong/game-ws',
+        httpMethods: ['GET'],
+        websocket: true,
+        http2: false,
+    });
+
     // inject token: for login & token generation after signup
     // block and modify response
     fastify.addHook('onSend', async (req, reply, payload) => {
@@ -56,8 +73,9 @@ export default fp(async function (fastify: FastifyInstance) {
 
                 // return new JSON response
                 return JSON.stringify({
-                    token,
-                    user: body.username
+                    id: body.id,
+                    token: token,
+                    user: body.username,
                 });
             } catch (err) {
                 console.error('⚠️ Failed to parse payload or generate token:', err);

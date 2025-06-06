@@ -23,7 +23,7 @@ services:
       - "8443:8443"     # TLS port exposed to host
     depends_on:
       - user_management
-#      - game_service
+      - game_service
     volumes:
       - ./backend/api-gateway:/app
       - /app/node_modules      # use container-installed deps
@@ -47,12 +47,16 @@ services:
     networks:
       - backend
 
-#  game_service:
-#    build: ./game_service
-#    expose:
-#      - "9002"
-#    networks:
-#      - backend
+  game_service:
+    build: ./backend/microservices/game_service
+    container_name: trans_game_service
+    expose:
+      - "9002"
+    volumes:
+      - /app/node_modules      # use container-installed deps
+    restart: always
+    networks:
+      - backend
 
 #  chat_service:
 #    build: ./chat_service

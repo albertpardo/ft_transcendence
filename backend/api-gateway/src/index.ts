@@ -23,11 +23,22 @@ const server = Fastify ({
 //register plugins
 async function registerPlugin() {
     await server.register(fastifyCors, {
-        origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
-    //    origin: "*",
-//        methods: ['GET', 'POST', 'OPTIONS'],
+        origin: (origin, cb) => {
+            // allow no origin (like curl) or dev frontend origins
+            if (!origin || [
+              'http://localhost:3000', 
+              'http://127.0.0.1:3000',
+              'https://localhost:3000', 
+              'https://127.0.0.1:3000'
+                ].includes(origin)) {
+              cb(null, true);
+            } else {
+              cb(new Error("Not allowed by CORS"), false);
+            }
+          },
+
         credentials: true,
-        allowedHeaders: 'Content-Type,Authorization',
+        allowedHeaders: 'Access-Content-Allow-Origin,Content-Type,Authorization,Upgrade,use-me-to-authorize',
     })
     //JWT middleware
     await server.register(jwt)
@@ -43,7 +54,7 @@ async function start() {
         await registerPlugin()
 
         //register routes
-        server.register(exampleRoutes, { prefix: '/api' })
+        await server.register(exampleRoutes, { prefix: '/api' })
 
         // print all the routes
         await server.ready()

@@ -74,6 +74,7 @@ web_modules/
 .yarn-integrity
 
 # dotenv environment variable files
+*/.env
 .env
 .env.development.local
 .env.test.local
@@ -146,12 +147,10 @@ git-script.sh
 # backend/.gitignore
 #database.db
 
-
 .vscode/
 
 # Desktop Services Store
 .DS_Store
 
-backend/package-lock.json
-frontend/package-lock.json
-
+package-lock.json
+*/package-lock.json
