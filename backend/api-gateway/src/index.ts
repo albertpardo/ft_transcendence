@@ -2,6 +2,7 @@
 /// <reference path="./types/fastify-jwt.d.ts" />
 require('dotenv').config({ path: __dirname + '/../.env' });
 const Fastify = require('fastify');
+const http = require('http');
 import fastifyJWT from '@fastify/jwt';
 import { jwt, authHook } from './plugins/jwt';
 const fastifyRateLimit = require('@fastify/rate-limit');
@@ -10,15 +11,26 @@ const { tlsConfig } = require('./config/tls')
 //import fastifyHttpProxy from '@fastify/http-proxy';
 import proxyPlugin from './plugins/proxy';
 
-delete require.cache[require.resolve('./middlewares/auth')];
+//delete require.cache[require.resolve('./middlewares/auth')];
 
 const { rateLimitPlugin } = require('./plugins/rateLimit');
 const exampleRoutes = require('./routes/example');
 
 const server = Fastify ({
-    logger: true,
+    logger: {
+        level: 'info',
+        
+    },
     https: tlsConfig,
 })
+
+const healthServer = Fastify({
+    logger: true,
+});
+
+healthServer.get('/health', async (request, reply) => {
+    return { status: 'ok' };
+});
 
 //register plugins
 async function registerPlugin() {
@@ -52,7 +64,6 @@ async function registerPlugin() {
     //JWT middleware
     await server.register(jwt)
     await server.register(rateLimitPlugin)
-
     await server.register(authHook)
     await server.register(proxyPlugin)
 }
@@ -67,7 +78,6 @@ async function start() {
 
         // print all the routes
         await server.ready()
-        console.log(server.printRoutes())
         server.listen({ port:8443, host: '0.0.0.0' }, (err: Error, address: string) => {
             if (err) {
                 server.log.error(err)
@@ -75,6 +85,9 @@ async function start() {
             }
             server.log.info(`Server listening on ${address}`)
         })
+        await healthServer.listen({ port: 8080, host: '0.0.0.0' });
+        console.log(`HTTP health check server listening on http://0.0.0.0:8080`);
+        console.log(server.printRoutes());
     } catch (err) {
         server.log.error(err)
         process.exit(1)
