@@ -211,6 +211,7 @@ export async function renderProfileContent(el: HTMLElement, bu: HTMLElement, gAr
       const response = await fetch(`${API_BASE_URL}/api/profile`, {
         method: "PUT",
         headers: { 
+          "Authorization": `Bearer ${authToken}`,
           "Content-Type": "application/json"
         },
         credentials: 'include',
@@ -260,6 +261,9 @@ export async function renderProfileContent(el: HTMLElement, bu: HTMLElement, gAr
   confirmDeleteBtn.addEventListener("click", async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/profile`, {
+        headers: {
+          "Authorization": `Bearer ${authToken}`
+        },
         method: "DELETE",
         credentials: 'include'
       });

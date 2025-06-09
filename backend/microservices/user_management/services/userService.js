@@ -59,3 +59,52 @@ exports.getProfile = async (userId) => {
         password: user.password
     };
 }
+
+exports.updateProfile = async (userId, { username, nickname, email, password, avatar }) => {
+    const user = db.getUserById(userId);
+    if (!user) return { error: "User not found" };
+
+    const updateFields = {
+        username: username ?? user.username,
+        nickname: nickname ?? user.nickname,
+        email: email ?? user.email,
+        password: user.password,
+        avatar: avatar ?? user.avatar
+    }
+
+    if (username && username !== user.username) {
+        const existingUsername = db.getUserByUsernameOrEmail(username, user.email);
+        if (existingUsername && existingUsername.id !== userId) {
+            return { error: "Username already in use" };
+        }
+    }
+    
+    if (nickname && nickname !== user.nickname) {
+        const nickexist = db.getNickname(nickname);
+        if (nickexist && nickexist.id !== userId) {
+            return { error: "Nickname already in use" };
+        }
+    }
+
+    if (password && password !== "") {
+        updateFields.password = await bcrypt.hash(password, 10);
+    }
+
+    if (email && email !== user.email) {
+        const existing = db.getUserByUsernameOrEmail(user.username, email);
+        if (existing && existing.id !== userId) {
+            return { error: "Email alrealdy in use" };
+        }
+    }
+
+    db.updateUser(userId, updateFields);
+    return { success: true };
+}
+
+exports.deleteProfile = async (userId) => {
+    const user = db.getUserById(userId);
+    if (!user) return { error: "User not found" };
+
+    db.deleteUser(userId);
+    return { success: true };
+}
