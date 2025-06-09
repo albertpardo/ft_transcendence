@@ -60,23 +60,25 @@ exports.getProfile = async (userId) => {
     };
 }
 
-exports.updateProfile = async (userId, { nickname, email, password, avatar }) => {
+exports.updateProfile = async (userId, { username, nickname, email, password, avatar }) => {
     const user = db.getUserById(userId);
     if (!user) return { error: "User not found" };
 
     const updateFields = {
+        username: username ?? user.username,
         nickname: nickname ?? user.nickname,
         email: email ?? user.email,
         password: user.password,
         avatar: avatar ?? user.avatar
     }
 
-    /*
-    const existing = db.getUserByUsernameOrEmail(username, email);
-    if (existing && existing.id !== userId) {
-        return { error: "Username or email already taken" };
+    if (username && username !== user.username) {
+        const existingUsername = db.getUserByUsernameOrEmail(username, user.email);
+        if (existingUsername && existingUsername.id !== userId) {
+            return { error: "Username already in use" };
+        }
     }
-    */
+    
     if (nickname && nickname !== user.nickname) {
         const nickexist = db.getNickname(nickname);
         if (nickexist && nickexist.id !== userId) {

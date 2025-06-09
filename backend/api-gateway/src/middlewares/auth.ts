@@ -11,7 +11,7 @@ export async function authMiddleware(req: FastifyRequest, reply: FastifyReply) {
     console.log("🔍🔍🔍 All keys on req:", Object.keys(req));
 
     console.log('🔍 Full headers before jwtVerify:', req.headers);
-    console.log('🔍 Authorization Header:', req.headers['authorization']);
+    console.log('🔍 Authorization Header outside try:', String(req.headers['authorization']));
 
 
     // if requested URL is public, skip auth
@@ -19,18 +19,23 @@ export async function authMiddleware(req: FastifyRequest, reply: FastifyReply) {
     if (publicPaths.some(path => req.url?.startsWith(path))) return;
 
     try {
-        if (req?.headers['sec-websocket-protocol'] !== null) {
+//        if (req?.headers['sec-websocket-protocol'] !== null) {
+        if (req.headers.upgrade === 'websocket' && !req.headers['authorization'] && req?.headers['sec-websocket-protocol']) {
           req.headers['authorization'] = "Bearer " + req.headers['sec-websocket-protocol'];
           delete req.headers['sec-websocket-protocol'];
         }
        
-        if (!req.headers['authorization'] || req.headers['authorization'] === "Bearer undefined" &&
-            req.headers['use-me-to-authorize']
-        ) {
-            req.headers['authorization'] = req.headers['use-me-to-authorize'];
-            delete req.headers['use-me-to-authorize'];
+        console.log('🔍 Raw Authorization Header inside try00:', String(req.headers['authorization']));
+        if (!req.headers['authorization'] || 
+            (req.headers['authorization'] === "Bearer undefined" && req.headers['use-me-to-authorize'])) {
+//            req.headers['authorization'] = req.headers['use-me-to-authorize'];
+//            delete req.headers['use-me-to-authorize'];
+            if (req.headers['use-me-to-authorize']) {
+                req.headers['authorization'] = `Bearer ${req.headers['use-me-to-authorize'].replace(/^Bearer\s*/, '')}`;
+                delete req.headers['use-me-to-authorize'];
+            }
         }
-        console.log('🔍 Raw Authorization Header:', JSON.stringify(req.headers.authorization));
+        console.log('🔍 Raw Authorization Header inside try:', String(req.headers['authorization']));
         console.log('🔍 JWT Secret in use:', process.env.JWT_SECRET);
 
         await req.jwtVerify(); //verfication by secret automatically

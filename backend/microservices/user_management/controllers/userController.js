@@ -40,11 +40,13 @@ exports.updateProfile = async (request, reply) => {
     if (!userId) return reply.code(401).send({ error: 'Unauthorized' });
 
     const { username, nickname, email, password, avatar } = request.body;
+/*
     if (username) {
         return reply.code(400).send({ error: "Username cannot be modified." });
     }
-
+*/
     const result = await userService.updateProfile(userId, {
+        username,
         nickname,
         email,
         password,

@@ -262,8 +262,7 @@ export async function renderProfileContent(el: HTMLElement, bu: HTMLElement, gAr
     try {
       const response = await fetch(`${API_BASE_URL}/api/profile`, {
         headers: {
-          "Authorization": `Bearer ${authToken}`,
-          "Content-Type": "application/json"
+          "Authorization": `Bearer ${authToken}`
         },
         method: "DELETE",
         credentials: 'include'
