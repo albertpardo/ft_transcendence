@@ -161,10 +161,15 @@ export function renderLogin(appElement: HTMLElement) {
        
        localStorage.setItem('authToken', data.token);
 	     localStorage.setItem('userId', data.id);
+
+       const userAvatar = data.user?.avatar?.trim()
+        ? data.user.avatar
+        : `https://i.pravatar.cc/150?u=${username}`;
        localStorage.setItem('user', JSON.stringify({ 
             username: data.user?.username || username,
             nickname: data.user?.nickname || username,
-            avatar: data.user?.avatar || `https://i.pravatar.cc/150?u=${username}`
+            avatar: userAvatar
+//            avatar: data.user?.avatar || `https://i.pravatar.cc/150?u=${username}`
           }));
           window.location.hash = 'home';
     
