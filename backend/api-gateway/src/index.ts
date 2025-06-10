@@ -19,31 +19,49 @@ const exampleRoutes = require('./routes/example');
 const server = Fastify ({
     logger: {
         level: 'info',
-        
     },
     https: tlsConfig,
 })
 
 const healthServer = Fastify({
-    logger: true,
+    // logger: true,
+    logger: false,
+    ignoreTrailingSlash: true
+});
+const healthResponse = () => ({
+    status: 'ok',
+    timestamp: new Date().toISOString(),  // Fixed typo in "timestamp"
+    uptime: process.uptime()
 });
 
-healthServer.get('/health', async (request, reply) => {
-    return { status: 'ok' };
+healthServer.get('/health', async () => {
+    return { 
+        status: 'ok',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime()
+    };
+
 });
 
-//register plugins
+healthServer.get('/', async () => {
+    return {
+        status: 'ok',
+        timestap: new Date().toISOString(),
+        uptime: process.uptime()
+    };
+});
+
 async function registerPlugin() {
     await server.register(fastifyCors, {
         origin: (origin, cb) => {
+        const allowedOrigins = new Set([
+            'http://localhost:3000',
+            'http://127.0.0.1:3000',
+            'https://localhost:3000',
+            'https://127.0.0.1:3000'
+        ]);
             // allow no origin (like curl) or dev frontend origins
-            if (!origin || [
-              'http://localhost:3000', 
-              'http://127.0.0.1:3000',
-              'https://localhost:3000', 
-              'https://127.0.0.1:3000'
-             ].includes(origin)) {
-
+        if (!origin || allowedOrigins.has(origin)) {
               cb(null, true);
             } else {
               cb(new Error("Not allowed by CORS"), false);
@@ -60,6 +78,8 @@ async function registerPlugin() {
             'Upgrade',
             'use-me-to-authorize',
         ],
+        preflightContinue: false,
+        optionsSuccessStatus: 204
     })
     //JWT middleware
     await server.register(jwt)
@@ -71,6 +91,8 @@ async function registerPlugin() {
 //start service (using HTTPS)
 async function start() {
     try {
+        // await healthServer.listen({ port: 8080, host: '0.0.0.0' });
+        await healthServer.listen({ port: 8080, host: '0.0.0.0' });
         await registerPlugin()
 
         //register routes
@@ -85,7 +107,6 @@ async function start() {
             }
             server.log.info(`Server listening on ${address}`)
         })
-        await healthServer.listen({ port: 8080, host: '0.0.0.0' });
         console.log(`HTTP health check server listening on http://0.0.0.0:8080`);
         console.log(server.printRoutes());
     } catch (err) {

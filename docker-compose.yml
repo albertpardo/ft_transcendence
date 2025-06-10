@@ -1,5 +1,7 @@
 services:
   frontend:
+    environment:
+      - VITE_API_BASE_URL=https://api-gateway:8443
     build:
       context: ./frontend
       dockerfile: Dockerfile
@@ -17,10 +19,14 @@ services:
     command: npm run dev
 
   api-gateway:
+    environment:
+      - USER_SERVICE_URL=http://user_management:9001
+      - GAME_SERVICE_URL=http://game_service:9002
     build: ./backend/api-gateway
     container_name: trans_api-gateway
     ports:
       - "8443:8443"     # TLS port exposed to host
+      - "8080:8080"
     depends_on:
       - user_management
       - game_service
