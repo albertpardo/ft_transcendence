@@ -1,5 +1,7 @@
 // src/views/buttonClicking.ts
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 export function registerPlayer(done: (error: Error | null, res?: Response) => void) {
   fetch(
     `${API_BASE_URL}/api/pong`,
@@ -22,7 +24,6 @@ export function registerPlayer(done: (error: Error | null, res?: Response) => vo
   .then((response) => done(null, response))
   .catch((error) => done(error));
 }
-// with a variable for debug purposes ^
 
 export function movePaddle(d: number, done: (error: Error | null, res?: Response) => void) {
   fetch(

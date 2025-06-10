@@ -332,6 +332,7 @@ export function addPlayerCompletely(playerId: string, sock: WebSocket) : PongRes
 export function removeTheSock(sock: WebSocket) : void {
   for (const [p, s] of socksMap) {
     if (s === sock) {
+      // XXX close?
       socksMap.delete(p);
 //      console.log("player", p, "got their sock removed");
       return ;

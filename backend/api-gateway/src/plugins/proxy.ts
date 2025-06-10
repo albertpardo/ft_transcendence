@@ -83,6 +83,10 @@ export default fp(async function (fastify: FastifyInstance) {
         rewritePrefix: '/api/pong',
         httpMethods: ['POST'],
         http2: false,
+        preHandler: async (req, reply) => {
+          console.log("prehandler pong POST");
+          console.log(req.headers);
+        }
     });
 
     fastify.register(fastifyHttpProxy, {
@@ -92,6 +96,11 @@ export default fp(async function (fastify: FastifyInstance) {
         httpMethods: ['GET'],
         websocket: true,
         http2: false,
+        preHandler: async (req, reply) => {
+          console.log("prehandler ws");
+          console.log(req.headers);
+          console.log("and the url is: ", req.url);
+        }
     });
 
     // inject token: for login & token generation after signup
