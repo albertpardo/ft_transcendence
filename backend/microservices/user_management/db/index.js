@@ -7,7 +7,8 @@ const init = db.prepare(`
     username TEXT UNIQUE,
     password TEXT,
     nickname TEXT,
-    email TEXT UNIQUE)` 
+    email TEXT UNIQUE,
+    avatar TEXT DEFAULT '')` 
 );
 init.run();
 
@@ -38,9 +39,37 @@ function createUser({ id, username, password, nickname, email }) {
     const info = stmt.run(id, username, password, nickname, email);
 	const stmt2 = db.prepare('SELECT * FROM users WHERE id = ?');
 	const info2 = stmt2.all(id);
-//	console.log("You're about to witness stmt2's results:");
-//	console.log(info2);
     return { id: info2[0].id, username };
+}
+
+function updateUser(userId, updates) {
+/*
+    const stmt = db.prepare(`
+        UPDATE users SET
+        username = ?,
+        nickname = ?,
+        email = ?,
+        password = ?,
+        avatar = ?
+        WHERE id = ?
+    `);
+    stmt.run(username, nickname, email, password, avatar || '', userId);
+*/
+    const fields = [];
+    const values = [];
+
+    for (const [key, value] of Object.entries(updates)) {
+        fields.push(`${key} = ?`);
+        values.push(value);
+    }
+    const sql = `UPDATE users SET ${fields.join(', ')} WHERE id = ?`;
+    const stmt = db.prepare(sql);
+    stmt.run(...values, userId);
+}
+
+function deleteUser(userId) {
+    const stmt = db.prepare('DELETE FROM users WHERE id = ?');
+    stmt.run(userId);
 }
 
 module.exports = {
@@ -48,5 +77,7 @@ module.exports = {
     getUserByUsername,
     getUserById,
     getNickname,
-    createUser
+    createUser,
+    updateUser,
+    deleteUser
 };

@@ -24,7 +24,49 @@ export default fp(async function (fastify: FastifyInstance) {
         upstream: 'http://user_management:9001',
         prefix: '/api/profile',
         rewritePrefix: '/api/user/profile',
-        http2: false
+        http2: false,
+        httpMethods: ['GET', 'POST', 'PUT', 'DELETE'],
+        replyOptions: {
+            rewriteRequestHeaders: (req, headers) => {
+              return {
+                ...headers,
+                'x-user-id': req.user?.id || headers['x-user-id'],
+                authorization: headers.authorization,
+              };
+            },
+        },
+        preHandler: async (req, reply) => {
+            // Allow preflight CORS manually for OPTIONS
+            if (req.method === 'OPTIONS') {
+              reply
+                .header('Access-Control-Allow-Origin', req.headers.origin || '*')
+                .header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS')
+                .header('Access-Control-Allow-Headers', 'Content-Type, Authorization, use-me-to-authorize')
+                .header('Access-Control-Allow-Credentials', 'true')
+                .code(204)
+                .send();
+              return;
+            }
+            console.log('🚀 rewriteRequestHeaders - forwarded auth:', req.headers.authorization);
+            console.log('🔐🔐 Authorization Header:', req.headers['authorization']);
+
+            try {
+                console.log('🔍🔐 Raw Authorization Header:', JSON.stringify(req.headers.authorization));
+                console.log('🔍🔐 JWT Secret in use:', process.env.JWT_SECRET);
+
+                await req.jwtVerify();
+                console.log("🔐 Verified JWT in proxy preHandler");
+
+                const userId = (req.user as any)?.userId;
+                if (userId) {
+                    req.headers['x-user-id'] = String(userId);
+                    console.log(`📦 Injected x-user-id = ${userId} into headers`);
+                }
+            } catch (err: any) {
+                console.error('❌ Proxy-level JWT verification failed:', err.message);
+                reply.code(401).send({ error: 'Unauthorized in proxy' });
+            }
+        },
     });
 
     fastify.register(fastifyHttpProxy, {
