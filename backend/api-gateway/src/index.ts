@@ -109,7 +109,7 @@ async function start() {
             }
             server.log.info(`Server listening on ${address}`)
         })
-        console.log(`HTTP health check server listening on http://0.0.0.0:8080`);
+        console.log(`HTTP health check server listening on ${HEALTH_PORT}`);
         console.log(server.printRoutes());
     } catch (err) {
         server.log.error(err)
