@@ -14,7 +14,7 @@ function makeid(length) {
    return result;
 }
 
-exports.signup = async (username, password, nickname, email) => {
+exports.signup = async (username, password, nickname, email, avatar = '') => {
     const existing = db.getUserByUsernameOrEmail(username, email);
     if (existing) return { error: 'This user already exists' };
 
@@ -25,8 +25,8 @@ exports.signup = async (username, password, nickname, email) => {
 	const localid = makeid(64);
 	console.log("localid from the backend/microservices/user_management/services/userService.js is...");
 	console.log(localid);
-    const user = db.createUser({ id: localid, username, password: hashed, nickname, email});
-    return { id: user.id, username: user.username };
+    const user = db.createUser({ id: localid, username, password: hashed, nickname, email, avatar });
+    return { id: user.id, username: user.username, avatar: user.avatar };
 }
 
 exports.verifyUser = async (username, password) => {
@@ -44,7 +44,13 @@ exports.login = async (username, password) => {
     const valid = await bcrypt.compare(password, user.password);
     if (!valid) return { error: 'Password is incorrect!' };
 
-    return { id: user.id, username: user.username };
+    return { 
+        id: user.id, 
+        username: user.username, 
+        nickname: user.nickname || user.username, 
+        email: user.email, 
+        avatar: user.avatar 
+    };
 };
 
 exports.getProfile = async (userId) => {
@@ -56,7 +62,8 @@ exports.getProfile = async (userId) => {
         username: user.username,
         nickname: user.nickname || user.username,
         email: user.email,
-        password: user.password
+//        password: user.password,
+        avatar: user.avatar
     };
 }
 
@@ -68,8 +75,15 @@ exports.updateProfile = async (userId, { username, nickname, email, password, av
         username: username ?? user.username,
         nickname: nickname ?? user.nickname,
         email: email ?? user.email,
-        password: user.password,
+//        password: user.password,
         avatar: avatar ?? user.avatar
+    }
+
+    if (password && password !== "" && !password.startsWith("$2b$") && typeof password === 'string') {
+        const isSame = await bcrypt.compare(password, user.password);
+        if (!isSame) {
+            updateFields.password = await bcrypt.hash(password, 10);
+        }
     }
 
     if (username && username !== user.username) {
@@ -84,10 +98,6 @@ exports.updateProfile = async (userId, { username, nickname, email, password, av
         if (nickexist && nickexist.id !== userId) {
             return { error: "Nickname already in use" };
         }
-    }
-
-    if (password && password !== "") {
-        updateFields.password = await bcrypt.hash(password, 10);
     }
 
     if (email && email !== user.email) {

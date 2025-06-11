@@ -34,12 +34,12 @@ function getUserById(id) {
     return stmt.get(id);
 }
 
-function createUser({ id, username, password, nickname, email }) {
-    const stmt = db.prepare('INSERT INTO users (id, username, password, nickname, email) VALUES (?, ?, ?, ?, ?)');
-    const info = stmt.run(id, username, password, nickname, email);
+function createUser({ id, username, password, nickname, email, avatar = '' }) {
+    const stmt = db.prepare('INSERT INTO users (id, username, password, nickname, email, avatar) VALUES (?, ?, ?, ?, ?, ?)');
+    const info = stmt.run(id, username, password, nickname, email, avatar);
 	const stmt2 = db.prepare('SELECT * FROM users WHERE id = ?');
 	const info2 = stmt2.all(id);
-    return { id: info2[0].id, username };
+    return { id: info2[0].id, username, avatar:info2[0].avatar };
 }
 
 function updateUser(userId, updates) {
