@@ -92,7 +92,7 @@ async function registerPlugin() {
 async function start() {
     try {
         // await healthServer.listen({ port: 8080, host: '0.0.0.0' });
-        await healthServer.listen({ port: 10000, host: '0.0.0.0' });
+        await healthServer.listen({ port: 8080, host: '0.0.0.0' });
         await registerPlugin()
 
         //register routes
