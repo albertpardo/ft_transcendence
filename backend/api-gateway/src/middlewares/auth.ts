@@ -45,20 +45,20 @@ export async function authMiddleware(req: FastifyRequest, reply: FastifyReply) {
 
         await req.jwtVerify(); //verfication by secret automatically
         console.log('✅ JWT verified, user:', req.user);
-        console.log('req.url was:', req.url);
+//        console.log('req.url was:', req.url);
 
         //inject user ID or username into headers (for downstream services)
         const userId = (req.user as any)?.userId;
         if (userId) {
             req.headers['x-user-id'] = String(userId);
             console.log(`📦 Injected x-user-id = ${userId} into headers`);
-            console.log(req.headers);
+//            console.log(req.headers);
             if (itwasasocket) {
-              console.log("it was a socket! huh");
+//              console.log("it was a socket! huh");
               // since the goddamned socket connection ejetcs the headers it doesn't want down the line, do the manual check here with the help of the url params
               if (req?.url.substring(req.url.search("uuid=") + 5) !== userId) {
-                console.log(req?.url.substring(req.url.search("uuid=") + 5));
-                throw ("uuid mismatch");
+//                console.log(req?.url.substring(req.url.search("uuid=") + 5));
+                throw "uuid mismatch";
               }
             }
         }
