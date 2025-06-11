@@ -34,7 +34,7 @@ const healthServer = Fastify({
     uptime: process.uptime()
 }); */
 
-healthServer.get('/health', async () => {
+/* healthServer.get('/health', async () => {
     return { 
         status: 'ok',
         timestamp: new Date().toISOString(),
@@ -49,6 +49,32 @@ healthServer.get('/', async () => {
         timestap: new Date().toISOString(),
         uptime: process.uptime()
     };
+}); */
+
+healthServer.route({
+    method: ['GET', 'HEAD'],
+    url: '/health',
+    handler: (_, reply) => {
+        reply.header('Cache-Control', 'no-cache');
+        return reply.code(200).send({ 
+            status: 'ok',
+            timestamp: new Date().toISOString(),
+            processId: process.pid
+        });
+    }
+});
+
+healthServer.route({
+    method: ['GET', 'HEAD'],
+    url: '/',
+    handler: (_, reply) => {
+        reply.header('Cache-Control', 'no-cache');
+        return reply.code(200).send({ 
+            status: 'ok',
+            timestamp: new Date().toISOString(),
+            processId: process.pid
+        });
+    }
 });
 
 async function registerPlugin() {
@@ -94,7 +120,17 @@ async function start() {
         // const HEALTH_PORT = process.env.RENDER ? 10000 : 8080;
         const HEALTH_PORT = 10000;
         // await healthServer.listen({ port: 8080, host: '0.0.0.0' });
-        await healthServer.listen({ port: HEALTH_PORT, host: '0.0.0.0' });
+      //  await healthServer.listen({ port: HEALTH_PORT, host: '0.0.0.0' });
+    await healthServer.listen({
+        port: HEALTH_PORT,
+        host: '0.0.0.0',
+        listenTextResolver: (address) => {
+        // This verifies the actual bound address
+        console.log(`ACTUAL BINDING: ${address}`);
+        return `Health server listening on ${address}`;
+        }
+    });
+
         await registerPlugin()
 
         //register routes
