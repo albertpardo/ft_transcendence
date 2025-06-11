@@ -146,6 +146,7 @@ git-script.sh
 
 # backend/.gitignore
 #database.db
+users.db
 
 .vscode/
 

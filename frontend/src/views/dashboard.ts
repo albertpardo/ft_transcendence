@@ -5,6 +5,19 @@ import { renderHomeContent, renderPlayContent, renderTournamentContent, renderSt
 import { renderProfileContent } from './profile';
 import { State, nullState } from './pongrender';
 
+function movePaddleWrapper(d: number) {
+  movePaddle(d, function (error, response) {
+    if (error) {
+      console.error(error);
+    }
+    else {
+      response?.text().then((result) => {
+        console.log(resut);
+      });
+    }
+  });
+}
+
 export function initDashboard() {
   const hash = window.location.hash.replace('#', '') || 'home';
   const app = document.getElementById('app')!;
@@ -103,8 +116,7 @@ export function initDashboard() {
 //  console.log(lpad);
 //  console.log(rpad);
   //WEBSOCKET TIME!
-  const socket = new WebSocket("https://127.0.0.1:8443/api/pong/game-ws", [localStorage.getItem("authToken")]);
-  //const socket = new WebSocket("https://127.0.0.1:8443/api/pong/game-ws");
+  const socket = new WebSocket(`https://127.0.0.1:8443/api/pong/game-ws?uuid=${localStorage.getItem('userId')}`, [localStorage.getItem("authToken")]);
   let gameState : State = nullState;
   let playerSide : string = "tbd";
   let started : boolean = false;
@@ -244,55 +256,64 @@ export function initDashboard() {
 
   // Secret button (start the game, etc. this is for the game section)
   document.getElementById('start-button')!.addEventListener('click', () => {
-    registerPlayer(socket);
+    registerPlayer(function (error, response) {
+      if (error) {
+        console.error(error);
+      }
+      else {
+        response?.text().then((result) => {
+          console.log(result);
+        });
+      }
+    });
   });
 
   leftUpArrow.addEventListener('mousedown', () => {
-    movePaddle(socket, -2);
+    movePaddleWrapper(-2);
   });
 
   leftUpArrow.addEventListener('mouseup', () => {
-    movePaddle(socket, 0);
+    movePaddleWrapper(0);
   });
 
   leftUpArrow.addEventListener('mouseleave', () => {
-    movePaddle(socket, 0);
+    movePaddleWrapper(0);
   });
 
   leftDownArrow.addEventListener('mousedown', () => {
-    movePaddle(socket, 2);
+    movePaddleWrapper(2);
   });
 
   leftDownArrow.addEventListener('mouseup', () => {
-    movePaddle(socket, 0);
+    movePaddleWrapper(0);
   });
 
   leftDownArrow.addEventListener('mouseleave', () => {
-    movePaddle(socket, 0);
+    movePaddleWrapper(0);
   });
 
   rightUpArrow.addEventListener('mousedown', () => {
-    movePaddle(socket, -2);
+    movePaddleWrapper(-2);
   });
 
   rightUpArrow.addEventListener('mouseup', () => {
-    movePaddle(socket, 0);
+    movePaddleWrapper(0);
   });
 
   rightUpArrow.addEventListener('mouseleave', () => {
-    movePaddle(socket, 0);
+    movePaddleWrapper(0);
   });
 
   rightDownArrow.addEventListener('mousedown', () => {
-    movePaddle(socket, 2);
+    movePaddleWrapper(2);
   });
 
   rightDownArrow.addEventListener('mouseup', () => {
-    movePaddle(socket, 0);
+    movePaddleWrapper(0);
   });
 
   rightDownArrow.addEventListener('mouseleave', () => {
-    movePaddle(socket, 0);
+    movePaddleWrapper(0);
   });
 
   // Render active section

@@ -32,3 +32,38 @@ exports.getProfile = async (request, reply) => {
     const userInfo = await userService.getProfile(userId);
     return reply.send(userInfo);    
 }
+
+exports.updateProfile = async (request, reply) => {
+    console.log('🧩 updateProfile triggered');
+    console.log('📦 userId from header:', request.headers['x-user-id']);
+    const userId = request.headers['x-user-id'];
+    if (!userId) return reply.code(401).send({ error: 'Unauthorized' });
+
+    console.log('🌎 request.body:', request.body);
+
+    const { username, nickname, email, password, avatar } = request.body;
+/*
+    if (username) {
+        return reply.code(400).send({ error: "Username cannot be modified." });
+    }
+*/
+    const result = await userService.updateProfile(userId, {
+        username,
+        nickname,
+        email,
+        password,
+        avatar
+    });
+    console.log('🌎 updatedResult:', result);
+    if (result.error) return reply.code(400).send(result);
+    return reply.send({ message: "🏄 Profile updated successfully" });
+}
+
+exports.deleteProfile = async (request, reply) => {
+    const userId = request.headers['x-user-id'];
+    if (!userId) return reply.code(401).send({ error: 'Unauthorized' });
+
+    const result = await userService.deleteProfile(userId);
+    if (result.error) return reply.code(400).send(result);
+    return reply.send({ message: "🏊 Profile deleted successfully" });
+}
