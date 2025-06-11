@@ -2,7 +2,7 @@
 import Database from 'better-sqlite3';
 
 export const historyMain = async () => {
-  const db = Database('./history.db');
+  const db = Database('/app/dbs/history.db');
   const init = db.prepare(`
   CREATE TABLE IF NOT EXISTS matches (
     id TEXT PRIMARY KEY UNIQUE,

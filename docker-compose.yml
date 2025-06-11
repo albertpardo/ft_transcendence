@@ -54,6 +54,7 @@ services:
       - "9002"
     volumes:
       - /app/node_modules      # use container-installed deps
+      - ./backend/microservices/game_service/vol:/app/dbs
     restart: always
     networks:
       - backend
