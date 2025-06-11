@@ -77,6 +77,17 @@ healthServer.route({
     }
 });
 
+healthServer.get('/render-debug', (_, reply) => {
+    reply.send({
+        headers: _.headers,
+        connection: {
+            remoteAddress: _.socket.remoteAddress,
+            localPort: _.socket.localPort
+        },
+        time: new Date()
+    });
+}); 
+
 async function registerPlugin() {
     await server.register(fastifyCors, {
         origin: (origin, cb) => {
