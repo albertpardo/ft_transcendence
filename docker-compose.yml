@@ -26,8 +26,8 @@ services:
     container_name: trans_api-gateway
     ports:
       - "8443:8443"     # TLS port exposed to host
-      - "8080:8080"
       - "10000:10000" # HTTP port for internal communication
+      # - "8080:8080"
     depends_on:
       - user_management
       - game_service
