@@ -22,6 +22,7 @@ COPY . .
 # Expose HTTPS port
 EXPOSE 8443
 EXPOSE 8080
+EXPOSE 10000
 
 # Run using ts-node (just like the local command)
 CMD ["npm", "run", "dev"]

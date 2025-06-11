@@ -28,11 +28,11 @@ const healthServer = Fastify({
     logger: false,
     ignoreTrailingSlash: true
 });
-const healthResponse = () => ({
+/* const healthResponse = () => ({
     status: 'ok',
     timestamp: new Date().toISOString(),  // Fixed typo in "timestamp"
     uptime: process.uptime()
-});
+}); */
 
 healthServer.get('/health', async () => {
     return { 
@@ -91,8 +91,10 @@ async function registerPlugin() {
 //start service (using HTTPS)
 async function start() {
     try {
+        // const HEALTH_PORT = process.env.RENDER ? 10000 : 8080;
+        const HEALTH_PORT = 10000;
         // await healthServer.listen({ port: 8080, host: '0.0.0.0' });
-        await healthServer.listen({ port: 8080, host: '0.0.0.0' });
+        await healthServer.listen({ port: HEALTH_PORT, host: '0.0.0.0' });
         await registerPlugin()
 
         //register routes
