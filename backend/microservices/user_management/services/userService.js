@@ -62,7 +62,7 @@ exports.getProfile = async (userId) => {
         username: user.username,
         nickname: user.nickname || user.username,
         email: user.email,
-        password: user.password,
+//        password: user.password,
         avatar: user.avatar
     };
 }
@@ -75,8 +75,15 @@ exports.updateProfile = async (userId, { username, nickname, email, password, av
         username: username ?? user.username,
         nickname: nickname ?? user.nickname,
         email: email ?? user.email,
-        password: user.password,
+//        password: user.password,
         avatar: avatar ?? user.avatar
+    }
+
+    if (password && password !== "" && !password.startsWith("$2b$") && typeof password === 'string') {
+        const isSame = await bcrypt.compare(password, user.password);
+        if (!isSame) {
+            updateFields.password = await bcrypt.hash(password, 10);
+        }
     }
 
     if (username && username !== user.username) {
@@ -91,10 +98,6 @@ exports.updateProfile = async (userId, { username, nickname, email, password, av
         if (nickexist && nickexist.id !== userId) {
             return { error: "Nickname already in use" };
         }
-    }
-
-    if (password && password !== "") {
-        updateFields.password = await bcrypt.hash(password, 10);
     }
 
     if (email && email !== user.email) {

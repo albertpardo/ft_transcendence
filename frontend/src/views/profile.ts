@@ -34,7 +34,8 @@ export async function renderProfileContent(el: HTMLElement, bu: HTMLElement, gAr
     return;
   }
 
-  const { username, nickname, email, password = "", avatar, createAt } = userData;
+//  const { username, nickname, email, password = "", avatar, createAt } = userData;
+  const { username, nickname, email, avatar, createAt } = userData;
 
   let memberSince = "Member since: ";
   if (createAt) {
@@ -82,8 +83,8 @@ export async function renderProfileContent(el: HTMLElement, bu: HTMLElement, gAr
                      class="w-full p-3 rounded-lg bg-gray-700 text-gray-400 disabled:bg-gray-700 disabled:text-gray-400 enabled:bg-gray-600 enabled:text-white transition-colors" disabled />
             </div>
             <div>
-              <label class="block text-white mb-1" for="form-password">Password</label>
-              <input id="form-password" type="password" value="${password}"
+              <label class="block text-white mb-1" for="form-password">New Password</label>
+              <input id="form-password" type="password" placeholder="Keep current password or input new one here"
                      class="w-full p-3 rounded-lg bg-gray-700 text-gray-400 disabled:bg-gray-700 disabled:text-gray-400 enabled:bg-gray-600 enabled:text-white transition-colors" disabled />
             </div>
             <div>
@@ -200,13 +201,22 @@ export async function renderProfileContent(el: HTMLElement, bu: HTMLElement, gAr
     const emailInput = document.getElementById("form-email") as HTMLInputElement;
     const passwordInput = document.getElementById("form-password") as HTMLInputElement;
 
-    const updatedData = {
+    const updatedData: {
+      username: string;
+      nickname: string;
+      email: string;
+      avatar: string;
+      password?: string; 
+     } = {
       username: usernameInput.value,
       nickname: nicknameInput.value,
       email: emailInput.value,
-      password: passwordInput.value,
       avatar: avatarPreview.src
     };
+
+    if (passwordInput.value.trim() !== "") {
+      updatedData.password = passwordInput.value;
+    }
 
     try {
       const response = await fetch(`${API_BASE_URL}/api/profile`, {

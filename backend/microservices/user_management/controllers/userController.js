@@ -39,6 +39,8 @@ exports.updateProfile = async (request, reply) => {
     const userId = request.headers['x-user-id'];
     if (!userId) return reply.code(401).send({ error: 'Unauthorized' });
 
+    console.log('🌎 request.body:', request.body);
+
     const { username, nickname, email, password, avatar } = request.body;
 /*
     if (username) {
@@ -52,7 +54,7 @@ exports.updateProfile = async (request, reply) => {
         password,
         avatar
     });
-
+    console.log('🌎 updatedResult:', result);
     if (result.error) return reply.code(400).send(result);
     return reply.send({ message: "🏄 Profile updated successfully" });
 }
