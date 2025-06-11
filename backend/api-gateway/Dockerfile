@@ -16,6 +16,10 @@ RUN npm install
 # Install ts-node & typescript globally (or via devDeps)
 RUN npm install -g ts-node typescript ts-node-dev
 
+# Install curl for health checks
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s \
+  CMD curl -f http://localhost:10000/health || exit 1
+
 # Copy source code & certs
 COPY . .
 
