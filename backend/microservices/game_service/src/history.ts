@@ -5,13 +5,13 @@ const db = Database('/app/dbs/history.db');
 export const historyMain = async () => {
   const init = db.prepare(`
   CREATE TABLE IF NOT EXISTS matches (
-    id NUMBER PRIMARY KEY AUTOINCREMENT,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     gameId TEXT,
-    date NUMBER,
+    date INTEGER,
     leftId TEXT,
     rightId TEXT,
-    scoreL NUMBER,
-    scoreR NUMBER,
+    scoreL INTEGER,
+    scoreR INTEGER,
     state TEXT
   )`);
   init.run();
@@ -21,4 +21,10 @@ export const historyMain = async () => {
 export const addMatch = async (gameId : string, leftId : string, rightId : string, scoreL : number, scoreR : number) => {
   const init = db.prepare("INSERT INTO matches (gameId, date, leftId, rightId, scoreL, scoreR, state) VALUES (?, ?, ?, ?, ?, ?, ?)");
   const info = init.run(gameId, Date.now(), leftId, rightId, scoreL, scoreR, (scoreL > scoreR ? "left" : "right"));
+}
+
+export const getAll = async () => {
+	const stmt2 = db.prepare('SELECT * FROM matches');
+	const info2 = stmt2.all();
+  console.log(info2);
 }
