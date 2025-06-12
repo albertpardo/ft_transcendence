@@ -38,50 +38,6 @@ bower_components
 
 # Compiled binary addons (https://nodejs.org/api/addons.html)
 build/Release
-Chat
-￼
-New Conversation
-￼
-🤓 Explain a complex thing
-
-Explain Artificial Intelligence so that I can explain it to my six-year-old child.
-
-￼
-🧠 Get suggestions and create new ideas
-
-Please give me the best 10 travel ideas around the world
-
-￼
-💭 Translate, summarize, fix grammar and more…
-
-Translate "I love you" French
-
-￼
-GPT-4o Mini
-Hello, how can I help you today?
-GPT-4o Mini
-￼￼
-10
-￼Upgrade
-￼
-￼
-￼
-￼
-￼￼
-￼
-￼
-Web Access
-￼
-￼Powered by AITOPIA 
-Chat
-Ask
-Search
-Write
-Image
-ChatFile
-Vision
-Full Page
-
 
 # Dependency directories
 node_modules/
