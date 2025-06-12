@@ -1,25 +1,25 @@
 services:
-  - type: web
-    name: frontend
-    env: docker
-    repo: https://github.com/albertpardo/ft_transcendence.git
-    branch: render
-    rootDir: frontend
-    dockerfilePath: Dockerfile
-    plan: free
-    autoDeploy: true
-    buildFilter:
-      paths:
-        - frontend/**
-    buildCommand: npm run build
-    envVars:
-      - key: NODE_ENV
-        value: production
-      - key: PORT
-        value: "3000"
-      - key: VITE_API_BASE_URL
-        value: https://api-gateway-71gx.onrender.com
-    healthCheckPath: /
+#  - type: web
+ #   name: frontend
+#    env: docker
+#    repo: https://github.com/albertpardo/ft_transcendence.git
+#    branch: render
+#    rootDir: frontend
+#    dockerfilePath: Dockerfile
+#    plan: free
+#    autoDeploy: true
+#    buildFilter:
+#      paths:
+#        - frontend/**
+#    buildCommand: npm run build
+#    envVars:
+#      - key: NODE_ENV
+#        value: production
+#      - key: PORT
+#        value: "3000"
+#      - key: VITE_API_BASE_URL
+#        value: https://api-gateway-71gx.onrender.com
+#    healthCheckPath: /
 
   - type: web
     name: api-gateway
