@@ -3,28 +3,39 @@
 require('dotenv').config({ path: __dirname + '/../.env' });
 const Fastify = require('fastify');
 const http = require('http');
-import fastifyJWT from '@fastify/jwt';
-import { jwt, authHook } from './plugins/jwt';
+
+const fastifyJWT = require('@fastify/jwt');
+
+const { jwt, authHook } = require('./plugins/jwt');
 const fastifyRateLimit = require('@fastify/rate-limit');
 const fastifyCors = require('@fastify/cors');
 const { tlsConfig } = require('./config/tls')
-//import fastifyHttpProxy from '@fastify/http-proxy';
-import proxyPlugin from './plugins/proxy';
-
-//delete require.cache[require.resolve('./middlewares/auth')];
+// const proxyPlugin = require('@fastify/http-proxy');
+const proxyPlugin = require('./plugins/proxy');
 
 const { rateLimitPlugin } = require('./plugins/rateLimit');
 const exampleRoutes = require('./routes/example');
+
+
+//import proxyPlugin from './plugins/proxy';
+
+//import { jwt, authHook } from './plugins/jwt';
+
+  
+//import fastifyJWT from '@fastify/jwt';
+//import fastifyHttpProxy from '@fastify/http-proxy';
+
+//delete require.cache[require.resolve('./middlewares/auth')];
+
 
 const server = Fastify ({
     logger: {
         level: 'info',
     },
     https: tlsConfig,
-})
+}) 
 
 const healthServer = Fastify({
-    // logger: true,
     logger: false,
     ignoreTrailingSlash: true
 });
@@ -91,14 +102,23 @@ healthServer.get('/render-debug', (_, reply) => {
 async function registerPlugin() {
     await server.register(fastifyCors, {
         origin: (origin, cb) => {
-        const allowedOrigins = new Set([
+
+            if (!origin) return cb(null, true); // Allow requests with no origin (like curl or Postman)
+
+            //const allowedOrigins = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
+
+           // const allowedOrigins = /^https?:\/\/(localhost|127\.0\.0\.1|frontend)(:\d+)?$/;
+         const allowedOrigins = new Set([
             'http://localhost:3000',
             'http://127.0.0.1:3000',
             'https://localhost:3000',
-            'https://127.0.0.1:3000'
+            'https://127.0.0.1:3000',
+            'https://frontend:3000',
+            'https://frontend-7nt4.onrender.com'
         ]);
             // allow no origin (like curl) or dev frontend origins
-        if (!origin || allowedOrigins.has(origin)) {
+       // if (!origin || allowedOrigins.has(origin)) {
+            if (allowedOrigins.has(origin)) {
               cb(null, true);
             } else {
               cb(new Error("Not allowed by CORS"), false);
@@ -165,3 +185,4 @@ async function start() {
 }
 
 start()
+ 
