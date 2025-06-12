@@ -151,11 +151,11 @@ async function registerPlugin() {
 async function start() {
     try {
         // const HEALTH_PORT = process.env.RENDER ? 10000 : 8080;
-        const HEALTH_PORT = 10000;
+        //const HEALTH_PORT = 10000;
         // await healthServer.listen({ port: 8080, host: '0.0.0.0' });
       //  await healthServer.listen({ port: HEALTH_PORT, host: '0.0.0.0' });
     await healthServer.listen({
-        port: HEALTH_PORT,
+        port: Number(process.env.HEALTH_PORT),
         host: '0.0.0.0',
         listenTextResolver: (address) => {
         // This verifies the actual bound address
@@ -178,7 +178,7 @@ async function start() {
             }
             server.log.info(`Server listening on ${address}`)
         })
-        console.log(`HTTP health check server listening on ${HEALTH_PORT}`);
+        console.log(`HTTP health check server listening on ${process.env.HEALTH_PORT}`);
         console.log(server.printRoutes());
     } catch (err) {
         server.log.error(err)
