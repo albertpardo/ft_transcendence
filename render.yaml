@@ -20,8 +20,6 @@ services:
       - key: VITE_API_BASE_URL
         value: https://api-gateway-71gx.onrender.com
     healthCheckPath: /
-    # ports: 
-    #   - 3000
 
   - type: web
     name: api-gateway
@@ -35,14 +33,14 @@ services:
     buildFilter:
       paths:
         - backend/api-gateway/**
+    buildCommand: ""
+    startCommand: ""
     envVars:
       - key: PORT
         value: "8443"
       - key: API_BASE_URL
         value: https://api-gateway-71gx.onrender.com
     healthCheckPath: /health
-    # ports:
-    #   - 8443
 
   - type: web
     name: user_management
@@ -60,6 +58,3 @@ services:
       - key: PORT
         value: "9001"
     healthCheckPath: /health
-    # ports:
-    #   - 9001
-
