@@ -28,6 +28,8 @@ const exampleRoutes = require('./routes/example');
 //delete require.cache[require.resolve('./middlewares/auth')];
 
 
+
+
 const server = Fastify ({
     logger: {
         level: 'info',
