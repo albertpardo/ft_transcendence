@@ -30,3 +30,4 @@ EXPOSE 10000
 
 # Run using ts-node (just like the local command)
 CMD ["npm", "run", "dev"]
+# CMD ["npm", "run", "serve"]

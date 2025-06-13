@@ -1,5 +1,6 @@
 
 /// <reference path="./types/fastify-jwt.d.ts" />
+import { FastifyRequest, FastifyReply } from 'fastify';
 require('dotenv').config({ path: __dirname + '/../.env' });
 const Fastify = require('fastify');
 const http = require('http');
@@ -17,22 +18,9 @@ const { rateLimitPlugin } = require('./plugins/rateLimit');
 const exampleRoutes = require('./routes/example');
 
 
-//import proxyPlugin from './plugins/proxy';
-
-//import { jwt, authHook } from './plugins/jwt';
-
-  
-//import fastifyJWT from '@fastify/jwt';
-//import fastifyHttpProxy from '@fastify/http-proxy';
-
-//delete require.cache[require.resolve('./middlewares/auth')];
-
-
-
-
 const server = Fastify ({
     logger: {
-        level: 'info',
+        level: 'debug',
     },
     https: tlsConfig,
 }) 
@@ -41,95 +29,108 @@ const healthServer = Fastify({
     logger: false,
     ignoreTrailingSlash: true
 });
-/* const healthResponse = () => ({
-    status: 'ok',
-    timestamp: new Date().toISOString(),  // Fixed typo in "timestamp"
-    uptime: process.uptime()
-}); */
 
-/* healthServer.get('/health', async () => {
-    return { 
-        status: 'ok',
-        timestamp: new Date().toISOString(),
-        uptime: process.uptime()
-    };
 
-});
-
-healthServer.get('/', async () => {
-    return {
-        status: 'ok',
-        timestap: new Date().toISOString(),
-        uptime: process.uptime()
-    };
-}); */
+interface HealthResponse {
+    status: string;
+    timestamp: string;
+    processId: number;
+}
 
 healthServer.route({
     method: ['GET', 'HEAD'],
     url: '/health',
-    handler: (_, reply) => {
+    handler: (_: FastifyRequest, reply: FastifyReply) => {
         reply.header('Cache-Control', 'no-cache');
-        return reply.code(200).send({ 
+        const response: HealthResponse = { 
             status: 'ok',
             timestamp: new Date().toISOString(),
             processId: process.pid
-        });
+        };
+        return reply.code(200).send(response);
     }
 });
+
+interface RootHealthResponse {
+    status: string;
+    timestamp: string;
+    processId: number;
+}
 
 healthServer.route({
     method: ['GET', 'HEAD'],
     url: '/',
-    handler: (_, reply) => {
+    handler: (_: FastifyRequest, reply: FastifyReply): FastifyReply => {
         reply.header('Cache-Control', 'no-cache');
-        return reply.code(200).send({ 
+        const response: RootHealthResponse = { 
             status: 'ok',
             timestamp: new Date().toISOString(),
             processId: process.pid
-        });
+        };
+        return reply.code(200).send(response);
     }
 });
 
-healthServer.get('/render-debug', (_, reply) => {
-    reply.send({
-        headers: _.headers,
-        connection: {
-            remoteAddress: _.socket.remoteAddress,
-            localPort: _.socket.localPort
-        },
+interface RenderDebugConnectionInfo {
+    remoteAddress: string | undefined;
+    localPort: number | undefined;
+}
+
+interface RenderDebugResponse {
+    headers: Record<string, any>;
+    connection: RenderDebugConnectionInfo;
+    time: Date;
+}
+
+healthServer.get('/render-debug', (request: FastifyRequest, reply: FastifyReply) => {
+    const connection: RenderDebugConnectionInfo = {
+        remoteAddress: request.socket?.remoteAddress,
+        localPort: request.socket?.localPort
+    };
+    const response: RenderDebugResponse = {
+        headers: request.headers,
+        connection,
         time: new Date()
-    });
+    };
+    reply.send(response);
 }); 
 
 async function registerPlugin() {
+    interface CorsOriginCallback {
+        (err: Error | null, allow?: boolean): void;
+    }
+
+    interface CorsOptions {
+        origin: (origin: string | undefined, cb: CorsOriginCallback) => void;
+        credentials: boolean;
+        methods: string[];
+        allowedHeaders: string[];
+        preflightContinue: boolean;
+        optionsSuccessStatus: number;
+    }
+
     await server.register(fastifyCors, {
-        origin: (origin, cb) => {
+        origin: (origin: string | undefined, cb: CorsOriginCallback) => {
 
-            if (!origin) return cb(null, true); // Allow requests with no origin (like curl or Postman)
+            if (!origin) return cb(null, true);
 
-            //const allowedOrigins = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
-
-           // const allowedOrigins = /^https?:\/\/(localhost|127\.0\.0\.1|frontend)(:\d+)?$/;
-         const allowedOrigins = new Set([
-            'http://localhost:3000',
-            'http://127.0.0.1:3000',
-            'https://localhost:3000',
-            'https://127.0.0.1:3000',
-            'https://frontend:3000',
-            'https://frontend-7nt4.onrender.com'
-        ]);
-            // allow no origin (like curl) or dev frontend origins
-       // if (!origin || allowedOrigins.has(origin)) {
+            const allowedOrigins = new Set([
+                'http://localhost:3000',
+                'http://127.0.0.1:3000',
+                'https://localhost:3000',
+                'https://127.0.0.1:3000',
+                'https://frontend:3000',
+                'https://frontend-7nt4.onrender.com'
+            ]);
             if (allowedOrigins.has(origin)) {
-              cb(null, true);
+                cb(null, true);
             } else {
-              cb(new Error("Not allowed by CORS"), false);
+                cb(new Error("Not allowed by CORS"), false);
             }
-          },
+        },
 
         credentials: true,
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-//        allowedHeaders: 'Access-Content-Allow-Origin,Content-Type,Authorization,Upgrade,use-me-to-authorize',
         allowedHeaders: [
             'Access-Content-Allow-Origin',
             'Content-Type',
@@ -139,7 +140,7 @@ async function registerPlugin() {
         ],
         preflightContinue: false,
         optionsSuccessStatus: 204
-    })
+    } as CorsOptions)
     //JWT middleware
     await server.register(jwt)
     await server.register(rateLimitPlugin)
@@ -157,10 +158,10 @@ async function start() {
     await healthServer.listen({
         port: Number(process.env.HEALTH_PORT),
         host: '0.0.0.0',
-        listenTextResolver: (address) => {
-        // This verifies the actual bound address
-        console.log(`ACTUAL BINDING: ${address}`);
-        return `Health server listening on ${address}`;
+        listenTextResolver: (address: string): string => {
+            // This verifies the actual bound address
+            console.log(`ACTUAL BINDING: ${address}`);
+            return `Health server listening on ${address}`;
         }
     });
 
@@ -187,4 +188,3 @@ async function start() {
 }
 
 start()
- 

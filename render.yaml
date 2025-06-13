@@ -31,10 +31,10 @@ services:
     plan: free
     autoDeploy: true
     buildFilter:
-      paths:
+      paths: 
         - backend/api-gateway/**
-    buildCommand: npm run build
-    startCommand: npm run serve
+    buildCommand: ""
+    startCommand: ""
     envVars:
       - key: PORT
         value: "8443"
