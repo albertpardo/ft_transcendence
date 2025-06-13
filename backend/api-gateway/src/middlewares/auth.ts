@@ -22,6 +22,7 @@ export async function authMiddleware(req: FastifyRequest, reply: FastifyReply) {
 
     try {
 //        if (req?.headers['sec-websocket-protocol'] !== null) {
+        
         if (req.headers.upgrade === 'websocket' && !req.headers['authorization'] && req?.headers['sec-websocket-protocol']) {
           req.headers['authorization'] = "Bearer " + req.headers['sec-websocket-protocol'];
           delete req.headers['sec-websocket-protocol'];
@@ -33,7 +34,10 @@ export async function authMiddleware(req: FastifyRequest, reply: FastifyReply) {
 //            req.headers['authorization'] = req.headers['use-me-to-authorize'];
 //            delete req.headers['use-me-to-authorize'];
             if (req.headers['use-me-to-authorize']) {
-                req.headers['authorization'] = `Bearer ${req.headers['use-me-to-authorize'].replace(/^Bearer\s*/, '')}`;
+                    const useMeToAuthorize = req.headers['use-me-to-authorize'];
+                    req.headers['authorization'] = `Bearer ${
+                        typeof useMeToAuthorize === 'string' ? useMeToAuthorize.replace(/^Bearer\s*/, '') : ''
+                }`;
                 delete req.headers['use-me-to-authorize'];
             }
         }
