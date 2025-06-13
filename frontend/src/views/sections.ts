@@ -43,6 +43,59 @@ export function renderPlayContent(el: HTMLElement, bu: HTMLElement, gArea: HTMLE
   gWin.hidden = false;
 }
 
+function getHistoryForPlayerId(userId: string, done: (error: Error | null, res?: Response) => void) {
+  fetch(
+    `${API_BASE_URL}/api/pong/hist`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json,application/html,text/html,*/*',
+        'Origin': 'https://127.0.0.1:3000/',
+        'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
+      },
+      body: JSON.stringify({
+        userId: userId,
+      }),
+      credentials: 'include',
+      mode: 'cors',
+    }
+  )
+  .then((response) => done(null, response))
+  .catch((error) => done(error));
+}
+
+export function renderHistoryContent(el: HTMLElement, bu: HTMLElement, gArea: HTMLElement, gWin: HTMLElement) {
+  el.innerHTML = `
+    <h1 class="text-3xl font-bold mb-6">Match History</h1>
+    <p class="mb-4">History of matches</p>
+  `;
+  el.innerHTML += `
+    <table><tr>
+    <th>Date</th>
+    <th>Opponent</th>
+    <th>Score</th>
+    </tr>
+  `;
+  // TODO FIXME spam protection? cache the thing maybe? make it independently get downloaded in the background once every something minutes.
+  getHistoryForPlayerId(localStorage.getItem('userId'), function (error, response) {
+    if (error) {
+      console.error(error);
+      el.innerHTML += "</table>";
+    }
+    else {
+      response?.text().then((result) => {
+        let parsedHist = JSON.parse(result);
+        console.log(parsedHist);
+      });
+      el.innerHTML += "</table>";
+    }
+  });
+  bu.hidden = true;
+  gArea.hidden = true;
+  gWin.hidden = true;
+}
+
 export function renderTournamentContent(el: HTMLElement, bu: HTMLElement, gArea: HTMLElement, gWin: HTMLElement) {
   el.innerHTML = `
     <h1 class="text-3xl font-bold mb-6">Tournaments</h1>

@@ -1,7 +1,7 @@
 // src/views/dashboard.ts
 import { registerPlayer, movePaddle } from './buttonClicking';
 import { route } from '../router';
-import { renderHomeContent, renderPlayContent, renderTournamentContent, renderStatsContent } from './sections';
+import { renderHomeContent, renderPlayContent, renderHistoryContent, renderTournamentContent, renderStatsContent } from './sections';
 import { renderProfileContent } from './profile';
 import { State, nullState } from './pongrender';
 
@@ -55,6 +55,7 @@ export function initDashboard() {
         <a href="#home" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='home'?'bg-blue-600':'bg-gray-700'}">Dashboard</a>
         <a href="#profile" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='profile'?'bg-blue-600':'bg-gray-700'}">Profile</a>
         <a href="#play" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='play'?'bg-blue-600':'bg-gray-700'}">Play Pong</a>
+        <a href="#history" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='play'?'bg-blue-600':'bg-gray-700'}">Match History</a>
         <a href="#tournament" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='tournament'?'bg-blue-600':'bg-gray-700'}">Tournament</a>
         <a href="#stats" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='stats'?'bg-blue-600':'bg-gray-700'}">Stats</a>
       </nav>
@@ -120,6 +121,7 @@ export function initDashboard() {
   let socket : WebSocket;
   let gameState : State = nullState;
   let playerSide : string = "tbd";
+  // FIXME unused. remove or use.
   let started : boolean = false;
   if (localStorage.getItem("authToken")) {
     socket = new WebSocket(`https://127.0.0.1:8443/api/pong/game-ws?uuid=${localStorage.getItem('userId')}`, [localStorage.getItem("authToken")]);
@@ -326,11 +328,12 @@ export function initDashboard() {
   const gameArea = document.getElementById('game-area')!;
   const gameWindow = document.getElementById('game-window')!;
   switch (hash) {
-    case 'profile':    renderProfileContent(contentArea, startButton, gameArea, gameWindow);    break;
-    case 'play':       renderPlayContent(contentArea, startButton, gameArea, gameWindow);       break;
-    case 'tournament': renderTournamentContent(contentArea, startButton, gameArea, gameWindow); break;
-    case 'stats':      renderStatsContent(contentArea, startButton, gameArea, gameWindow);      break;
-    default:           renderHomeContent(contentArea, startButton, gameArea, gameWindow);
+    case 'profile':     renderProfileContent(contentArea, startButton, gameArea, gameWindow);     break;
+    case 'play':        renderPlayContent(contentArea, startButton, gameArea, gameWindow);        break;
+    case 'history':     renderHistoryContent(contentArea, startButton, gameArea, gameWindow);     break;
+    case 'tournament':  renderTournamentContent(contentArea, startButton, gameArea, gameWindow);  break;
+    case 'stats':       renderStatsContent(contentArea, startButton, gameArea, gameWindow);       break;
+    default:            renderHomeContent(contentArea, startButton, gameArea, gameWindow);
   }
 }
 

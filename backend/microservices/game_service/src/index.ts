@@ -3,7 +3,7 @@ import websocket from '@fastify/websocket';
 import type { FastifyRequest } from 'fastify';
 import cors from '@fastify/cors';
 import { PongResponses, State, addPlayerCompletely, removeTheSock, getPongDoneness, getPongState, moveMyPaddle, gamesReadyLoopCheck, dataStreamer } from './pong';
-import { historyMain } from './history';
+import { historyMain, getHistForPlayerFromDb } from './history';
 
 interface PongBodyReq {
   playerId: string,
@@ -14,8 +14,8 @@ interface PongBodyReq {
 // getIn tells do we wanna move (false) or do we wanna get into a game (true)
 // mov tells us where to move and if we wanna
 
-// TODO extra x-user-id to sock map here
-// maybe remove the one from the pong.ts file
+// TODO extra x-user-id to sock map maybe needs to be literally the same obj
+//as the one in the pong.ts file
 
 const upperSocksMap = new Map<string, WebSocket>();
 //const qs = fastQuerystring();
@@ -87,6 +87,11 @@ const startServer = async () => {
         return "the request is super malformed";
       }
       return "done inerfacing via post";
+    });
+    // TODO XXX add public pong hist by username?
+    fastify.post('/pong/hist', async (req: FastifyRequest<{ Body: {userId: string} }>, reply) => {
+      await resp = getHistForPlayerFromDb(req?.body.userId);
+      return JSON.stringify(resp);
     });
   };
 

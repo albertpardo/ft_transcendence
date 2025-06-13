@@ -28,3 +28,10 @@ export const getAll = async () => {
 	const info2 = stmt2.all();
   console.log(info2);
 }
+
+export const getHistForPlayerFromDb = async (playerId : string) => {
+	const stmt2 = db.prepare('SELECT * FROM matches WHERE leftId==? OR rightId==?');
+	const info2 = stmt2.all(playerId, playerId);
+  console.log(info2);
+  return (info2);
+}
