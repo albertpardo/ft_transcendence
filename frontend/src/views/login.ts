@@ -215,7 +215,7 @@ export function renderLogin(appElement: HTMLElement) {
             headers: {
               'Content-Type': 'application/json',
               'Accept': 'application/json,application/html,text/html,*/*',
-              'Origin': 'https://127.0.0.1:3000/',
+             // 'Origin': 'https://127.0.0.1:3000/',
             },
             body: JSON.stringify({ nickname, username, email ,password }),
             credentials: 'include',
