@@ -138,6 +138,9 @@ export function renderLogin(appElement: HTMLElement) {
       
       try {
         // Try real API first
+        if (!API_BASE_URL) {
+          throw new Error('API base URL is not defined. Please set VITE_API_BASE_URL in your environment variables.');
+        }
         const response = await fetch(`${API_BASE_URL}/api/login`, {
           method: 'POST',
           headers: {
@@ -209,6 +212,9 @@ export function renderLogin(appElement: HTMLElement) {
       registerButton.textContent = 'Registering...';
       
       try {
+        if (!API_BASE_URL) {
+          throw new Error('API base URL is not defined. Please set VITE_API_BASE_URL in your environment variables.');
+        }
         const response = await fetch(`${API_BASE_URL}/api/signup`,
           {
             method: 'POST',

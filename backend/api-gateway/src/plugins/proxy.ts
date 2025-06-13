@@ -3,50 +3,64 @@ import fastifyHttpProxy from '@fastify/http-proxy';
 import { FastifyInstance } from 'fastify';
 import getRawBody from 'raw-body';
 import { Readable } from 'stream';
+import { FastifyRequest, FastifyReply } from 'fastify';
+
+const userManagementUrl = process.env.USER_MANAGEMENT_URL;
+if (!userManagementUrl) {
+    throw new Error('USER_MANAGEMENT_URL environment variable is not set');
+}
 
 export default fp(async function (fastify: FastifyInstance) {
     // register proxy: without onResponse
     fastify.register(fastifyHttpProxy, {
-        
-        upstream: process.env.USER_MANAGEMENT_URL,
+        upstream: userManagementUrl,
         prefix: '/api/login',
         rewritePrefix: '/api/user/login',
         http2: false,
     });
 
     fastify.register(fastifyHttpProxy, {
-        upstream: process.env.USER_MANAGEMENT_URL,
+        upstream: userManagementUrl,
         prefix: '/api/signup',
         rewritePrefix: '/api/user/signup',
         http2: false
     });
 
+    interface ProxyReplyOptions {
+        rewriteRequestHeaders: (req: import('fastify').FastifyRequest, headers: Record<string, any>) => Record<string, any>;
+    }
+
+    interface ProxyPreHandlerRequest extends import('fastify').FastifyRequest {
+        user?: { userId?: string; id?: string };
+        jwtVerify: () => Promise<void>;
+    }
+
     fastify.register(fastifyHttpProxy, {
-        upstream: process.env.USER_MANAGEMENT_URL,
+        upstream: userManagementUrl,
         prefix: '/api/profile',
         rewritePrefix: '/api/user/profile',
         http2: false,
         httpMethods: ['GET', 'POST', 'PUT', 'DELETE'],
         replyOptions: {
-            rewriteRequestHeaders: (req, headers) => {
-              return {
-                ...headers,
-                'x-user-id': req.user?.id || headers['x-user-id'],
-                authorization: headers.authorization,
-              };
+            rewriteRequestHeaders: (req: import('fastify').FastifyRequest, headers: Record<string, any>): Record<string, any> => {
+                return {
+                    ...headers,
+                    'x-user-id': (req as ProxyPreHandlerRequest).user?.id || headers['x-user-id'],
+                    authorization: headers.authorization,
+                };
             },
-        },
-        preHandler: async (req, reply) => {
+        } as ProxyReplyOptions,
+        preHandler: async (req: import('fastify').FastifyRequest, reply: import('fastify').FastifyReply) => {
             // Allow preflight CORS manually for OPTIONS
             if (req.method === 'OPTIONS') {
-              reply
-                .header('Access-Control-Allow-Origin', req.headers.origin || '*')
-                .header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS')
-                .header('Access-Control-Allow-Headers', 'Content-Type, Authorization, use-me-to-authorize')
-                .header('Access-Control-Allow-Credentials', 'true')
-                .code(204)
-                .send();
-              return;
+                reply
+                    .header('Access-Control-Allow-Origin', req.headers.origin || '*')
+                    .header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS')
+                    .header('Access-Control-Allow-Headers', 'Content-Type, Authorization, use-me-to-authorize')
+                    .header('Access-Control-Allow-Credentials', 'true')
+                    .code(204)
+                    .send();
+                return;
             }
             console.log('🚀 rewriteRequestHeaders - forwarded auth:', req.headers.authorization);
             console.log('🔐🔐 Authorization Header:', req.headers['authorization']);
@@ -55,10 +69,10 @@ export default fp(async function (fastify: FastifyInstance) {
                 console.log('🔍🔐 Raw Authorization Header:', JSON.stringify(req.headers.authorization));
                 console.log('🔍🔐 JWT Secret in use:', process.env.JWT_SECRET);
 
-                await req.jwtVerify();
+                await (req as ProxyPreHandlerRequest).jwtVerify();
                 console.log("🔐 Verified JWT in proxy preHandler");
 
-                const userId = (req.user as any)?.userId;
+                const userId = (req as ProxyPreHandlerRequest).user?.userId;
                 if (userId) {
                     req.headers['x-user-id'] = String(userId);
                     console.log(`📦 Injected x-user-id = ${userId} into headers`);
@@ -89,30 +103,33 @@ export default fp(async function (fastify: FastifyInstance) {
 
     // inject token: for login & token generation after signup
     // block and modify response
-    fastify.addHook('onSend', async (req, reply, payload) => {
+    interface LoginSignupPayload {
+        id?: string;
+        username?: string;
+        [key: string]: any;
+    }
+
+    fastify.addHook('onSend', async (req: FastifyRequest, reply: FastifyReply, payload: unknown): Promise<unknown> => {
         if ((req.url.startsWith('/api/login') || req.url.startsWith('/api/signup')) && reply.statusCode === 200) {
             try {
-                let body;
-                //if payload is Readable, transform it into string with raw-bady
+                let body: LoginSignupPayload;
+                //if payload is Readable, transform it into string with raw-body
                 if (payload && typeof (payload as Readable).read === 'function') {
                     const raw = await getRawBody(payload as Readable);
                     body = JSON.parse(raw.toString());
                 } else if (typeof payload === 'string') {
-                    body = JSON.parse(payload);
+                    body = JSON.parse(payload) as LoginSignupPayload;
                 } else {
-                    body = payload;
+                    body = payload as LoginSignupPayload;
                 }
                 console.log('📦 Final parsed payload:', body);
- 
-            //    const data = typeof payload === 'string' ? JSON.parse(payload) : payload;
-            //    console.log('📦 Login/signup response payload:', data);
 
                 if (!body.id || !body.username) {
                     console.warn('⚠️ No id or username found in payload!');
                     return payload;
                 }
 
-                const token = fastify.jwt.sign({ userId: body.id });
+                const token: string = fastify.jwt.sign({ userId: body.id });
 
                 // return new JSON response
                 return JSON.stringify({
