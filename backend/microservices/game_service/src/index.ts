@@ -90,7 +90,7 @@ const startServer = async () => {
     });
     // TODO XXX add public pong hist by username?
     fastify.post('/pong/hist', async (req: FastifyRequest<{ Body: {userId: string} }>, reply) => {
-      await resp = getHistForPlayerFromDb(req?.body.userId);
+      const resp = await getHistForPlayerFromDb(req?.body.userId);
       return JSON.stringify(resp);
     });
   };

@@ -43,6 +43,8 @@ export function renderPlayContent(el: HTMLElement, bu: HTMLElement, gArea: HTMLE
   gWin.hidden = false;
 }
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 function getHistoryForPlayerId(userId: string, done: (error: Error | null, res?: Response) => void) {
   fetch(
     `${API_BASE_URL}/api/pong/hist`,
@@ -75,6 +77,7 @@ export function renderHistoryContent(el: HTMLElement, bu: HTMLElement, gArea: HT
     <th>Date</th>
     <th>Opponent</th>
     <th>Score</th>
+    <th>Result</th>
     </tr>
   `;
   // TODO FIXME spam protection? cache the thing maybe? make it independently get downloaded in the background once every something minutes.
@@ -86,7 +89,15 @@ export function renderHistoryContent(el: HTMLElement, bu: HTMLElement, gArea: HT
     else {
       response?.text().then((result) => {
         let parsedHist = JSON.parse(result);
-        console.log(parsedHist);
+        for (const entry of parsedHist) {
+          el.innerHTML += `<tr>
+            <td>${Date(entry.date * 1000)}</td>
+            <td>${localStorage.getItem('userId') === entry.leftId ? entry.rightId : entry.leftId}</td>
+            <td>${entry.scoreL} : ${entry.scoreR}</td>
+            <td>${localStorage.getItem('userId') === entry.leftId ? (entry.scoreL > entry.scoreR ? "Victory" : "Loss") : (entry.scoreL < entry.scoreR ? "Victory" : "Loss")}</td>
+            </tr><br>
+          `;
+        }
       });
       el.innerHTML += "</table>";
     }

@@ -408,7 +408,7 @@ export const gamesReadyLoopCheck = async () => {
       }
     }
     await sleep(5e3);
-    getAll();
+//    getAll();
 //    console.log("one gamesreadyloop iteration passed");
   }
 }

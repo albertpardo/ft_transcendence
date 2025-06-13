@@ -12,7 +12,7 @@ function movePaddleWrapper(d: number) {
     }
     else {
       response?.text().then((result) => {
-        console.log(resut);
+        console.log(result);
       });
     }
   });
