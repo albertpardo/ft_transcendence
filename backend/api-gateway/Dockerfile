@@ -30,4 +30,5 @@ EXPOSE 10000
 
 # Run using ts-node (just like the local command)
 #CMD ["npm", "run", "dev"]
-CMD ["node", "dist/index.js"]
+#CMD ["node", "dist/index.js"]
+CMD ["npm", "run", "serve"]
