@@ -23,8 +23,6 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s \
 # Copy source code & certs
 COPY . .
 
-RUN npm run build
-
 # Expose HTTPS port
 EXPOSE 8443
 EXPOSE 10000
