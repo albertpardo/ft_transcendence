@@ -29,5 +29,8 @@ EXPOSE 10000
 # EXPOSE 8080
 
 # Run using ts-node (just like the local command)
-# CMD ["npm", "run", "dev"]
+
+#CMD ["npm", "run", "dev"]
+#CMD ["node", "dist/index.js"]
+
 CMD ["npm", "run", "serve"]
