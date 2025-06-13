@@ -26,4 +26,15 @@ declare global {
             API_BASE_URL?: string; // Base URL for the API gateway
         }
     }
-}       
+}
+
+declare module 'fastify' {
+  interface FastifyRequest {
+    user?: {
+      userId?: string;
+      id?: string;
+    };
+    jwtVerify: () => Promise<void>; // You can augment this too if needed
+  }
+}
+
