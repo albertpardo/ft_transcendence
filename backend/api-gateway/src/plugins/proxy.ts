@@ -30,26 +30,18 @@ export default fp(async function (fastify: FastifyInstance) {
         rewriteRequestHeaders: (req: import('fastify').FastifyRequest, headers: Record<string, any>) => Record<string, any>;
     }
 
-    interface ProxyPreHandlerRequest extends FastifyRequest {
-        user?: { userId?: string; id?: string };
+/*     interface ProxyPreHandlerRequest extends FastifyRequest {
+        user: { userId: string };
         jwtVerify: () => Promise<void>;
     }
-
+ */
     fastify.register(fastifyHttpProxy, {
         upstream: userManagementUrl,
         prefix: '/api/profile',
         rewritePrefix: '/api/user/profile',
         http2: false,
         httpMethods: ['GET', 'POST', 'PUT', 'DELETE'],
- /*        replyOptions: {
-            rewriteRequestHeaders: (req: import('fastify').FastifyRequest, headers: Record<string, any>): Record<string, any> => {
-                return {
-                    ...headers,
-                    'x-user-id': (req as ProxyPreHandlerRequest).user?.id || headers['x-user-id'],
-                    authorization: headers.authorization,
-                };
-            },
-        } as ProxyReplyOptions, */
+
         preHandler: async (req: import('fastify').FastifyRequest, reply: import('fastify').FastifyReply) => {
             // Allow preflight CORS manually for OPTIONS
             if (req.method === 'OPTIONS') {
@@ -68,11 +60,12 @@ export default fp(async function (fastify: FastifyInstance) {
             try {
                 console.log('🔍🔐 Raw Authorization Header:', JSON.stringify(req.headers.authorization));
                 console.log('🔍🔐 JWT Secret in use:', process.env.JWT_SECRET);
-
-                await (req as ProxyPreHandlerRequest).jwtVerify();
+                // await req.jwtVerify(); <- option removing redundance below 
+                await (req as FastifyRequest).jwtVerify();
                 console.log("🔐 Verified JWT in proxy preHandler");
-
-                const userId = (req as ProxyPreHandlerRequest).user?.userId;
+                //same here, we can use req.user directly
+                // const userId = req.user?.userId; <- option removing redundance below
+                const userId = (req as FastifyRequest).user?.userId;
                 if (userId) {
                     req.headers['x-user-id'] = String(userId);
                     console.log(`📦 Injected x-user-id = ${userId} into headers`);
@@ -117,7 +110,7 @@ export default fp(async function (fastify: FastifyInstance) {
                 //if payload is Readable, transform it into string with raw-body
                 if (payload && typeof (payload as Readable).read === 'function') {
                     const raw = await getRawBody(payload as Readable);
-                    body = JSON.parse(raw.toString());
+                    body = JSON.parse(raw.toString()); 
                 } else if (typeof payload === 'string') {
                     body = JSON.parse(payload) as LoginSignupPayload;
                 } else {
