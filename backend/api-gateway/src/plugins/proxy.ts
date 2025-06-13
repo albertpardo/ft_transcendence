@@ -30,7 +30,7 @@ export default fp(async function (fastify: FastifyInstance) {
         rewriteRequestHeaders: (req: import('fastify').FastifyRequest, headers: Record<string, any>) => Record<string, any>;
     }
 
-    interface ProxyPreHandlerRequest extends import('fastify').FastifyRequest {
+    interface ProxyPreHandlerRequest extends FastifyRequest {
         user?: { userId?: string; id?: string };
         jwtVerify: () => Promise<void>;
     }
@@ -41,7 +41,7 @@ export default fp(async function (fastify: FastifyInstance) {
         rewritePrefix: '/api/user/profile',
         http2: false,
         httpMethods: ['GET', 'POST', 'PUT', 'DELETE'],
-        replyOptions: {
+ /*        replyOptions: {
             rewriteRequestHeaders: (req: import('fastify').FastifyRequest, headers: Record<string, any>): Record<string, any> => {
                 return {
                     ...headers,
@@ -49,7 +49,7 @@ export default fp(async function (fastify: FastifyInstance) {
                     authorization: headers.authorization,
                 };
             },
-        } as ProxyReplyOptions,
+        } as ProxyReplyOptions, */
         preHandler: async (req: import('fastify').FastifyRequest, reply: import('fastify').FastifyReply) => {
             // Allow preflight CORS manually for OPTIONS
             if (req.method === 'OPTIONS') {
@@ -80,6 +80,7 @@ export default fp(async function (fastify: FastifyInstance) {
             } catch (err: any) {
                 console.error('❌ Proxy-level JWT verification failed:', err.message);
                 reply.code(401).send({ error: 'Unauthorized in proxy' });
+                return;
             }
         },
     });
