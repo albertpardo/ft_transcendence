@@ -9,6 +9,14 @@ RUN npm install
 
 COPY . .
 
-EXPOSE 3000
 
-CMD ["npm", "run", "dev"]
+# Build the frontend
+RUN npm run build
+
+# Install a lightweight HTTP server for static files
+RUN npm install -g serve
+
+EXPOSE 3000
+# CMD ["npm", "run", "dev"]
+CMD ["serve", "-s", "dist", "-l", "3000"]
+

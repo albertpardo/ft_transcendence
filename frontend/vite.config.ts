@@ -2,15 +2,19 @@ import { defineConfig } from 'vite';
 import { resolve } from 'path';
 import fs from 'fs';
 
+const isProduction = process.env.NODE_ENV === 'production';
+
 export default defineConfig({
   server: {
     port: 3000,
     open: false, // Desactivamos la apertura automática del navegador
     host: '0.0.0.0', // Importante para que funcione en Docker
-    https: {
-      key: fs.readFileSync('certs/front.key'),
-      cert: fs.readFileSync('certs/front.cert'),
-    },
+    ...(isProduction ? {} : {
+      https: {
+        key: fs.readFileSync('certs/front.key'),
+        cert: fs.readFileSync('certs/front.cert'),
+      },
+    }),
     proxy: {
       '/api': {
         target: 'https://backend:8443',
