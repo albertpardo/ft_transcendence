@@ -67,6 +67,25 @@ function getHistoryForPlayerId(userId: string, done: (error: Error | null, res?:
   .catch((error) => done(error));
 }
 
+function getNicknameForPlayerId(userId: string, done: (error: Error | null, res?: Response) => void) {
+  fetch(
+    `${API_BASE_URL}/api/public/nickname`,
+    {
+      method: 'POST',
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: 'include',
+      mode: 'cors',
+      body: JSON.stringify({
+        userId: userId,
+      }),
+    }
+  )
+  .then((response) => done(null, response))
+  .catch((error) => done(error));
+}
+
 export function renderHistoryContent(el: HTMLElement, bu: HTMLElement, gArea: HTMLElement, gWin: HTMLElement) {
   el.innerHTML = `
     <h1 class="text-3xl font-bold mb-6">Match History</h1>
@@ -90,13 +109,40 @@ export function renderHistoryContent(el: HTMLElement, bu: HTMLElement, gArea: HT
       response?.text().then((result) => {
         let parsedHist = JSON.parse(result);
         for (const entry of parsedHist) {
-          el.innerHTML += `<tr>
-            <td>${Date(entry.date * 1000)}</td>
-            <td>${localStorage.getItem('userId') === entry.leftId ? entry.rightId : entry.leftId}</td>
-            <td>${entry.scoreL} : ${entry.scoreR}</td>
-            <td>${localStorage.getItem('userId') === entry.leftId ? (entry.scoreL > entry.scoreR ? "Victory" : "Loss") : (entry.scoreL < entry.scoreR ? "Victory" : "Loss")}</td>
-            </tr><br>
-          `;
+          const idL : string = entry.leftId;
+          const idR : string = entry.rightId;
+          // fallbacks for if getNickname fails I guess
+          let nicknameL : string = idL;
+          let nicknameR : string = idR;
+          getNicknameForPlayerId(idL, function (error, response) {
+            if (error) {
+              console.error(error);
+            }
+            else {
+              response?.text().then((result) => {
+                let parsedHist = JSON.parse(result);
+                nicknameL = parsedHist.nickname;
+                getNicknameForPlayerId(idR, function (error, response) {
+                  if (error) {
+                    console.error(error);
+                  }
+                  else {
+                    response?.text().then((result) => {
+                      let parsedHist = JSON.parse(result);
+                      nicknameR = parsedHist.nickname;
+                      el.innerHTML += `<tr>
+                        <td>${Date(entry.date * 1000)}</td>
+                        <td>${localStorage.getItem('userId') === idL ? nicknameR : nicknameL}</td>
+                        <td>${entry.scoreL} : ${entry.scoreR}</td>
+                        <td>${localStorage.getItem('userId') === idL ? (entry.scoreL > entry.scoreR ? "Victory" : "Loss") : (entry.scoreL < entry.scoreR ? "Victory" : "Loss")}</td>
+                        </tr><br>
+                      `;
+                    });
+                  }
+                });
+              });
+            }
+          });
         }
       });
       el.innerHTML += "</table>";

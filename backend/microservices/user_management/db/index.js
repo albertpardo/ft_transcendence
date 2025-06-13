@@ -12,6 +12,12 @@ const init = db.prepare(`
 );
 init.run();
 
+function getNicknameById(userId) {
+	const stmt = db.prepare('SELECT nickname FROM users WHERE id = ?');
+	console.log("hit from backend/microservices/user_management/db/index.js");
+	return stmt.get(userId);
+}
+
 function getUserByUsernameOrEmail(username, email) {
     const stmt = db.prepare('SELECT * FROM users WHERE username = ? OR email = ?');
     return stmt.get(username, email);
@@ -73,6 +79,7 @@ function deleteUser(userId) {
 }
 
 module.exports = {
+	getNicknameById,
     getUserByUsernameOrEmail,
     getUserByUsername,
     getUserById,
