@@ -32,4 +32,5 @@ EXPOSE 10000
 
 #CMD ["npm", "run", "dev"]
 #CMD ["node", "dist/index.js"]
+
 CMD ["npm", "run", "serve"]
