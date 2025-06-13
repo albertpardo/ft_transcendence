@@ -1,9 +1,10 @@
 //src/router.ts
 
 import { renderLogin } from './views/login';
-import { renderHomeContent, renderPlayContent, renderHistoryContent, renderTournamentContent, renderStatsContent } from './views/sections';
-import { initDashboard } from './views/dashboard';
+import { renderHomeContent, renderPlayContent, renderTournamentContent, renderStatsContent } from './views/sections';
 import { renderProfileContent } from './views/profile';
+import { renderHistoryContent } from './views/history';
+import { initDashboard } from './views/dashboard';
 
 export function route() {
   const hash = window.location.hash.replace('#', '') || 'home';
@@ -25,8 +26,10 @@ export function route() {
   // Si no esta login, monta ESTRUCTURA del dashboard UNA vez
   if (!document.getElementById('sidebar')) {
     initDashboard();
+    console.log("init done!");
   }
 
+  console.log("doing a second pass now....");
   // Renderiza el contenido según la sección
   const contentArea = document.getElementById('content-area')!;
   const startButton = document.getElementById('start-button')!;

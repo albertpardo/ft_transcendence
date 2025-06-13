@@ -1,7 +1,8 @@
 // src/views/dashboard.ts
 import { registerPlayer, movePaddle } from './buttonClicking';
 import { route } from '../router';
-import { renderHomeContent, renderPlayContent, renderHistoryContent, renderTournamentContent, renderStatsContent } from './sections';
+import { renderHomeContent, renderPlayContent, renderTournamentContent, renderStatsContent } from './sections';
+import { renderHistoryContent } from './history';
 import { renderProfileContent } from './profile';
 import { State, nullState } from './pongrender';
 
@@ -19,10 +20,12 @@ function movePaddleWrapper(d: number) {
 }
 
 
-export function initDashboard() {
+export async function initDashboard() {
   const hash = window.location.hash.replace('#', '') || 'home';
   const app = document.getElementById('app')!;
 
+  console.log("I was summoned!");
+  console.log(app.innerHTML);
   app.innerHTML = `
     <!-- Mobile Header -->
     <header class="md:hidden fixed top-0 left-0 right-0 bg-gray-900 z-50 p-4 flex items-center justify-between">
