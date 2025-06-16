@@ -42,11 +42,9 @@ async function getNicknameForPlayerId(userId: string) {
 }
 
 export async function renderHistoryContent(el: HTMLElement, bu: HTMLElement, gArea: HTMLElement, gWin: HTMLElement) {
-  el.innerHTML = `
+  let tempInnerHTML : string = `
     <h1 class="text-3xl font-bold mb-6">Match History</h1>
     <p class="mb-4">History of matches</p>
-  `;
-  let tempInnerHTML : string = `
     <table class="table-fixed"><tbody><tr>
     <th>Date</th>
     <th>Opponent</th>
@@ -79,7 +77,7 @@ export async function renderHistoryContent(el: HTMLElement, bu: HTMLElement, gAr
       </tr>
     `;
   }
-  el.innerHTML += tempInnerHTML;
+  el.innerHTML = tempInnerHTML;
   bu.hidden = true;
   gArea.hidden = true;
   gWin.hidden = true;
