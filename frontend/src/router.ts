@@ -2,8 +2,9 @@
 
 import { renderLogin } from './views/login';
 import { renderHomeContent, renderPlayContent, renderTournamentContent, renderStatsContent } from './views/sections';
-import { initDashboard } from './views/dashboard';
 import { renderProfileContent } from './views/profile';
+import { renderHistoryContent } from './views/history';
+import { initDashboard } from './views/dashboard';
 
 export function route() {
   const hash = window.location.hash.replace('#', '') || 'home';
@@ -33,11 +34,12 @@ export function route() {
   const gameArea = document.getElementById('game-area')!;
   const gameWindow = document.getElementById('game-window')!;
   switch (hash) {
-    case 'profile':    renderProfileContent(contentArea, startButton, gameArea, gameWindow);    break;
-    case 'play':       renderPlayContent(contentArea, startButton, gameArea, gameWindow);       break;
-    case 'tournament': renderTournamentContent(contentArea, startButton, gameArea, gameWindow); break;
-    case 'stats':      renderStatsContent(contentArea, startButton, gameArea, gameWindow);      break;
-    default:           renderHomeContent(contentArea, startButton, gameArea, gameWindow);
+    case 'profile':     renderProfileContent(contentArea, startButton, gameArea, gameWindow);     break;
+    case 'play':        renderPlayContent(contentArea, startButton, gameArea, gameWindow);        break;
+    case 'history':     renderHistoryContent(contentArea, startButton, gameArea, gameWindow);     break;
+    case 'tournament':  renderTournamentContent(contentArea, startButton, gameArea, gameWindow);  break;
+    case 'stats':       renderStatsContent(contentArea, startButton, gameArea, gameWindow);       break;
+    default:            renderHomeContent(contentArea, startButton, gameArea, gameWindow);
   }
 
   // Actualiza el estado activo de los links del sidebar

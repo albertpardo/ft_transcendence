@@ -8,6 +8,13 @@ export default fp(async function (fastify: FastifyInstance) {
     // register proxy: without onResponse
     fastify.register(fastifyHttpProxy, {
         upstream: 'http://user_management:9001',
+        prefix: '/api/public/nickname',
+        rewritePrefix: '/api/user/public/nickname',
+        http2: false,
+    });
+
+    fastify.register(fastifyHttpProxy, {
+        upstream: 'http://user_management:9001',
         prefix: '/api/login',
         rewritePrefix: '/api/user/login',
         http2: false,
