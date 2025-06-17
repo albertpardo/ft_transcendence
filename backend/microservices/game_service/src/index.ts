@@ -2,7 +2,7 @@ import Fastify from 'fastify';
 import websocket from '@fastify/websocket';
 import type { FastifyRequest } from 'fastify';
 import cors from '@fastify/cors';
-import { PongResponses, State, addPlayerCompletely, removeTheSock, getPongDoneness, getPongState, moveMyPaddle, gamesReadyLoopCheck, dataStreamer } from './pong';
+import { PongResponses, State, addPlayerCompletely, removeTheSock, getPongDoneness, getPongState, forefit, moveMyPaddle, gamesReadyLoopCheck, dataStreamer } from './pong';
 import { historyMain, getHistForPlayerFromDb } from './history';
 
 interface PongBodyReq {
@@ -75,6 +75,10 @@ const startServer = async () => {
           const resp : PongResponses = addPlayerCompletely(playerId, sock);
         }
         else if (typeof mov !== "undefined") {
+          if (mov > 321 && mov < 323) {
+            forefit(playerId);
+            return ;
+          }
           moveMyPaddle(playerId, mov);
         }
       }

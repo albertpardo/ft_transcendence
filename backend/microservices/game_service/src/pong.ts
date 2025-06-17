@@ -76,11 +76,11 @@ function makeid(length : number) : string {
    return result;
 }
 
-function checkLoseConditions(ball: Ball) : string {
-  if (ball.coords.x < 0) {
+function checkLoseConditions(ball: Ball, LGaveUp: boolean, RGaveUp: boolean) : string {
+  if (ball.coords.x < 0 || LGaveUp) {
     return "left";
   }
-  else if (ball.coords.x > WINDOW_SIZE.x) {
+  else if (ball.coords.x > WINDOW_SIZE.x || RGaveUp) {
     return "right";
   }
   return "none";
@@ -107,6 +107,9 @@ class PongRuntime {
   private whoLost : string = "none";
   private scoreL : number = 0;
   private scoreR : number = 0;
+  private LGaveUp : boolean = false;
+  private RGaveUp : boolean = false;
+  private gameType : string = "normal";
 
   private resetGame() : void {
     if (this.whoLost === "right") {
@@ -118,6 +121,15 @@ class PongRuntime {
     this.Lpaddle = { y: (WINDOW_SIZE.y - PADDLE_H)/2, h: PADDLE_H, d: 0 };
     this.Rpaddle = { y: (WINDOW_SIZE.y - PADDLE_H)/2, h: PADDLE_H, d: 0 };
     this.whoLost = "none";
+  }
+
+  public forefit(playerId: string) : void {
+    if (playerId === this.LplayerId) {
+      this.LGaveUp = true;
+    }
+    else {
+      this.RGaveUp = true;
+    }
   }
 
   public LpadMove(d: number) : void {
@@ -205,7 +217,7 @@ class PongRuntime {
   public mainLoop = async () => {
     this.pongStarted = true;
     while (true) {
-      this.whoLost = checkLoseConditions(this.ball);
+      this.whoLost = checkLoseConditions(this.ball, this.LGaveUp, this.RGaveUp);
       if (this.whoLost !== "none") {
         if (this.whoLost === "left") {
           this.scoreR += 1;
@@ -224,7 +236,8 @@ class PongRuntime {
         };
 //        console.log("ball lost by...", this.whoLost);
         await sleep(INTER_ROUND_COOLDOWN_TIME_MS);
-        if (this.scoreL > 2 || this.scoreR > 2) {
+        // TODO custom score for tournament?
+        if (this.scoreL > 2 || this.scoreR > 2 || this.LGaveUp || this.RGaveUp) {
           this.pongDone = true;
 //          console.log("game done.");
           if (this.whoLost === "left") {
@@ -233,7 +246,15 @@ class PongRuntime {
           else {
             this.gstate.stateWhoL = "right fully";
           }
-          addMatch(playersMap.get(this.LplayerId), this.LplayerId, this.RplayerId, this.scoreL, this.scoreR);
+          if (this.LGaveUp) {
+            addMatch(playersMap.get(this.LplayerId), this.LplayerId, this.RplayerId, this.scoreL, this.scoreR, "R", this.gameType, "forefit");
+          }
+          else if (this.RGaveUp) {
+            addMatch(playersMap.get(this.LplayerId), this.LplayerId, this.RplayerId, this.scoreL, this.scoreR, "L", this.gameType, "forefit");
+          }
+          else {
+            addMatch(playersMap.get(this.LplayerId), this.LplayerId, this.RplayerId, this.scoreL, this.scoreR, (this.whoLost === "left" ? "R" : "L"), this.gameType, "normal");
+          }
 //          this.gstate = nullState;
 //          this.gstate.stateScoreL = this.scoreL;
 //          this.gstate.stateScoreR = this.scoreR;
@@ -359,12 +380,21 @@ export function getPongDoneness(gameId: string) : PongResponses {
   return PongResponses.NotInMap;
 }
 
-export function  getPongState(gameId: string) : State {
+export function getPongState(gameId: string) : State {
   if (gamesMap.has(gameId)) {
     return (gamesMap.get(gameId).gstate);
   }
 //  console.error("no game found registered at " + gameId);
   return nullState;
+}
+
+export function forefit(playerId: string) {
+  if (playersMap.has(playerId)) {
+    const gameId = playersMap.get(playerId);
+    if (gamesMap.has(gameId)) {
+      gamesMap.get(gameId).forefit(playerId);
+    }
+  }
 }
 
 export function moveMyPaddle(playerId: string, d: number) : PongResponses {

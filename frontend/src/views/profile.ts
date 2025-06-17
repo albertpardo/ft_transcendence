@@ -1,13 +1,14 @@
-export async function renderProfileContent(el: HTMLElement, bu: HTMLElement, gArea: HTMLElement, gWin: HTMLElement) {
-  bu.hidden = true;
-  gArea.hidden = true;
-  gWin.hidden = true;
+export async function renderProfileContent(hideableElements) {
+  hideableElements.startButton.hidden = true;
+  hideableElements.giveupButton.hidden = true;
+  hideableElements.gameArea.hidden = true;
+  hideableElements.gameWindow.hidden = true;
   const userId = localStorage.getItem('userId') || sessionStorage.getItem('userId');
   const authToken : string = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   if (!authToken) {
-    el.innerHTML = `<p class="text-red-500">You're not logged in. Please log in again.</p>`;
+    hideableElements.contentArea.innerHTML = `<p class="text-red-500">You're not logged in. Please log in again.</p>`;
     return;
   }
 
@@ -30,7 +31,7 @@ export async function renderProfileContent(el: HTMLElement, bu: HTMLElement, gAr
     console.log('🎸🎸🎸Received user on login:', userData);
   } catch (err) {
     console.error(err);
-    el.innerHTML = `<p class="text-red-500">Error loading profile. Please try again later.</p>`;
+    hideableElements.contentArea.innerHTML = `<p class="text-red-500">Error loading profile. Please try again later.</p>`;
     return;
   }
 
@@ -47,7 +48,7 @@ export async function renderProfileContent(el: HTMLElement, bu: HTMLElement, gAr
     })}`;
   }
 
-  el.innerHTML = `
+  hideableElements.contentArea.innerHTML = `
     <div class="w-full max-w-6xl p-10 bg-gray-900 rounded-lg shadow-md mx-auto my-8">
       <h1 class="text-4xl font-bold mb-10 text-center">Your Profile</h1>
 

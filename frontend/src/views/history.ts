@@ -41,13 +41,15 @@ async function getNicknameForPlayerId(userId: string) {
   return (response);
 }
 
-export async function renderHistoryContent(el: HTMLElement, bu: HTMLElement, gArea: HTMLElement, gWin: HTMLElement) {
+export async function renderHistoryContent(hideableElements) {
   let tempInnerHTML : string = `
     <h1 class="text-3xl font-bold mb-6">Match History</h1>
     <p class="mb-4">History of matches</p>
     <table class="table-fixed"><tbody><tr>
     <th>Date</th>
     <th>Opponent</th>
+    <th>Side</th>
+    <th>Type</th>
     <th>Score</th>
     <th>Result</th>
     </tr>
@@ -59,27 +61,67 @@ export async function renderHistoryContent(el: HTMLElement, bu: HTMLElement, gAr
   for (const entry of parsedHist) {
     const idL : string = entry.leftId;
     const idR : string = entry.rightId;
-    // fallbacks for if getNickname fails I guess
-    let nicknameL : string = idL;
-    let nicknameR : string = idR;
-    const respNickL = await getNicknameForPlayerId(idL);
-    const respNickLBody = await respNickL.text();
-    nicknameL = JSON.parse(respNickLBody)?.nickname;
-    const respNickR = await getNicknameForPlayerId(idR);
-    const respNickRBody = await respNickR.text();
-    nicknameR = JSON.parse(respNickRBody)?.nickname;
+    let side : string = "";
+    let nicnknameVs : string = "unknown";
+    let res : string = "";
+    if (localStorage.getItem('userId') === idL) {
+      if (entry.winner === "L") {
+        if (entry.finish === "forefit") {
+          res = "Win (enemy forefit)";
+        }
+        else {
+          res = "Win";
+        }
+      }
+      else {
+        if (entry.finish === "forefit") {
+          res = "Loss (forefit)";
+        }
+        else {
+          res = "Loss";
+        }
+      }
+      side = "Left";
+      let respNn = await getNicknameForPlayerId(idR);
+      nicnknameVs = JSON.parse(await respNn.text())?.nickname;
+    }
+    else {
+      if (entry.winner === "R") {
+        if (entry.finish === "forefit") {
+          res = "Win (enemy forefit)";
+        }
+        else {
+          res = "Win";
+        }
+      }
+      else {
+        if (entry.finish === "forefit") {
+          res = "Loss (forefit)";
+        }
+        else {
+          res = "Loss";
+        }
+      }
+      side = "Right";
+      let respNn = await getNicknameForPlayerId(idL);
+      nicnknameVs = JSON.parse(await respNn.text())?.nickname;
+    }
     const thisdate = new Date(entry.date);
+    console.log(entry);
     tempInnerHTML += `<tr>
       <td>${thisdate.toDateString()}, ${thisdate.toTimeString()}</td>
-      <td>${localStorage.getItem('userId') === idL ? nicknameR : nicknameL}</td>
+      <td>${nicnknameVs}</td>
+      <td>${side}</td>
+      <td>${entry.gameType}</td>
       <td>${entry.scoreL} : ${entry.scoreR}</td>
-      <td>${localStorage.getItem('userId') === idL ? (entry.scoreL > entry.scoreR ? "Victory" : "Loss") : (entry.scoreL < entry.scoreR ? "Victory" : "Loss")}</td>
+      <td>${res}</td>
       </tr>
     `;
   }
-  el.innerHTML = tempInnerHTML;
-  bu.hidden = true;
-  gArea.hidden = true;
-  gWin.hidden = true;
+  hideableElements.contentArea.innerHTML = tempInnerHTML;
+  hideableElements.startButton.hidden = true;
+  hideableElements.giveupButton.hidden = true;
+  hideableElements.gameArea.hidden = true;
+  hideableElements.gameWindow.hidden = true;
 }
 
