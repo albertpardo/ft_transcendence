@@ -15,7 +15,6 @@ export const historyMain = async () => {
     state TEXT
   )`);
   init.run();
-  console.log(db);
 }
 
 export const addMatch = async (gameId : string, leftId : string, rightId : string, scoreL : number, scoreR : number) => {
@@ -32,6 +31,5 @@ export const getAll = async () => {
 export const getHistForPlayerFromDb = async (playerId : string) => {
 	const stmt2 = db.prepare('SELECT * FROM matches WHERE leftId==? OR rightId==?');
 	const info2 = stmt2.all(playerId, playerId);
-  console.log(info2);
   return (info2);
 }

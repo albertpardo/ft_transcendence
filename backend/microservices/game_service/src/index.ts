@@ -40,18 +40,14 @@ const startServer = async () => {
   // Registra un plugin para prefijar las rutas API con '/api'
   const apiRoutes = async (fastify) => {
     fastify.get('/pong/game-ws', { websocket: true }, async (sock, req: FastifyRequest<{ Body: PongBodyReq }>) => {
-      console.log(req.headers);
       let playerId : string = req?.url.substring(req.url.search("uuid=") + 5) as string;
-      console.log("from within the socket, we see the following uuid:", playerId);
       upperSocksMap.set(playerId, sock);
-      console.log("added the sock to the upper map");
       sock.on('message', message => {
         sock.send("connected");
       });
       sock.on('close', event => {
         removeTheSock(sock);
         upperSocksMap.delete(playerId);
-        console.log("closing, removed the sock everywhere");
       });
     });
     fastify.get('/pong', async (request, reply) => {
@@ -66,14 +62,13 @@ const startServer = async () => {
       let jsonMsg = req.body;
       // this user id should be completely verified by now.
       let playerId : string = req.headers['x-user-id'] as string;
-      console.log("from the post request handling, we see the following uuid:", playerId);
       let getIn = jsonMsg?.getIn;
       let mov = jsonMsg?.mov;
       let sock : WebSocket;
       if (typeof playerId !== "undefined" && playerId !== "") {
         if (typeof getIn !== "undefined" && getIn === true) {
           if (upperSocksMap.has(playerId) === false) {
-            console.log("no associated socket found. this must never happen, i think.");
+            console.error("no associated socket found. this must never happen, i think.");
             return "somehow, the socket hasn't been found";
           }
           sock = upperSocksMap.get(playerId) as WebSocket;

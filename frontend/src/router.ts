@@ -26,10 +26,8 @@ export function route() {
   // Si no esta login, monta ESTRUCTURA del dashboard UNA vez
   if (!document.getElementById('sidebar')) {
     initDashboard();
-    console.log("init done!");
   }
 
-  console.log("doing a second pass now....");
   // Renderiza el contenido según la sección
   const contentArea = document.getElementById('content-area')!;
   const startButton = document.getElementById('start-button')!;
