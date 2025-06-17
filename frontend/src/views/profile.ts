@@ -34,7 +34,6 @@ export async function renderProfileContent(el: HTMLElement, bu: HTMLElement, gAr
     return;
   }
 
-//  const { username, nickname, email, password = "", avatar, createAt } = userData;
   const { username, nickname, email, avatar, createAt } = userData;
 
   let memberSince = "Member since: ";
@@ -47,6 +46,7 @@ export async function renderProfileContent(el: HTMLElement, bu: HTMLElement, gAr
     })}`;
   }
 
+  const passwordDots = '••••••••';
   el.innerHTML = `
     <div class="w-full max-w-6xl p-10 bg-gray-900 rounded-lg shadow-md mx-auto my-8">
       <h1 class="text-4xl font-bold mb-10 text-center">Your Profile</h1>
@@ -82,12 +82,30 @@ export async function renderProfileContent(el: HTMLElement, bu: HTMLElement, gAr
               <input id="form-email" type="email" value="${email}"
                      class="w-full p-3 rounded-lg bg-gray-700 text-gray-400 disabled:bg-gray-700 disabled:text-gray-400 enabled:bg-gray-600 enabled:text-white transition-colors" disabled />
             </div>
-            <div>
-              <label class="block text-white mb-1" for="form-password">New Password</label>
-              <input id="form-password" type="password" placeholder="Keep current password or input new one here"
-                     class="w-full p-3 rounded-lg bg-gray-700 text-gray-400 disabled:bg-gray-700 disabled:text-gray-400 enabled:bg-gray-600 enabled:text-white transition-colors" disabled />
-            </div>
-            <div>
+                <div class="relative">
+                  <label class="block text-white mb-1" for="form-password">Password</label>
+                  <div class="relative">
+                    <input id="form-password" type="password" value="${passwordDots}"
+                           class="w-full p-3 rounded-lg bg-gray-700 text-gray-400 disabled:bg-gray-700 disabled:text-gray-400 enabled:bg-gray-600 enabled:text-white transition-colors" disabled readonly data-is-dummy="true" />
+                    <button type="button" id="password-toggle"
+                            class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-300">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      
+                        <g id="open-eye">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </g>
+                        <g id="closed-eye" class="hidden">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                        </g>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              <div>
               <label class="block text-white mb-1" for="form-avatar">Avatar Image</label>
               <input id="form-avatar" type="file" accept="image/*"
                      class="w-full p-3 rounded-lg bg-gray-700 text-gray-400 disabled:bg-gray-700 disabled:text-gray-400 enabled:bg-gray-600 enabled:text-white transition-colors" disabled />
@@ -165,12 +183,50 @@ export async function renderProfileContent(el: HTMLElement, bu: HTMLElement, gAr
   const saveModal = document.getElementById("save-modal") as HTMLDivElement;
   const cancelSaveBtn = document.getElementById("cancel-save") as HTMLButtonElement;
   const confirmSaveBtn = document.getElementById("confirm-save") as HTMLButtonElement;
+  const passwordToggle = document.getElementById('password-toggle');
+  const passwordInput = document.getElementById('form-password') as HTMLInputElement;
+  const openEye = document.getElementById('open-eye');
+  const closedEye = document.getElementById('closed-eye');
+
+
+  if (passwordInput && passwordToggle && openEye && closedEye) {
+    passwordToggle.addEventListener('click', () => {
+      const isPassword = passwordInput.type === 'password';
+      passwordInput.type = isPassword ? 'text' : 'password';
+      
+      // Toggle eye icons
+      if (isPassword) {
+        openEye.classList.add('hidden');
+        closedEye.classList.remove('hidden');
+      } else {
+        openEye.classList.remove('hidden');
+        closedEye.classList.add('hidden');
+      }
+    });
+  }
 
   editBtn.addEventListener("click", () => {
     inputs.forEach((input) => {
       input.disabled = false;
-      if (input.type !== "file") input.select();
+      
+      // Special handling for password field
+      if (input.id === 'form-password') {
+        const isDummy = input.getAttribute('data-is-dummy') === 'true';
+        
+        if (isDummy) {
+          // Clear the dummy  s when editing
+          input.value = '';
+          input.removeAttribute('readonly');
+          input.setAttribute('placeholder', 'Enter new password');
+          input.removeAttribute('data-is-dummy');
+        }
+        
+        if (input.type !== "file") input.select();
+      } else {
+        if (input.type !== "file") input.select();
+      }
     });
+    
     saveBtn.disabled = false;
     deleteBtn.disabled = false;
   });
@@ -214,7 +270,7 @@ export async function renderProfileContent(el: HTMLElement, bu: HTMLElement, gAr
       avatar: avatarPreview.src
     };
 
-    if (passwordInput.value.trim() !== "") {
+    if (passwordInput.value.trim() !== "" && !passwordInput.hasAttribute('data-is-dummy')) {
       updatedData.password = passwordInput.value;
     }
 
@@ -245,6 +301,18 @@ export async function renderProfileContent(el: HTMLElement, bu: HTMLElement, gAr
           setTimeout(() => successAlert.classList.add("hidden"), 500); // Wait for fade-out
         }, 4000);
         
+        //not sure:
+        passwordInput.type = 'password';
+        passwordInput.value = passwordDots;
+        passwordInput.setAttribute('readonly', 'true');
+        passwordInput.setAttribute('data-is-dummy', 'true');
+        passwordInput.removeAttribute('placeholder');
+        
+        // Reset eye icons to open state
+        if (openEye && closedEye) {
+          openEye.classList.remove('hidden');
+          closedEye.classList.add('hidden');
+        }
 
         inputs.forEach((input) => (input.disabled = true));
         saveBtn.disabled = true;
