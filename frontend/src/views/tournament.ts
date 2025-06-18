@@ -83,6 +83,7 @@ export function renderTournamentManagerContent(hideableElements) {
     </tbody></table>
     <!-- actual table of all public tournaments TODO -->
   `;
+  hideableElements.contentArea.innerHTML = tempHTML;
   const tournamentForm = document.getElementById('tournament-form') as HTMLFormElement;
   if (tournamentForm) {
     tournamentForm.addEventListener('submit', async (e) => {
@@ -95,7 +96,6 @@ export function renderTournamentManagerContent(hideableElements) {
       tnameEl.reset();
     });
   }
-  hideableElements.contentArea.innerHTML = tempHTML;
   hideableElements.startButton.hidden = true;
   hideableElements.giveupButton.hidden = true;
   hideableElements.gameArea.hidden = true;
