@@ -107,7 +107,6 @@ export async function renderHistoryContent(hideableElements) {
       nicnknameVs = JSON.parse(await respNn.text())?.nickname;
     }
     const thisdate = new Date(entry.date);
-    console.log(entry);
     tempInnerHTML += `<tr>
       <td>${thisdate.toDateString()}, ${thisdate.toTimeString()}</td>
       <td>${nicnknameVs}</td>
