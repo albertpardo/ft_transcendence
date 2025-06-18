@@ -48,16 +48,31 @@ export function renderTournamentContent(hideableElements) {
 export function renderTournamentManagerContent(hideableElements) {
   let tempHTML : string = `
     <h1 class="text-3xl font-bold mb-6">Tournament management</h1>
-    <p class="mb-4">You're already participating in a tournament</p>
-    <p class="mb-4">Create a tournament:</p>
+    <p class="font-bold mb-4 text-xl" style="color:coral">You're already participating in a tournament.</p>
+    <p class="mb-4 font-bold">Create a tournament:</p>
     <!-- form form form TODO XXX -->
       <form class="mt-8 space-y-6" id="tournament-form">
         <div>
-          <input id="tname" name="tname" type="text" required 
-            class="w-full px-3 py-2 text-gray-200 bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
+          <label for="players">Tournament name</label>
+          <input id="tname" name="tname" type="text" required
+            class="w-full px-3 py-2 text-gray-200 bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="Tournament name">
-            Tournament name
           </input>
+        </div>
+        <div>
+          <label for="players">Amount of participants</label>
+          <select id="players" name="players" required
+            class="w-full px-3 py-2 text-gray-200 bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder=2>
+            <option value=2>2</option>
+            <option value=4>4</option>
+            <option value=8>8</option>
+          </select>
+        </div>
+        <div>
+          <input type="checkbox" id="rprivate" name="rprivate"
+            checked />
+          <label for="rprivate">Make it private</label>
         </div>
         <div>
           <button type="submit" id="register-tournament-button"
@@ -90,10 +105,12 @@ export function renderTournamentManagerContent(hideableElements) {
       e.preventDefault();
       const submitButton = document.getElementById('register-tournament-button') as HTMLButtonElement;
       const tnameEl = document.getElementById('tname') as HTMLInputElement;
+      const playersEl = document.getElementById('players') as HTMLInputElement;
+      const checkboxEl = document.getElementById('rprivate') as HTMLInputElement;
       submitButton.disabled = true;
-      console.log("submitted:", tnameEl.value);
+      console.log("submitted:", tnameEl.value, playersEl.value, checkboxEl.checked);
       submitButton.disabled = false;
-      tnameEl.reset();
+      tournamentForm.reset();
     });
   }
   hideableElements.startButton.hidden = true;
