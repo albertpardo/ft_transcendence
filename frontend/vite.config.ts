@@ -11,6 +11,11 @@ export default defineConfig({
       key: fs.readFileSync('certs/front.key'),
       cert: fs.readFileSync('certs/front.cert'),
     },
+    root: './', 
+    build: {
+    outDir: 'dist',
+    emptyOutDir: true,
+  },
     proxy: {
       '/api': {
         target: 'https://backend:8443',
