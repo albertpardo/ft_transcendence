@@ -14,6 +14,15 @@ function makeid(length) {
    return result;
 }
 
+exports.getPublicNickname = async (userId) => {
+	const nick = db.getNicknameById(userId);
+	if (!nick) {
+		return { error: "couldn't get nickname; user might be non-existent" };
+	}
+	console.log("hit from backend/microservices/user_management/services/userService.js", nick);
+	return nick;
+}
+
 exports.signup = async (username, password, nickname, email, avatar = '') => {
     const existing = db.getUserByUsernameOrEmail(username, email);
     if (existing) return { error: 'This user already exists' };
