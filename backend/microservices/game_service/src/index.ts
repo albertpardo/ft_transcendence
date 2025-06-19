@@ -16,6 +16,7 @@ interface PongBodyReq {
 
 // TODO extra x-user-id to sock map maybe needs to be literally the same obj
 //as the one in the pong.ts file
+// on the other hand, these two maps perform slightly different functions, so...
 
 const upperSocksMap = new Map<string, WebSocket>();
 //const qs = fastQuerystring();

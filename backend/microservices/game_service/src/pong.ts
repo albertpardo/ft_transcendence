@@ -1,7 +1,7 @@
 import { addMatch, getAll } from './history';
 
 const ALPHA_MAX : number = 5*Math.PI/11;
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const FRAME_TIME : number = 1/30;
 const FRAME_TIME_MS : number = 1000 * FRAME_TIME;
 const WINDOW_SIZE : Vector2 = {x: 1280, y: 720};
@@ -277,9 +277,9 @@ class PongRuntime {
   };
 };
 
-const gamesMap = new Map();
-const playersMap = new Map();
-const socksMap = new Map();
+export const gamesMap = new Map();
+export const playersMap = new Map();
+export const socksMap = new Map();
 const needToSendStartedMap = new Map();
 const nullVec2 : Vector2 = {x: 0, y: 0};
 const nullBall : Ball = {speed: nullVec2, coords: nullVec2};

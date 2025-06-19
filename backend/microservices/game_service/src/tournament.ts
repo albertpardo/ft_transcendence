@@ -1,13 +1,41 @@
-import { makeid } from './pong';
+import { gamesMap, playersMap, socksMap, sleep, makeid } from './pong';
 
 class Tournament {
   private tName : string = "";
   private adminId : string = "";
-  private isItPrivate : bool = true;
+  private isItPrivate : boolean = true;
   private participantsIds : Array<string> = ["", "", "", "", "", "", "", ""];
   public stages : number = 1;
   public currentStage : number = 1;
   public tId : string = "";
+
+  private function checkEveryonePresent() {
+    for (let i : number = 0; i < Math.pow(2, this.currentStage); i++) {
+      if (participantsIds[i] === "") {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private function matchesOngoing() {
+    let res : Array<boolean> = [false, false, false, false, false, false, false, false];
+    for (let i : number = 0; i < Math.pow(2, this.currentStage); i++) {
+      if (participantsIds[i] !== "" && participantsIds[i] !== "failed") {
+        let playerId : string = participantsIds[i];
+        if (playersMap.has(playerId)) {
+          let gameId : string = playersMap.get(playerId);
+          if (gamesMap.has(gameId)) {
+            if (!(gamesMap.get(getId).pongDone)) {
+              res[i] = true;
+            }
+          }
+        }
+      }
+    }
+    const inlineIsTrue = (a) => a === true;
+    return (res.some(inlineIsTrue));
+  }
 
   // loop checking for players in ts
   //
@@ -40,4 +68,17 @@ class Tournament {
   // 7
   //  - failed
   // 8
+  public async function mainLoop() {
+    while (1) {
+      while (!this.checkEveryonePresent()) {
+        await sleep(5e3);
+      }
+      while (this.matchesOngoing()) {
+        await sleep(5e3);
+      }
+      this.currentStage -= 1;
+      if (this.currentStage === 0)
+        break ;
+    }
+  }
 }
