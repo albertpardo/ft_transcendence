@@ -1,7 +1,7 @@
 
 /// <reference path="./types/fastify-jwt.d.ts" />
 import { FastifyRequest, FastifyReply } from 'fastify';
-require('dotenv').config({ path: __dirname + '/../.env' });
+require('dotenv').config({ path: __dirname + '/../.env' }); 
 const Fastify = require('fastify');
 const http = require('http');
 

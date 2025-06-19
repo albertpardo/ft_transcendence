@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y \
 
 # Copy package.json and install deps
 COPY package*.json ./
-RUN npm install
+#RUN npm install
 
 # Install ts-node & typescript globally (or via devDeps)
 RUN npm install -g ts-node typescript ts-node-dev
@@ -28,9 +28,10 @@ EXPOSE 8443
 EXPOSE 10000
 # EXPOSE 8080
 
+RUN npm install dotenv
 # Run using ts-node (just like the local command)
 
-#CMD ["npm", "run", "dev"]
+CMD ["npm", "run", "dev"]
 #CMD ["node", "dist/index.js"]
 
-CMD ["npm", "run", "serve"]
+#CMD ["npm", "run", "serve"]

@@ -3,7 +3,17 @@ export async function renderProfileContent(el: HTMLElement, bu: HTMLElement, gAr
   gArea.hidden = true;
   gWin.hidden = true;
   const userId = localStorage.getItem('userId') || sessionStorage.getItem('userId');
-  const authToken : string = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+
+  const authToken: string = localStorage.getItem('authToken') || sessionStorage.getItem('authToken') || "";
+
+/*   const raw: string = localStorage.getItem('authToken') ?? sessionStorage.getItem('authToken') ?? "";
+  if (raw !== null) {
+    authToken = raw;
+    if (authToken === "") {
+      el.innerHTML = `<p class="text-red-500">You're not logged in. Please log in again.</p>`;
+      return;
+    }
+  } */
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   if (!authToken) {

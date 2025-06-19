@@ -8,6 +8,5 @@
     "esModuleInterop": true,
     "skipLibCheck": true
   },
-  "include": ["src"]
+  "include": ["src", "vite-env.d.ts"]
 }
-// This is a TypeScript configuration file for a frontend project. tbdeleted if does not work monday

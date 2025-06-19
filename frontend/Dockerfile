@@ -11,7 +11,7 @@ COPY . .
 
 
 # Build the frontend
-RUN npm run build
+# RUN npm run build
 
 # Install a lightweight HTTP server for static files
 RUN npm install -g serve
