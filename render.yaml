@@ -33,13 +33,15 @@ services:
     buildFilter:
       paths: 
         - backend/api-gateway/**
-    buildCommand: ""
-    startCommand: ""
+    # buildCommand: ""
+    # startCommand: ""
     envVars:
       - key: PORT
         value: "8443"
       - key: API_BASE_URL
         value: https://api-gateway-71gx.onrender.com
+      - key: HEALTH_PORT
+        value: "10000"
     healthCheckPath: /health
 
   - type: web
