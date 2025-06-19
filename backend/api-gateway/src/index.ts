@@ -17,14 +17,26 @@ const proxyPlugin = require('./plugins/proxy');
 const { rateLimitPlugin } = require('./plugins/rateLimit');
 const exampleRoutes = require('./routes/example');
 
+const isDev = process.env.NODE_ENV === 'development';
 
-const server = Fastify ({
-    logger: {
-        level: 'debug',
-    },
-    https: tlsConfig,
-}) 
-
+const server = isDev
+    ? Fastify({
+        logger: {
+            level: 'debug',
+        },
+        https: tlsConfig,
+        // ignoreTrailingSlash: true
+    })
+    : Fastify({
+        logger: true,
+        ignoreTrailingSlash: true
+    });
+    /* const server = Fastify ({
+        logger: {
+            level: 'debug',
+        },
+    }) 
+ */
 const healthServer = Fastify({
     logger: false,
     ignoreTrailingSlash: true
