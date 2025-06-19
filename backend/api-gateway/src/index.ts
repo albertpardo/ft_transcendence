@@ -35,6 +35,7 @@ const server = isDev
         logger: {
             level: 'debug',
         },
+        https: tlsConfig,
     }) 
  */
 const healthServer = Fastify({
