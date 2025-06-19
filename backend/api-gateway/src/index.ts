@@ -25,7 +25,7 @@ const server = Fastify ({
     https: tlsConfig,
 }) 
 
-const healthServer = Fastify({
+/* const healthServer = Fastify({
     logger: false,
     ignoreTrailingSlash: true
 });
@@ -49,15 +49,15 @@ healthServer.route({
         };
         return reply.code(200).send(response);
     }
-});
+}); */
 
-interface RootHealthResponse {
+/* interface RootHealthResponse {
     status: string;
     timestamp: string;
     processId: number;
-}
+} */
 
-healthServer.route({
+/* healthServer.route({
     method: ['GET', 'HEAD'],
     url: '/',
     handler: (_: FastifyRequest, reply: FastifyReply): FastifyReply => {
@@ -69,7 +69,7 @@ healthServer.route({
         };
         return reply.code(200).send(response);
     }
-});
+}); */
 
 interface RenderDebugConnectionInfo {
     remoteAddress: string | undefined;
@@ -82,7 +82,7 @@ interface RenderDebugResponse {
     time: Date;
 }
 
-healthServer.get('/render-debug', (request: FastifyRequest, reply: FastifyReply) => {
+/* healthServer.get('/render-debug', (request: FastifyRequest, reply: FastifyReply) => {
     const connection: RenderDebugConnectionInfo = {
         remoteAddress: request.socket?.remoteAddress,
         localPort: request.socket?.localPort
@@ -93,7 +93,7 @@ healthServer.get('/render-debug', (request: FastifyRequest, reply: FastifyReply)
         time: new Date()
     };
     reply.send(response);
-}); 
+}); */ 
 
 async function registerPlugin() {
     interface CorsOriginCallback {
@@ -149,7 +149,7 @@ async function registerPlugin() {
 }
 
 //start service (using HTTPS)
-async function start() {
+/* async function start() {
     try {
         // const HEALTH_PORT = process.env.RENDER ? 10000 : 8080;
         //const HEALTH_PORT = 10000;
@@ -187,4 +187,36 @@ async function start() {
     }
 }
 
-start()
+start() */
+
+async function start() {
+    try {
+        await registerPlugin();
+
+        // Register health check route
+        interface HealthCheckResponse {
+            status: string;
+        }
+
+        server.get('/health', async (req: FastifyRequest, reply: FastifyReply): Promise<HealthCheckResponse> => {
+            return { status: 'ok' };
+        });
+
+        // Register your routes
+        await server.register(exampleRoutes, { prefix: '/api' });
+
+        await server.ready();
+        console.log(server.printRoutes());
+
+        const PORT = Number(process.env.PORT || 8443); // fallback if local
+        const HOST = '0.0.0.0';
+
+        await server.listen({ port: PORT, host: HOST });
+        console.log(`Server listening on ${HOST}:${PORT}`);
+    } catch (err) {
+        server.log.error(err);
+        process.exit(1);
+    }
+}
+
+start();
