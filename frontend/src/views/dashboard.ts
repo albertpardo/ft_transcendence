@@ -136,6 +136,19 @@ export async function initDashboard() {
         case "connected":
 //          console.log("Welcome to pong.");
           break;
+        case "abandon":
+          started = false;
+          playerSide = "tbd";
+          leftUpArrow.hidden = true;
+          leftDownArrow.hidden = true;
+          rightUpArrow.hidden = true;
+          rightDownArrow.hidden = true;
+          gameText.style.visibility = "visible";
+          gameText.innerHTML = `
+          <tspan x="640" dy="1.2em">The match has been abandoned</tspan>
+          <tspan x="640" dy="1.2em">by either of the two players</tspan>`;
+          scoreText.innerHTML = "" + 0 + " : " + 0;
+          break;
         case "added: L":
           started = false;
           playerSide = "l";

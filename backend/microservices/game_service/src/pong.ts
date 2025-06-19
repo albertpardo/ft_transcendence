@@ -388,13 +388,42 @@ export function getPongState(gameId: string) : State {
   return nullState;
 }
 
+function sendOnAbandon(lp: string, rp: string) {
+  if (socksMap.has(lp)) {
+    socksMap.get(lp).send("abandon");
+  }
+  if (socksMap.has(rp)) {
+    socksMap.get(rp).send("abandon");
+  }
+}
+
 export function forefit(playerId: string) {
+  console.log(playerId, "has asked to forefit.");
   if (playersMap.has(playerId)) {
+    console.log("they are in the playersmap");
     const gameId = playersMap.get(playerId);
     if (gamesMap.has(gameId)) {
+      console.log("they are in a game");
+      if (gamesMap.get(gameId).pongStarted === false) {
+        console.log("the game hasn't started yet, so just remove them and the other player too and the game as well");
+        const lpid = gamesMap.get(gameId).LplayerId;
+        const rpid = gamesMap.get(gameId).RplayerId;
+        sendOnAbandon(lpid, rpid);
+        playersMap.delete(lpid);
+        playersMap.delete(rpid);
+        gamesMap.delete(gameId);
+        console.log("done. returning");
+        return ;
+      }
+      console.log("the game was already started, so making them lose");
       gamesMap.get(gameId).forefit(playerId);
+      console.log("giveup flag set");
+      return ;
     }
+    console.log("the gameid wasn't in the gamesmap");
+    return ;
   }
+  console.log("the playersmap didn't have the player");
 }
 
 export function moveMyPaddle(playerId: string, d: number) : PongResponses {
