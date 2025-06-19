@@ -31,7 +31,7 @@ EXPOSE 10000
 RUN npm install dotenv
 # Run using ts-node (just like the local command)
 
-CMD ["npm", "run", "dev"]
+#CMD ["npm", "run", "dev"]
 #CMD ["node", "dist/index.js"]
 
-#CMD ["npm", "run", "serve"]
+CMD ["npm", "run", "serve"]
