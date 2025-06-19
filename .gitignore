@@ -147,6 +147,7 @@ git-script.sh
 # backend/.gitignore
 #database.db
 users.db
+*.db
 
 .vscode/
 
@@ -155,3 +156,4 @@ users.db
 
 package-lock.json
 */package-lock.json
+Dockerfile_dev

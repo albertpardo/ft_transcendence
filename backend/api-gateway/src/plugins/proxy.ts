@@ -103,6 +103,18 @@ export default fp(async function (fastify: FastifyInstance) {
         [key: string]: any;
     }
 
+    interface OnRequestFastifyRequest extends FastifyRequest {
+        headers: {
+            origin?: string;
+            [key: string]: any;
+        };
+    } 
+
+    fastify.addHook('onRequest', async (req: OnRequestFastifyRequest, reply: FastifyReply): Promise<void> => {
+      reply.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+      reply.header('Access-Control-Allow-Credentials', 'true');
+    });
+
     fastify.addHook('onSend', async (req: FastifyRequest, reply: FastifyReply, payload: unknown): Promise<unknown> => {
         if ((req.url.startsWith('/api/login') || req.url.startsWith('/api/signup')) && reply.statusCode === 200) {
             try {

@@ -1,4 +1,5 @@
 import Fastify from 'fastify';
+import type { FastifyInstance } from 'fastify';
 import websocket from '@fastify/websocket';
 import type { FastifyRequest } from 'fastify';
 import cors from '@fastify/cors';
@@ -17,17 +18,44 @@ const startServer = async () => {
   const fastify = Fastify({ logger: true });
   await fastify.register(websocket);
 
-  await fastify.register(cors, {
-    origin: ['https://localhost:3000', 'https://127.0.0.1:3000'],
+  interface CorsOriginCallback {
+    (err: Error | null, allow?: boolean): void;
+  }
+
+  interface CorsOptions {
+    origin: (origin: string | undefined, cb: CorsOriginCallback) => void;
+    credentials: boolean;
+    allowedHeaders: string;
+    methods: string[];
+  }
+
+  await fastify.register(cors,
+    {
+      //origin: "*",
+    origin: (origin: string, cb: CorsOriginCallback) => {
+      const allowed = [
+        'http://localhost:5173',
+        'http://127.0.0.1:5173',
+        'https://localhost:3000',
+        'https://127.0.0.1:3000'
+      ];
+      if (!origin || allowed.includes(origin)) {
+        cb(null, true);
+        return;
+      }
+      cb(new Error("Not allowed by CORS"), false);
+      
+    },
     credentials: true,
     allowedHeaders: 'Access-Content-Allow-Origin,Content-Type,Authorization,Upgrade',
+    methods: ['GET', 'POST', 'OPTIONS'],
   });
 
   // start the meta loop of checking if any of the games are full enough to be started.
   gamesReadyLoopCheck();
 
   // Registra un plugin para prefijar las rutas API con '/api'
-  const apiRoutes = async (fastify) => {
+  const apiRoutes = async (fastify: FastifyInstance) => {
     fastify.get('/pong', async (request, reply) => {
       reply.headers({
         "Content-Security-Policy": "default-src 'self'",
@@ -35,16 +63,55 @@ const startServer = async () => {
       });
       return "Welcome to an \"html\" return for firefox testing purposes.<br>Enjoy your stay!";
     });
-    fastify.get('/pong/game-ws', { websocket: true }, async (sock, req: FastifyRequest<{ Body: PongBodyReq }>) => {
-      sock.on('message', message => {
-        sock.send("connected");
-        let jsonMsg = JSON.parse(message);
+    fastify.get('/pong/game-ws', { websocket: true },(socket /* WebSocket */, req /* FastifyRequest */) => {
+    socket.on('message', message => {
+      // message.toString() === 'hi from client'
+      let jsonMsg: PongBodyReq;
+        try {
+          jsonMsg = JSON.parse(message.toString()); // corrected
+        } catch (e) {
+          socket.send("error: invalid JSON"); // corrected
+          return; // corrected
+        }
         let playerId = jsonMsg?.playerId;
         let getIn = jsonMsg?.getIn;
         let mov = jsonMsg?.mov;
         if (typeof playerId !== "undefined" && playerId !== "") {
           if (typeof getIn !== "undefined" && getIn === true) {
-            const resp : PongResponses = addPlayerCompletely(playerId, sock);
+            const resp : PongResponses = addPlayerCompletely (playerId, socket);
+          }
+          else if (typeof mov !== "undefined") {
+            moveMyPaddle(playerId, mov);
+          }
+        }
+        else {
+          socket.send("error");
+        }
+      });
+      socket.on('close', event => {
+        removeTheSock(socket);
+      socket.send('hi from server')
+    })
+  })
+
+   // fastify.get('/pong/game-ws', { websocket: true }, async (sock, req: FastifyRequest<{ Body: PongBodyReq }>) => {
+   /*fastify.get('/pong/game-ws', { websocket: true }, (socket, req) => {  
+      socket.on('message', message => {
+        socket.send("connected");
+        //let jsonMsg = JSON.parse(message);
+        let jsonMsg: PongBodyReq;
+        try {
+          jsonMsg = JSON.parse(message.toString()); // corrected
+        } catch (e) {
+          socket.send("error: invalid JSON"); // corrected
+          return; // corrected
+        }
+        let playerId = jsonMsg?.playerId;
+        let getIn = jsonMsg?.getIn;
+        let mov = jsonMsg?.mov;
+        if (typeof playerId !== "undefined" && playerId !== "") {
+          if (typeof getIn !== "undefined" && getIn === true) {
+            const resp : PongResponses = addPlayerCompletely (playerId, sock);
           }
           else if (typeof mov !== "undefined") {
             moveMyPaddle(playerId, mov);
@@ -57,7 +124,7 @@ const startServer = async () => {
       sock.on('close', event => {
         removeTheSock(sock);
       });
-    });
+    }); */
   };
 
   fastify.register(apiRoutes, { prefix: '/api' });

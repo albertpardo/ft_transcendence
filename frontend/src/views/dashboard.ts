@@ -88,22 +88,30 @@ export function initDashboard() {
     </div>
   `;
 
-  const leftUpArrow: HTMLElement = document.getElementById("left-up");
-  const leftDownArrow : HTMLElement = document.getElementById("left-down");
-  const rightUpArrow : HTMLElement = document.getElementById("right-up");
-  const rightDownArrow : HTMLElement = document.getElementById("right-down");
-  const ball : HTMLElement = document.getElementById("ball");
-  const lpad : HTMLElement = document.getElementById("lpad");
-  const rpad : HTMLElement = document.getElementById("rpad");
-  let gameText : HTMLElement = document.getElementById("game-text");
+  const leftUpArrow: HTMLElement = document.getElementById("left-up") as HTMLElement;
+  const leftDownArrow : HTMLElement = document.getElementById("left-down") as HTMLElement;
+  const rightUpArrow : HTMLElement = document.getElementById("right-up") as HTMLElement;
+  const rightDownArrow : HTMLElement = document.getElementById("right-down") as HTMLElement;
+  const ball : HTMLElement = document.getElementById("ball") as HTMLElement;
+  const lpad : HTMLElement = document.getElementById("lpad") as HTMLElement;
+  const rpad : HTMLElement = document.getElementById("rpad") as HTMLElement;
+  let gameText : HTMLElement = document.getElementById("game-text") as HTMLElement;
   gameText.style.visibility = "hidden";
   // for some reason, doing a .hidden = false or true on this doesn't work.
-  const scoreText : HTMLElement = document.getElementById("score-text");
+  const scoreText : HTMLElement = document.getElementById("score-text") as HTMLElement;
 //  console.log(ball);
 //  console.log(lpad);
 //  console.log(rpad);
   //WEBSOCKET TIME!
-  const socket = new WebSocket("https://127.0.0.1:8443/api/pong/game-ws", [localStorage.getItem("authToken")]);
+  const token = localStorage.getItem("authToken");
+  if (!token) {
+    console.error("No auth token found in localStorage. Please log in first.");
+    return;
+  }
+  const socket = token 
+    ? new WebSocket("wss://127.0.0.1:8443/api/pong/game-ws", [token]) 
+    : new WebSocket("wss://127.0.0.1:8443/api/pong/game-ws");
+  // const socket = new WebSocket("https://127.0.0.1:8443/api/pong/game-ws", [localStorage.getItem("authToken") || ""]);
   //const socket = new WebSocket("https://127.0.0.1:8443/api/pong/game-ws");
   let gameState : State = nullState;
   let playerSide : string = "tbd";
@@ -143,10 +151,10 @@ export function initDashboard() {
         break;
       default:
         gameState = JSON.parse(event.data);
-        ball.setAttribute("cx", gameState.stateBall.coords.x);
-        ball.setAttribute("cy", gameState.stateBall.coords.y);
-        lpad.setAttribute("y", gameState.stateLP.y);
-        rpad.setAttribute("y", gameState.stateRP.y);
+        ball.setAttribute("cx", (gameState.stateBall.coords.x).toString());
+        ball.setAttribute("cy", (gameState.stateBall.coords.y).toString());
+        lpad.setAttribute("y", (gameState.stateLP.y).toString());
+        rpad.setAttribute("y", (gameState.stateRP.y).toString());
 
         if (gameState.stateWhoL !== "none" && gameState.stateWhoL !== "null state") {
           gameText.style.visibility = "visible";
