@@ -1,10 +1,19 @@
 module.exports = {
   content: [
-    "./public/**/*.html",
-    // "./public/assets/styles/**/*.css"
-    "./public/assets/styles/**.css"
+    ".index.html",
+    "./src/**/*.{js,ts,jsx,tsx}"
   ],
-  purge: [],
+  safelist: [ // ✅ prevents Tailwind from purging these
+    'bg-blue-500',
+    'text-white',
+    'p-4',
+    'text-xl',
+    'min-h-screen',
+    'flex',
+    'items-center',
+    'justify-center',
+    'bg-gray-900',
+  ],
   darkMode: false,
   theme: {
     extend: {},
