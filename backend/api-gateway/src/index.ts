@@ -137,6 +137,7 @@ async function registerPlugin() {
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
         allowedHeaders: [
             'Access-Content-Allow-Origin',
+
             'Content-Type',
             'Authorization',
             'Upgrade',
@@ -145,7 +146,7 @@ async function registerPlugin() {
         preflightContinue: false,
         optionsSuccessStatus: 204
     })
-    //JWT middleware
+    //JWT middleware 
     await server.register(jwt)
     await server.register(rateLimitPlugin)
     await server.register(authHook)
