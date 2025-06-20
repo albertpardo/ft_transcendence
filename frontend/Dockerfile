@@ -19,4 +19,4 @@ RUN npm install -g serve
 EXPOSE 3000
 EXPOSE 10000
 # CMD ["npm", "run", "dev"]
-CMD ["serve", "-s", "dist", "-l", "10000"]
+CMD ["serve", "-s", "dist", "-l", "3000"]
