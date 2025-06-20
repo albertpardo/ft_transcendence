@@ -4,7 +4,7 @@ services:
     #  - VITE_API_BASE_URL=https://backend:8443
     build:
       context: ./frontend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile_dev
     container_name: transcendence_frontend
     volumes:
       - ./frontend:/app
