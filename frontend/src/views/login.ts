@@ -145,7 +145,7 @@ export function renderLogin(appElement: HTMLElement) {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Access-Content-Allow-Origin': '*',
+            // 'Access-Content-Allow-Origin': '*',
                        
             'Accept': 'application/json,application/html,text/html,*/*',
           //  'Origin': 'https://127.0.0.1:3000/',//comment me out for production
