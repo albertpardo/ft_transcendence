@@ -15,7 +15,7 @@ export async function authMiddleware(req: FastifyRequest, reply: FastifyReply) {
 
 
     // if requested URL is public, skip auth
-    const publicPaths = ['/api/signup', '/api/login', '/api/public'];
+    const publicPaths = ['/api/signup', '/api/login', '/api/public', '/api/health'];
     if (publicPaths.some(path => req.url?.startsWith(path))) return;
     // if (publicPaths.some(path => req.url?.startsWitth('/health'))) return; // allow health check without auth
     if (req.url?.startsWith('/health')) return; // allow health check without auth
