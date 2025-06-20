@@ -118,18 +118,12 @@ async function registerPlugin() {
 
     
     await server.register(fastifyCors, {
-        origin: '*',
-        /*  origin: (origin: string | undefined, cb: CorsOriginCallback) => {
+        //origin: '*',
+          origin: (origin: string | undefined, cb: CorsOriginCallback) => {
 
             if (!origin) return cb(null, true);
 
             const allowedOrigins = new Set([
-                'http://localhost:3000',
-                'http://127.0.0.1:3000',
-                'https://localhost:3000',
-                'https://127.0.0.1:3000',
-                'https://frontend:3000',
-                'https://frontend-7nt4.onrender.com', 
                 '*',
             ]);
             if (allowedOrigins.has(origin)) {
@@ -137,7 +131,7 @@ async function registerPlugin() {
             } else {
                 cb(new Error("Not allowed by CORS"), false);
             }
-        }, */
+        }, 
 
         credentials: true,
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
