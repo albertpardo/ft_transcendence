@@ -124,6 +124,7 @@ async function registerPlugin() {
             if (!origin) return cb(null, true);
 
             const allowedOrigins = new Set([
+                'https://frontend-7nt4.onrender.com',
                 '*',
             ]);
             if (allowedOrigins.has(origin)) {
@@ -137,7 +138,6 @@ async function registerPlugin() {
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
         allowedHeaders: [
             'Access-Content-Allow-Origin',
-
             'Content-Type',
             'Authorization',
             'Upgrade',
