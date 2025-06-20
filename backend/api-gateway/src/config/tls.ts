@@ -7,6 +7,7 @@ const tlsOptions = {
     key: fs.readFileSync(path.join(certPath, 'key.pem')),
     cert: fs.readFileSync(path.join(certPath, 'cert.pem')),
     allowHTTP1: true,
+    allowHTTP2: false,
 }
 
 module.exports = {
