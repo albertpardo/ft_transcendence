@@ -111,8 +111,7 @@ export function initDashboard() {
   const socket = token 
     ? new WebSocket("wss://127.0.0.1:8443/api/pong/game-ws", [token]) 
     : new WebSocket("wss://127.0.0.1:8443/api/pong/game-ws");
-  // const socket = new WebSocket("https://127.0.0.1:8443/api/pong/game-ws", [localStorage.getItem("authToken") || ""]);
-  //const socket = new WebSocket("https://127.0.0.1:8443/api/pong/game-ws");
+ 
   let gameState : State = nullState;
   let playerSide : string = "tbd";
   let started : boolean = false;

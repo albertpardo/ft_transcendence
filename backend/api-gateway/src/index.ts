@@ -176,15 +176,18 @@ async function start() {
         await server.register(exampleRoutes, { prefix: '/api' })
 
         // print all the routes
-        await server.ready()
-        server.listen({ port:8443, host: '0.0.0.0' }, (err: Error, address: string) => {
+        await server.ready();
+        const address = await server.listen({ port: Number(process.env.PORT), host: '0.0.0.0' });
+        server.log.info(`Server listening on ${address}`)
+
+        /* server.listen({ port:8443, host: '0.0.0.0' }, (err: Error, address: string) => {
             if (err) {
                 server.log.error(err)
                 process.exit(1)
             }
             server.log.info(`Server listening on ${address}`)
         })
-        console.log(`HTTP health check server listening on ${process.env.HEALTH_PORT}`);
+ */        console.log(`HTTP health check server listening on ${process.env.HEALTH_PORT}`);
         console.log(server.printRoutes());
     } catch (err) {
         server.log.error(err)
