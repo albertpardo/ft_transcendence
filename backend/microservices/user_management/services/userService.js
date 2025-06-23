@@ -40,6 +40,7 @@ exports.verifyUser = async (username, password) => {
 exports.login = async (username, password) => {
     const user = db.getUserByUsername(username);
     if (!user) return { error: 'This user does not exist!' };
+    console.log("💥 reecieved login request: *** ", username, " *** 💥");
 
     const valid = await bcrypt.compare(password, user.password);
     if (!valid) return { error: 'Password is incorrect!' };
