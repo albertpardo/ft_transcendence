@@ -142,10 +142,9 @@ export default fp(async function (fastify: FastifyInstance): Promise<void> {
                 });
             } catch (err) {
                 console.error('⚠️ Failed to parse payload or generate token:', err);
-                return payload; // fallback to original
+                return payload;
             }
         }
-
-        return payload; // return original response by default
+        return payload;
     });
 });
