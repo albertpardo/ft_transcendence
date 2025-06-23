@@ -66,13 +66,20 @@ export default fp(async function (fastify: FastifyInstance): Promise<void> {
                     .send();
                 return;
             }
+            const auth = req.headers['authorization'];
+            if (!auth) {
+                console.warn('❌ No Authorization header found in request');
+                return reply.code(401).send({ error: 'Missing Authorization header' });
+            }
             console.log('🚀 rewriteRequestHeaders - forwarded auth:', req.headers.authorization);
             console.log('🔐🔐 Authorization Header:', req.headers['authorization']);
 
             try {
-                console.log('🔍🔐 Raw Authorization Header:', JSON.stringify(req.headers.authorization));
+               // console.log('🔍🔐 Raw Authorization Header:', JSON.stringify(req.headers.authorization));
                 console.log('🔍🔐 JWT Secret in use:', process.env.JWT_SECRET);
-                await (req as FastifyRequest).jwtVerify();
+                console.log(`🔍🔐 Aurthorization header**** -> : ${auth}`);
+                await req.jwtVerify();
+                // await (req as FastifyRequest).jwtVerify();
                 console.log("🔐 Verified JWT in proxy preHandler");
                 const userId = (req as FastifyRequest).user?.userId;
                 if (userId) {
