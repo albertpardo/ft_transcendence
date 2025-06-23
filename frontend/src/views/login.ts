@@ -145,10 +145,7 @@ export function renderLogin(appElement: HTMLElement) {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            // 'Access-Content-Allow-Origin': '*',
-                       
             'Accept': 'application/json,application/html,text/html,*/*',
-          //  'Origin': 'https://127.0.0.1:3000/',//comment me out for production
           },
           body: JSON.stringify({ username, password }),
           credentials: 'include',
@@ -156,12 +153,9 @@ export function renderLogin(appElement: HTMLElement) {
         });
 
         const data = await response.json();
-//        console.log("in login, received data:", data);
 
         if (!response.ok || data.error) {
           throw new Error(data.error || 'Login failed');
-//          const errorData = await response.json();
-//          throw new Error(errorData.message || 'Login failed');
         }
        
        localStorage.setItem('authToken', data.token);
