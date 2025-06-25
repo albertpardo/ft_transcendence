@@ -9,6 +9,25 @@ class Tournament {
   public currentStage : number = 1;
   public tId : string = "";
 
+  constructor(tName: string, adminId: string, isItPrivate: boolean = true, playersN: number) {
+    this.tName = tName;
+    this.adminId = adminId;
+    this.isItPrivate = isItPrivate;
+    switch (playersN) {
+      case 2:
+        this.stages = 1;
+        break;
+      case 4:
+        this.stages = 2;
+        break;
+      case 8:
+        this.stages = 3;
+        break;
+      default:
+        this.stages = 0;
+    }
+  }
+
   private function checkEveryonePresent() {
     for (let i : number = 0; i < Math.pow(2, this.currentStage); i++) {
       if (participantsIds[i] === "") {
@@ -76,9 +95,18 @@ class Tournament {
       while (this.matchesOngoing()) {
         await sleep(5e3);
       }
+      // TODO add the moving people on phase here
       this.currentStage -= 1;
       if (this.currentStage === 0)
         break ;
     }
   }
+}
+
+export function addTournament(tName: string, playersN: number, privacy: boolean, uuid: string) {
+  if (adminMap.has(uuid)) {
+    throw "player already manages a tournament";
+  }
+  adminMap.set(uuid, makeid(64));
+  tournamentMap.set(adminMap.get(uuid), Tournament(tName, uuid, privacy, playersN));
 }

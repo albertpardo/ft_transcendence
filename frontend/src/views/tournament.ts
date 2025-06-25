@@ -45,7 +45,31 @@ export function renderTournamentContent(hideableElements) {
   hideableElements.gameWindow.hidden = true;
 }
 
-export function renderTournamentManagerContent(hideableElements) {
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+async function createTournament(tName : string, playersN : number, privacy : boolean) {
+  const fresp = fetch(
+    `${API_BASE_URL}/api/pong/tour/enroll`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json,application/html,text/html,*/*',
+        'Origin': 'https://127.0.0.1:3000/',
+        'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
+      },
+      body: JSON.stringify({
+        tName: tName,
+        playersN: playersN,
+        privacy: privacy,
+      }),
+      credentials: 'include',
+      mode: 'cors',
+    }
+  );
+}
+
+export async function renderTournamentManagerContent(hideableElements) {
   let tempHTML : string = `
     <h1 class="text-3xl font-bold mb-6">Tournament management</h1>
     <p class="font-bold mb-4 text-xl" style="color:coral">You're already participating in a tournament.</p>
@@ -108,7 +132,7 @@ export function renderTournamentManagerContent(hideableElements) {
       const playersEl = document.getElementById('players') as HTMLInputElement;
       const checkboxEl = document.getElementById('rprivate') as HTMLInputElement;
       submitButton.disabled = true;
-      console.log("submitted:", tnameEl.value, playersEl.value, checkboxEl.checked);
+      await createTournament(tnameEl.value, playersEl.value, checkboxEl.checked);
       submitButton.disabled = false;
       tournamentForm.reset();
     });

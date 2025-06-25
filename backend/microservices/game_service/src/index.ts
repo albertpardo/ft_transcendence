@@ -4,6 +4,7 @@ import type { FastifyRequest } from 'fastify';
 import cors from '@fastify/cors';
 import { PongResponses, State, addPlayerCompletely, removeTheSock, getPongDoneness, getPongState, forefit, moveMyPaddle, gamesReadyLoopCheck, dataStreamer } from './pong';
 import { historyMain, getHistForPlayerFromDb } from './history';
+import { addTournament } from './tournament';
 
 interface PongBodyReq {
   playerId: string,
@@ -93,6 +94,15 @@ const startServer = async () => {
     fastify.post('/pong/hist', async (req: FastifyRequest<{ Body: {userId: string} }>, reply) => {
       const resp = await getHistForPlayerFromDb(req?.body.userId);
       return JSON.stringify(resp);
+    });
+    fastify.post('/pong/tour/enroll', async (req: FastifyRequest<{ Body: {tName: string, playersN: number, privacy: boolean} }>, reply) => {
+      try {
+        const resp = addTournament(req?.body.tName, req?.body.playersN, req?.body.privacy, req?.headers['x-user-id']);
+        return (resp);
+      }
+      catch (e) {
+        return (e);
+      }
     });
   };
 
