@@ -2,7 +2,17 @@ require('dotenv').config();
 const fastify = require('fastify')({ logger: true });
 const userRoutes = require('./routes/user');
 
-fastify.register(userRoutes);
+fastify.register(userRoutes, { prefix: '/api/user' });
+
+process.on('unhandledRejection', (err) => {
+    fastify.log.error(err);
+    process.exit(1);
+});
+
+process.on('uncaughtException', (err) => {
+    fastify.log.error(err);
+    process.exit(1);
+});
 
 const start = async () => {
     try {
