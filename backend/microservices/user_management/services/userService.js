@@ -15,6 +15,7 @@ function makeid(length) {
 }
 
 exports.signup = async (username, password, nickname, email) => {
+   try {
     const existing = db.getUserByUsernameOrEmail(username, email);
     if (existing) return { error: 'This user already exists' };
 
@@ -27,6 +28,10 @@ exports.signup = async (username, password, nickname, email) => {
 	console.log(localid);
     const user = db.createUser({ id: localid, username, password: hashed, nickname, email});
     return { id: user.id, username: user.username };
+   } catch (error) {
+    console.error("Error during signup:", error);
+    return { error: 'An error occurred during signup' };
+   }
 }
 
 exports.verifyUser = async (username, password) => {

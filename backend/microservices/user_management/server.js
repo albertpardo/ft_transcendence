@@ -4,6 +4,16 @@ const userRoutes = require('./routes/user');
 
 fastify.register(userRoutes, { prefix: '/api/user' });
 
+process.on('unhandledRejection', (err) => {
+    fastify.log.error(err);
+    process.exit(1);
+});
+
+process.on('uncaughtException', (err) => {
+    fastify.log.error(err);
+    process.exit(1);
+});
+
 const start = async () => {
     try {
         await fastify.listen({ port: process.env.PORT || 9001, host: '0.0.0.0' });
