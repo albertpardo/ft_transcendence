@@ -41,8 +41,7 @@ const startServer = async () => {
   const apiRoutes = async (fastify) => {
     fastify.get('/pong/game-ws', { websocket: true }, async (sock, req: FastifyRequest<{ Body: PongBodyReq }>) => {
       const usp2 = new URLSearchParams(req.url);
-      console.log("usp2:", usp2);
-      let playerId : string = usp2.get("uuid") as string;
+      let playerId : string = usp2.get("/api/pong/game-ws?uuid") as string;
       upperSocksMap.set(playerId, sock);
       sock.on('message', message => {
         sock.send("connected");

@@ -23,10 +23,9 @@ export async function authMiddleware(req: FastifyRequest, reply: FastifyReply) {
     try {
 //        if (req?.headers['sec-websocket-protocol'] !== null) {
         const usp1 = new URLSearchParams(req.url);
-        console.log("usp1:", usp1);
-        if (req.headers.upgrade === "websocket") {
+        if (req.headers["upgrade"] === "websocket") {
           itwasasocket = true;
-          req.headers["authorization"] = usp1.get("authorization");
+          req.headers["authorization"] = "Bearer " + usp1.get("authorization");
         }
        
         console.log('🔍 Raw Authorization Header inside try00:', String(req.headers['authorization']));
@@ -50,7 +49,7 @@ export async function authMiddleware(req: FastifyRequest, reply: FastifyReply) {
         const userId = (req.user as any)?.userId;
         if (userId) {
             if (itwasasocket) {
-              if (usp1.get("uuid") !== userId) {
+              if (usp1.get("/api/pong/game-ws?uuid") !== userId) {
                 throw "uuid mismatch";
               }
             }
