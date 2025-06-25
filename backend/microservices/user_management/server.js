@@ -2,7 +2,7 @@ require('dotenv').config();
 const fastify = require('fastify')({ logger: true });
 const userRoutes = require('./routes/user');
 
-fastify.register(userRoutes);
+fastify.register(userRoutes, { prefix: '/api/user' });
 
 const start = async () => {
     try {
