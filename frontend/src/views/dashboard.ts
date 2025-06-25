@@ -128,7 +128,7 @@ export async function initDashboard() {
   // FIXME unused. remove or use.
   let started : boolean = false;
   if (localStorage.getItem("authToken")) {
-    socket = new WebSocket(`https://127.0.0.1:8443/api/pong/game-ws?uuid=${localStorage.getItem('userId')}`, [localStorage.getItem("authToken")]);
+    socket = new WebSocket(`https://127.0.0.1:8443/api/pong/game-ws?uuid=${localStorage.getItem("userId")}&authorization=${localStorage.getItem("authToken")}`);
     socket.addEventListener("message", (event) => {
 //      console.log("I, a tokened player, receive:", event.data);
       // XXX maybe a try catch? idk if it'd crash or something on a wrong input
