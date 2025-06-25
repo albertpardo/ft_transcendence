@@ -14,6 +14,11 @@ process.on('uncaughtException', (err) => {
     process.exit(1);
 });
 
+// Health check route
+fastify.get('/health', async (req, reply) => {
+    return { status: 'ok', time: new Date().toISOString() };
+});
+
 const start = async () => {
     try {
         await fastify.listen({ port: process.env.PORT || 9001, host: '0.0.0.0' });
@@ -25,3 +30,4 @@ const start = async () => {
 };
 
 start();
+ 
