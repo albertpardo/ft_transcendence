@@ -40,7 +40,8 @@ const startServer = async () => {
   // Registra un plugin para prefijar las rutas API con '/api'
   const apiRoutes = async (fastify) => {
     fastify.get('/pong/game-ws', { websocket: true }, async (sock, req: FastifyRequest<{ Body: PongBodyReq }>) => {
-      let playerId : string = req?.url.substring(req.url.search("uuid=") + 5) as string;
+      const usp2 = new URLSearchParams(req.url);
+      let playerId : string = usp2.get("/api/pong/game-ws?uuid") as string;
       upperSocksMap.set(playerId, sock);
       sock.on('message', message => {
         sock.send("connected");
