@@ -11,6 +11,7 @@ exports.login = async (request, reply) => {
     const { username, password } = request.body;
     console.log('🟡 Login Request:', request.body);
     const result = await userService.login(username, password);
+    console.log("result of the final login func:", result);
 
     if (result.error) {
         return reply.code(401).send({ error: '🧸 Invalid credentials' });
