@@ -67,6 +67,7 @@ async function createTournament(tName : string, playersN : number, privacy : boo
       mode: 'cors',
     }
   );
+  return fresp;
 }
 
 export async function renderTournamentManagerContent(hideableElements) {
@@ -132,7 +133,8 @@ export async function renderTournamentManagerContent(hideableElements) {
       const playersEl = document.getElementById('players') as HTMLInputElement;
       const checkboxEl = document.getElementById('rprivate') as HTMLInputElement;
       submitButton.disabled = true;
-      await createTournament(tnameEl.value, playersEl.value, checkboxEl.checked);
+      const fresp = await createTournament(tnameEl.value, playersEl.value, checkboxEl.checked);
+      console.log(fresp);
       submitButton.disabled = false;
       tournamentForm.reset();
     });

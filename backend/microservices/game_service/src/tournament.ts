@@ -9,6 +9,17 @@ class Tournament {
   public currentStage : number = 1;
   public tId : string = "";
 
+  public function addParticipant(participantId: string) {
+    let i : number = 0;
+    while (i < Math.pow(2, this.currentStage) && this.participantsIds[i] !== "") {
+      i += 1;
+    }
+    if (i === Math.pow(2, this.currentStage)) {
+      throw "everyone is already in";
+    }
+    this.participantsIds[i] = participantId;
+  }
+
   constructor(tName: string, adminId: string, isItPrivate: boolean = true, playersN: number) {
     this.tName = tName;
     this.adminId = adminId;
@@ -89,24 +100,37 @@ class Tournament {
   // 8
   public async function mainLoop() {
     while (1) {
+      console.log("tour: before everyone present");
       while (!this.checkEveryonePresent()) {
         await sleep(5e3);
       }
+      console.log("tour: after everyone present, before ongoing");
       while (this.matchesOngoing()) {
         await sleep(5e3);
       }
+      console.log("tour: after ongoing");
       // TODO add the moving people on phase here
       this.currentStage -= 1;
-      if (this.currentStage === 0)
+      if (this.currentStage <= 0) {
+        console.log("tour: bye");
         break ;
+      }
     }
   }
 }
+
+let adminMap = new Map<string, string>();
+let tournamentMap = new Map<string, Tournament>();
 
 export function addTournament(tName: string, playersN: number, privacy: boolean, uuid: string) {
   if (adminMap.has(uuid)) {
     throw "player already manages a tournament";
   }
-  adminMap.set(uuid, makeid(64));
-  tournamentMap.set(adminMap.get(uuid), Tournament(tName, uuid, privacy, playersN));
+  const touridtoadd = makeid(64);
+  adminMap.set(uuid, touridtoadd);
+  const tourtoadd = new Tournament(tName, uuid, privacy, playersN);
+  tournamentMap.set(touridtoadd, tourtoadd);
+  console.log("so here's what the current maps are r/n:");
+  console.log(adminMap);
+  console.log(tournamentMap);
 }
