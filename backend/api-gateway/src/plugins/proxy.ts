@@ -123,13 +123,23 @@ export default fp(async function (fastify: FastifyInstance): Promise<void> {
     ) => {
         if ((req.url.startsWith('/api/login') || req.url.startsWith('/api/signup')) && reply.statusCode === 200) {
             try {
+                console.log("entered the try block");
                 let body;
                 if (payload && typeof (payload as Readable).read === 'function') {
+                    console.log("if number 1");
                     const raw: Buffer = await getRawBody(payload as Readable);
+                    console.log("getrawbody success");
+                    console.log(raw);
+                    console.log("and now, raw to string:", raw.toString());
                     body = JSON.parse(raw.toString());
+                    console.log("json parse success");
                 } else if (typeof payload === 'string') {
+                    console.log("if number 2");
+                    console.log("payload found to be", payload);
                     body = JSON.parse(payload);
+                    console.log("json parse success");
                 } else {
+                    console.log("if number 3");
                     body = payload;
                 }
                 console.log('📦 Final parsed payload:', body);
