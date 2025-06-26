@@ -6,13 +6,14 @@ console.log("🛡️ Auth middleware loaded!");
 // JWT verification using authMiddleware
 export async function authMiddleware(req: FastifyRequest, reply: FastifyReply) {
 
-    console.log("🔍 Incoming request URL:", req.url);
-    console.log("🔍 jwtVerify type in middleware:", typeof req.jwtVerify);
-    console.log("🔍🔍🔍 All keys on req:", Object.keys(req));
+    if (!(req.url?.startsWith('/health'))) {
+        console.log("🔍 Incoming request URL:", req.url);
+        console.log("🔍 jwtVerify type in middleware:", typeof req.jwtVerify);
+        console.log("🔍🔍🔍 All keys on req:", Object.keys(req));
 
-    console.log('🔍 Full headers before jwtVerify:', req.headers);
-    console.log('🔍 Authorization Header outside try:', String(req.headers['authorization']));
-
+        console.log('🔍 Full headers before jwtVerify:', req.headers);
+        console.log('🔍 Authorization Header outside try:', String(req.headers['authorization']));
+    }
 
     // if requested URL is public, skip auth
     const publicPaths = ['/api/signup', '/api/login', '/api/public', '/api/health'];
