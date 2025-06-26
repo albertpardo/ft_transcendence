@@ -130,7 +130,12 @@ export default fp(async function (fastify: FastifyInstance): Promise<void> {
                     const raw: Buffer = await getRawBody(payload as Readable);
                     console.log("getrawbody success");
                     console.log(raw);
-                    console.log("and now, raw to string:", raw.toString());
+                    console.log("and now, raw to string:");
+                    console.log('utf8', raw.toString('utf8'));
+                    console.log('lat1', raw.toString('latin1'));
+                    console.log('asc', raw.toString('ascii'));
+                    console.log('hex', raw.toString('hex'));
+                    console.log('64', raw.toString('base64'));
                     body = JSON.parse(raw.toString());
                     console.log("json parse success");
                 } else if (typeof payload === 'string') {
