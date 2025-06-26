@@ -127,7 +127,8 @@ export function renderLogin(appElement: HTMLElement) {
       const password = (document.getElementById('password') as HTMLInputElement).value;
       const errorElement = document.getElementById('login-error') as HTMLElement;
       const submitButton = document.getElementById('submit-button') as HTMLButtonElement;
-      
+      console.log("okay, so we're trying to send username and passowrd:", username, password);
+      console.log("the object:", {username: username, password: password});
       // Clear previous errors
       errorElement.classList.add('hidden');
       errorElement.textContent = '';
@@ -147,7 +148,7 @@ export function renderLogin(appElement: HTMLElement) {
             'Content-Type': 'application/json',
             'Accept': 'application/json,application/html,text/html,*/*',
           },
-          body: JSON.stringify({ username, password }),
+          body: JSON.stringify({ username: username, password: password }),
           credentials: 'include',
           mode: 'cors',
         });
@@ -221,7 +222,7 @@ export function renderLogin(appElement: HTMLElement) {
               'Accept': 'application/json,application/html,text/html,*/*',
              // 'Origin': 'https://127.0.0.1:3000/',
             },
-            body: JSON.stringify({ nickname, username, email ,password }),
+            body: JSON.stringify({ nickname: nickname, username: username, email: email , password: password }),
             credentials: 'include',
             mode: 'cors',
         });
