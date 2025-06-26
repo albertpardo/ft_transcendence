@@ -3,8 +3,8 @@ const userService = require('../services/userService');
 exports.signup = async (request, reply) => {
     const { username, password, nickname, email } = request.body;
     const result = await userService.signup(username, password, nickname, email);
-    if (result.error) return reply.code(400).send(result);
-    return reply.send(result);
+    if (result.error) reply.code(400).send(result);
+    reply.send(result);
 };
 
 exports.login = async (request, reply) => {
@@ -14,28 +14,28 @@ exports.login = async (request, reply) => {
     console.log("result of the final login func:", result);
 
     if (result.error) {
-        return reply.code(401).send({ error: '🧸 Invalid credentials' });
+        reply.code(401).send({ error: '🧸 Invalid credentials' });
     }
 
     console.log('🎏 username and password are correct!');
 
-    return reply.send(result);
+    reply.send(result);
 };
 
 exports.getProfile = async (request, reply) => {
     const userId = request.headers['x-user-id'];
-    if (!userId) return reply.code(401).send({ error: 'Unauthorized' });
+    if (!userId) reply.code(401).send({ error: 'Unauthorized' });
     console.log("📦 userId from header:", userId);
 
     const userInfo = await userService.getProfile(userId);
-    return reply.send(userInfo);    
+    reply.send(userInfo);    
 }
 
 exports.updateProfile = async (request, reply) => {
     console.log('🧩 updateProfile triggered');
     console.log('📦 userId from header:', request.headers['x-user-id']);
     const userId = request.headers['x-user-id'];
-    if (!userId) return reply.code(401).send({ error: 'Unauthorized' });
+    if (!userId) reply.code(401).send({ error: 'Unauthorized' });
 
     const { username, nickname, email, password, avatar } = request.body;
 /*
@@ -51,15 +51,15 @@ exports.updateProfile = async (request, reply) => {
         avatar
     });
 
-    if (result.error) return reply.code(400).send(result);
-    return reply.send({ message: "🏄 Profile updated successfully" });
+    if (result.error) reply.code(400).send(result);
+    reply.send({ message: "🏄 Profile updated successfully" });
 }
 
 exports.deleteProfile = async (request, reply) => {
     const userId = request.headers['x-user-id'];
-    if (!userId) return reply.code(401).send({ error: 'Unauthorized' });
+    if (!userId) reply.code(401).send({ error: 'Unauthorized' });
 
     const result = await userService.deleteProfile(userId);
-    if (result.error) return reply.code(400).send(result);
-    return reply.send({ message: "🏊 Profile deleted successfully" });
+    if (result.error) reply.code(400).send(result);
+    reply.send({ message: "🏊 Profile deleted successfully" });
 }
