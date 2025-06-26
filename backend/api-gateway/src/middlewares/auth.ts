@@ -14,13 +14,6 @@ export async function authMiddleware(req: FastifyRequest, reply: FastifyReply) {
         console.log('🔍 Full headers before jwtVerify:', req.headers);
         console.log('and the wonderful request raw shall be:');
         console.log(req.raw);
-        console.log('and the probably crashes the code body raw:');
-        try {
-            console.log(req.body.raw);
-        }
-        catch {
-            console.log("whoops");
-        }
         console.log('🔍 Authorization Header outside try:', String(req.headers['authorization']));
     }
 
