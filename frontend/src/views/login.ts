@@ -153,8 +153,8 @@ export function renderLogin(appElement: HTMLElement) {
           mode: 'cors',
         });
 
-	const intermediate0 = await response.text();
-	console.log(intermediate0);
+//	const intermediate0 = await response.text();
+//	console.log(intermediate0);
         const data = await response.json();
 
         if (!response.ok || data.error) {
@@ -227,8 +227,8 @@ export function renderLogin(appElement: HTMLElement) {
             mode: 'cors',
         });
 
-	const intermediate = await response.text();
-	console.log(intermediate);
+//	const intermediate = await response.text();
+//	console.log(intermediate);
 
 //        console.log(response);
         if (!response.ok) {
