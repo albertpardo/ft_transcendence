@@ -9,7 +9,7 @@ class Tournament {
   public currentStage : number = 1;
   public tId : string = "";
 
-  public function addParticipant(participantId: string) {
+  public addParticipant(participantId: string) {
     let i : number = 0;
     while (i < Math.pow(2, this.currentStage) && this.participantsIds[i] !== "") {
       i += 1;
@@ -24,39 +24,51 @@ class Tournament {
     this.tName = tName;
     this.adminId = adminId;
     this.isItPrivate = isItPrivate;
+    console.log("so. the playersN is...", playersN);
+    console.log(typeof playersN);
     switch (playersN) {
       case 2:
+        console.log("2");
         this.stages = 1;
         break;
       case 4:
+        console.log("4");
         this.stages = 2;
         break;
       case 8:
+        console.log("8");
         this.stages = 3;
         break;
       default:
+        console.log("how.");
         this.stages = 0;
     }
+    this.currentStage = this.stages;
+    this.addParticipant(adminId);
   }
 
-  private function checkEveryonePresent() {
+  private checkEveryonePresent() {
+    if (this.stages === 0) {
+      return true;
+    }
     for (let i : number = 0; i < Math.pow(2, this.currentStage); i++) {
-      if (participantsIds[i] === "") {
+      if (this.participantsIds[i] === "") {
+        console.log("hha! participant", i, "of", Math.pow(2, this.currentStage), "is not present");
         return false;
       }
     }
     return true;
   }
 
-  private function matchesOngoing() {
+  private matchesOngoing() {
     let res : Array<boolean> = [false, false, false, false, false, false, false, false];
     for (let i : number = 0; i < Math.pow(2, this.currentStage); i++) {
-      if (participantsIds[i] !== "" && participantsIds[i] !== "failed") {
-        let playerId : string = participantsIds[i];
+      if (this.participantsIds[i] !== "" && this.participantsIds[i] !== "failed") {
+        let playerId : string = this.participantsIds[i];
         if (playersMap.has(playerId)) {
           let gameId : string = playersMap.get(playerId);
           if (gamesMap.has(gameId)) {
-            if (!(gamesMap.get(getId).pongDone)) {
+            if (!(gamesMap.get(gameId).pongDone)) {
               res[i] = true;
             }
           }
@@ -98,7 +110,7 @@ class Tournament {
   // 7
   //  - failed
   // 8
-  public async function mainLoop() {
+  public mainLoop = async () => {
     while (1) {
       console.log("tour: before everyone present");
       while (!this.checkEveryonePresent()) {
@@ -128,7 +140,9 @@ export function addTournament(tName: string, playersN: number, privacy: boolean,
   }
   const touridtoadd = makeid(64);
   adminMap.set(uuid, touridtoadd);
+  console.log("the playersnum shall be...", playersN);
   const tourtoadd = new Tournament(tName, uuid, privacy, playersN);
+  tourtoadd.mainLoop();
   tournamentMap.set(touridtoadd, tourtoadd);
   console.log("so here's what the current maps are r/n:");
   console.log(adminMap);

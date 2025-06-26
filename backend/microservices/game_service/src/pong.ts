@@ -64,7 +64,7 @@ export interface State {
 
 
 
-function makeid(length : number) : string {
+export function makeid(length : number) : string {
    let result : string= '';
    const characters : string = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
    const charactersLength : number = characters.length;

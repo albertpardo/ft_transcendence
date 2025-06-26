@@ -97,7 +97,9 @@ const startServer = async () => {
     });
     fastify.post('/pong/tour/enroll', async (req: FastifyRequest<{ Body: {tName: string, playersN: number, privacy: boolean} }>, reply) => {
       try {
-        const resp = addTournament(req?.body.tName, req?.body.playersN, req?.body.privacy, req?.headers['x-user-id']);
+        console.log("heyyyy");
+        console.log(typeof req?.body.playersN);
+        const resp = addTournament(req?.body.tName, Number(req?.body.playersN), req?.body.privacy, req?.headers['x-user-id'] as string);
         return (resp);
       }
       catch (e) {
