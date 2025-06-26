@@ -117,20 +117,20 @@ export default fp(async function (fastify: FastifyInstance): Promise<void> {
     });
 
     fastify.addHook('onSend', async (
-        req: FastifyRequest,
-        reply: FastifyReply,
-        payload: unknown
-    ): Promise<unknown> => {
+        req,
+        reply,
+        payload
+    ) => {
         if ((req.url.startsWith('/api/login') || req.url.startsWith('/api/signup')) && reply.statusCode === 200) {
             try {
-                let body: LoginSignupPayload;
+                let body;
                 if (payload && typeof (payload as Readable).read === 'function') {
                     const raw: Buffer = await getRawBody(payload as Readable);
                     body = JSON.parse(raw.toString());
                 } else if (typeof payload === 'string') {
-                    body = JSON.parse(payload) as LoginSignupPayload;
+                    body = JSON.parse(payload);
                 } else {
-                    body = payload as LoginSignupPayload;
+                    body = payload;
                 }
                 console.log('📦 Final parsed payload:', body);
 
