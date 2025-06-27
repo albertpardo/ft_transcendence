@@ -4,7 +4,6 @@ import { FastifyInstance } from 'fastify';
 import getRawBody from 'raw-body';
 import { Readable } from 'stream';
 import { FastifyRequest, FastifyReply } from 'fastify';
-import { Buffer } from 'buffer';
 
 const userManagementUrl = process.env.USER_MANAGEMENT_URL;
 if (!userManagementUrl) {
@@ -122,37 +121,54 @@ export default fp(async function (fastify: FastifyInstance): Promise<void> {
         reply,
         payload
     ) => {
-        if ((req.url.startsWith('/api/login') || req.url.startsWith('/api/signup')) && reply.statusCode === 200) {
+        if ((req.url.startsWith('/api/login') || req.url.startsWith('/api/signup') ) && reply.statusCode === 200) {
             try {
-              // Only decode in dev if payload is a string
-              if (typeof payload === 'string') {
-                const body = JSON.parse(payload);
-                if (!body.id || !body.username) return payload;
-                const token = fastify.jwt.sign({ userId: body.id });
-                return JSON.stringify({ ...body, token });
-              }
-          
-              // In prod, only deserialize if it's really JSON
-              if ((payload as any)?.read) {
-                const raw = await getRawBody(payload as any, { encoding: 'utf8' });
-                try {
-                  const body = JSON.parse(raw);
-                  if (!body.id || !body.username) return raw;
-                  const token = fastify.jwt.sign({ userId: body.id });
-                  return JSON.stringify({ ...body, token });
-                } catch (err) {
-                  console.warn('❌ Not JSON (probably compressed or encrypted), skipping JWT injection.');
-                  return raw;
+                console.log("entered the try block");
+                let body;
+                if (payload && typeof (payload as Readable).read === 'function') {
+                    console.log("if number 1");
+                    console.log("*************", payload);
+                    console.log("*************");
+                    const raw: Buffer = await getRawBody(payload as Readable);
+                    console.log("getrawbody success");
+                    console.log(raw);
+                    console.log("and now, raw to string:");
+                    console.log('utf8', raw.toString('utf8'));
+                    console.log('lat1', raw.toString('latin1'));
+                    console.log('asc', raw.toString('ascii'));
+                    console.log('hex', raw.toString('hex'));
+                    console.log('64', raw.toString('base64'));
+                    body = JSON.parse(raw.toString());
+                    console.log("json parse success");
+                } else if (typeof payload === 'string') {
+                    console.log("if number 2");
+                    console.log("payload found to be", payload);
+                    body = JSON.parse(payload);
+                    console.log("json parse success");
+                } else {
+                    console.log("if number 3");
+                    body = payload;
                 }
-              }
-          
-              return payload;
-            } catch (e) {
-              console.error('🛑 Error in onSend:', e);
-              return payload;
+                console.log('📦 Final parsed payload:', body);
+
+                if (!body.id || !body.username) {
+                    console.warn('⚠️ No id or username found in payload!');
+                    return payload;
+                }
+
+                const token: string = fastify.jwt.sign({ userId: body.id });
+
+                // return new JSON response
+                return JSON.stringify({
+                    id: body.id,
+                    token: token,
+                    user: body.username,
+                });
+            } catch (err) {
+                console.error('⚠️ Failed to parse payload or generate token:', err);
+                return payload;
             }
         }
         return payload;
     });
 });
-
