@@ -20,7 +20,7 @@ class Tournament {
     this.participantsIds[i] = participantId;
   }
 
-  constructor(tName: string, adminId: string, isItPrivate: boolean = true, playersN: number) {
+  constructor(tName: string, adminId: string, isItPrivate: boolean = true, playersN: number, tId: string) {
     this.tName = tName;
     this.adminId = adminId;
     this.isItPrivate = isItPrivate;
@@ -45,6 +45,7 @@ class Tournament {
     }
     this.currentStage = this.stages;
     this.addParticipant(adminId);
+    this.tId = tId;
   }
 
   private checkEveryonePresent() {
@@ -136,15 +137,16 @@ let tournamentMap = new Map<string, Tournament>();
 
 export function addTournament(tName: string, playersN: number, privacy: boolean, uuid: string) {
   if (adminMap.has(uuid)) {
-    throw "player already manages a tournament";
+    return adminMap.get(uuid);
   }
   const touridtoadd = makeid(64);
   adminMap.set(uuid, touridtoadd);
   console.log("the playersnum shall be...", playersN);
-  const tourtoadd = new Tournament(tName, uuid, privacy, playersN);
+  const tourtoadd = new Tournament(tName, uuid, privacy, playersN, touridtoadd);
   tourtoadd.mainLoop();
   tournamentMap.set(touridtoadd, tourtoadd);
   console.log("so here's what the current maps are r/n:");
   console.log(adminMap);
   console.log(tournamentMap);
+  return (tourtoadd.tId);
 }

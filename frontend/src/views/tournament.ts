@@ -1,5 +1,8 @@
 // src/views/tournament.ts
 
+// stolen from backend/microservices/game_service/src/pong.ts
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
 export function renderTournamentContent(hideableElements) {
   let tempHTML : string = `
     <h1>Hi</h1>
@@ -70,10 +73,33 @@ async function createTournament(tName : string, playersN : number, privacy : boo
   return fresp;
 }
 
+async function checkOnTournamentRawResp() {
+  const fresp = fetch(
+    `${API_BASE_URL}/api/pong/tour/enroll`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json,application/html,text/html,*/*',
+        'Origin': 'https://127.0.0.1:3000/',
+        'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
+      },
+      body: JSON.stringify({
+        tName: "",
+        playersN: -1,
+        privacy: false,
+      }),
+      credentials: 'include',
+      mode: 'cors',
+    }
+  );
+  return fresp;
+}
+
 export async function renderTournamentManagerContent(hideableElements) {
   let tempHTML : string = `
+    <p id="error-text-field" class="font-bold mb-4 text-xl" style="color:coral" hidden>You're already participating in a tournament.</p>
     <h1 class="text-3xl font-bold mb-6">Tournament management</h1>
-    <p class="font-bold mb-4 text-xl" style="color:coral">You're already participating in a tournament.</p>
     <p class="mb-4 font-bold">Create a tournament:</p>
     <!-- form form form TODO XXX -->
       <form class="mt-8 space-y-6" id="tournament-form">
@@ -113,10 +139,8 @@ export async function renderTournamentManagerContent(hideableElements) {
         </div>
       </form>
 
-    <p class="mb-4">My tournaments:</p>
-    <table class="table-fixed"><tbody>
-    </tbody></table>
-    <!-- actual table of my tournaments TODO -->
+    <p class="mb-4">My tournament:</p>
+    <div id="my-tournament"><p><i>none</i></p></div>
 
     <p class="mb-4">All tournaments:</p>
     <table class="table-fixed"><tbody>
@@ -125,19 +149,47 @@ export async function renderTournamentManagerContent(hideableElements) {
   `;
   hideableElements.contentArea.innerHTML = tempHTML;
   const tournamentForm = document.getElementById('tournament-form') as HTMLFormElement;
+  const errorField = document.getElementById('error-text-field');
+  const myTournamentField = document.getElementById('my-tournament');
   if (tournamentForm) {
-    tournamentForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
+    const checkOnTournamentRawResp = await checkOnTournamentForm();
+    const checkResp = await checkOnTournamentRawResp.text();
+    const tIdPreliminary = JSON.parse(checkResp)?.tId;
+    if (tIdPreliminary === "nope") {
+      tournamentForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const submitButton = document.getElementById('register-tournament-button') as HTMLButtonElement;
+        const tnameEl = document.getElementById('tname') as HTMLInputElement;
+        const playersEl = document.getElementById('players') as HTMLInputElement;
+        const checkboxEl = document.getElementById('rprivate') as HTMLInputElement;
+        submitButton.disabled = true;
+        const rawCreateTournamentResp = await createTournament(tnameEl.value, playersEl.value, checkboxEl.checked);
+        console.log(rawCreateTournamentResp);
+        const tourResp = await rawCreateTournamentResp.text();
+        const tId = JSON.parse(tourResp)?.tId;
+        if (tId[0] === "_") {
+          alert("Tournament creation error: " + tId.substring(1));
+//          errorField.innerHTML = "Tournament creation error: " + tId;
+//          errorField.hidden = false;
+        }
+        else {
+          errorField.hidden = true;
+          console.log("registerd a tournament:", tId);
+          myTournamentField.innerHTML = "<a href=\"" + document.URL.substring(0, document.URL.search("#")) + "#tournament" + "\">click to view</a>"
+          localStorage.setItem('tId', tId);
+        }
+        submitButton.disabled = false;
+        tournamentForm.reset();
+      });
+    }
+    else {
+      localStorage.setItem('tId', tIdPreliminary);
       const submitButton = document.getElementById('register-tournament-button') as HTMLButtonElement;
-      const tnameEl = document.getElementById('tname') as HTMLInputElement;
-      const playersEl = document.getElementById('players') as HTMLInputElement;
-      const checkboxEl = document.getElementById('rprivate') as HTMLInputElement;
       submitButton.disabled = true;
-      const fresp = await createTournament(tnameEl.value, playersEl.value, checkboxEl.checked);
-      console.log(fresp);
-      submitButton.disabled = false;
-      tournamentForm.reset();
-    });
+      errorField.hidden = true;
+      console.log("already registerd in a tournament:", tId);
+      myTournamentField.innerHTML = "<a href=\"" + document.URL.substring(0, document.URL.search("#")) + "#tournament" + "\">click to view</a>"
+    }
   }
   hideableElements.startButton.hidden = true;
   hideableElements.giveupButton.hidden = true;
