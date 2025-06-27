@@ -127,7 +127,8 @@ export default fp(async function (fastify: FastifyInstance): Promise<void> {
                 let body;
                 if (payload && typeof (payload as Readable).read === 'function') {
                     console.log("if number 1");
-                    console.log("*************", payload.read());
+                    console.log("*************", payload);
+                    console.log("*************");
                     const raw: Buffer = await getRawBody(payload as Readable);
                     console.log("getrawbody success");
                     console.log(raw);
