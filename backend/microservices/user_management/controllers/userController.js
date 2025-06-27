@@ -3,8 +3,13 @@ const userService = require('../services/userService');
 exports.signup = async (request, reply) => {
     const { username, password, nickname, email } = request.body;
     const result = await userService.signup(username, password, nickname, email);
-    if (result.error) reply.code(400).send(result);
-    reply.send(result);
+   /*  if (result.error) reply.code(400).send(result);
+    reply.send(result); */
+
+     if (result.error) {
+        return reply.code(400).type('application/json').send(result); // corrected
+    }
+    reply.code(200).type('application/json').send(result);
 };
 
 exports.login = async (request, reply) => {
@@ -13,13 +18,20 @@ exports.login = async (request, reply) => {
     const result = await userService.login(username, password);
     console.log("result of the final login func:", result);
 
-    if (result.error) {
+   /*  if (result.error) {
         reply.code(401).send({ error: '🧸 Invalid credentials' });
     }
 
     console.log('🎏 username and password are correct!');
 
-    reply.send(result);
+    reply.send(result); */
+
+    if (result.error) {
+        return reply.code(401).type('application/json').send({ error: '🧸 Invalid credentials' }); // corrected
+    }
+
+    console.log('🎏 username and password are correct!');
+    reply.code(200).type('application/json').send(result); // corrected
 };
 
 exports.getProfile = async (request, reply) => {
