@@ -126,6 +126,7 @@ export default fp(async function (fastify: FastifyInstance): Promise<void> {
             try {
               // Only decode in dev if payload is a string
               if (typeof payload === 'string') {
+                console.log('📝 Payload is string');
                 const body = JSON.parse(payload);
                 if (!body.id || !body.username) return payload;
                 const token = fastify.jwt.sign({ userId: body.id });
@@ -134,18 +135,21 @@ export default fp(async function (fastify: FastifyInstance): Promise<void> {
           
               // In prod, only deserialize if it's really JSON
               if ((payload as any)?.read) {
+                console.log('📦 Payload is Readable stream');
                 const raw = await getRawBody(payload as any, { encoding: 'utf8' });
                 try {
                   const body = JSON.parse(raw);
+                  console.log('🧾 Parsed JSON from stream:', body);
                   if (!body.id || !body.username) return raw;
                   const token = fastify.jwt.sign({ userId: body.id });
+                  console.log('🔑 Token generated:', token);
                   return JSON.stringify({ ...body, token });
                 } catch (err) {
                   console.warn('❌ Not JSON (probably compressed or encrypted), skipping JWT injection.');
                   return raw;
                 }
               }
-          
+              console.log('ℹ️ Payload is unknown type, returning as is');
               return payload;
             } catch (e) {
               console.error('🛑 Error in onSend:', e);
