@@ -1,4 +1,5 @@
 import fp from 'fastify-plugin';
+import { gunzipSync } from 'zlib'; 
 import fastifyHttpProxy from '@fastify/http-proxy';
 import { FastifyInstance } from 'fastify';
 import getRawBody from 'raw-body';
@@ -27,6 +28,7 @@ interface OnRequestFastifyRequest extends FastifyRequest {
         [key: string]: any;
     };
 }
+
 
 export default fp(async function (fastify: FastifyInstance): Promise<void> {
     fastify.get('/health', async (req: FastifyRequest, reply: FastifyReply): Promise<{ status: string }> => {
@@ -150,7 +152,25 @@ export default fp(async function (fastify: FastifyInstance): Promise<void> {
                   contentType.includes('application/json')
                 ) {
                 console.log('📦 Payload is Readable stream');
-                const raw: string = await getRawBody(payload as Readable, { encoding: 'utf8' });
+                
+                //const raw: string = await getRawBody(payload as Readable, { encoding: 'utf8' });
+                //new from here until console.log('📜 Raw body from stream:', raw);
+                const rawBuffer: Buffer = await getRawBody(payload as Readable);
+                let raw = rawBuffer.toString('utf-8');
+                
+                const encoding = reply.getHeader('content-encoding');
+                if (typeof encoding === 'string' && encoding.includes('gzip')) {
+                    try {
+                        console.log('🔄 Decompressing gzip stream...');
+                        const decompressed = gunzipSync(rawBuffer);
+                        raw = decompressed.toString('utf-8');
+                        console.log('✅ Decompressed:', raw.slice(0, 200));
+                    } catch (err) {
+                        console.warn('❌ Failed to decompress gzip stream:', err);
+                        return payload;
+                    }
+                }
+                //new until  console.log('📜 Raw body from stream:', raw);
                 console.log('📜 Raw body from stream:', raw);
                 try {
                   const body: LoginSignupResponseBody = JSON.parse(raw);
