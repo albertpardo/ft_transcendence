@@ -193,11 +193,6 @@ export async function renderTournamentManagerContent(hideableElements) {
     <br>
     <p class="mb-4">All tournaments:</p>
     <table class="table-fixed"><tbody id="all-tournaments-table">
-      <th>
-        <td>Name</td>
-        <td>Players</td>
-        <td></td>
-      </th>
     </tbody></table>
     <!-- actual table of all public tournaments TODO -->
   `;
@@ -250,9 +245,16 @@ export async function renderTournamentManagerContent(hideableElements) {
   const allTournamentsTable = document.getElementById('all-tournaments-table');
   const rawAllPublicTournamentsResponse = await fetchAllPublicTournaments();
   const allPTR = await rawAllPublicTournamentsResponse.text();
+  console.log(allPTR);
   const allPTRObj = JSON.parse(allPTR);
   let count : number = 0;
-  let tempInner : string = "";
+  let tempInner : string = `
+  <tr>
+    <th>Name</th>
+    <th>Players</th>
+    <th>Join</th>
+  </tr>
+  `;
   for (var item of allPTRObj?.res) {
     tempInner += `
     <tr>
