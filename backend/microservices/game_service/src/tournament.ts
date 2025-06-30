@@ -8,14 +8,18 @@ class Tournament {
   public stages : number = 1;
   public currentStage : number = 1;
   public tId : string = "";
+  public started : boolean = false;
 
   public addParticipant(participantId: string) {
     let i : number = 0;
     while (i < Math.pow(2, this.currentStage) && this.participantsIds[i] !== "") {
+      if (this.participantsIds[i] === participantId) {
+        throw "This player is already in";
+      }
       i += 1;
     }
     if (i === Math.pow(2, this.currentStage)) {
-      throw "everyone is already in";
+      throw "Everyone is already in";
     }
     this.participantsIds[i] = participantId;
   }
@@ -58,6 +62,7 @@ class Tournament {
         return false;
       }
     }
+    this.started = true;
     return true;
   }
 
@@ -155,4 +160,20 @@ export function addTournament(tName: string, playersN: number, privacy: boolean,
   console.log(adminMap);
   console.log(tournamentMap);
   return (tourtoadd.tId);
+}
+
+export function joinTournament(tId: string, uuid: string) {
+  if (tournamentMap.has(tId)) {
+    const currentTour = tournamentMap.get(tId);
+    if (typeof currentTour === "undefined") {
+      throw "Tournament object type: undefined";
+    }
+    if (currentTour.started) {
+      throw "This tournament is already ongoing";
+    }
+    currentTour.addParticipant(uuid);
+  }
+  else {
+    throw "This tournament doesn't exist";
+  }
 }

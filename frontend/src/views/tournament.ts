@@ -12,35 +12,35 @@ export function renderTournamentContent(hideableElements) {
     <h1>Hi</h1>
     <table class="table-fixed"><tbody>
       <tr>
-        <td>contender 1</td>
-        <td rowspan="2">quarterfinal 1</td>
-        <td rowspan="4">semifinal 1</td>
-        <td rowspan="8">finalist!</td>
+        <td id="table-contender-1">contender 1</td>
+        <td rowspan="2" id="table-quarterfinal-1">quarterfinal 1</td>
+        <td rowspan="4" id="table-semifinal-1">semifinal 1</td>
+        <td rowspan="8" id="table-finalist">finalist!</td>
       </tr>
       <tr>
-        <td>contender 2</td>
+        <td id="table-contender-2">contender 2</td>
       </tr>
       <tr>
-        <td>contender 3</td>
-        <td rowspan="2">quarterfinal 2</td>
+        <td id="table-contender-3">contender 3</td>
+        <td rowspan="2" id="table-quarterfinal-2">quarterfinal 2</td>
       </tr>
       <tr>
-        <td>contender 4</td>
+        <td id="table-contender-4">contender 4</td>
       </tr>
       <tr>
-        <td>contender 5</td>
-        <td rowspan="2">quarterfinal 3</td>
-        <td rowspan="4">semifinal 2</td>
+        <td id="table-contender-5">contender 5</td>
+        <td rowspan="2" id="table-quarterfinal-3">quarterfinal 3</td>
+        <td rowspan="4" id="table-semifinal-2">semifinal 2</td>
       </tr>
       <tr>
-        <td>contender 6</td>
+        <td id="table-contender-6">contender 6</td>
       </tr>
       <tr>
-        <td>contender 7</td>
-        <td rowspan="2">quarterfinal 4</td>
+        <td id="table-contender-7">contender 7</td>
+        <td rowspan="2" id="table-quarterfinal-4">quarterfinal 4</td>
       </tr>
       <tr>
-        <td>contender 8</td>
+        <td id="table-contender-8">contender 8</td>
       </tr>
     </tbody>
     </table>
@@ -52,7 +52,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 async function createTournament(tName : string, playersN : number, privacy : boolean) {
   const fresp = fetch(
-    `${API_BASE_URL}/api/pong/tour/enroll`,
+    `${API_BASE_URL}/api/pong/tour/create`,
     {
       method: 'POST',
       headers: {
@@ -75,7 +75,7 @@ async function createTournament(tName : string, playersN : number, privacy : boo
 
 async function checkOnTournamentForm() {
   const fresp = fetch(
-    `${API_BASE_URL}/api/pong/tour/enroll`,
+    `${API_BASE_URL}/api/pong/tour/create`,
     {
       method: 'POST',
       headers: {
@@ -88,6 +88,27 @@ async function checkOnTournamentForm() {
         tName: "",
         playersN: -1,
         privacy: false,
+      }),
+      credentials: 'include',
+      mode: 'cors',
+    }
+  );
+  return fresp;
+}
+
+async function enrollInTournament(tId: string) {
+  const fresp = fetch(
+    `${API_BASE_URL}/api/pong/tour/enroll`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json,application/html,text/html,*/*',
+        'Origin': 'https://127.0.0.1:3000/',
+        'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
+      },
+      body: JSON.stringify({
+        tId: tId,
       }),
       credentials: 'include',
       mode: 'cors',
@@ -148,6 +169,7 @@ export async function renderTournamentManagerContent(hideableElements) {
     <p class="mb-4">My tournament:</p>
     <div id="my-tournament"><p><i>none</i></p></div>
 
+    <br>
     <p class="mb-4">All tournaments:</p>
     <table class="table-fixed"><tbody>
     </tbody></table>

@@ -4,7 +4,7 @@ import type { FastifyRequest } from 'fastify';
 import cors from '@fastify/cors';
 import { PongResponses, State, addPlayerCompletely, removeTheSock, getPongDoneness, getPongState, forefit, moveMyPaddle, gamesReadyLoopCheck, dataStreamer } from './pong';
 import { historyMain, getHistForPlayerFromDb } from './history';
-import { addTournament } from './tournament';
+import { addTournament, joinTournament } from './tournament';
 
 interface PongBodyReq {
   playerId: string,
@@ -95,19 +95,32 @@ const startServer = async () => {
       const resp = await getHistForPlayerFromDb(req?.body.userId);
       return JSON.stringify(resp);
     });
-    fastify.post('/pong/tour/enroll', async (req: FastifyRequest<{ Body: {tName: string, playersN: number, privacy: boolean} }>, reply) => {
+    fastify.post('/pong/tour/create', async (req: FastifyRequest<{ Body: {tName: string, playersN: number, privacy: boolean} }>, reply) => {
       try {
         console.log("heyyyy");
         console.log(typeof req?.body.playersN);
         const resp = addTournament(req?.body.tName, Number(req?.body.playersN), req?.body.privacy, req?.headers['x-user-id'] as string);
         return JSON.stringify({
           tId: resp,
-          err: "nil"
+          err: "nil",
         });
       }
       catch (e) {
         return JSON.stringify({
           tId: "",
+          err: e,
+        });
+      }
+    });
+    fastify.post('/pong/tour/enroll', async (req: FastifyRequest<{ Body: {tId: string} }>, reply) => {
+      try {
+        const resp = joinTournament(req?.body.tId, req?.headers['x-user-id'] as string);
+        return JSON.stringify({
+          err: "nil",
+        });
+      }
+      catch (e) {
+        return JSON.stringify({
           err: e,
         });
       }
