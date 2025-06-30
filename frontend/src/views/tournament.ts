@@ -137,7 +137,9 @@ export async function renderTournamentManagerContent(hideableElements) {
               rounded-md hover:bg-blue-700 focus:outline-none
               focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
               focus:ring-offset-gray-800
-          ">
+              disabled:border-gray-200 disabled:bg-gray-700 disabled:text-gray-500 disabled:shadow-none
+          "
+          disabled>
             Register tournament
           </button>
         </div>
@@ -156,14 +158,15 @@ export async function renderTournamentManagerContent(hideableElements) {
   const errorField = document.getElementById('error-text-field');
   const myTournamentField = document.getElementById('my-tournament');
   if (tournamentForm) {
+    const submitButton = document.getElementById('register-tournament-button') as HTMLButtonElement;
     const checkOnTournamentRawResp = await checkOnTournamentForm();
     const checkResp = await checkOnTournamentRawResp.text();
     const checkRespObj = JSON.parse(checkResp);
     if (checkRespObj.err?.substring(0, 3) === "no ") {
+      submitButton.disabled = false;
       // "no tournament for this player found" => proceed with allowing to create the tournament
       tournamentForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const submitButton = document.getElementById('register-tournament-button') as HTMLButtonElement;
         const tnameEl = document.getElementById('tname') as HTMLInputElement;
         const playersEl = document.getElementById('players') as HTMLInputElement;
         const checkboxEl = document.getElementById('rprivate') as HTMLInputElement;
@@ -174,26 +177,25 @@ export async function renderTournamentManagerContent(hideableElements) {
         const tourRespObj = JSON.parse(tourResp);
         if (tourRespObj.err !== "nil") {
           alert("Tournament creation error: " + tourRespObj.err);
+          submitButton.disabled = false;
 //          errorField.innerHTML = "Tournament creation error: " + tId;
 //          errorField.hidden = false;
         }
         else {
 //          errorField.hidden = true;
           console.log("registerd a tournament:", tourRespObj.tId);
-          myTournamentField.innerHTML = "<a href=\"" + document.URL.substring(0, document.URL.search("#")) + "#tournament" + "\">click to view</a>"
+          myTournamentField.innerHTML = "<a href=\"" + document.URL.substring(0, document.URL.search("#")) + "#tournament" + "\"><b><i>Click to view</b></i></a>"
           localStorage.setItem('tId', tourRespObj.tId);
         }
-        submitButton.disabled = false;
         tournamentForm.reset();
       });
     }
     else {
       localStorage.setItem('tId', checkRespObj.err);
-      const submitButton = document.getElementById('register-tournament-button') as HTMLButtonElement;
       submitButton.disabled = true;
       errorField.hidden = true;
       console.log("already registerd in a tournament:", checkRespObj.err);
-      myTournamentField.innerHTML = "<a href=\"" + document.URL.substring(0, document.URL.search("#")) + "#tournament" + "\">click to view</a>"
+      myTournamentField.innerHTML = "<a href=\"" + document.URL.substring(0, document.URL.search("#")) + "#tournament" + "\"><b><i>Click to view</b></i></a>"
     }
   }
 }
