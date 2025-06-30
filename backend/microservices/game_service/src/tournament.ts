@@ -1,14 +1,26 @@
 import { gamesMap, playersMap, socksMap, sleep, makeid } from './pong';
 
+let playersAlreadyParticipating = new Map<string, string>();
+
 class Tournament {
-  private tName : string = "";
+  public tName : string = "";
   private adminId : string = "";
-  private isItPrivate : boolean = true;
+  public isItPrivate : boolean = true;
   private participantsIds : Array<string> = ["", "", "", "", "", "", "", ""];
   public stages : number = 1;
   public currentStage : number = 1;
   public tId : string = "";
   public started : boolean = false;
+
+  public calculateJoinedPN() {
+    let count : number = 0;
+    for (var player of this.participantsIds) {
+      if (player !== "") {
+        count += 1;
+      }
+    }
+    return count;
+  }
 
   public addParticipant(participantId: string) {
     let i : number = 0;
@@ -147,7 +159,7 @@ export function addTournament(tName: string, playersN: number, privacy: boolean,
   if (playersN === -1) {
     throw "no tourament for this player found";
   }
-  if (tName === "" || !(playersN in [2, 4, 8]) || uuid === "") {
+  if (tName === "" || !(playersN === 2 || playersN === 4 || playersN === 8) || uuid === "") {
     throw "invalid tournament creation parameters";
   }
   const touridtoadd = makeid(64);
@@ -156,6 +168,7 @@ export function addTournament(tName: string, playersN: number, privacy: boolean,
   const tourtoadd = new Tournament(tName, uuid, privacy, playersN, touridtoadd);
   tourtoadd.mainLoop();
   tournamentMap.set(touridtoadd, tourtoadd);
+  playersAlreadyParticipating.set(uuid, touridtoadd);
   console.log("so here's what the current maps are r/n:");
   console.log(adminMap);
   console.log(tournamentMap);
@@ -163,6 +176,9 @@ export function addTournament(tName: string, playersN: number, privacy: boolean,
 }
 
 export function joinTournament(tId: string, uuid: string) {
+  if (playersAlreadyParticipating.has(uuid)) {
+    throw "Player already participates in " + playersAlreadyParticipating.get(uuid);
+  }
   if (tournamentMap.has(tId)) {
     const currentTour = tournamentMap.get(tId);
     if (typeof currentTour === "undefined") {
@@ -172,8 +188,31 @@ export function joinTournament(tId: string, uuid: string) {
       throw "This tournament is already ongoing";
     }
     currentTour.addParticipant(uuid);
+    playersAlreadyParticipating.set(uuid, tId);
   }
   else {
     throw "This tournament doesn't exist";
   }
+}
+
+interface listingReturnType {
+  tId: string,
+  tName: string,
+  joinedPN: number,
+  maxPN: number,
+};
+
+export function listAllPublicTournaments() {
+  let res : Array<listingReturnType> = [];
+  for (const [tId, tourn] of tournamentMap) {
+    if (!tourn.isItPrivate && !tourn.started) {
+      res.push({
+        tId: tId,
+        tName: tourn.tName,
+        joinedPN: tourn.calculateJoinedPN(),
+        maxPN: Math.pow(2, tourn.stages),
+      });
+    }
+  }
+  return res;
 }

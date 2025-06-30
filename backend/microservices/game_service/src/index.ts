@@ -4,7 +4,7 @@ import type { FastifyRequest } from 'fastify';
 import cors from '@fastify/cors';
 import { PongResponses, State, addPlayerCompletely, removeTheSock, getPongDoneness, getPongState, forefit, moveMyPaddle, gamesReadyLoopCheck, dataStreamer } from './pong';
 import { historyMain, getHistForPlayerFromDb } from './history';
-import { addTournament, joinTournament } from './tournament';
+import { addTournament, joinTournament, listAllPublicTournaments } from './tournament';
 
 interface PongBodyReq {
   playerId: string,
@@ -122,6 +122,20 @@ const startServer = async () => {
       catch (e) {
         return JSON.stringify({
           err: e,
+        });
+      }
+    });
+    fastify.get('/pong/tour/all', async (req, reply) => {
+      try {
+        const resp = listAllPublicTournaments();
+        return JSON.stringify({
+          res: resp,
+        });
+      }
+      catch {
+        console.log("how the hell did this fail");
+        return JSON.stringify({
+          res: [],
         });
       }
     });

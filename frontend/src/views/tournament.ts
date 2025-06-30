@@ -117,6 +117,27 @@ async function enrollInTournament(tId: string) {
   return fresp;
 }
 
+// getting all public tournaments will be available only to registered users
+// to account for how taxing this operation can be on the database and to limit
+// the possible DOS attack vulnerabilities
+async function fetchAllPublicTournaments() {
+  const fresp = fetch(
+    `${API_BASE_URL}/api/pong/tour/all`,
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json,application/html,text/html,*/*',
+        'Origin': 'https://127.0.0.1:3000/',
+        'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
+      },
+      credentials: 'include',
+      mode: 'cors',
+    }
+  );
+  return fresp;
+}
+
 export async function renderTournamentManagerContent(hideableElements) {
   hideableElements.startButton.hidden = true;
   hideableElements.giveupButton.hidden = true;
@@ -171,7 +192,12 @@ export async function renderTournamentManagerContent(hideableElements) {
 
     <br>
     <p class="mb-4">All tournaments:</p>
-    <table class="table-fixed"><tbody>
+    <table class="table-fixed"><tbody id="all-tournaments-table">
+      <th>
+        <td>Name</td>
+        <td>Players</td>
+        <td></td>
+      </th>
     </tbody></table>
     <!-- actual table of all public tournaments TODO -->
   `;
@@ -219,5 +245,36 @@ export async function renderTournamentManagerContent(hideableElements) {
       console.log("already registerd in a tournament:", checkRespObj.err);
       myTournamentField.innerHTML = "<a href=\"" + document.URL.substring(0, document.URL.search("#")) + "#tournament" + "\"><b><i>Click to view</b></i></a>"
     }
+  }
+
+  const allTournamentsTable = document.getElementById('all-tournaments-table');
+  const rawAllPublicTournamentsResponse = await fetchAllPublicTournaments();
+  const allPTR = await rawAllPublicTournamentsResponse.text();
+  const allPTRObj = JSON.parse(allPTR);
+  let count : number = 0;
+  let tempInner : string = "";
+  for (var item of allPTRObj?.res) {
+    tempInner += `
+    <tr>
+      <td>${item.tName}</td>
+      <td>${item.joinedPN}/${item.maxPN}</td>
+      <td><button id="join-button-${count}" class="mt-6 p-3 bg-blue-500 rounded-lg hover:bg-blue-400 transition text-white font-medium">Join</button></td>
+    </tr>`;
+    count += 1;
+  }
+  allTournamentsTable.innerHTML = tempInner;
+  for (let newCount = 0; newCount < count; newCount += 1) {
+    document.getElementById(`join-button-${newCount}`).addEventListener('click', async () => {
+      const rawResOfEnroll = await enrollInTournament(allPTRObj.res[newCount].tId);
+      const resOfEnroll = await rawResOfEnroll.text();
+      const resOfEnrollObj = JSON.parse(resOfEnroll);
+      if (resOfEnrollObj.err === "nil") {
+        alert("enrolled in " + allPTRObj.res[newCount].tId);
+        localStorage.setItem("tId", allPTRObj.res[newCount].tId);
+      }
+      else {
+        alert("failed to enroll in " + allPTRObj.res[newCount].tId);
+      }
+    });
   }
 }
