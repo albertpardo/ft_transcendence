@@ -20,7 +20,8 @@ export async function renderProfileContent(el: HTMLElement, bu: HTMLElement, gAr
     const res = await fetch(`${API_BASE_URL}/api/profile`, {
       method: 'GET',
       headers: {
-        "Use-me-to-authorize": authstringheader,
+        "Authorization": authstringheader,
+        "use-me-to-authorize": authstringheader,
         "Content-Type": "application/json",
       },
       credentials: 'include',
