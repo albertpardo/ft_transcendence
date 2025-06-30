@@ -156,9 +156,10 @@ export default fp(async function (fastify: FastifyInstance): Promise<void> {
                 //const raw: string = await getRawBody(payload as Readable, { encoding: 'utf8' });
                 //new from here until console.log('📜 Raw body from stream:', raw);
                 const rawBuffer: Buffer = await getRawBody(payload as Readable);
-                let raw = rawBuffer.toString('utf-8');
                 
                 const encoding = reply.getHeader('content-encoding');
+                let raw: string;
+
                 if (typeof encoding === 'string' && encoding.includes('gzip')) {
                     try {
                         console.log('🔄 Decompressing gzip stream...');
@@ -169,6 +170,8 @@ export default fp(async function (fastify: FastifyInstance): Promise<void> {
                         console.warn('❌ Failed to decompress gzip stream:', err);
                         return payload;
                     }
+                } else {
+                raw = rawBuffer.toString('utf-8');
                 }
                 //new until  console.log('📜 Raw body from stream:', raw);
                 console.log('📜 Raw body from stream:', raw);
