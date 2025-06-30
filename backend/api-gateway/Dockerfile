@@ -12,6 +12,7 @@ RUN apt-get update && apt-get install -y \
 # Copy package.json and install deps
 COPY package*.json ./
 # RUN npm install
+RUN npm install --package-lock-only
 RUN npm ci --omit=dev
 
 # Install ts-node & typescript globally (or via devDeps)
