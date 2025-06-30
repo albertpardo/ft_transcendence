@@ -117,30 +117,43 @@ export default fp(async function (fastify: FastifyInstance): Promise<void> {
         reply.header('Access-Control-Allow-Credentials', 'true');
     });
 
+    interface OnSendRequest extends FastifyRequest {
+        url: string;
+    }
+
+    interface LoginSignupResponseBody {
+        id?: string;
+        username?: string;
+        [key: string]: any;
+    }
+
     fastify.addHook('onSend', async (
-        req,
-        reply,
-        payload
-    ) => {
+        req: OnSendRequest,
+        reply: FastifyReply,
+        payload: string | Buffer | Readable
+    ): Promise<string | Buffer | Readable> => {
         if ((req.url.startsWith('/api/login') || req.url.startsWith('/api/signup')) && reply.statusCode === 200) {
             try {
               // Only decode in dev if payload is a string
               if (typeof payload === 'string') {
                 console.log('📝 Payload is string');
-                const body = JSON.parse(payload);
+                const body: LoginSignupResponseBody = JSON.parse(payload);
                 if (!body.id || !body.username) return payload;
                 const token = fastify.jwt.sign({ userId: body.id });
                 return JSON.stringify({ ...body, token });
               }
-          
-              // In prod, only deserialize if it's really JSON
-              if ((payload as any)?.read && reply.getHeader('content-type')?.includes('application/json')) {
 
+              const contentType = reply.getHeader('content-type');
+              if (
+                  (payload as Readable)?.read &&
+                  typeof contentType === 'string' &&
+                  contentType.includes('application/json')
+                ) {
                 console.log('📦 Payload is Readable stream');
-                const raw = await getRawBody(payload as any, { encoding: 'utf8' });
+                const raw: string = await getRawBody(payload as Readable, { encoding: 'utf8' });
                 console.log('📜 Raw body from stream:', raw);
                 try {
-                  const body = JSON.parse(raw);
+                  const body: LoginSignupResponseBody = JSON.parse(raw);
                   console.log('🧾 Parsed JSON from stream:', body);
                   if (!body.id || !body.username) {
                       reply.type('application/json');
