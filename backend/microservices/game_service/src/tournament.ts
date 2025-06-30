@@ -137,7 +137,13 @@ let tournamentMap = new Map<string, Tournament>();
 
 export function addTournament(tName: string, playersN: number, privacy: boolean, uuid: string) {
   if (adminMap.has(uuid)) {
-    return adminMap.get(uuid);
+    throw adminMap.get(uuid);
+  }
+  if (playersN === -1) {
+    throw "no tourament for this player found";
+  }
+  if (tName === "" || !(playersN in [2, 4, 8]) || uuid === "") {
+    throw "invalid tournament creation parameters";
   }
   const touridtoadd = makeid(64);
   adminMap.set(uuid, touridtoadd);

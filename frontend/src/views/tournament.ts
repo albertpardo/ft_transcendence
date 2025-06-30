@@ -4,6 +4,10 @@
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 export function renderTournamentContent(hideableElements) {
+  hideableElements.startButton.hidden = true;
+  hideableElements.giveupButton.hidden = true;
+  hideableElements.gameArea.hidden = true;
+  hideableElements.gameWindow.hidden = true;
   let tempHTML : string = `
     <h1>Hi</h1>
     <table class="table-fixed"><tbody>
@@ -42,10 +46,6 @@ export function renderTournamentContent(hideableElements) {
     </table>
   `;
   hideableElements.contentArea.innerHTML = tempHTML;
-  hideableElements.startButton.hidden = true;
-  hideableElements.giveupButton.hidden = true;
-  hideableElements.gameArea.hidden = true;
-  hideableElements.gameWindow.hidden = true;
 }
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -73,7 +73,7 @@ async function createTournament(tName : string, playersN : number, privacy : boo
   return fresp;
 }
 
-async function checkOnTournamentRawResp() {
+async function checkOnTournamentForm() {
   const fresp = fetch(
     `${API_BASE_URL}/api/pong/tour/enroll`,
     {
@@ -97,6 +97,10 @@ async function checkOnTournamentRawResp() {
 }
 
 export async function renderTournamentManagerContent(hideableElements) {
+  hideableElements.startButton.hidden = true;
+  hideableElements.giveupButton.hidden = true;
+  hideableElements.gameArea.hidden = true;
+  hideableElements.gameWindow.hidden = true;
   let tempHTML : string = `
     <p id="error-text-field" class="font-bold mb-4 text-xl" style="color:coral" hidden>You're already participating in a tournament.</p>
     <h1 class="text-3xl font-bold mb-6">Tournament management</h1>
@@ -154,8 +158,9 @@ export async function renderTournamentManagerContent(hideableElements) {
   if (tournamentForm) {
     const checkOnTournamentRawResp = await checkOnTournamentForm();
     const checkResp = await checkOnTournamentRawResp.text();
-    const tIdPreliminary = JSON.parse(checkResp)?.tId;
-    if (tIdPreliminary === "nope") {
+    const checkRespObj = JSON.parse(checkResp);
+    if (checkRespObj.err?.substring(0, 3) === "no ") {
+      // "no tournament for this player found" => proceed with allowing to create the tournament
       tournamentForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const submitButton = document.getElementById('register-tournament-button') as HTMLButtonElement;
@@ -166,33 +171,29 @@ export async function renderTournamentManagerContent(hideableElements) {
         const rawCreateTournamentResp = await createTournament(tnameEl.value, playersEl.value, checkboxEl.checked);
         console.log(rawCreateTournamentResp);
         const tourResp = await rawCreateTournamentResp.text();
-        const tId = JSON.parse(tourResp)?.tId;
-        if (tId[0] === "_") {
-          alert("Tournament creation error: " + tId.substring(1));
+        const tourRespObj = JSON.parse(tourResp);
+        if (tourRespObj.err !== "nil") {
+          alert("Tournament creation error: " + tourRespObj.err);
 //          errorField.innerHTML = "Tournament creation error: " + tId;
 //          errorField.hidden = false;
         }
         else {
-          errorField.hidden = true;
-          console.log("registerd a tournament:", tId);
+//          errorField.hidden = true;
+          console.log("registerd a tournament:", tourRespObj.tId);
           myTournamentField.innerHTML = "<a href=\"" + document.URL.substring(0, document.URL.search("#")) + "#tournament" + "\">click to view</a>"
-          localStorage.setItem('tId', tId);
+          localStorage.setItem('tId', tourRespObj.tId);
         }
         submitButton.disabled = false;
         tournamentForm.reset();
       });
     }
     else {
-      localStorage.setItem('tId', tIdPreliminary);
+      localStorage.setItem('tId', checkRespObj.err);
       const submitButton = document.getElementById('register-tournament-button') as HTMLButtonElement;
       submitButton.disabled = true;
       errorField.hidden = true;
-      console.log("already registerd in a tournament:", tId);
+      console.log("already registerd in a tournament:", checkRespObj.err);
       myTournamentField.innerHTML = "<a href=\"" + document.URL.substring(0, document.URL.search("#")) + "#tournament" + "\">click to view</a>"
     }
   }
-  hideableElements.startButton.hidden = true;
-  hideableElements.giveupButton.hidden = true;
-  hideableElements.gameArea.hidden = true;
-  hideableElements.gameWindow.hidden = true;
 }

@@ -102,11 +102,13 @@ const startServer = async () => {
         const resp = addTournament(req?.body.tName, Number(req?.body.playersN), req?.body.privacy, req?.headers['x-user-id'] as string);
         return JSON.stringify({
           tId: resp,
+          err: "nil"
         });
       }
       catch (e) {
         return JSON.stringify({
-          tId: "_" + e,
+          tId: "",
+          err: e,
         });
       }
     });
