@@ -217,7 +217,8 @@ export async function renderProfileContent(el: HTMLElement, bu: HTMLElement, gAr
         method: "PUT",
         headers: { 
           "Authorization": `Bearer ${authToken}`,
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
+          'Accept-Encoding': 'identity',
         },
         credentials: 'include',
         body: JSON.stringify(updatedData)
@@ -267,7 +268,8 @@ export async function renderProfileContent(el: HTMLElement, bu: HTMLElement, gAr
     try {
       const response = await fetch(`${API_BASE_URL}/api/profile`, {
         headers: {
-          "Authorization": `Bearer ${authToken}`
+          "Authorization": `Bearer ${authToken}`,
+          'Accept-Encoding': 'identity',
         },
         method: "DELETE",
         credentials: 'include'
