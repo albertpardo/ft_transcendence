@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y \
 COPY package*.json ./
 # RUN npm install
 # RUN npm install --package-lock-only
-RUN npm ci
+RUN npm install
 
 # Copy source code & certs
 COPY . .
