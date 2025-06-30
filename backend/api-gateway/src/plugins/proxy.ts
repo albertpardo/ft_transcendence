@@ -134,19 +134,21 @@ export default fp(async function (fastify: FastifyInstance): Promise<void> {
               }
           
               // In prod, only deserialize if it's really JSON
-              if ((payload as any)?.read) {
+              if ((payload as any)?.read && reply.getHeader('content-type')?.includes('application/json')) {
+
                 console.log('📦 Payload is Readable stream');
                 const raw = await getRawBody(payload as any, { encoding: 'utf8' });
                 console.log('📜 Raw body from stream:', raw);
                 try {
                   const body = JSON.parse(raw);
                   console.log('🧾 Parsed JSON from stream:', body);
-                  reply.type('application/json');
                   if (!body.id || !body.username) {
+                      reply.type('application/json');
                     return raw;
                   }
 
                   const token = fastify.jwt.sign({ userId: body.id });
+                  reply.type('application/json');
                   console.log('🔑 Token generated:', token);
                   return JSON.stringify({ ...body, token });
                 } catch (err) {
