@@ -63,8 +63,11 @@ exports.updateProfile = async (request, reply) => {
         avatar
     });
 
-    if (result.error) reply.code(400).send(result);
-    reply.send({ message: "🏄 Profile updated successfully" });
+    // if (result.error) reply.code(400).send(result);
+     if (result.error) return reply.code(400).type('application/json').send(result);
+
+    // reply.send({ message: "🏄 Profile updated successfully" });
+    reply.type('application/json').send({ message: "🏄 Profile updated successfully" });
 }
 
 exports.deleteProfile = async (request, reply) => {
@@ -72,6 +75,10 @@ exports.deleteProfile = async (request, reply) => {
     if (!userId) reply.code(401).send({ error: 'Unauthorized' });
 
     const result = await userService.deleteProfile(userId);
-    if (result.error) reply.code(400).send(result);
-    reply.send({ message: "🏊 Profile deleted successfully" });
+
+    // if (result.error) reply.code(400).send(result);
+    if (result.error) return reply.code(400).type('application/json').send(result);
+
+    // reply.send({ message: "🏊 Profile deleted successfully" });
+    reply.type('application/json').send({ message: "🏊 Profile deleted successfully" });
 }

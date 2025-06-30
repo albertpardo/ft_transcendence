@@ -78,7 +78,7 @@ export default fp(async function (fastify: FastifyInstance): Promise<void> {
             try {
                // console.log('🔍🔐 Raw Authorization Header:', JSON.stringify(req.headers.authorization));
                 console.log('🔍🔐 JWT Secret in use:', process.env.JWT_SECRET);
-                console.log(`🔍🔐 Aurthorization header**** -> : ${auth}`);
+                console.log(`🔍🔐 Authorization header: ${auth}`);
                 await req.jwtVerify();
                 // await (req as FastifyRequest).jwtVerify();
                 console.log("🔐 Verified JWT in proxy preHandler");
@@ -137,15 +137,22 @@ export default fp(async function (fastify: FastifyInstance): Promise<void> {
               if ((payload as any)?.read) {
                 console.log('📦 Payload is Readable stream');
                 const raw = await getRawBody(payload as any, { encoding: 'utf8' });
+                console.log('📜 Raw body from stream:', raw);
                 try {
                   const body = JSON.parse(raw);
                   console.log('🧾 Parsed JSON from stream:', body);
-                  if (!body.id || !body.username) return raw;
+                  reply.type('application/json');
+                  if (!body.id || !body.username) {
+                    return raw;
+                  }
+
                   const token = fastify.jwt.sign({ userId: body.id });
                   console.log('🔑 Token generated:', token);
                   return JSON.stringify({ ...body, token });
                 } catch (err) {
                   console.warn('❌ Not JSON (probably compressed or encrypted), skipping JWT injection.');
+                  console.warn('🔎 Raw body (truncated):', raw?.slice?.(0, 300));
+                  reply.type('application/json');
                   return raw;
                 }
               }

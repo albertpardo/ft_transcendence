@@ -27,6 +27,8 @@ export async function renderProfileContent(el: HTMLElement, bu: HTMLElement, gAr
       mode: 'cors',
     });
 
+    //console.log('🧪 API Gateway Content-Type:', res.headers.get('content-type'));
+
     if (!res.ok) throw new Error("Failed to fetch user data");
 
     userData = await res.json();
