@@ -134,6 +134,7 @@ export default fp(async function (fastify: FastifyInstance): Promise<void> {
         reply: FastifyReply,
         payload: string | Buffer | Readable
     ): Promise<string | Buffer | Readable> => {
+        console.log(`📡 [onSend] URL: ${req.url}, statusCode: ${reply.statusCode}`);//debug log
         if ((req.url.startsWith('/api/login') || req.url.startsWith('/api/signup')) && reply.statusCode === 200) {
             try {
               // Only decode in dev if payload is a string
