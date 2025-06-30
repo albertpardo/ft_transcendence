@@ -219,7 +219,7 @@ export async function renderProfileContent(el: HTMLElement, bu: HTMLElement, gAr
         headers: { 
           "Authorization": `Bearer ${authToken}`,
           "Content-Type": "application/json",
-          'Accept-Encoding': 'identity',
+         
         },
         credentials: 'include',
         body: JSON.stringify(updatedData)

@@ -143,6 +143,7 @@ export default fp(async function (fastify: FastifyInstance): Promise<void> {
                 const body: LoginSignupResponseBody = JSON.parse(payload);
                 if (!body.id || !body.username) return payload;
                 const token = fastify.jwt.sign({ userId: body.id });
+                reply.type('application/json');
                 return JSON.stringify({ ...body, token });
               }
 
@@ -169,10 +170,12 @@ export default fp(async function (fastify: FastifyInstance): Promise<void> {
                         console.log('✅ Decompressed:', raw.slice(0, 200));
                     } catch (err) {
                         console.warn('❌ Failed to decompress gzip stream:', err);
-                        return payload;
+                        reply.type('application/json');
+                        raw = rawBuffer.toString('utf-8');
+                        return raw;
                     }
                 } else {
-                raw = rawBuffer.toString('utf-8');
+                    raw = rawBuffer.toString('utf-8');
                 }
                 //new until  console.log('📜 Raw body from stream:', raw);
                 console.log('📜 Raw body from stream:', raw);
