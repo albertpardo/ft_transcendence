@@ -12,8 +12,12 @@ RUN apt-get update && apt-get install -y \
 # Copy package.json and install deps
 COPY package*.json ./
 # RUN npm install
-RUN npm install --package-lock-only
-RUN npm ci --omit=dev
+# RUN npm install --package-lock-only
+RUN npm ci
+
+# Copy source code & certs
+COPY . .
+RUN npm run build
 
 # Install ts-node & typescript globally (or via devDeps)
 # RUN npm install -g ts-node typescript ts-node-dev
@@ -22,9 +26,6 @@ RUN npm ci --omit=dev
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s \
   CMD curl -f http://localhost:10000/health || exit 1
 
-# Copy source code & certs
-COPY . .
-RUN npm run build
 
 # Expose HTTPS port
 EXPOSE 8443
