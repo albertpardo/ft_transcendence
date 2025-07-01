@@ -3,7 +3,27 @@
 // stolen from backend/microservices/game_service/src/pong.ts
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-export function renderTournamentContent(hideableElements) {
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+async function deleteTournament() {
+  const fresp = fetch(
+    `${API_BASE_URL}/api/pong/tour/delete`,
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json,application/html,text/html,*/*',
+        'Origin': 'https://127.0.0.1:3000/',
+        'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
+      },
+      credentials: 'include',
+      mode: 'cors',
+    }
+  );
+  return fresp;
+}
+
+export async function renderTournamentContent(hideableElements) {
   hideableElements.startButton.hidden = true;
   hideableElements.giveupButton.hidden = true;
   hideableElements.gameArea.hidden = true;
@@ -44,11 +64,49 @@ export function renderTournamentContent(hideableElements) {
       </tr>
     </tbody>
     </table>
+    <button id="force-rm-tourn" disabled
+     class=
+     "
+       w-full px-4 py-2 text-white bg-blue-600
+       rounded-md hover:bg-blue-700 focus:outline-none
+       focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+       focus:ring-offset-gray-800
+       disabled:border-gray-200 disabled:bg-gray-700 disabled:text-gray-500 disabled:shadow-none
+     ">
+      COMPLETELY ANIHILATE THE TOURNAMENT (admin only)
+    </button>
   `;
   hideableElements.contentArea.innerHTML = tempHTML;
+  const tournAnihilationButton = document.getElementById("force-rm-tourn");
+  if (tournAnihilationButton) {
+    const checkOnTournamentRawResp = await checkOnTournamentForm();
+    const checkResp = await checkOnTournamentRawResp.text();
+    const checkRespObj = JSON.parse(checkResp);
+    if (checkRespObj.err?.substring(0, 3) !== "no " && checkRespObj.err?.substring(0, 3) !== "Pla") {
+      console.log(tournAnihilationButton);
+      console.log("should be enabled in the next line");
+      tournAnihilationButton.removeAttribute('disabled');
+      console.log(tournAnihilationButton);
+      tournAnihilationButton.addEventListener("click", async () => {
+        const rawResOfDelete = await deleteTournament();
+        const resOfDelete = await rawResOfDelete.text();
+        const resOfDeleteObj = JSON.parse(resOfDelete);
+        if (resOfDeleteObj.err === "nil") {
+          alert("wow dude. deleted tournament.");
+          localStorage.removeItem("tId");
+          tournAnihilationButton.disabled = true;
+        }
+        else {
+          alert("failed to delete tournament: " + resOfEnrollObj.err);
+        }
+      });
+    }
+    else {
+      console.log("just checked and you don't admin anything:", checkRespObj.err);
+      tournAnihilationButton.disabled = true;
+    }
+  }
 }
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 async function createTournament(tName : string, playersN : number, privacy : boolean) {
   const fresp = fetch(
@@ -168,7 +226,7 @@ export async function renderTournamentManagerContent(hideableElements) {
         </div>
         <div>
           <input type="checkbox" id="rprivate" name="rprivate"
-            checked />
+            />
           <label for="rprivate">Make it private</label>
         </div>
         <div>
@@ -206,7 +264,7 @@ export async function renderTournamentManagerContent(hideableElements) {
     const checkResp = await checkOnTournamentRawResp.text();
     const checkRespObj = JSON.parse(checkResp);
     if (checkRespObj.err?.substring(0, 3) === "no ") {
-      submitButton.disabled = false;
+      submitButton.removeAttribute('disabled');
       // "no tournament for this player found" => proceed with allowing to create the tournament
       tournamentForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -220,7 +278,7 @@ export async function renderTournamentManagerContent(hideableElements) {
         const tourRespObj = JSON.parse(tourResp);
         if (tourRespObj.err !== "nil") {
           alert("Tournament creation error: " + tourRespObj.err);
-          submitButton.disabled = false;
+          submitButton.removeAttribute('disabled');
 //          errorField.innerHTML = "Tournament creation error: " + tId;
 //          errorField.hidden = false;
         }
@@ -275,7 +333,7 @@ export async function renderTournamentManagerContent(hideableElements) {
         localStorage.setItem("tId", allPTRObj.res[newCount].tId);
       }
       else {
-        alert("failed to enroll in " + allPTRObj.res[newCount].tId);
+        alert("failed to enroll in " + allPTRObj.res[newCount].tId + " because: " + resOfEnrollObj.err);
       }
     });
   }

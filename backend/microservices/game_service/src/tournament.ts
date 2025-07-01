@@ -6,15 +6,19 @@ class Tournament {
   public tName : string = "";
   private adminId : string = "";
   public isItPrivate : boolean = true;
-  private participantsIds : Array<string> = ["", "", "", "", "", "", "", ""];
+  private qfIds : Array<string> = ["", "", "", "", "", "", "", ""];
+  private sfIds : Array<string> = ["", "", "", ""];
+  private fIds : Array<string> = ["", ""];
+  private Ids : Array<Array<string>> = [this.fIds, this.sfIds, this.qfIds];
   public stages : number = 1;
   public currentStage : number = 1;
   public tId : string = "";
   public started : boolean = false;
+  public alive : boolean = true;
 
   public calculateJoinedPN() {
     let count : number = 0;
-    for (var player of this.participantsIds) {
+    for (var player of this.Ids[this.stages - 1]) {
       if (player !== "") {
         count += 1;
       }
@@ -24,16 +28,17 @@ class Tournament {
 
   public addParticipant(participantId: string) {
     let i : number = 0;
-    while (i < Math.pow(2, this.currentStage) && this.participantsIds[i] !== "") {
-      if (this.participantsIds[i] === participantId) {
+    let I : number = Math.pow(2, this.stages);
+    while (i < I && this.Ids[this.stages - 1][i] !== "") {
+      if (this.Ids[this.stages - 1][i] === participantId) {
         throw "This player is already in";
       }
       i += 1;
     }
-    if (i === Math.pow(2, this.currentStage)) {
+    if (i >= I) {
       throw "Everyone is already in";
     }
-    this.participantsIds[i] = participantId;
+    this.Ids[this.stages - 1][i] = participantId;
   }
 
   constructor(tName: string, adminId: string, isItPrivate: boolean = true, playersN: number, tId: string) {
@@ -41,35 +46,25 @@ class Tournament {
     this.adminId = adminId;
     this.isItPrivate = isItPrivate;
     console.log("so. the playersN is...", playersN);
-    console.log(typeof playersN);
-    switch (playersN) {
-      case 2:
-        console.log("2");
-        this.stages = 1;
-        break;
-      case 4:
-        console.log("4");
-        this.stages = 2;
-        break;
-      case 8:
-        console.log("8");
-        this.stages = 3;
-        break;
-      default:
-        console.log("how.");
-        this.stages = 0;
+    if (playersN !== 2 && playersN !== 4 && playersN !== 8) {
+      console.error("some clever bastard tried some bs rn");
+      return ;
     }
+    // I'm NOT doing a log_2.
+    const numbs : Array<number> = [0, 1, 0, 2, 0, 0, 0, 3];
+    this.stages = numbs[playersN - 1];
+    console.log("chosen stages var:", this.stages);
     this.currentStage = this.stages;
     this.addParticipant(adminId);
     this.tId = tId;
   }
 
   private checkEveryonePresent() {
-    if (this.stages === 0) {
+    if (this.stages === 0 || this.currentStage === 0) {
       return true;
     }
     for (let i : number = 0; i < Math.pow(2, this.currentStage); i++) {
-      if (this.participantsIds[i] === "") {
+      if (this.Ids[this.currentStage - 1][i] === "") {
         console.log("hha! participant", i, "of", Math.pow(2, this.currentStage), "is not present");
         return false;
       }
@@ -79,10 +74,13 @@ class Tournament {
   }
 
   private matchesOngoing() {
+    if (this.stages === 0 || this.currentStage === 0) {
+      return false;
+    }
     let res : Array<boolean> = [false, false, false, false, false, false, false, false];
     for (let i : number = 0; i < Math.pow(2, this.currentStage); i++) {
-      if (this.participantsIds[i] !== "" && this.participantsIds[i] !== "failed") {
-        let playerId : string = this.participantsIds[i];
+      if (this.Ids[this.currentStage - 1][i] !== "" && this.Ids[this.currentStage - 1][i] !== "failed") {
+        let playerId : string = this.Ids[this.stages - 1][i];
         if (playersMap.has(playerId)) {
           let gameId : string = playersMap.get(playerId);
           if (gamesMap.has(gameId)) {
@@ -129,7 +127,7 @@ class Tournament {
   //  - failed
   // 8
   public mainLoop = async () => {
-    while (1) {
+    while (this.alive) {
       console.log("tour: before everyone present");
       while (!this.checkEveryonePresent()) {
         await sleep(5e3);
@@ -147,6 +145,16 @@ class Tournament {
       }
     }
   }
+
+  public eliminateSelf() {
+    this.alive = false;
+    for (var user of this.Ids[this.currentStage - 1]) {
+      if (playersAlreadyParticipating.has(user)) {
+        playersAlreadyParticipating.delete(user);
+      }
+    }
+    // TODO run thru game ids and clean ts up
+  }
 }
 
 let adminMap = new Map<string, string>();
@@ -155,6 +163,9 @@ let tournamentMap = new Map<string, Tournament>();
 export function addTournament(tName: string, playersN: number, privacy: boolean, uuid: string) {
   if (adminMap.has(uuid)) {
     throw adminMap.get(uuid);
+  }
+  if (playersAlreadyParticipating.has(uuid)) {
+    throw "Player already participates in " + playersAlreadyParticipating.get(uuid);
   }
   if (playersN === -1) {
     throw "no tourament for this player found";
@@ -215,4 +226,29 @@ export function listAllPublicTournaments() {
     }
   }
   return res;
+}
+
+export function deleteTournament(adminId: string) {
+  if (adminMap.has(adminId)) {
+    const tId = adminMap.get(adminId);
+    if (typeof tId === "undefined") {
+      throw "tid is undefined";
+    }
+    if (tournamentMap.has(tId)) {
+      const tour = tournamentMap.get(tId);
+      if (typeof tour === "undefined") {
+        throw "tour is undefined";
+      }
+      tour.eliminateSelf();
+      tournamentMap.delete(tId);
+      adminMap.delete(adminId);
+    }
+    else {
+      adminMap.delete(adminId);
+      throw "Tournament doesn't exist for some reason";
+    }
+  }
+  else {
+    throw "You don't admin anything";
+  }
 }

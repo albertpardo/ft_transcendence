@@ -4,7 +4,7 @@ import type { FastifyRequest } from 'fastify';
 import cors from '@fastify/cors';
 import { PongResponses, State, addPlayerCompletely, removeTheSock, getPongDoneness, getPongState, forefit, moveMyPaddle, gamesReadyLoopCheck, dataStreamer } from './pong';
 import { historyMain, getHistForPlayerFromDb } from './history';
-import { addTournament, joinTournament, listAllPublicTournaments } from './tournament';
+import { addTournament, joinTournament, listAllPublicTournaments, deleteTournament } from './tournament';
 
 interface PongBodyReq {
   playerId: string,
@@ -136,6 +136,19 @@ const startServer = async () => {
         console.log("how the hell did this fail");
         return JSON.stringify({
           res: [],
+        });
+      }
+    });
+    fastify.get('/pong/tour/delete', async (req, reply) => {
+      try {
+        deleteTournament(req?.headers['x-user-id'] as string);
+        return JSON.stringify({
+          err: "nil",
+        });
+      }
+      catch (e) {
+        return JSON.stringify({
+          err: e,
         });
       }
     });
