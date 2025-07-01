@@ -1,5 +1,5 @@
 import fp from 'fastify-plugin';
-import { gunzipSync } from 'zlib'; 
+import { gunzipSync, brotliDecompressSync } from 'zlib';
 import fastifyHttpProxy from '@fastify/http-proxy';
 import { FastifyInstance } from 'fastify';
 import getRawBody from 'raw-body';
@@ -162,6 +162,35 @@ export default fp(async function (fastify: FastifyInstance): Promise<void> {
                 const encoding = reply.getHeader('content-encoding');
                 let raw: string;
 
+                // ─── BEGIN: Diagnostic Block ─────────────────────────────────────
+                console.log("🔍 Diagnostic block enabled:");
+                console.log("🔎 Raw buffer (hex slice):", rawBuffer.subarray(0, 32).toString('hex'));
+                console.log("📏 Buffer length:", rawBuffer.length);
+                console.log("🧪 content-encoding:", encoding);
+                console.log("🧪 content-type:", contentType);
+
+                try {
+                    const utf8 = rawBuffer.toString('utf-8');
+                    console.log("🔤 UTF-8 decoded text (slice):", utf8.slice(0, 300));
+                } catch {
+                    console.log("❌ Failed to decode as UTF-8");
+                }
+
+                try {
+                    const decompressedGzip = gunzipSync(rawBuffer);
+                    console.log("💨 GZIP decompressed (slice):", decompressedGzip.toString('utf-8').slice(0, 300));
+                } catch (e) {
+                    console.log("❌ Not GZIP or failed to decompress:", e.message);
+                }
+
+                try {
+                    const decompressedBrotli = brotliDecompressSync(rawBuffer);
+                    console.log("🧊 Brotli decompressed (slice):", decompressedBrotli.toString('utf-8').slice(0, 300));
+                } catch (e) {
+                    console.log("❌ Not Brotli or failed to decompress:", e.message);
+                }
+                // ─── END: Diagnostic Block ─────────────────────────────────────
+
                 if (typeof encoding === 'string' && encoding.includes('gzip')) {
                     try {
                         console.log('🔄 Decompressing gzip stream...');
@@ -188,7 +217,7 @@ export default fp(async function (fastify: FastifyInstance): Promise<void> {
                   }
 
                   const token = fastify.jwt.sign({ userId: body.id });
-                  reply.type('application/json');
+                  reply.type('application/json'); 
                   console.log('🔑 Token generated:', token);
                   return JSON.stringify({ ...body, token });
                 } catch (err) {
