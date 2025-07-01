@@ -9,7 +9,7 @@ class Tournament {
   private qfIds : Array<string> = ["", "", "", "", "", "", "", ""];
   private sfIds : Array<string> = ["", "", "", ""];
   private fIds : Array<string> = ["", ""];
-  private Ids : Array<Array<string>> = [this.fIds, this.sfIds, this.qfIds];
+  public Ids : Array<Array<string>> = [this.fIds, this.sfIds, this.qfIds];
   public stages : number = 1;
   public currentStage : number = 1;
   public tId : string = "";
@@ -251,4 +251,29 @@ export function deleteTournament(adminId: string) {
   else {
     throw "You don't admin anything";
   }
+}
+
+export function getFullTournament(uuid: string) {
+  if (!playersAlreadyParticipating.has(uuid)) {
+    throw "You have no tournament you'd be in";
+  }
+  const tId = playersAlreadyParticipating.get(uuid);
+  if (typeof tId === "undefined") {
+    throw "tId undefined";
+  }
+  if (!tournamentMap.has(tId)) {
+    throw "Tournament not found in tId map";
+  }
+  const tour = tournamentMap.get(tId);
+  if (typeof tour === "undefined") {
+    throw "tour undefined";
+  }
+  let response = {
+    tName: tour.tName,
+    tId: tId,
+    Ids: tour.Ids,
+    currentStage: tour.currentStage,
+    stages: tour.stages,
+  };
+  return response;
 }
