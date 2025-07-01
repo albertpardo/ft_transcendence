@@ -13,7 +13,28 @@ export async function renderProfileContent(el: HTMLElement, bu: HTMLElement, gAr
     el.innerHTML = `<p class="text-red-500">You're not logged in. Please log in again.</p>`;
     return;
   }
+//debugg block  start
+function simpleJwtDecode(token: string) {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(atob(base64).split('').map(c =>
+      '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
+    ).join(''));
+    return JSON.parse(jsonPayload);
+  } catch {
+    return null;
+  }
+}
 
+// Usage:
+const decoded = simpleJwtDecode(authToken);
+if (!decoded) {
+  el.innerHTML = `<p class="text-red-500">Invalid token. Please log in again.</p>`;
+  return;
+}
+console.log("✅ Decoded token:", decoded);
+//debugg block end
   let userData;
   const authstringheader : string = "Bearer " + authToken;
   try {
