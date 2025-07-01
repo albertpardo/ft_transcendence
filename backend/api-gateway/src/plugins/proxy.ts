@@ -180,14 +180,22 @@ export default fp(async function (fastify: FastifyInstance): Promise<void> {
                     const decompressedGzip = gunzipSync(rawBuffer);
                     console.log("💨 GZIP decompressed (slice):", decompressedGzip.toString('utf-8').slice(0, 300));
                 } catch (e) {
-                    console.log("❌ Not GZIP or failed to decompress:", e.message);
+                    if (e instanceof Error) {
+                        console.log("❌ Not GZIP or failed to decompress:", e.message);
+                    } else {
+                        console.log("❌ Not GZIP or failed to decompress:", e);
+                    }
                 }
 
                 try {
                     const decompressedBrotli = brotliDecompressSync(rawBuffer);
                     console.log("🧊 Brotli decompressed (slice):", decompressedBrotli.toString('utf-8').slice(0, 300));
                 } catch (e) {
-                    console.log("❌ Not Brotli or failed to decompress:", e.message);
+                    if (e instanceof Error) {
+                        console.log("❌ Not Brotli or failed to decompress:", e.message);
+                    } else {
+                        console.log("❌ Not Brotli or failed to decompress:", String(e));
+                    }
                 }
                 // ─── END: Diagnostic Block ─────────────────────────────────────
 
