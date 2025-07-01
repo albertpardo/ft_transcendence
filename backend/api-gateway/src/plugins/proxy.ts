@@ -162,7 +162,7 @@ export default fp(async function (fastify: FastifyInstance): Promise<void> {
                 const encoding = reply.getHeader('content-encoding');
                 let raw: string;
 
-                // ─── BEGIN: Diagnostic Block ─────────────────────────────────────
+               /*  // ─── BEGIN: Diagnostic Block ─────────────────────────────────────
                 console.log("🔍 Diagnostic block enabled:");
                 console.log("🔎 Raw buffer (hex slice):", rawBuffer.subarray(0, 32).toString('hex'));
                 console.log("📏 Buffer length:", rawBuffer.length);
@@ -197,9 +197,36 @@ export default fp(async function (fastify: FastifyInstance): Promise<void> {
                         console.log("❌ Not Brotli or failed to decompress:", String(e));
                     }
                 }
-                // ─── END: Diagnostic Block ─────────────────────────────────────
+                // ─── END: Diagnostic Block ───────────────────────────────────── */
 
-                if (typeof encoding === 'string' && encoding.includes('gzip')) {
+                if (typeof encoding === 'string') {
+                    if (encoding.includes('gzip')) {
+                        try {
+                            console.log('🔄 Decompressing gzip stream...');
+                            const decompressed = gunzipSync(rawBuffer);
+                            raw = decompressed.toString('utf-8');
+                            console.log('✅ GZIP Decompressed:', raw.slice(0, 200));
+                        } catch (err) {
+                            console.warn('❌ Failed to decompress gzip stream:', err);
+                            raw = rawBuffer.toString('utf-8');
+                        }
+                    } else if (encoding.includes('br')) {
+                        try {
+                            console.log('🧊 Decompressing Brotli stream...');
+                            const decompressed = brotliDecompressSync(rawBuffer);
+                            raw = decompressed.toString('utf-8');
+                            console.log('✅ Brotli Decompressed:', raw.slice(0, 200));
+                        } catch (err) {
+                            console.warn('❌ Failed to decompress Brotli stream:', err);
+                            raw = rawBuffer.toString('utf-8');
+                        }
+                    } else {
+                        raw = rawBuffer.toString('utf-8');
+                    }
+                } else {
+                    raw = rawBuffer.toString('utf-8');
+                }
+                /* if (typeof encoding === 'string' && encoding.includes('gzip')) {
                     try {
                         console.log('🔄 Decompressing gzip stream...');
                         const decompressed = gunzipSync(rawBuffer);
@@ -213,7 +240,7 @@ export default fp(async function (fastify: FastifyInstance): Promise<void> {
                     }
                 } else {
                     raw = rawBuffer.toString('utf-8');
-                }
+                } */
                 //new until  console.log('📜 Raw body from stream:', raw);
                 console.log('📜 Raw body from stream:', raw);
                 try {
