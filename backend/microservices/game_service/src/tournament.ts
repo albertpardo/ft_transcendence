@@ -165,13 +165,13 @@ export function addTournament(tName: string, playersN: number, privacy: boolean,
     throw adminMap.get(uuid);
   }
   if (playersAlreadyParticipating.has(uuid)) {
-    throw "Player already participates in " + playersAlreadyParticipating.get(uuid);
+    throw "_Player already participates in " + playersAlreadyParticipating.get(uuid);
   }
   if (playersN === -1) {
-    throw "no tourament for this player found";
+    throw "_no tourament for this player found";
   }
   if (tName === "" || !(playersN === 2 || playersN === 4 || playersN === 8) || uuid === "") {
-    throw "invalid tournament creation parameters";
+    throw "_invalid tournament creation parameters";
   }
   const touridtoadd = makeid(64);
   adminMap.set(uuid, touridtoadd);

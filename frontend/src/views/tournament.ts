@@ -100,7 +100,8 @@ export async function renderTournamentContent(hideableElements) {
     const checkOnTournamentRawResp = await checkOnTournamentForm();
     const checkResp = await checkOnTournamentRawResp.text();
     const checkRespObj = JSON.parse(checkResp);
-    if (checkRespObj.err?.substring(0, 3) !== "no " && checkRespObj.err?.substring(0, 3) !== "Pla") {
+    const firstThree : string = checkRespObj.err?.substring(0, 3);
+    if (firstThree !== "_no" && firstThree !== "_Pl" && firstThree !== "_in" && firstThree !== "nil") {
       tournAnihilationButton.removeAttribute('disabled');
       tournAnihilationButton.addEventListener("click", async () => {
         const rawResOfDelete = await deleteTournament();
@@ -307,7 +308,7 @@ export async function renderTournamentManagerContent(hideableElements) {
     const checkOnTournamentRawResp = await checkOnTournamentForm();
     const checkResp = await checkOnTournamentRawResp.text();
     const checkRespObj = JSON.parse(checkResp);
-    if (checkRespObj.err?.substring(0, 3) === "no ") {
+    if (checkRespObj.err?.substring(0, 3) === "_no") {
       canWeJoin = true;
       submitButton.removeAttribute('disabled');
       // "no tournament for this player found" => proceed with allowing to create the tournament
