@@ -1,5 +1,7 @@
 // src/views/tournament.ts
 
+import { getNicknameForPlayerId } from './history'
+
 // stolen from backend/microservices/game_service/src/pong.ts
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -141,7 +143,9 @@ export async function renderTournamentContent(hideableElements) {
         let currentTitle : string = ["table-contender-", "table-quarterfinal-", "table-semifinal-"][3 - i - 1];
         for (let j = 0; j < currMaxPN; j++) {
           if (tourn?.Ids[i][j] !== "") {
-            document.getElementById(`${currentTitle}${j + 1}`).innerHTML = "<b>" + tourn?.Ids[i][j] + "</b>";
+            let respNn = await getNicknameForPlayerId(tourn?.Ids[i][j]);
+            let nicnknameVs = JSON.parse(await respNn.text())?.nickname;
+            document.getElementById(`${currentTitle}${j + 1}`).innerHTML = "<b>" + nicnknameVs + "</b>";
           }
           else {
             document.getElementById(`${currentTitle}${j + 1}`).innerHTML = "<i>empty</i>";

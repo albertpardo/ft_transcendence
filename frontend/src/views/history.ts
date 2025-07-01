@@ -23,7 +23,7 @@ async function getHistoryForPlayerId(userId: string) {
   return (response);
 }
 
-async function getNicknameForPlayerId(userId: string) {
+export async function getNicknameForPlayerId(userId: string) {
   const response = await fetch(
     `${API_BASE_URL}/api/public/nickname`,
     {
