@@ -31,6 +31,19 @@ interface OnRequestFastifyRequest extends FastifyRequest {
 
 
 export default fp(async function (fastify: FastifyInstance): Promise<void> {
+    fastify.addHook('onRequest', async (req, reply) => {
+        const allowedOrigin = process.env.API_FRONTEND_URL || 'https://frontend-7nt4.onrender.com';
+        if (req.headers.origin === allowedOrigin) {
+            reply.header('Access-Control-Allow-Origin', allowedOrigin);
+            reply.header('Access-Control-Allow-Credentials', 'true');
+            reply.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+            reply.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+        }
+        if (req.method === 'OPTIONS') {
+            reply.code(204).send();
+        }
+    });
+    
     fastify.get('/health', async (req: FastifyRequest, reply: FastifyReply): Promise<{ status: string }> => {
         return { status: 'ok' };
     });
