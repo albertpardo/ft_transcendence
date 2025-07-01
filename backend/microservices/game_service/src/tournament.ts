@@ -45,7 +45,6 @@ class Tournament {
     this.tName = tName;
     this.adminId = adminId;
     this.isItPrivate = isItPrivate;
-    console.log("so. the playersN is...", playersN);
     if (playersN !== 2 && playersN !== 4 && playersN !== 8) {
       console.error("some clever bastard tried some bs rn");
       return ;
@@ -53,7 +52,6 @@ class Tournament {
     // I'm NOT doing a log_2.
     const numbs : Array<number> = [0, 1, 0, 2, 0, 0, 0, 3];
     this.stages = numbs[playersN - 1];
-    console.log("chosen stages var:", this.stages);
     this.currentStage = this.stages;
     this.addParticipant(adminId);
     this.tId = tId;
@@ -65,7 +63,6 @@ class Tournament {
     }
     for (let i : number = 0; i < Math.pow(2, this.currentStage); i++) {
       if (this.Ids[this.currentStage - 1][i] === "") {
-        console.log("hha! participant", i, "of", Math.pow(2, this.currentStage), "is not present");
         return false;
       }
     }
@@ -148,6 +145,9 @@ class Tournament {
 
   public eliminateSelf() {
     this.alive = false;
+    if (this.currentStage <= 0) {
+      throw "It should already be gone via the loop cleaning";
+    }
     for (var user of this.Ids[this.currentStage - 1]) {
       if (playersAlreadyParticipating.has(user)) {
         playersAlreadyParticipating.delete(user);
@@ -175,14 +175,10 @@ export function addTournament(tName: string, playersN: number, privacy: boolean,
   }
   const touridtoadd = makeid(64);
   adminMap.set(uuid, touridtoadd);
-  console.log("the playersnum shall be...", playersN);
   const tourtoadd = new Tournament(tName, uuid, privacy, playersN, touridtoadd);
   tourtoadd.mainLoop();
   tournamentMap.set(touridtoadd, tourtoadd);
   playersAlreadyParticipating.set(uuid, touridtoadd);
-  console.log("so here's what the current maps are r/n:");
-  console.log(adminMap);
-  console.log(tournamentMap);
   return (tourtoadd.tId);
 }
 

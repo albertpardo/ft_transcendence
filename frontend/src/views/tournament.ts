@@ -112,7 +112,7 @@ export async function renderTournamentContent(hideableElements) {
           tournAnihilationButton.disabled = true;
         }
         else {
-          console.error("failed to delete tournament: " + resOfEnrollObj.err);
+          console.error("failed to delete tournament:", resOfDeleteObj.err);
         }
       });
     }
