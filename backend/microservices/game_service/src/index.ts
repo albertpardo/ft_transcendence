@@ -4,13 +4,14 @@ import type { FastifyRequest } from 'fastify';
 import cors from '@fastify/cors';
 import { PongResponses, State, addPlayerCompletely, removeTheSock, getPongDoneness, getPongState, forefit, moveMyPaddle, gamesReadyLoopCheck, dataStreamer } from './pong';
 import { historyMain, getHistForPlayerFromDb } from './history';
-import { addTournament, joinTournament, listAllPublicTournaments, deleteTournament, getFullTournament } from './tournament';
+import { addTournament, joinTournament, listAllPublicTournaments, deleteTournament, getFullTournament, TournError } from './tournament';
 
 interface PongBodyReq {
   playerId: string,
   getIn: boolean,
   mov: number,
 }
+
 // id shall come from the req and be per-user unique and persistent (jwt)
 // getIn tells do we wanna move (false) or do we wanna get into a game (true)
 // mov tells us where to move and if we wanna
@@ -106,10 +107,18 @@ const startServer = async () => {
         });
       }
       catch (e) {
-        return JSON.stringify({
-          tId: "",
-          err: e,
-        });
+        if (e instanceof TournError) {
+          return JSON.stringify({
+            res: e.tId,
+            err: e.err,
+          });
+        }
+        else {
+          return JSON.stringify({
+            res: "",
+            err: e,
+          });
+        }
       }
     });
     fastify.post('/pong/tour/enroll', async (req: FastifyRequest<{ Body: {tId: string} }>, reply) => {

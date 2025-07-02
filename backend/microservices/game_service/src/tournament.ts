@@ -2,6 +2,18 @@ import { gamesMap, playersMap, socksMap, sleep, makeid } from './pong';
 
 let playersAlreadyParticipating = new Map<string, string>();
 
+export class TournError extends Error {
+  public tId: string;
+  public err: string;
+
+  constructor({tId, err,}: {tId: string, err: string,}) {
+    super();
+    this.tId = tId;
+    this.err = err;
+  }
+}
+
+
 class Tournament {
   public tName : string = "";
   private adminId : string = "";
@@ -162,16 +174,42 @@ let tournamentMap = new Map<string, Tournament>();
 
 export function addTournament(tName: string, playersN: number, privacy: boolean, uuid: string) {
   if (adminMap.has(uuid)) {
-    throw adminMap.get(uuid);
+    const tId = adminMap.get(uuid);
+    if (typeof tId === "undefined") {
+      throw new TournError({
+        tId: "",
+        err: "undefined tId",
+      });
+    }
+    throw new TournError({
+      tId: tId,
+      err: "You already administer a tournament",
+    });
   }
   if (playersAlreadyParticipating.has(uuid)) {
-    throw "_Player already participates in " + playersAlreadyParticipating.get(uuid);
+    const tId = playersAlreadyParticipating.get(uuid);
+    if (typeof tId === "undefined") {
+      throw new TournError({
+        tId: "",
+        err: "undefined tId",
+      });
+    }
+    throw new TournError({
+      tId: tId,
+      err: "You already participate in a tournament",
+    });
   }
   if (playersN === -1) {
-    throw "_no tourament for this player found";
+    throw new TournError({
+      tId: "",
+      err: "Doing a -1 check has shown that you don't engage with any tournaments"
+    });
   }
   if (tName === "" || !(playersN === 2 || playersN === 4 || playersN === 8) || uuid === "") {
-    throw "_invalid tournament creation parameters";
+    throw new TournError({
+      tId: "",
+      err: "Invalid tournament creation parameters",
+    });
   }
   const touridtoadd = makeid(64);
   adminMap.set(uuid, touridtoadd);

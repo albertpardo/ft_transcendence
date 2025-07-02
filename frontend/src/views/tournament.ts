@@ -43,6 +43,77 @@ async function getCompleteTournamentInfo() {
   return fresp;
 }
 
+async function fillInTheTournTable() {
+  const tournAllInfoRawResp = await getCompleteTournamentInfo();
+  const tournAllInfoResp = await tournAllInfoRawResp.text();
+  const tournAllInfoRespObj = JSON.parse(tournAllInfoResp);
+  if (tournAllInfoRespObj.err !== "nil") {
+    console.log("getting all the tourn info resulted in err:", tournAllInfoRespObj.err);
+    document.getElementById("tourn-title").innerHTML = "<i>No tournament.</i>";
+    const bt = document.getElementById("big-table");
+    if (bt) {
+      bt.innerHTML = `
+        <tbody>
+          <tr>
+            <td id="table-contender-1">contender 1</td>
+            <td rowspan="2" id="table-quarterfinal-1">quarterfinal 1</td>
+            <td rowspan="4" id="table-semifinal-1">semifinal 1</td>
+            <td rowspan="8" id="table-finalist">finalist!</td>
+          </tr>
+          <tr>
+            <td id="table-contender-2">contender 2</td>
+          </tr>
+          <tr>
+            <td id="table-contender-3">contender 3</td>
+            <td rowspan="2" id="table-quarterfinal-2">quarterfinal 2</td>
+          </tr>
+          <tr>
+            <td id="table-contender-4">contender 4</td>
+          </tr>
+          <tr>
+            <td id="table-contender-5">contender 5</td>
+            <td rowspan="2" id="table-quarterfinal-3">quarterfinal 3</td>
+            <td rowspan="4" id="table-semifinal-2">semifinal 2</td>
+          </tr>
+          <tr>
+            <td id="table-contender-6">contender 6</td>
+          </tr>
+          <tr>
+            <td id="table-contender-7">contender 7</td>
+            <td rowspan="2" id="table-quarterfinal-4">quarterfinal 4</td>
+          </tr>
+          <tr>
+            <td id="table-contender-8">contender 8</td>
+          </tr>
+        </tbody>
+      `;
+    }
+  }
+  else {
+    const tourn = tournAllInfoRespObj.res;
+    if (typeof tourn === "undefined") {
+      console.error("weird error occured: tour is undefined, although no err received");
+    }
+    else {
+      document.getElementById("tourn-title").innerHTML = tourn.tName;
+      for (let i = 0; i < 3; i++) {
+        let currMaxPN : number = Math.pow(2, i + 1);
+        let currentTitle : string = ["table-contender-", "table-quarterfinal-", "table-semifinal-"][3 - i - 1];
+        for (let j = 0; j < currMaxPN; j++) {
+          if (tourn?.Ids[i][j] !== "") {
+            let respNn = await getNicknameForPlayerId(tourn?.Ids[i][j]);
+            let nicnknameVs = JSON.parse(await respNn.text())?.nickname;
+            document.getElementById(`${currentTitle}${j + 1}`).innerHTML = "<b>" + nicnknameVs + "</b>";
+          }
+          else {
+            document.getElementById(`${currentTitle}${j + 1}`).innerHTML = "<i>empty</i>";
+          }
+        }
+      }
+    }
+  }
+}
+
 export async function renderTournamentContent(hideableElements) {
   hideableElements.startButton.hidden = true;
   hideableElements.giveupButton.hidden = true;
@@ -50,7 +121,7 @@ export async function renderTournamentContent(hideableElements) {
   hideableElements.gameWindow.hidden = true;
   let tempHTML : string = `
     <h1 id="tourn-title">Hi</h1>
-    <table class="table-fixed"><tbody>
+    <table id="big-table" class="table-fixed"><tbody>
       <tr>
         <td id="table-contender-1">contender 1</td>
         <td rowspan="2" id="table-quarterfinal-1">quarterfinal 1</td>
@@ -102,8 +173,7 @@ export async function renderTournamentContent(hideableElements) {
     const checkOnTournamentRawResp = await checkOnTournamentForm();
     const checkResp = await checkOnTournamentRawResp.text();
     const checkRespObj = JSON.parse(checkResp);
-    const firstThree : string = checkRespObj.err?.substring(0, 3);
-    if (firstThree !== "_no" && firstThree !== "_Pl" && firstThree !== "_in" && firstThree !== "nil") {
+    if (checkRespObj.err === "You already administer a tournament") {
       tournAnihilationButton.removeAttribute('disabled');
       tournAnihilationButton.addEventListener("click", async () => {
         const rawResOfDelete = await deleteTournament();
@@ -117,6 +187,7 @@ export async function renderTournamentContent(hideableElements) {
         else {
           console.error("failed to delete tournament:", resOfDeleteObj.err);
         }
+        await fillInTheTournTable();
       });
     }
     else {
@@ -124,36 +195,8 @@ export async function renderTournamentContent(hideableElements) {
       tournAnihilationButton.disabled = true;
     }
   }
-  const tournAllInfoRawResp = await getCompleteTournamentInfo();
-  const tournAllInfoResp = await tournAllInfoRawResp.text();
-  const tournAllInfoRespObj = JSON.parse(tournAllInfoResp);
-  if (tournAllInfoRespObj.err !== "nil") {
-    console.log("getting all the tourn info resulted in err:", tournAllInfoRespObj.err);
-    document.getElementById("tourn-title").innerHTML = "<i>No tournament.</i>";
-  }
-  else {
-    const tourn = tournAllInfoRespObj.res;
-    if (typeof tourn === "undefined") {
-      console.error("weird error occured: tour is undefined, although no err received");
-    }
-    else {
-      document.getElementById("tourn-title").innerHTML = tourn.tName;
-      for (let i = 0; i < 3; i++) {
-        let currMaxPN : number = Math.pow(2, i + 1);
-        let currentTitle : string = ["table-contender-", "table-quarterfinal-", "table-semifinal-"][3 - i - 1];
-        for (let j = 0; j < currMaxPN; j++) {
-          if (tourn?.Ids[i][j] !== "") {
-            let respNn = await getNicknameForPlayerId(tourn?.Ids[i][j]);
-            let nicnknameVs = JSON.parse(await respNn.text())?.nickname;
-            document.getElementById(`${currentTitle}${j + 1}`).innerHTML = "<b>" + nicnknameVs + "</b>";
-          }
-          else {
-            document.getElementById(`${currentTitle}${j + 1}`).innerHTML = "<i>empty</i>";
-          }
-        }
-      }
-    }
-  }
+
+  await fillInTheTournTable();
 }
 
 async function createTournament(tName : string, playersN : number, privacy : boolean) {
@@ -244,6 +287,57 @@ async function fetchAllPublicTournaments() {
   return fresp;
 }
 
+async function generateUpdateAllTOurTable(canWeJoin: boolean) {
+  const allTournamentsTable = document.getElementById('all-tournaments-table');
+  const rawAllPublicTournamentsResponse = await fetchAllPublicTournaments();
+  const allPTR = await rawAllPublicTournamentsResponse.text();
+  console.log(allPTR);
+  const allPTRObj = JSON.parse(allPTR);
+  let count : number = 0;
+  let tempInner : string = `
+  <tr>
+    <th>Name</th>
+    <th>Players</th>
+    <th>Join</th>
+  </tr>
+  `;
+  for (var item of allPTRObj?.res) {
+    tempInner += `
+    <tr>
+      <td>${item.tName}</td>
+      <td>${item.joinedPN}/${item.maxPN}</td>
+      <td><button id="join-button-${count}" class="
+        mt-6 p-3 bg-blue-500 rounded-lg hover:bg-blue-400 transition text-white font-medium
+        disabled:border-gray-200 disabled:bg-gray-700 disabled:text-gray-500 disabled:shadow-none
+      ">
+        Join
+      </button></td>
+    </tr>`;
+    count += 1;
+  }
+  allTournamentsTable.innerHTML = tempInner;
+  for (let newCount = 0; newCount < count; newCount += 1) {
+    if (!canWeJoin) {
+      document.getElementById(`join-button-${newCount}`).disabled = true;
+    }
+    else {
+      document.getElementById(`join-button-${newCount}`).disabled = false;
+    }
+    document.getElementById(`join-button-${newCount}`).addEventListener('click', async () => {
+      const rawResOfEnroll = await enrollInTournament(allPTRObj.res[newCount].tId);
+      const resOfEnroll = await rawResOfEnroll.text();
+      const resOfEnrollObj = JSON.parse(resOfEnroll);
+      if (resOfEnrollObj.err === "nil") {
+        alert("enrolled in " + allPTRObj.res[newCount].tId);
+        localStorage.setItem("tId", allPTRObj.res[newCount].tId);
+      }
+      else {
+        alert("failed to enroll in " + allPTRObj.res[newCount].tId + " because: " + resOfEnrollObj.err);
+      }
+    });
+  }
+}
+
 export async function renderTournamentManagerContent(hideableElements) {
   hideableElements.startButton.hidden = true;
   hideableElements.giveupButton.hidden = true;
@@ -312,7 +406,8 @@ export async function renderTournamentManagerContent(hideableElements) {
     const checkOnTournamentRawResp = await checkOnTournamentForm();
     const checkResp = await checkOnTournamentRawResp.text();
     const checkRespObj = JSON.parse(checkResp);
-    if (checkRespObj.err?.substring(0, 3) === "_no") {
+    console.log("check resp obj:", checkRespObj);
+    if (checkRespObj.err?.substring(0, 3) === "Doi") {
       canWeJoin = true;
       submitButton.removeAttribute('disabled');
       // "no tournament for this player found" => proceed with allowing to create the tournament
@@ -327,7 +422,7 @@ export async function renderTournamentManagerContent(hideableElements) {
         const tourResp = await rawCreateTournamentResp.text();
         const tourRespObj = JSON.parse(tourResp);
         if (tourRespObj.err !== "nil") {
-          alert("Tournament creation error: " + tourRespObj.err);
+          alert("Tournament creation error: " + tourRespObj.err + " | " + tourRespObj.tId);
           submitButton.removeAttribute('disabled');
           canWeJoin = true;
 //          errorField.innerHTML = "Tournament creation error: " + tId;
@@ -335,71 +430,25 @@ export async function renderTournamentManagerContent(hideableElements) {
         }
         else {
 //          errorField.hidden = true;
-          alert("registerd a tournament: " + tourRespObj.tId);
-          console.log("registerd a tournament:", tourRespObj.tId);
+          alert("Registered a tournament: " + tourRespObj.tId);
+          console.log("registered a tournament:", tourRespObj.tId);
           canWeJoin = false;
           myTournamentField.innerHTML = "<a href=\"" + document.URL.substring(0, document.URL.search("#")) + "#tournament" + "\"><b><i>Click to view</b></i></a>"
           localStorage.setItem('tId', tourRespObj.tId);
         }
         tournamentForm.reset();
+        await generateUpdateAllTOurTable(canWeJoin);
       });
     }
     else {
+      console.log("this warrants a fail");
       canWeJoin = false
-      localStorage.setItem('tId', checkRespObj.err);
+      localStorage.setItem('tId', checkRespObj.tId);
       submitButton.disabled = true;
       errorField.hidden = true;
-      console.log("already registerd in a tournament:", checkRespObj.err);
       myTournamentField.innerHTML = "<a href=\"" + document.URL.substring(0, document.URL.search("#")) + "#tournament" + "\"><b><i>Click to view</b></i></a>"
     }
   }
 
-  const allTournamentsTable = document.getElementById('all-tournaments-table');
-  const rawAllPublicTournamentsResponse = await fetchAllPublicTournaments();
-  const allPTR = await rawAllPublicTournamentsResponse.text();
-  console.log(allPTR);
-  const allPTRObj = JSON.parse(allPTR);
-  let count : number = 0;
-  let tempInner : string = `
-  <tr>
-    <th>Name</th>
-    <th>Players</th>
-    <th>Join</th>
-  </tr>
-  `;
-  for (var item of allPTRObj?.res) {
-    tempInner += `
-    <tr>
-      <td>${item.tName}</td>
-      <td>${item.joinedPN}/${item.maxPN}</td>
-      <td><button id="join-button-${count}" class="
-        mt-6 p-3 bg-blue-500 rounded-lg hover:bg-blue-400 transition text-white font-medium
-        disabled:border-gray-200 disabled:bg-gray-700 disabled:text-gray-500 disabled:shadow-none
-      ">
-        Join
-      </button></td>
-    </tr>`;
-    count += 1;
-  }
-  allTournamentsTable.innerHTML = tempInner;
-  for (let newCount = 0; newCount < count; newCount += 1) {
-    if (!canWeJoin) {
-      document.getElementById(`join-button-${newCount}`).disabled = true;
-    }
-    else {
-      document.getElementById(`join-button-${newCount}`).disabled = false;
-    }
-    document.getElementById(`join-button-${newCount}`).addEventListener('click', async () => {
-      const rawResOfEnroll = await enrollInTournament(allPTRObj.res[newCount].tId);
-      const resOfEnroll = await rawResOfEnroll.text();
-      const resOfEnrollObj = JSON.parse(resOfEnroll);
-      if (resOfEnrollObj.err === "nil") {
-        alert("enrolled in " + allPTRObj.res[newCount].tId);
-        localStorage.setItem("tId", allPTRObj.res[newCount].tId);
-      }
-      else {
-        alert("failed to enroll in " + allPTRObj.res[newCount].tId + " because: " + resOfEnrollObj.err);
-      }
-    });
-  }
+  await generateUpdateAllTOurTable(canWeJoin);
 }
