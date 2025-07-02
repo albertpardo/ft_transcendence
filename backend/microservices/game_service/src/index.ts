@@ -2,7 +2,7 @@ import Fastify from 'fastify';
 import websocket from '@fastify/websocket';
 import type { FastifyRequest } from 'fastify';
 import cors from '@fastify/cors';
-import { PongResponses, State, addPlayerCompletely, removeTheSock, getPongDoneness, getPongState, forefit, moveMyPaddle, gamesReadyLoopCheck, dataStreamer } from './pong';
+import { State, addPlayerCompletely, removeTheSock, getPongDoneness, getPongState, forefit, moveMyPaddle, gamesReadyLoopCheck, dataStreamer } from './pong';
 import { historyMain, getHistForPlayerFromDb } from './history';
 import { addTournament, joinTournament, listAllPublicTournaments, deleteTournament, getFullTournament, TournError } from './tournament';
 
@@ -73,23 +73,55 @@ const startServer = async () => {
         if (typeof getIn !== "undefined" && getIn === true) {
           if (upperSocksMap.has(playerId) === false) {
             console.error("no associated socket found. this must never happen, i think.");
-            return "somehow, the socket hasn't been found";
+            return JSON.stringify({
+              gType: "",
+              err: "somehow, the socket hasn't been found",
+            });
           }
           sock = upperSocksMap.get(playerId) as WebSocket;
-          const resp : PongResponses = addPlayerCompletely(playerId, sock);
+          try {
+            gtype = addPlayerCompletely(playerId, sock);
+            return JSON.stringify({
+              gType: gtype,
+              err: "nil",
+            });
+          }
+          catch (e) {
+            return JSON.stringify({
+              gType: "",
+              err: e,
+            });
+          }
         }
         else if (typeof mov !== "undefined") {
           if (mov > 321 && mov < 323) {
             forefit(playerId);
-            return ;
+            return JSON.stringify({
+              gType: "",
+              err: "forefit called",
+            });
           }
           moveMyPaddle(playerId, mov);
+          return JSON.stringify({
+            gType: "",
+            err: "nil",
+          });
         }
+        return JSON.stringify({
+          gType: "",
+          err: "idk why you got here",
+        })
       }
       else {
-        return "the request is super malformed";
+        return JSON.stringify({
+          gType: "",
+          err: "the request is super malformed",
+        });
       }
-      return "done inerfacing via post";
+      return JSON.stringify({
+        gType: "",
+        err: "nil",
+      });
     });
     // TODO XXX add public pong hist by username?
     fastify.post('/pong/hist', async (req: FastifyRequest<{ Body: {userId: string} }>, reply) => {

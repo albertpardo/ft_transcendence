@@ -102,8 +102,9 @@ export async function initDashboard() {
         </div>
 
       </div>
-      <button id="start-button" class="mt-6 p-3 bg-red-600 rounded-lg hover:bg-red-700 transition text-white font-medium">click to join or reconnect</button>
+      <button id="start-button" class="mt-6 p-3 bg-red-600 rounded-lg hover:bg-red-700 transition text-white font-medium">Click to join, reconnect or set yourself ready</button>
       <button id="giveup-button" class="mt-6 p-3 bg-red-600 rounded-lg hover:bg-red-700 transition text-white font-medium">FOREFIT (INSTANT)</button>
+      <div id="game-info"></div>
     </div>
   `;
 
@@ -115,6 +116,7 @@ export async function initDashboard() {
   const lpad : HTMLElement = document.getElementById("lpad");
   const rpad : HTMLElement = document.getElementById("rpad");
   let gameText : HTMLElement = document.getElementById("game-text");
+  const gameInfo : HTMLElement = document.getElementById("game-info");
   gameText.style.visibility = "hidden";
   // for some reason, doing a .hidden = false or true on this doesn't work.
   const scoreText : HTMLElement = document.getElementById("score-text");
@@ -229,18 +231,20 @@ export async function initDashboard() {
     });
 
     document.getElementById('start-button')!.addEventListener('click', () => {
+      console.log("after clicking the start-button,");
       registerPlayer(function (error, response) {
         if (error) {
           console.error(error);
         }
         else {
           response?.text().then((result) => {
-//            console.log(result);
+            console.log(result);
           });
         }
       });
     });
     document.getElementById('giveup-button')!.addEventListener('click', () => {
+      console.log("after clicking the giveup-button,");
       forefit(function (error, response) {
         if (error) {
           console.error(error);

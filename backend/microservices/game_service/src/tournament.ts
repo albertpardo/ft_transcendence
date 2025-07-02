@@ -1,6 +1,6 @@
 import { gamesMap, playersMap, socksMap, sleep, makeid } from './pong';
 
-let playersAlreadyParticipating = new Map<string, string>();
+export let playersParticipatingTourn = new Map<string, string>();
 
 export class TournError extends Error {
   public tId: string;
@@ -21,7 +21,12 @@ class Tournament {
   private qfIds : Array<string> = ["", "", "", "", "", "", "", ""];
   private sfIds : Array<string> = ["", "", "", ""];
   private fIds : Array<string> = ["", ""];
+  public winner : string = "";
   public Ids : Array<Array<string>> = [this.fIds, this.sfIds, this.qfIds];
+  private gameQfIds : Array<string> = ["", "", "", ""];
+  private gameSfIds : Array<string> = ["", ""];
+  private gameFIds : Array<string> = [""];
+  public gameIds : Array<Array<string>> = [this.gameFIds, this.gameSfIds, this.gameQfIds];
   public stages : number = 1;
   public currentStage : number = 1;
   public tId : string = "";
@@ -161,8 +166,8 @@ class Tournament {
       throw "It should already be gone via the loop cleaning";
     }
     for (var user of this.Ids[this.currentStage - 1]) {
-      if (playersAlreadyParticipating.has(user)) {
-        playersAlreadyParticipating.delete(user);
+      if (playersParticipatingTourn.has(user)) {
+        playersParticipatingTourn.delete(user);
       }
     }
     // TODO run thru game ids and clean ts up
@@ -170,7 +175,7 @@ class Tournament {
 }
 
 let adminMap = new Map<string, string>();
-let tournamentMap = new Map<string, Tournament>();
+export let tournamentMap = new Map<string, Tournament>();
 
 export function addTournament(tName: string, playersN: number, privacy: boolean, uuid: string) {
   if (adminMap.has(uuid)) {
@@ -186,8 +191,8 @@ export function addTournament(tName: string, playersN: number, privacy: boolean,
       err: "You already administer a tournament",
     });
   }
-  if (playersAlreadyParticipating.has(uuid)) {
-    const tId = playersAlreadyParticipating.get(uuid);
+  if (playersParticipatingTourn.has(uuid)) {
+    const tId = playersParticipatingTourn.get(uuid);
     if (typeof tId === "undefined") {
       throw new TournError({
         tId: "",
@@ -216,13 +221,13 @@ export function addTournament(tName: string, playersN: number, privacy: boolean,
   const tourtoadd = new Tournament(tName, uuid, privacy, playersN, touridtoadd);
   tourtoadd.mainLoop();
   tournamentMap.set(touridtoadd, tourtoadd);
-  playersAlreadyParticipating.set(uuid, touridtoadd);
+  playersParticipatingTourn.set(uuid, touridtoadd);
   return (tourtoadd.tId);
 }
 
 export function joinTournament(tId: string, uuid: string) {
-  if (playersAlreadyParticipating.has(uuid)) {
-    throw "Player already participates in " + playersAlreadyParticipating.get(uuid);
+  if (playersParticipatingTourn.has(uuid)) {
+    throw "Player already participates in " + playersParticipatingTourn.get(uuid);
   }
   if (tournamentMap.has(tId)) {
     const currentTour = tournamentMap.get(tId);
@@ -233,7 +238,7 @@ export function joinTournament(tId: string, uuid: string) {
       throw "This tournament is already ongoing";
     }
     currentTour.addParticipant(uuid);
-    playersAlreadyParticipating.set(uuid, tId);
+    playersParticipatingTourn.set(uuid, tId);
   }
   else {
     throw "This tournament doesn't exist";
@@ -288,10 +293,10 @@ export function deleteTournament(adminId: string) {
 }
 
 export function getFullTournament(uuid: string) {
-  if (!playersAlreadyParticipating.has(uuid)) {
+  if (!playersParticipatingTourn.has(uuid)) {
     throw "You have no tournament you'd be in";
   }
-  const tId = playersAlreadyParticipating.get(uuid);
+  const tId = playersParticipatingTourn.get(uuid);
   if (typeof tId === "undefined") {
     throw "tId undefined";
   }

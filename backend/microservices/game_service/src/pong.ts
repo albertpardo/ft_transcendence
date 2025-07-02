@@ -1,4 +1,5 @@
 import { addMatch, getAll } from './history';
+import { playersParticipatingTourn, tournamentMap } from './tournament';
 
 const ALPHA_MAX : number = 5*Math.PI/11;
 export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -109,7 +110,9 @@ class PongRuntime {
   private scoreR : number = 0;
   private LGaveUp : boolean = false;
   private RGaveUp : boolean = false;
-  private gameType : string = "normal";
+  public gameType : string = "normal";
+  public leftReady : boolean = false;
+  public rightReady : boolean = false;
 
   private resetGame() : void {
     if (this.whoLost === "right") {
@@ -297,10 +300,7 @@ const nullState : State = {
 // will always return "you're in queue, awaiting for a game", even if there's enough players in a game already, including you.
 // this way, we'll always have to wait for a confirmation signal from the game runtime itself that the game is ready to start.
 //
-export function addPlayerCompletely(playerId: string, sock: WebSocket) : PongResponses {
-//  for (const [p, g] of playersMap) {
-//    console.log("p:", p, "g:", g);
-//  }
+export function addPlayerCompletely(playerId: string, sock: WebSocket) {
   if (playersMap.has(playerId)) {
 //    console.log("oh no! player id", playerId, "already in!");
     if (socksMap.has(playerId) === false) {
@@ -314,43 +314,53 @@ export function addPlayerCompletely(playerId: string, sock: WebSocket) : PongRes
         sock.send("added: R");
       }
     }
-    return PongResponses.PlayerAlreadyIn;
+    throw "Player already in";
   }
   if (socksMap.has(playerId) === false) {
     socksMap.set(playerId, sock);
   }
   needToSendStartedMap.set(playerId, true);
-  for (const [gameId, gameRuntime] of gamesMap) {
-    if (gameRuntime.LplayerId === "") {
-      gameRuntime.LplayerId = playerId;
-//      console.log("about to add p:", playerId, "with", gameId);
-      playersMap.set(playerId, gameId);
-//      console.log("done! now, the map is:");
-//      for (const [p, g] of playersMap) {
-//        console.log(" p:", p, "g:", g);
-//      }
-      sock.send("added: L");
-      return PongResponses.YoureWaiting;
+  if (!playersParticipatingTourn.has(playerId)) {
+    // default, random MM
+    for (const [gameId, gameRuntime] of gamesMap) {
+      if (gameRuntime.LplayerId === "") {
+        gameRuntime.LplayerId = playerId;
+        playersMap.set(playerId, gameId);
+        sock.send("added: L");
+        return gameRuntime.gameType;
+      }
+      else if (gameRuntime.RplayerId === "") {
+        gameRuntime.RplayerId = playerId;
+        playersMap.set(playerId, gameId);
+        sock.send("added: R");
+        return gameRuntime.gameType;
+      }
     }
-    else if (gameRuntime.RplayerId === "") {
-      gameRuntime.RplayerId = playerId;
-      playersMap.set(playerId, gameId);
-      sock.send("added: R");
-      return PongResponses.YoureWaiting;
+    // no free game available!
+    const newid : string = makeid(32);
+    gamesMap.set(newid, new PongRuntime);
+    gamesMap.get(newid).LplayerId = playerId;
+    playersMap.set(playerId, newid);
+    sock.send("added: L");
+    return gamesMap.get(newid).gameType;
+  }
+  else {
+    // wow! this is some tournament stuff! since every game is gonna be managed by the tourn, we just need to set the "ready" flag.
+    if (!playersMap.has(playerId)) {
+      throw "No player in playersMap in tournament";
+    }
+    const gid = playersMap.get(playerId);
+    if (!gamesMap.has(gid)) {
+      throw "gamesMap without the game of the player";
+    }
+    const game = gamesMap.get(gid);
+    if (game.LplayerId === playerId) {
+      game.leftReady = true;
+    }
+    else {
+      game.rightReady = true;
     }
   }
-  // no game available!
-//  console.log("no games available. creating...");
-  const newid : string = makeid(32);
-  gamesMap.set(newid, new PongRuntime);
-  gamesMap.get(newid).LplayerId = playerId;
-  playersMap.set(playerId, newid);
-//  console.log("done! now, the map is:");
-  for (const [p, g] of playersMap) {
-//    console.log(" p:", p, "g:", g);
-  }
-  sock.send("added: L");
-  return PongResponses.YoureWaiting;
 }
 
 export function removeTheSock(sock: WebSocket) : void {
@@ -450,19 +460,32 @@ export const gamesReadyLoopCheck = async () => {
     for (const [gameId, gameRuntime] of gamesMap) {
       if (gameRuntime.LplayerId !== "" && gameRuntime.RplayerId !== "")  {
         if (gameRuntime.pongStarted !== true
-            && needToSendStartedMap.get(gameRuntime.LplayerId) === true
-            && needToSendStartedMap.get(gameRuntime.RplayerId) === true) {
-          gameRuntime.mainLoop();
-//          console.log("one game started: " + gameId + ", with left: " + gameRuntime.LplayerId + " and right: " + gameRuntime.RplayerId);
-//          console.log("sending the appropriate message to both clientis via ws");
-          // XXX maybe do a json string here with the gamestate or something.
-          socksMap.get(gameRuntime.LplayerId).send("started");
-          socksMap.get(gameRuntime.RplayerId).send("started");
-          needToSendStartedMap.set(gameRuntime.LplayerId, false);
-          needToSendStartedMap.set(gameRuntime.RplayerId, false);
-          await sleep(100);
-          dataStreamer(gameRuntime.LplayerId);
-          dataStreamer(gameRuntime.RplayerId);
+        && needToSendStartedMap.get(gameRuntime.LplayerId) === true
+        && needToSendStartedMap.get(gameRuntime.RplayerId) === true) {
+          if (gameRuntime.gameType === "normal") {
+            gameRuntime.mainLoop();
+//            console.log("one game started: " + gameId + ", with left: " + gameRuntime.LplayerId + " and right: " + gameRuntime.RplayerId);
+//            console.log("sending the appropriate message to both clientis via ws");
+            socksMap.get(gameRuntime.LplayerId).send("started");
+            socksMap.get(gameRuntime.RplayerId).send("started");
+            needToSendStartedMap.set(gameRuntime.LplayerId, false);
+            needToSendStartedMap.set(gameRuntime.RplayerId, false);
+            await sleep(10);
+            dataStreamer(gameRuntime.LplayerId);
+            dataStreamer(gameRuntime.RplayerId);
+          }
+          else {
+            gameRuntime.mainLoop();
+//            console.log("one game started: " + gameId + ", with left: " + gameRuntime.LplayerId + " and right: " + gameRuntime.RplayerId);
+//            console.log("sending the appropriate message to both clientis via ws");
+//            socksMap.get(gameRuntime.LplayerId).send("started");
+//            socksMap.get(gameRuntime.RplayerId).send("started");
+//            needToSendStartedMap.set(gameRuntime.LplayerId, false);
+//            needToSendStartedMap.set(gameRuntime.RplayerId, false);
+            await sleep(10);
+            dataStreamer(gameRuntime.LplayerId);
+            dataStreamer(gameRuntime.RplayerId);
+          }
         }
       }
     }
@@ -488,11 +511,15 @@ export const dataStreamer = async (playerId) => {
       await waitingForReconnect(playerId);
       sock = socksMap.get(playerId);
     }
-    if (runtime.pongDone === false) {
+    if (runtime.gameType === "tournament" && (runtime.leftReady === false || runtime.rightReady === false)) {
+      console.log("I,", playerId, "am waiting for... left:", !runtime.leftReady, "right:", !runtime.rightReady, "...one of them is me :)");
+      await sleep(5000 - FRAME_TIME_MS);
+    }
+    else if (runtime.pongDone === false) {
       sock.send(JSON.stringify(runtime.gstate));
 //    console.log(runtime.gstate);
     }
-    else {
+    else if (runtime.pongDone === true) {
       sock.send(JSON.stringify(runtime.gstate));
       if (runtime.LplayerId === playerId) {
         // only delete the game id if the datastreamer is from the left to avoid double delete
@@ -505,4 +532,16 @@ export const dataStreamer = async (playerId) => {
     }
     await sleep(FRAME_TIME_MS);
   }
+}
+
+export function getGType(pId: string) {
+  if (playersMap.has(pId)) {
+    const gid = playersMap.get(pId);
+    if (gamesMap.has(gid)) {
+      const gr = gamesMap.get(gid);
+      return gr.gameType;
+    }
+    throw "gamesMap doesn't have the player's gameid";
+  }
+  throw "Player not found in playersMap";
 }
