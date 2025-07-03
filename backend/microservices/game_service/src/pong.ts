@@ -13,25 +13,16 @@ const PADDLE_SPEED : number = 300;
 const MIN_BALL_SPEED_Y : number = 100;
 const INTER_ROUND_COOLDOWN_TIME_MS : number = 1000 * 3;
 
+export class JoinError extends Error {
+  public gType: string;
+  public err: string;
 
-export enum PongResponses {
-  StartedRunning,
-  AlreadyRunning,
-  NotRunning,
-  StoppedRunning,
-  AddedInMap,
-  AlreadyInMap,
-  NotInMap,
-  PMoveOK,
-  NoPlayer,
-  PlayerRegistered,
-  PlayerAlreadyIn,
-  AlreadyFull,
-  MissingPlayers,
-  YoureWaiting,
-  YoureWrong,
+  constructor({gType, err,}: {gType: string, err: string,}) {
+    super();
+    this.gType = gType;
+    this.err = err;
+  }
 }
-// lol
 
 export interface Vector2 {
   x: number;
@@ -314,7 +305,11 @@ export function addPlayerCompletely(playerId: string, sock: WebSocket) {
         sock.send("added: R");
       }
     }
-    throw "Player already in";
+    const gType = gamesMap.get(playersMap.get(playerId)).gameType;
+    throw new JoinError({
+      gType: gType,
+      err: "Player already in",
+    });
   }
   if (socksMap.has(playerId) === false) {
     socksMap.set(playerId, sock);
@@ -376,20 +371,6 @@ export function removeTheSock(sock: WebSocket) : void {
   return ;
 }
 
-export function getPongDoneness(gameId: string) : PongResponses {
-  if (gamesMap.has(gameId)) {
-    if (gamesMap.get(gameId).pongStarted && !(gamesMap.get(gameId).pongDone)) {
-      return PongResponses.AlreadyRunning;
-    }
-    if (gamesMap.get(gameId).pongDone) {
-      return PongResponses.StoppedRunning;
-    }
-    return PongResponses.NotRunning;
-  }
-//  console.error("no game found registered at " + gameId);
-  return PongResponses.NotInMap;
-}
-
 export function getPongState(gameId: string) : State {
   if (gamesMap.has(gameId)) {
     return (gamesMap.get(gameId).gstate);
@@ -436,7 +417,7 @@ export function forefit(playerId: string) {
   console.log("the playersmap didn't have the player");
 }
 
-export function moveMyPaddle(playerId: string, d: number) : PongResponses {
+export function moveMyPaddle(playerId: string, d: number) {
   if (playersMap.has(playerId)) {
     const gameId = playersMap.get(playerId);
     if (gamesMap.has(gameId)) {
@@ -444,15 +425,11 @@ export function moveMyPaddle(playerId: string, d: number) : PongResponses {
         gamesMap.get(gameId).LpadMove(d);
       } else {
         gamesMap.get(gameId).RpadMove(d);
-        // a very fun exploit would be moving the right player's paddle with an invalid player id;
-        // however I think the logic prevents us from getting into this fork if we have an invalid
-        // id in the first place.
       }
-      return PongResponses.PMoveOK;
     }
-    return PongResponses.NotInMap;
+    throw "Game not in map";
   }
-  return PongResponses.NoPlayer;
+  throw "Player not in map";
 }
 
 export const gamesReadyLoopCheck = async () => {

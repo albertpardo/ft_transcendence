@@ -2,15 +2,9 @@ import Fastify from 'fastify';
 import websocket from '@fastify/websocket';
 import type { FastifyRequest } from 'fastify';
 import cors from '@fastify/cors';
-import { State, addPlayerCompletely, removeTheSock, getPongDoneness, getPongState, forefit, moveMyPaddle, gamesReadyLoopCheck, dataStreamer } from './pong';
+import { State, addPlayerCompletely, removeTheSock, getPongState, forefit, moveMyPaddle, gamesReadyLoopCheck, dataStreamer, JoinError } from './pong';
 import { historyMain, getHistForPlayerFromDb } from './history';
 import { addTournament, joinTournament, listAllPublicTournaments, deleteTournament, getFullTournament, TournError } from './tournament';
-
-interface PongBodyReq {
-  playerId: string,
-  getIn: boolean,
-  mov: number,
-}
 
 // id shall come from the req and be per-user unique and persistent (jwt)
 // getIn tells do we wanna move (false) or do we wanna get into a game (true)
@@ -42,7 +36,7 @@ const startServer = async () => {
 
   // Registra un plugin para prefijar las rutas API con '/api'
   const apiRoutes = async (fastify) => {
-    fastify.get('/pong/game-ws', { websocket: true }, async (sock, req: FastifyRequest<{ Body: PongBodyReq }>) => {
+    fastify.get('/pong/game-ws', { websocket: true }, async (sock, req) => {
       const usp2 = new URLSearchParams(req.url);
       let playerId : string = usp2.get("/api/pong/game-ws?uuid") as string;
       upperSocksMap.set(playerId, sock);
@@ -61,66 +55,74 @@ const startServer = async () => {
       });
       return "Welcome to an \"html\" return for firefox testing purposes.<br>Enjoy your stay!";
     });
-    fastify.post('/pong', async (req: FastifyRequest<{ Body: PongBodyReq }>, reply) => {
-//      let jsonMsg = JSON.parse(req.body);
-      let jsonMsg = req.body;
-      // this user id should be completely verified by now.
+    fastify.post('/pong/game/add', async (req, reply) => {
       let playerId : string = req.headers['x-user-id'] as string;
-      let getIn = jsonMsg?.getIn;
-      let mov = jsonMsg?.mov;
       let sock : WebSocket;
       if (typeof playerId !== "undefined" && playerId !== "") {
-        if (typeof getIn !== "undefined" && getIn === true) {
-          if (upperSocksMap.has(playerId) === false) {
-            console.error("no associated socket found. this must never happen, i think.");
+        if (upperSocksMap.has(playerId) === false) {
+          console.error("no associated socket found. this must never happen, i think.");
+          return JSON.stringify({
+            gType: "",
+            err: "somehow, the socket hasn't been found",
+          });
+        }
+        sock = upperSocksMap.get(playerId) as WebSocket;
+        try {
+          const gtype = addPlayerCompletely(playerId, sock);
+          return JSON.stringify({
+            gType: gtype,
+            err: "nil",
+          });
+        }
+        catch (e) {
+          if (e instanceof JoinError) {
             return JSON.stringify({
-              gType: "",
-              err: "somehow, the socket hasn't been found",
+              gType: e.gType,
+              err: e.err,
             });
           }
-          sock = upperSocksMap.get(playerId) as WebSocket;
-          try {
-            const gtype = addPlayerCompletely(playerId, sock);
-            return JSON.stringify({
-              gType: gtype,
-              err: "nil",
-            });
-          }
-          catch (e) {
+          else {
             return JSON.stringify({
               gType: "",
               err: e,
             });
           }
         }
-        else if (typeof mov !== "undefined") {
-          if (mov > 321 && mov < 323) {
-            forefit(playerId);
-            return JSON.stringify({
-              gType: "",
-              err: "forefit called",
-            });
-          }
+      }
+      return JSON.stringify({
+        gType: "",
+        err: "undefined or empty playerId -- failed to verify?",
+      });
+    });
+    fastify.post('/pong/game/move', async (req, reply) => {
+      let jsonMsg = req.body;
+      let playerId : string = req.headers['x-user-id'] as string;
+      let mov = jsonMsg.mov;
+      if (typeof playerId !== "undefined" && playerId !== "") {
+        if (typeof mov !== "undefined") {
           moveMyPaddle(playerId, mov);
           return JSON.stringify({
-            gType: "",
             err: "nil",
           });
         }
         return JSON.stringify({
-          gType: "",
-          err: "idk why you got here",
+          err: "undefined mov",
         })
       }
-      else {
+      return JSON.stringify({
+        err: "undefined or empty playerId -- failed to verify?",
+      });
+    });
+    fastify.post('/pong/game/forefit', async (req, reply) => {
+      let playerId : string = req.headers['x-user-id'] as string;
+      if (typeof playerId !== "undefined" && playerId !== "") {
+        forefit(playerId);
         return JSON.stringify({
-          gType: "",
-          err: "the request is super malformed",
+          err: "nil",
         });
       }
       return JSON.stringify({
-        gType: "",
-        err: "nil",
+        err: "undefined or empty playerId -- failed to verify?",
       });
     });
     // TODO XXX add public pong hist by username?
