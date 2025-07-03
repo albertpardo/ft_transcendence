@@ -443,8 +443,6 @@ export const gamesReadyLoopCheck = async () => {
             gameRuntime.mainLoop();
 //            console.log("one game started: " + gameId + ", with left: " + gameRuntime.LplayerId + " and right: " + gameRuntime.RplayerId);
 //            console.log("sending the appropriate message to both clientis via ws");
-            socksMap.get(gameRuntime.LplayerId).send("started");
-            socksMap.get(gameRuntime.RplayerId).send("started");
             needToSendStartedMap.set(gameRuntime.LplayerId, false);
             needToSendStartedMap.set(gameRuntime.RplayerId, false);
             await sleep(10);
