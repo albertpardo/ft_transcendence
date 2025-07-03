@@ -156,13 +156,3 @@ git-script.sh
 *package-lock.json
 package-lock.json
 */package-lock.json
-
-# vim tmp files
-.swp
-.swo
-*.swp
-*.swo
-*/.swp
-*/.swo
-*/*.swp
-*/*.swo
