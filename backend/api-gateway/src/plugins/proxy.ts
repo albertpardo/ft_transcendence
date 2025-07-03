@@ -218,6 +218,12 @@ export default fp(async function (fastify: FastifyInstance): Promise<void> {
                   const token = fastify.jwt.sign({ userId: body.id });
                   reply.type('application/json'); 
                   console.log('🔑 Token generated:', token);
+                  reply.setCookie('authToken', token, {
+                      path: '/',
+                      httpOnly: true,
+                      secure: true,
+                      sameSite: 'none',
+                    });
                   return JSON.stringify({ ...body, token });
                 } catch (err) {
                   console.warn('❌ Not JSON (probably compressed or encrypted), skipping JWT injection.');

@@ -64,7 +64,7 @@ exports.getProfile = async (userId) => {
         username: user.username,
         nickname: user.nickname || user.username,
         email: user.email,
-        password: user.password
+        password: user.password //should not be returned, but it's here for consistency
     };
 }
 
