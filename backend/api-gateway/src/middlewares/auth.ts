@@ -10,10 +10,10 @@ export async function authMiddleware(req: FastifyRequest, reply: FastifyReply) {
     itwasasocket = false;
     console.log("🔍 Incoming request URL:", req.url);
     console.log("🔍 jwtVerify type in middleware:", typeof req.jwtVerify);
-    console.log("🔍🔍🔍 All keys on req:", Object.keys(req));
+//    console.log("🔍🔍🔍 All keys on req:", Object.keys(req));
 
-    console.log('🔍 Full headers before jwtVerify:', req.headers);
-    console.log('🔍 Authorization Header outside try:', String(req.headers['authorization']));
+//    console.log('🔍 Full headers before jwtVerify:', req.headers);
+//    console.log('🔍 Authorization Header outside try:', String(req.headers['authorization']));
 
 
     // if requested URL is public, skip auth
