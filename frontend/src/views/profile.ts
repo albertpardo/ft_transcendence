@@ -1,8 +1,5 @@
 export async function renderProfileContent(hideableElements) {
-  hideableElements.startButton.hidden = true;
-  hideableElements.giveupButton.hidden = true;
-  hideableElements.gameArea.hidden = true;
-  hideableElements.gameWindow.hidden = true;
+  hideableElements.gameArea.setAttribute("class", "md:hidden flex flex-col items-center justify-center");
   const userId = localStorage.getItem('userId') || sessionStorage.getItem('userId');
   const authToken : string = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;

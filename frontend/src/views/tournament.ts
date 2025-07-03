@@ -115,10 +115,7 @@ async function fillInTheTournTable() {
 }
 
 export async function renderTournamentContent(hideableElements) {
-  hideableElements.startButton.hidden = true;
-  hideableElements.giveupButton.hidden = true;
-  hideableElements.gameArea.hidden = true;
-  hideableElements.gameWindow.hidden = true;
+  hideableElements.gameArea.setAttribute("class", "md:hidden flex flex-col items-center justify-center");
   let tempHTML : string = `
     <h1 id="tourn-title">Hi</h1>
     <table id="big-table" class="table-fixed"><tbody>
@@ -339,10 +336,7 @@ async function generateUpdateAllTOurTable(canWeJoin: boolean) {
 }
 
 export async function renderTournamentManagerContent(hideableElements) {
-  hideableElements.startButton.hidden = true;
-  hideableElements.giveupButton.hidden = true;
-  hideableElements.gameArea.hidden = true;
-  hideableElements.gameWindow.hidden = true;
+  hideableElements.gameArea.setAttribute("class", "md:hidden flex flex-col items-center justify-center");
   let tempHTML : string = `
     <p id="error-text-field" class="font-bold mb-4 text-xl" style="color:coral" hidden>You're already participating in a tournament.</p>
     <h1 class="text-3xl font-bold mb-6">Tournament management</h1>

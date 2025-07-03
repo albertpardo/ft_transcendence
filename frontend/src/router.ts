@@ -1,7 +1,8 @@
 ///src/router.ts
 
 import { renderLogin } from './views/login';
-import { renderHomeContent, renderPlayContent, renderStatsContent } from './views/sections';
+import { renderHomeContent, renderStatsContent } from './views/sections';
+import { renderPlayContent } from './views/pong';
 import { renderProfileContent } from './views/profile';
 import { renderHistoryContent } from './views/history';
 import { renderTournamentContent, renderTournamentManagerContent } from './views/tournament';
@@ -32,10 +33,7 @@ export function route() {
   // Renderiza el contenido según la sección
   const hideableElements = {
     contentArea: document.getElementById('content-area')!,
-    startButton: document.getElementById('start-button')!,
-    giveupButton: document.getElementById('giveup-button')!,
     gameArea: document.getElementById('game-area')!,
-    gameWindow: document.getElementById('game-window')!,
   };
   switch (hash) {
     case 'profile':           renderProfileContent(hideableElements);           break;

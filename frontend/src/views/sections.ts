@@ -29,20 +29,7 @@ export function renderHomeContent(hideableElements) {
     <p class="mb-4">Sección de inicio con texto e imagen de prueba.</p>
     <img src="https://placehold.co/1000x400/444444/ffffff?text=Demo" class="w-full rounded-lg mb-6" alt="Demo">
   `;
-  hideableElements.startButton.hidden = true;
-  hideableElements.giveupButton.hidden = true;
-  hideableElements.gameArea.hidden = true;
-  hideableElements.gameWindow.hidden = true;
-}
-
-export function renderPlayContent(hideableElements) {
-  hideableElements.contentArea.innerHTML = `
-  `;
-  // on this view, show the button and the registered games list
-  hideableElements.startButton.hidden = false;
-  hideableElements.giveupButton.hidden = false;
-  hideableElements.gameArea.hidden = false;
-  hideableElements.gameWindow.hidden = false;
+  hideableElements.gameArea.setAttribute("class", "md:hidden flex flex-col items-center justify-center");
 }
 
 export function renderStatsContent(hideableElements) {
@@ -51,8 +38,5 @@ export function renderStatsContent(hideableElements) {
     <p class="mb-4">Stats</p>
     <img src="https://placehold.co/1000x400/444444/ffffff?text=Demo" class="w-full rounded-lg" alt="Stats">
   `;
-  hideableElements.startButton.hidden = true;
-  hideableElements.giveupButton.hidden = true;
-  hideableElements.gameArea.hidden = true;
-  hideableElements.gameWindow.hidden = true;
+  hideableElements.gameArea.setAttribute("class", "md:hidden flex flex-col items-center justify-center");
 }

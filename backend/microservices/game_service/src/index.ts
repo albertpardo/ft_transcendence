@@ -80,7 +80,7 @@ const startServer = async () => {
           }
           sock = upperSocksMap.get(playerId) as WebSocket;
           try {
-            gtype = addPlayerCompletely(playerId, sock);
+            const gtype = addPlayerCompletely(playerId, sock);
             return JSON.stringify({
               gType: gtype,
               err: "nil",
