@@ -41,6 +41,7 @@ export default fp(async function (fastify: FastifyInstance): Promise<void> {
         }
         if (req.method === 'OPTIONS') {
             reply.code(204).send();
+            return;
         }
     });
     
@@ -232,7 +233,20 @@ export default fp(async function (fastify: FastifyInstance): Promise<void> {
               return payload;
             }
         }
-        console.log('✅ Final payload returned to client:', payload.toString());
+            // debugg until 249 
+            if (typeof payload === 'string') {
+                console.log('✅ Final payload returned to client (string):', payload);
+            } else if (Buffer.isBuffer(payload)) {
+                console.log('✅ Final payload returned to client (buffer):', payload.toString());
+            } else if (typeof payload === 'object') {
+                try {
+                    console.log('✅ Final payload returned to client (json):', JSON.stringify(payload));
+                } catch {
+                    console.log('✅ Final payload returned to client (object):', payload);
+                }
+            } else {
+                console.log('✅ Final payload returned to client (unknown type):', payload);
+            }
         return payload;
     });
 });
