@@ -5,6 +5,7 @@ import { renderHomeContent, renderPlayContent, renderTournamentContent, renderSt
 import { renderHistoryContent } from './history';
 import { renderProfileContent } from './profile';
 import { State, nullState } from './pongrender';
+import { renderSecuritySettings } from './settings';
 
 function movePaddleWrapper(d: number) {
   movePaddle(d, function (error, response) {
@@ -58,6 +59,7 @@ export async function initDashboard() {
         <a href="#play" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='play'?'bg-blue-600':'bg-gray-700'}">Play Pong</a>
         <a href="#history" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='play'?'bg-blue-600':'bg-gray-700'}">Match History</a>
         <a href="#tournament" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='tournament'?'bg-blue-600':'bg-gray-700'}">Tournament</a>
+        <a href="#settings" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='settings'?'bg-blue-600':'bg-gray-700'}">Security Settings</a>
         <a href="#stats" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='stats'?'bg-blue-600':'bg-gray-700'}">Stats</a>
       </nav>
       <button id="logout-btn" class="mt-auto w-full p-3 bg-red-600 rounded-lg hover:bg-red-700 transition text-white font-medium">Logout</button>
@@ -333,6 +335,7 @@ export async function initDashboard() {
     case 'play':        renderPlayContent(contentArea, startButton, gameArea, gameWindow);        break;
     case 'history':     renderHistoryContent(contentArea, startButton, gameArea, gameWindow);     break;
     case 'tournament':  renderTournamentContent(contentArea, startButton, gameArea, gameWindow);  break;
+    case 'settings':    renderSecuritySettings(contentArea, startButton, gameArea, gameWindow);   break;
     case 'stats':       renderStatsContent(contentArea, startButton, gameArea, gameWindow);       break;
     default:            renderHomeContent(contentArea, startButton, gameArea, gameWindow);
   }
@@ -340,3 +343,6 @@ export async function initDashboard() {
 
 // Initialize dashboard only once when starting the app
 initDashboard();
+
+// Re-initialize dashboard when hash changes
+window.addEventListener('hashchange', initDashboard);

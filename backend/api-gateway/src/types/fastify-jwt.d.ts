@@ -3,8 +3,8 @@ import 'fastify';
 
 declare module '@fastify/jwt' {
     interface FastifyJWT {
-        payload: { userId: string };
-        user: { userId: string };
+        payload: { userId: string; has_2fa?: boolean };
+        user: { userId: string; has_2fa?: boolean };
     }
 }
 

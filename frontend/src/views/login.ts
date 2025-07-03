@@ -200,6 +200,9 @@ export function renderLogin(appElement: HTMLElement) {
        localStorage.setItem('authToken', data.token);
 	     localStorage.setItem('userId', data.id);
 
+       const isFirstLogin = !data.user?.["has_seen_2fa_prompt"]; ///////////////////// this field must be returned from backend
+       localStorage.setItem('isFirstLogin', isFirstLogin ? 'true' : 'false');
+
        const userAvatar = data.user?.avatar?.trim()
         ? data.user.avatar
         : `https://i.pravatar.cc/150?u=${username}`;
@@ -209,7 +212,11 @@ export function renderLogin(appElement: HTMLElement) {
             avatar: userAvatar
 //            avatar: data.user?.avatar || `https://i.pravatar.cc/150?u=${username}`
           }));
-          window.location.hash = 'home';
+          if (isFirstLogin) {
+            window.location.hash = 'settings';
+          } else {
+            window.location.hash = 'home';
+          }
     
         
       } catch (error) {

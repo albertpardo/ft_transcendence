@@ -110,10 +110,79 @@ export default fp(async function (fastify: FastifyInstance) {
 //        }
     });
 
+    // 2FA Skip
+    fastify.register(fastifyHttpProxy, {
+        upstream: 'http://auth_service:9003',
+        prefix: '/api/auth/2fa/skip',
+        rewritePrefix: '/api/security/auth/2fa/skip',
+        http2: false,
+        preHandler: async (req, reply) => {
+            try {
+                await req.jwtVerify();
+                const userId = (req.user as any)?.userId;
+                if (userId) {
+                    req.headers['x-user-id'] = String(userId);
+                }
+            } catch (err) {
+                reply.code(401).send({ error: 'Unauthorized' });
+            }
+        },
+    });
+
+    // 2FA Enable
+    fastify.register(fastifyHttpProxy, {
+        upstream: 'http://auth_service:9003',
+        prefix: '/api/auth/2fa/enable',
+        rewritePrefix: '/api/security/auth/2fa/enable',
+        http2: false,
+        preHandler: async (req, reply) => {
+            try {
+                await req.jwtVerify();
+                const userId = (req.user as any)?.userId;
+                if (userId) {
+                    req.headers['x-user-id'] = String(userId);
+                }
+            } catch (err) {
+                reply.code(401).send({ error: 'Unauthorized' });
+            }
+        },
+    });
+
+    // 2FA Disable
+    fastify.register(fastifyHttpProxy, {
+        upstream: 'http://auth_service:9003',
+        prefix: '/api/auth/2fa/disable',
+        rewritePrefix: '/api/security/auth/2fa/disable',
+        http2: false,
+        preHandler: async (req, reply) => {
+            try {
+                await req.jwtVerify();
+                const userId = (req.user as any)?.userId;
+                if (userId) {
+                    req.headers['x-user-id'] = String(userId);
+                }
+            } catch (err) {
+                reply.code(401).send({ error: 'Unauthorized' });
+            }
+        },
+    });
+
+    // Finalize login after successful 2FA
+    fastify.register(fastifyHttpProxy, {
+        upstream: 'http://auth_service:9003',
+        prefix: '/api/auth/finalize-login',
+        rewritePrefix: '/api/security/auth/finalize-login',
+        http2: false,
+    });
+
+
     // inject token: for login & token generation after signup
     // block and modify response
     fastify.addHook('onSend', async (req, reply, payload) => {
-        if ((req.url.startsWith('/api/login') || req.url.startsWith('/api/signup')) && reply.statusCode === 200) {
+        if ((req.url.startsWith('/api/login') || 
+            req.url.startsWith('/api/signup') || 
+            req.url.startsWith('/api/auth/finalize-login')) && 
+            reply.statusCode === 200) {
             try {
                 let body;
                 //if payload is Readable, transform it into string with raw-bady
@@ -135,13 +204,21 @@ export default fp(async function (fastify: FastifyInstance) {
                     return payload;
                 }
 
-                const token = fastify.jwt.sign({ userId: body.id });
+                // include has_2fa in token if present
+                const tokenPayload: any = { userId: body.id };
+                if (typeof body.has_2fa === 'boolean') {
+                    tokenPayload.has_2fa = body.has_2fa;
+                }
+
+                const token = fastify.jwt.sign(tokenPayload);
+//                const token = fastify.jwt.sign({ userId: body.id });
 
                 // return new JSON response
                 return JSON.stringify({
                     id: body.id,
-                    token: token,
+                    token,
                     user: body.username,
+                    has_2fa: body.has_2fa ?? false,
                 });
             } catch (err) {
                 console.error('⚠️ Failed to parse payload or generate token:', err);
