@@ -74,7 +74,16 @@ const startServer = async () => {
           socket.send("error: invalid JSON"); // corrected
           return; // corrected
         }
-        let playerId = jsonMsg?.playerId;
+        let token = req.headers['authorization']?.replace('Bearer ', '') || '';
+        let playerId = ""; // default empty playerId
+        // let playerId = jsonMsg?.playerId;
+        try {
+          const decoded = fastify.jwt.verify(token); // corrected
+          playerId = decoded.userId; // corrected — assumes you sign tokens with `{ userId }`
+        } catch (err) {
+          socket.send('error: invalid token'); // corrected
+          return; // corrected
+        }
         let getIn = jsonMsg?.getIn;
         let mov = jsonMsg?.mov;
         if (typeof playerId !== "undefined" && playerId !== "") {
@@ -95,37 +104,6 @@ const startServer = async () => {
     })
   })
 
-   // fastify.get('/pong/game-ws', { websocket: true }, async (sock, req: FastifyRequest<{ Body: PongBodyReq }>) => {
-   /*fastify.get('/pong/game-ws', { websocket: true }, (socket, req) => {  
-      socket.on('message', message => {
-        socket.send("connected");
-        //let jsonMsg = JSON.parse(message);
-        let jsonMsg: PongBodyReq;
-        try {
-          jsonMsg = JSON.parse(message.toString()); // corrected
-        } catch (e) {
-          socket.send("error: invalid JSON"); // corrected
-          return; // corrected
-        }
-        let playerId = jsonMsg?.playerId;
-        let getIn = jsonMsg?.getIn;
-        let mov = jsonMsg?.mov;
-        if (typeof playerId !== "undefined" && playerId !== "") {
-          if (typeof getIn !== "undefined" && getIn === true) {
-            const resp : PongResponses = addPlayerCompletely (playerId, sock);
-          }
-          else if (typeof mov !== "undefined") {
-            moveMyPaddle(playerId, mov);
-          }
-        }
-        else {
-          sock.send("error");
-        }
-      });
-      sock.on('close', event => {
-        removeTheSock(sock);
-      });
-    }); */
   };
 
   fastify.register(apiRoutes, { prefix: '/api' });
