@@ -22,12 +22,10 @@ export async function authMiddleware(req: FastifyRequest, reply: FastifyReply) {
 
     try {
 //        if (req?.headers['sec-websocket-protocol'] !== null) {
-        if (req.headers.upgrade === 'websocket') {
+        const usp1 = new URLSearchParams(req.url);
+        if (req.headers["upgrade"] === "websocket") {
           itwasasocket = true;
-        }
-        if (req.headers.upgrade === 'websocket' && !req.headers['authorization'] && req?.headers['sec-websocket-protocol']) {
-          req.headers['authorization'] = "Bearer " + req.headers['sec-websocket-protocol'];
-          delete req.headers['sec-websocket-protocol'];
+          req.headers["authorization"] = "Bearer " + usp1.get("authorization");
         }
        
         console.log('🔍 Raw Authorization Header inside try00:', String(req.headers['authorization']));
@@ -50,17 +48,14 @@ export async function authMiddleware(req: FastifyRequest, reply: FastifyReply) {
         //inject user ID or username into headers (for downstream services)
         const userId = (req.user as any)?.userId;
         if (userId) {
-            req.headers['x-user-id'] = String(userId);
-            console.log(`📦 Injected x-user-id = ${userId} into headers`);
-//            console.log(req.headers);
             if (itwasasocket) {
-//              console.log("it was a socket! huh");
-              // since the goddamned socket connection ejetcs the headers it doesn't want down the line, do the manual check here with the help of the url params
-              if (req?.url.substring(req.url.search("uuid=") + 5) !== userId) {
-//                console.log(req?.url.substring(req.url.search("uuid=") + 5));
+              if (usp1.get("/api/pong/game-ws?uuid") !== userId) {
                 throw "uuid mismatch";
               }
             }
+            req.headers['x-user-id'] = String(userId);
+            console.log(`📦 Injected x-user-id = ${userId} into headers`);
+//            console.log(req.headers);
         }
     } catch (err: any) {
         console.error('❌ JWT verification failed:', err.message);
