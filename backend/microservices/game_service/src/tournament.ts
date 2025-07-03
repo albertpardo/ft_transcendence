@@ -91,6 +91,7 @@ class Tournament {
     if (this.stages === 0 || this.currentStage === 0) {
       return false;
     }
+    // TODO depending on the current stage, make a different sized array.
     let res : Array<boolean> = [false, false, false, false, false, false, false, false];
     for (let i : number = 0; i < Math.pow(2, this.currentStage); i++) {
       if (this.Ids[this.currentStage - 1][i] !== "" && this.Ids[this.currentStage - 1][i] !== "failed") {

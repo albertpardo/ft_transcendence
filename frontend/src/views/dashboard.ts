@@ -104,7 +104,7 @@ export async function initDashboard() {
       </div>
       <button id="start-button" class="mt-6 p-3 bg-red-600 rounded-lg hover:bg-red-700 transition text-white font-medium">Click to join, reconnect or set yourself ready</button>
       <button id="giveup-button" class="mt-6 p-3 bg-red-600 rounded-lg hover:bg-red-700 transition text-white font-medium">FOREFIT (INSTANT)</button>
-      <div id="game-info"></div>
+      <p id="game-info"></p>
     </div>
   `;
 
@@ -225,6 +225,7 @@ export async function initDashboard() {
           }
           else {
             gameText.style.visibility = "hidden";
+            gameInfo.innerHTML = "";
             scoreText.innerHTML = "" + gameState.stateScoreL + " : " + gameState.stateScoreR;
           }
       }
@@ -239,6 +240,8 @@ export async function initDashboard() {
         else {
           response?.text().then((result) => {
             console.log(result);
+            gameInfo.innerHTML = "Current game type: " + JSON.parse(result)?.gType;
+            console.log(gameText);
           });
         }
       });
@@ -251,6 +254,7 @@ export async function initDashboard() {
         }
         else {
           response?.text().then((result) => {
+            gameInfo.innerHTML = "";
             console.log(result);
           });
         }

@@ -12,6 +12,7 @@ const PADDLE_X : number = 50;
 const PADDLE_SPEED : number = 300;
 const MIN_BALL_SPEED_Y : number = 100;
 const INTER_ROUND_COOLDOWN_TIME_MS : number = 1000 * 3;
+const TOURNAMENT_READY_TIMEOUT : number = 30;
 
 export class JoinError extends Error {
   public gType: string;
@@ -209,6 +210,32 @@ class PongRuntime {
   };
 
   public mainLoop = async () => {
+    if (this.gameType === "tournament") {
+      const startDate = Date.now();
+      while (Date.now() - startDate < TOURNAMENT_READY_TIMEOUT) {
+        if (this.leftReady && this.rightReady) {
+          break ;
+        }
+        await sleep(1e3);
+      }
+    }
+    if (this.leftReady && !this.rightReady) {
+      this.whoLost = "right";
+      addMatch(playersMap.get(this.LplayerId), this.LplayerId, this.RplayerId, this.scoreL, this.scoreR, "L", this.gameType, "technical");
+      return ;
+    }
+    else if (!this.leftReady && this.rightReady) {
+      this.whoLost = "left";
+      addMatch(playersMap.get(this.LplayerId), this.LplayerId, this.RplayerId, this.scoreL, this.scoreR, "R", this.gameType, "technical");
+      return ;
+    }
+    else if (!this.leftReady && !this.rightReady) {
+      this.whoLost = "both";
+      // no history? nah
+      return ;
+    }
+
+    // now that the tournament-specific fail condition check is done, begin the cycle.
     this.pongStarted = true;
     while (true) {
       this.whoLost = checkLoseConditions(this.ball, this.LGaveUp, this.RGaveUp);
