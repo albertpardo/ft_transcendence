@@ -7,6 +7,40 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
+async function adminCheck() {
+  const fresp = fetch(
+    `${API_BASE_URL}/api/pong/tour/admincheck`,
+    {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json,application/html,text/html,*/*',
+        'Origin': 'https://127.0.0.1:3000/',
+        'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
+      },
+      credentials: 'include',
+      mode: 'cors',
+    }
+  );
+  return fresp;
+}
+
+async function participantCheck() {
+  const fresp = fetch(
+    `${API_BASE_URL}/api/pong/tour/participantcheck`,
+    {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json,application/html,text/html,*/*',
+        'Origin': 'https://127.0.0.1:3000/',
+        'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
+      },
+      credentials: 'include',
+      mode: 'cors',
+    }
+  );
+  return fresp;
+}
+
 async function deleteTournament() {
   const fresp = fetch(
     `${API_BASE_URL}/api/pong/tour/delete`,
@@ -170,10 +204,10 @@ export async function renderTournamentContent(hideableElements) {
   hideableElements.contentArea.innerHTML = tempHTML;
   const tournAnihilationButton = document.getElementById("force-rm-tourn");
   if (tournAnihilationButton) {
-    const checkOnTournamentRawResp = await checkOnTournamentForm();
+    const checkOnTournamentRawResp = await checkAdmining();
     const checkResp = await checkOnTournamentRawResp.text();
     const checkRespObj = JSON.parse(checkResp);
-    if (checkRespObj.err === "You already administer a tournament") {
+    if (checkRespObj.err === "nil") {
       tournAnihilationButton.removeAttribute('disabled');
       tournAnihilationButton.addEventListener("click", async () => {
         const rawResOfDelete = await deleteTournament();
@@ -214,29 +248,6 @@ async function createTournament(tName : string, playersN : number, privacy : boo
         tName: tName,
         playersN: playersN,
         privacy: privacy,
-      }),
-      credentials: 'include',
-      mode: 'cors',
-    }
-  );
-  return fresp;
-}
-
-async function checkOnTournamentForm() {
-  const fresp = fetch(
-    `${API_BASE_URL}/api/pong/tour/create`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json,application/html,text/html,*/*',
-        'Origin': 'https://127.0.0.1:3000/',
-        'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
-      },
-      body: JSON.stringify({
-        tName: "",
-        playersN: -1,
-        privacy: false,
       }),
       credentials: 'include',
       mode: 'cors',
@@ -287,7 +298,7 @@ async function fetchAllPublicTournaments() {
   return fresp;
 }
 
-async function generateUpdateAllTOurTable(canWeJoin: boolean) {
+async function generateUpdateAllTourTable(canWeJoin: boolean) {
   const allTournamentsTable = document.getElementById('all-tournaments-table');
   const rawAllPublicTournamentsResponse = await fetchAllPublicTournaments();
   const allPTR = await rawAllPublicTournamentsResponse.text();
@@ -403,11 +414,11 @@ export async function renderTournamentManagerContent(hideableElements) {
   const myTournamentField = document.getElementById('my-tournament');
   if (tournamentForm) {
     const submitButton = document.getElementById('register-tournament-button') as HTMLButtonElement;
-    const checkOnTournamentRawResp = await checkOnTournamentForm();
-    const checkResp = await checkOnTournamentRawResp.text();
+    const checkPartRawResp = await checkParticipating();
+    const checkResp = await checkPartRawResp.text();
     const checkRespObj = JSON.parse(checkResp);
     console.log("check resp obj:", checkRespObj);
-    if (checkRespObj.err?.substring(0, 3) === "Doi") {
+    if (checkRespObj.err !== "nil") {
       canWeJoin = true;
       submitButton.removeAttribute('disabled');
       // "no tournament for this player found" => proceed with allowing to create the tournament
@@ -437,7 +448,7 @@ export async function renderTournamentManagerContent(hideableElements) {
           localStorage.setItem('tId', tourRespObj.tId);
         }
         tournamentForm.reset();
-        await generateUpdateAllTOurTable(canWeJoin);
+        await generateUpdateAllTourTable(canWeJoin);
       });
     }
     else {
@@ -450,5 +461,5 @@ export async function renderTournamentManagerContent(hideableElements) {
     }
   }
 
-  await generateUpdateAllTOurTable(canWeJoin);
+  await generateUpdateAllTourTable(canWeJoin);
 }

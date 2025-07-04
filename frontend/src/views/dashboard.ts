@@ -1,5 +1,5 @@
 // src/views/dashboard.ts
-import { registerPlayer, forefit, movePaddle } from './buttonClicking';
+import { registerPlayer, forefit, movePaddle, confirmParticipation } from './buttonClicking';
 import { route } from '../router';
 import { renderHomeContent, renderPlayContent, renderStatsContent } from './sections';
 import { renderHistoryContent } from './history';
@@ -8,16 +8,12 @@ import { renderTournamentContent, renderTournamentManagerContent } from './tourn
 import { State, nullState } from './pongrender';
 
 function movePaddleWrapper(d: number) {
-  movePaddle(d, function (error, response) {
-    if (error) {
-      console.error(error);
-    }
-    else {
-      response?.text().then((result) => {
-//        console.log(result);
-      });
-    }
-  });
+  const movePaddleRawResp = await movePaddle(d);
+  const movePaddleResp = await movePaddleRawResp.text();
+  const movePaddleRespObj = JSON.parse(movePaddleResp);
+  if (movePaddleRespObj.err !== "nil") {
+    console.error(movePaddleRespObj.err);
+  }
 }
 
 
@@ -102,7 +98,8 @@ export async function initDashboard() {
         </div>
 
       </div>
-      <button id="start-button" class="mt-6 p-3 bg-red-600 rounded-lg hover:bg-red-700 transition text-white font-medium">Click to join, reconnect or set yourself ready</button>
+      <button id="start-button" class="mt-6 p-3 bg-red-600 rounded-lg hover:bg-red-700 transition text-white font-medium">Click to join or reconnect</button>
+      <button id="ready-button" class="mt-6 p-3 bg-red-600 rounded-lg hover:bg-red-700 transition text-white font-medium">Click to set yourself ready</button>
       <button id="giveup-button" class="mt-6 p-3 bg-red-600 rounded-lg hover:bg-red-700 transition text-white font-medium">FOREFIT (INSTANT)</button>
       <p id="game-info"></p>
     </div>
@@ -231,34 +228,24 @@ export async function initDashboard() {
       }
     });
 
-    document.getElementById('start-button')!.addEventListener('click', () => {
+    document.getElementById('start-button')!.addEventListener('click', async () => {
       console.log("after clicking the start-button,");
-      registerPlayer(function (error, response) {
-        if (error) {
-          console.error(error);
-        }
-        else {
-          response?.text().then((result) => {
-            console.log(result);
-            gameInfo.innerHTML = "Current game type: " + JSON.parse(result)?.gType;
-            console.log(gameText);
-          });
-        }
-      });
+      const regPlRawResp = await registerPlayer();
+      const regPlResp = await regPlRawResp.text();
+      const regPlRespObj = JSON.parse(regPlResp);
+      console.log(regPlRespObj.gType);
+      if (regPlRespObj.err !== "nil") {
+        console.error(regPlRespObj.err);
+      }
     });
     document.getElementById('giveup-button')!.addEventListener('click', () => {
       console.log("after clicking the giveup-button,");
-      forefit(function (error, response) {
-        if (error) {
-          console.error(error);
-        }
-        else {
-          response?.text().then((result) => {
-            gameInfo.innerHTML = "";
-            console.log(result);
-          });
-        }
-      });
+      const forefitRawResp = await forefit();
+      const forefitResp = await forefitRawResp.text();
+      const forefitRespObj = JSON.parse(forefitResp);
+      if (forefitRespObj.err !== "nil") {
+        console.error(forefitRespObj.err);
+      }
     });
 
     leftUpArrow.addEventListener('mousedown', () => {

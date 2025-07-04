@@ -4,7 +4,7 @@ import type { FastifyRequest } from 'fastify';
 import cors from '@fastify/cors';
 import { State, addPlayerCompletely, removeTheSock, getPongState, forefit, moveMyPaddle, gamesReadyLoopCheck, dataStreamer, JoinError } from './pong';
 import { historyMain, getHistForPlayerFromDb } from './history';
-import { addTournament, joinTournament, listAllPublicTournaments, deleteTournament, getFullTournament, TournError } from './tournament';
+import { checkAdmining, checkParticipating, addTournament, joinTournament, listAllPublicTournaments, deleteTournament, getFullTournament } from './tournament';
 
 // id shall come from the req and be per-user unique and persistent (jwt)
 // getIn tells do we wanna move (false) or do we wanna get into a game (true)
@@ -130,6 +130,36 @@ const startServer = async () => {
       const resp = await getHistForPlayerFromDb(req?.body.userId);
       return JSON.stringify(resp);
     });
+    fastify.post('/pong/tour/admincheck', async (req, reply) => {
+      try {
+        const resp = checkAdmining(req?.headers['x-user-id'] as string);
+        return JSON.stringify({
+          tId: resp,
+          err: "nil",
+        });
+      }
+      catch (e) {
+        return JSON.stringify({
+          res: "",
+          err: e,
+        });
+      }
+    });
+    fastify.post('/pong/tour/participantcheck', async (req, reply) => {
+      try {
+        const resp = checkParticipating(req?.headers['x-user-id'] as string);
+        return JSON.stringify({
+          tId: resp,
+          err: "nil",
+        });
+      }
+      catch (e) {
+        return JSON.stringify({
+          res: "",
+          err: e,
+        });
+      }
+    });
     fastify.post('/pong/tour/create', async (req: FastifyRequest<{ Body: {tName: string, playersN: number, privacy: boolean} }>, reply) => {
       try {
         console.log("heyyyy");
@@ -141,18 +171,10 @@ const startServer = async () => {
         });
       }
       catch (e) {
-        if (e instanceof TournError) {
-          return JSON.stringify({
-            res: e.tId,
-            err: e.err,
-          });
-        }
-        else {
-          return JSON.stringify({
-            res: "",
-            err: e,
-          });
-        }
+        return JSON.stringify({
+          res: "",
+          err: e,
+        });
       }
     });
     fastify.post('/pong/tour/enroll', async (req: FastifyRequest<{ Body: {tId: string} }>, reply) => {

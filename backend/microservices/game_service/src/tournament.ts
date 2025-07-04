@@ -178,44 +178,30 @@ class Tournament {
 let adminMap = new Map<string, string>();
 export let tournamentMap = new Map<string, Tournament>();
 
-export function addTournament(tName: string, playersN: number, privacy: boolean, uuid: string) {
+export function checkAdmining(uuid: string) {
   if (adminMap.has(uuid)) {
-    const tId = adminMap.get(uuid);
-    if (typeof tId === "undefined") {
-      throw new TournError({
-        tId: "",
-        err: "undefined tId",
-      });
-    }
-    throw new TournError({
-      tId: tId,
-      err: "You already administer a tournament",
-    });
+    return adminMap.get(uuid);
   }
+  throw "You don't admin a tournament";
+}
+
+export function checkParticipating(uuid: string) {
+  if (playersParticipatingTourn.has(uuid)) {
+    return playersParticipatingTourn.get(uuid);
+  }
+  throw "You don't participate in a tournament";
+}
+
+export function addTournament(tName: string, playersN: number, privacy: boolean, uuid: string) {
   if (playersParticipatingTourn.has(uuid)) {
     const tId = playersParticipatingTourn.get(uuid);
     if (typeof tId === "undefined") {
-      throw new TournError({
-        tId: "",
-        err: "undefined tId",
-      });
+      throw "Undefined tId in participation map";
     }
-    throw new TournError({
-      tId: tId,
-      err: "You already participate in a tournament",
-    });
-  }
-  if (playersN === -1) {
-    throw new TournError({
-      tId: "",
-      err: "Doing a -1 check has shown that you don't engage with any tournaments"
-    });
+    throw "You already participate in a tournament";
   }
   if (tName === "" || !(playersN === 2 || playersN === 4 || playersN === 8) || uuid === "") {
-    throw new TournError({
-      tId: "",
-      err: "Invalid tournament creation parameters",
-    });
+    throw "Invalid tournament creation parameters";
   }
   const touridtoadd = makeid(64);
   adminMap.set(uuid, touridtoadd);
