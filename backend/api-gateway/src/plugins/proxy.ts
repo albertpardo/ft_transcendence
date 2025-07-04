@@ -219,8 +219,10 @@ export default fp(async function (fastify: FastifyInstance): Promise<void> {
                   const body: LoginSignupResponseBody = JSON.parse(raw);
                   console.log('🧾 Parsed JSON from stream:', body);
                   if (!body.id || !body.username) {
-                      reply.type('application/json');
-                    return raw;
+                     /*  reply.type('application/json');
+                    return raw; */
+                    console.log('⚠️ Missing id or username, returning raw JSON without token');
+                    return typeof raw === 'string' ? raw : JSON.stringify(body);
                   }
 
                   const token = fastify.jwt.sign({ userId: body.id });
@@ -261,6 +263,7 @@ export default fp(async function (fastify: FastifyInstance): Promise<void> {
             } else {
                 console.log('✅ Final payload returned to client (unknown type):', payload);
             }
+            console.log('↪️ About to return payload of type:', typeof payload);
         return payload;
     });
 });
