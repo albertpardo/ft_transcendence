@@ -2,18 +2,6 @@ import { gamesMap, playersMap, socksMap, sleep, makeid } from './pong';
 
 export let playersParticipatingTourn = new Map<string, string>();
 
-export class TournError extends Error {
-  public tId: string;
-  public err: string;
-
-  constructor({tId, err,}: {tId: string, err: string,}) {
-    super();
-    this.tId = tId;
-    this.err = err;
-  }
-}
-
-
 class Tournament {
   public tName : string = "";
   private adminId : string = "";
@@ -87,27 +75,30 @@ class Tournament {
     return true;
   }
 
-  private matchesOngoing() {
-    if (this.stages === 0 || this.currentStage === 0) {
-      return false;
+  private gameCreator() {
+    // TODO don't forget about "failed" (player id = failed? this means that the last game failed. award an instant tech win to the other player, if they exist.) (also see below)
+    for (let i : number = 0; i < Math.pow(2, this.currentStage - 1); i++) {
+      let lId = this.Ids[this.currentStage - 1][2 * i];
+      let rId = this.Ids[this.currentStage - 1][2 * i + 1];
+      this.gameIds[this.currentStage - 1][i] = createTournamentGame(lId, rId);
     }
-    // TODO depending on the current stage, make a different sized array.
-    let res : Array<boolean> = [false, false, false, false, false, false, false, false];
-    for (let i : number = 0; i < Math.pow(2, this.currentStage); i++) {
-      if (this.Ids[this.currentStage - 1][i] !== "" && this.Ids[this.currentStage - 1][i] !== "failed") {
-        let playerId : string = this.Ids[this.stages - 1][i];
-        if (playersMap.has(playerId)) {
-          let gameId : string = playersMap.get(playerId);
-          if (gamesMap.has(gameId)) {
-            if (!(gamesMap.get(gameId).pongDone)) {
-              res[i] = true;
-            }
-          }
+  }
+
+  private matchesStopped() {
+    if (this.stages === 0 || this.currentStage === 0) {
+      return true;
+    }
+    // TODO FIXME depending on the current stage, make a different sized array.
+    // TODO don't forget about "failed" (also see above)
+    // (which SHOULD be the same anyway but it's better from the data management model point of view)
+    for (var gameId of this.gameIds[currentStage - 1]) {
+      if (gamesMap.has(gameId)) {
+        if (!gamesMap.get(gameId).pongDone) {
+          return false;
         }
       }
     }
-    const inlineIsTrue = (a) => a === true;
-    return (res.some(inlineIsTrue));
+    return true;
   }
 
   // loop checking for players in ts
@@ -147,11 +138,13 @@ class Tournament {
       while (!this.checkEveryonePresent()) {
         await sleep(5e3);
       }
-      console.log("tour: after everyone present, before ongoing");
-      while (this.matchesOngoing()) {
+      console.log("tour: after everyone present, before checking for stopped");
+      this.gameCreator();
+      while (!this.matchesStopped()) {
+        // TODO prolly this dude needs to get the info of the finished games and distribute the people, actually. idk
         await sleep(5e3);
       }
-      console.log("tour: after ongoing");
+      console.log("tour: after stopped");
       // TODO add the moving people on phase here
       this.currentStage -= 1;
       if (this.currentStage <= 0) {
@@ -172,6 +165,23 @@ class Tournament {
       }
     }
     // TODO run thru game ids and clean ts up
+  }
+
+  public confirmPlayer(uuid: string) {
+    for (var gId of this.gameIds[this.currentStage - 1]) {
+      if (!gamesMap.has(gId)) {
+        throw "gamesMap has no " + gId;
+      }
+      if (gamesMap.get(gId).LplayerId === uuid) {
+        gamesMap.get(gId).leftReady = true;
+        return ;
+      }
+      if (gamesMap.get(gId).RplayerId === uuid) {
+        gamesMap.get(gId).rightReady = true;
+        return ;
+      }
+    }
+    throw "Player not in tournament's games";
   }
 }
 
@@ -212,7 +222,7 @@ export function addTournament(tName: string, playersN: number, privacy: boolean,
   return (tourtoadd.tId);
 }
 
-export function joinTournament(tId: string, uuid: string) {
+export function joinTournament(tId: string, uuid: string, sock: WebSocket) {
   if (playersParticipatingTourn.has(uuid)) {
     throw "Player already participates in " + playersParticipatingTourn.get(uuid);
   }
@@ -226,6 +236,7 @@ export function joinTournament(tId: string, uuid: string) {
     }
     currentTour.addParticipant(uuid);
     playersParticipatingTourn.set(uuid, tId);
+    socksMap.set(uuid, sock);
   }
   else {
     throw "This tournament doesn't exist";
@@ -302,4 +313,22 @@ export function getFullTournament(uuid: string) {
     stages: tour.stages,
   };
   return response;
+}
+
+export function confirmParticipation(uuid: string) {
+  if (!playersParticipatingTourn.has(uuid)) {
+    throw "You aren't in a tournament";
+  }
+  const tId = playersParticipatingTourn.get(uuid);
+  if (typeof tId === "undefined") {
+    throw "undefined tId";
+  }
+  if (!tournamentMap.has(tId)) {
+    throw "tournamenMap has no " + tId;
+  }
+  let tourn = tournamentMap.get(tId);
+  if (typeof tourn === "undefined") {
+    throw "undefined tournament";
+  }
+  tourn.confirmPlayer(uuid);
 }

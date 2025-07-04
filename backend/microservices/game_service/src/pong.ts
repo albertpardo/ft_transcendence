@@ -345,6 +345,9 @@ export function addPlayerCompletely(playerId: string, sock: WebSocket) {
   if (!playersParticipatingTourn.has(playerId)) {
     // default, random MM
     for (const [gameId, gameRuntime] of gamesMap) {
+      if (gameRuntime.gameType === "tournament") {
+        continue ;
+      }
       if (gameRuntime.LplayerId === "") {
         gameRuntime.LplayerId = playerId;
         playersMap.set(playerId, gameId);
@@ -367,22 +370,26 @@ export function addPlayerCompletely(playerId: string, sock: WebSocket) {
     return gamesMap.get(newid).gameType;
   }
   else {
-    // wow! this is some tournament stuff! since every game is gonna be managed by the tourn, we just need to set the "ready" flag.
-    if (!playersMap.has(playerId)) {
-      throw "No player in playersMap in tournament";
-    }
-    const gid = playersMap.get(playerId);
-    if (!gamesMap.has(gid)) {
-      throw "gamesMap without the game of the player";
-    }
-    const game = gamesMap.get(gid);
-    if (game.LplayerId === playerId) {
-      game.leftReady = true;
-    }
-    else {
-      game.rightReady = true;
-    }
+    throw "Can't join/create normal game for this player since they're a tournament member"
   }
+}
+
+export function createTournamentGame(lId: string, rId: string) {
+  if (playersMap.has(lId)) {
+    throw "Player already in " + playersMap.get(lId);
+  }
+  if (playersMap.has(rId)) {
+    throw "Player already in " + playersMap.get(rId);
+  }
+  const newid : string = makeid(32);
+  gamesMap.set(newid, new PongRuntime);
+  gamesMap.get(newid).LplayerId = lId;
+  gamesMap.get(newid).RplayerId = rId;
+  playersMap.set(lId, newid);
+  playersMap.set(rId, newid);
+  socksMap.get(lId).send("added: L");
+  socksMap.get(rId).send("added: R");
+  return (newid);
 }
 
 export function removeTheSock(sock: WebSocket) : void {

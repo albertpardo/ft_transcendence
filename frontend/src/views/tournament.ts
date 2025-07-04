@@ -203,7 +203,7 @@ export async function renderTournamentContent(hideableElements) {
   hideableElements.contentArea.innerHTML = tempHTML;
   const tournAnihilationButton = document.getElementById("force-rm-tourn");
   if (tournAnihilationButton) {
-    const checkOnTournamentRawResp = await checkAdmining();
+    const checkOnTournamentRawResp = await adminCheck();
     const checkResp = await checkOnTournamentRawResp.text();
     const checkRespObj = JSON.parse(checkResp);
     if (checkRespObj.err === "nil") {
@@ -412,7 +412,7 @@ export async function renderTournamentManagerContent(hideableElements) {
   const myTournamentField = document.getElementById('my-tournament');
   if (tournamentForm) {
     const submitButton = document.getElementById('register-tournament-button') as HTMLButtonElement;
-    const checkPartRawResp = await checkParticipating();
+    const checkPartRawResp = await participantCheck();
     const checkResp = await checkPartRawResp.text();
     const checkRespObj = JSON.parse(checkResp);
     console.log("check resp obj:", checkRespObj);

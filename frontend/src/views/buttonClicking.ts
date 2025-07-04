@@ -61,9 +61,8 @@ export async function confirmParticipation() {
   const fresp = fetch(
     `${API_BASE_URL}/api/pong/tour/confirm`,
     {
-      method: 'GET',
+      method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
         'Accept': 'application/json,application/html,text/html,*/*',
         'Origin': 'https://127.0.0.1:3000/',
         'Authorization': 'Bearer ' + localStorage.getItem('authToken'),

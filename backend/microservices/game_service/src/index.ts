@@ -4,7 +4,7 @@ import type { FastifyRequest } from 'fastify';
 import cors from '@fastify/cors';
 import { State, addPlayerCompletely, removeTheSock, getPongState, forefit, moveMyPaddle, gamesReadyLoopCheck, dataStreamer, JoinError } from './pong';
 import { historyMain, getHistForPlayerFromDb } from './history';
-import { checkAdmining, checkParticipating, addTournament, joinTournament, listAllPublicTournaments, deleteTournament, getFullTournament } from './tournament';
+import { checkAdmining, checkParticipating, addTournament, joinTournament, listAllPublicTournaments, deleteTournament, getFullTournament, confirmParticipation } from './tournament';
 
 // id shall come from the req and be per-user unique and persistent (jwt)
 // getIn tells do we wanna move (false) or do we wanna get into a game (true)
@@ -179,7 +179,18 @@ const startServer = async () => {
     });
     fastify.post('/pong/tour/enroll', async (req: FastifyRequest<{ Body: {tId: string} }>, reply) => {
       try {
-        const resp = joinTournament(req?.body.tId, req?.headers['x-user-id'] as string);
+        const uuid = req?.headers['x-user-id'];
+        if (typeof uuid === "undefined") {
+          throw "undefined uuid";
+        }
+        if (!upperSocksMap.has(uuid)) {
+          throw "User has no socker in the upper socks map";
+        }
+        let sock = upperSocksMap.get(uuid);
+        if (typeof sock === "undefined") {
+          throw "Sock undefined in the server stage";
+        }
+        const resp = joinTournament(req?.body.tId, uuid, sock);
         return JSON.stringify({
           err: "nil",
         });
@@ -228,6 +239,19 @@ const startServer = async () => {
       catch (e) {
         return JSON.stringify({
           res: {},
+          err: e,
+        });
+      }
+    });
+    fastify.post('/pong/tour/confirm', async (req, reply) => {
+      try {
+        confirmParticipation(req?.headers['x-user-id'] as string);
+        return JSON.stringify({
+          err: "nil",
+        });
+      }
+      catch (e) {
+        return JSON.stringify({
           err: e,
         });
       }
