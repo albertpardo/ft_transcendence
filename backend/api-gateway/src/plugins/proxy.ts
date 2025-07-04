@@ -91,6 +91,12 @@ export default fp(async function (fastify: FastifyInstance): Promise<void> {
                     .send();
                 return;
             }
+            console.log('🧪 req.url:', req.url);
+            console.log('🧪 req.raw.url:', req.raw.url);
+          /*   if (!req.url?.startsWith('/api/profile')) {
+                return; // skip JWT if not /api/profile
+            } */
+
             const auth = req.headers['authorization'];
             if (!auth) {
                 console.warn('❌ No Authorization header found in request');
@@ -98,11 +104,16 @@ export default fp(async function (fastify: FastifyInstance): Promise<void> {
             }
             console.log('🚀 rewriteRequestHeaders - forwarded auth:', req.headers.authorization);
             console.log('🔐🔐 Authorization Header:', req.headers['authorization']);
+             if (!req.headers.authorization && req.cookies?.authToken) {
+                req.headers.authorization = `Bearer ${req.cookies.authToken}`;
+                console.log('🍪 Injected Authorization header from authToken cookie');
+            }
 
             try {
                // console.log('🔍🔐 Raw Authorization Header:', JSON.stringify(req.headers.authorization));
                 console.log('🔍🔐 JWT Secret in use:', process.env.JWT_SECRET);
                 console.log(`🔍🔐 Authorization header: ${auth}`);
+                console.log(`🔍🔐 cookie 🍪🍪 Authorization header: ${req.headers.authorization} 🍪🍪`);
                 await req.jwtVerify();
                 // await (req as FastifyRequest).jwtVerify();
                 console.log("🔐 Verified JWT in proxy preHandler");
@@ -157,7 +168,7 @@ export default fp(async function (fastify: FastifyInstance): Promise<void> {
         payload: string | Buffer | Readable
     ): Promise<string | Buffer | Readable> => {
         console.log(`📡 [onSend] URL: ${req.url}, statusCode: ${reply.statusCode}`);//debug log
-        if ((req.url.startsWith('/api/login') || req.url.startsWith('/api/signup')) && reply.statusCode === 200) {
+        if ((req.url.startsWith('/api/login') || req.url.startsWith('/api/signup') || req.url.startsWith('/api/profile')) && reply.statusCode === 200) {
             try {
               // Only decode in dev if payload is a string
               if (typeof payload === 'string') {
@@ -176,15 +187,11 @@ export default fp(async function (fastify: FastifyInstance): Promise<void> {
                   contentType.includes('application/json')
                 ) {
                 console.log('📦 Payload is Readable stream');
-                
-                //const raw: string = await getRawBody(payload as Readable, { encoding: 'utf8' });
-                //new from here until console.log('📜 Raw body from stream:', raw);
+
                 const rawBuffer: Buffer = await getRawBody(payload as Readable);
                 
                 const encoding = reply.getHeader('content-encoding');
                 let raw: string;
-
-           
 
                 if (typeof encoding === 'string') {
                     if (encoding.includes('gzip')) {
@@ -218,9 +225,13 @@ export default fp(async function (fastify: FastifyInstance): Promise<void> {
                 try {
                   const body: LoginSignupResponseBody = JSON.parse(raw);
                   console.log('🧾 Parsed JSON from stream:', body);
+                  if (req.url.startsWith('/api/profile')) {
+                      console.log('🧾 Profile response, skipping token injection');
+                      reply.type('application/json');
+                      return JSON.stringify(body);
+                    }
                   if (!body.id || !body.username) {
-                     /*  reply.type('application/json');
-                    return raw; */
+                   
                     console.log('⚠️ Missing id or username, returning raw JSON without token');
                     return typeof raw === 'string' ? raw : JSON.stringify(body);
                   }
