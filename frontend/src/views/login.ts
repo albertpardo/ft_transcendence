@@ -142,6 +142,9 @@ export function renderLogin(appElement: HTMLElement) {
         if (!API_BASE_URL) {
           throw new Error('API base URL is not defined. Please set VITE_API_BASE_URL in your environment variables.');
         }
+        console.log(`🔍🔐 🍪 🍪`);
+        console.log('Sending login fetch to:', `${API_BASE_URL}/api/login`);
+        console.log(`🔍🔐 🍪 🍪`);
         const response = await fetch(`${API_BASE_URL}/api/login`, {
           method: 'POST',
           headers: {
@@ -153,15 +156,25 @@ export function renderLogin(appElement: HTMLElement) {
           credentials: 'include',
           mode: 'cors',
         });
+        console.log('Login fetch response status:', response.status);
+        console.log('Login fetch response headers:', [...response.headers.entries()]);
 
 //	const intermediate0 = await response.text();
 //	console.log(intermediate0);
-        const data = await response.json();
+         let data;
+        try {
+          data = await response.json();
+        } catch (jsonError) {
+          const text = await response.text();
+          console.log('Login response text (not json):', text);
+          throw new Error('Invalid JSON response');
+        }
+        console.log('**********Login response data:', data);
 
         if (!response.ok || data.error) {
           throw new Error(data.error || 'Login failed');
         }
-       
+       console.log('**********Storing auth token and user info');
        localStorage.setItem('authToken', data.token);
 	     localStorage.setItem('userId', data.id);
        localStorage.setItem('user', JSON.stringify({ 
@@ -173,6 +186,7 @@ export function renderLogin(appElement: HTMLElement) {
     
         
       } catch (error) {
+        console.error('**********Login error caught:', error);
         errorElement.textContent = error instanceof Error ? error.message : 'Login failed';
         errorElement.classList.remove('hidden');
        

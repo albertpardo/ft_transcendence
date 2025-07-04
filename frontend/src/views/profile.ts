@@ -51,9 +51,15 @@ console.log("✅ Decoded token:", decoded);
 
     //console.log('🧪 API Gateway Content-Type:', res.headers.get('content-type'));
 
-    if (!res.ok) throw new Error("Failed to fetch user data");
-
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`Failed to fetch user data: ${res.status} ${text}`);
+    }
+    console.log('🧪 ************************************************************************************');
+    console.log('Profile fetch status:', res.status);
+console.log('Profile fetch headers:', [...res.headers.entries()]);
     userData = await res.json();
+    console.log('🧪 User data fetched successfully:', userData);
   } catch (err) {
     console.error(err);
     el.innerHTML = `<p class="text-red-500">Error loading profile. Please try again later.</p>`;
