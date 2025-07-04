@@ -118,9 +118,8 @@ export async function renderHistoryContent(hideableElements) {
     `;
   }
   hideableElements.contentArea.innerHTML = tempInnerHTML;
-  hideableElements.startButton.hidden = true;
-  hideableElements.giveupButton.hidden = true;
-  hideableElements.gameArea.hidden = true;
+  hideableElements.buttonArea.hidden = true;
+  hideableElements.gameArea.classList.add("hidden");
   hideableElements.gameWindow.hidden = true;
 }
 

@@ -32,8 +32,7 @@ export function route() {
   // Renderiza el contenido según la sección
   const hideableElements = {
     contentArea: document.getElementById('content-area')!,
-    startButton: document.getElementById('start-button')!,
-    giveupButton: document.getElementById('giveup-button')!,
+    buttonArea: document.getElementById('button-area')!,
     gameArea: document.getElementById('game-area')!,
     gameWindow: document.getElementById('game-window')!,
   };

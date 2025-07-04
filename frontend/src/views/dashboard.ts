@@ -7,7 +7,7 @@ import { renderProfileContent } from './profile';
 import { renderTournamentContent, renderTournamentManagerContent } from './tournament';
 import { State, nullState } from './pongrender';
 
-function movePaddleWrapper(d: number) {
+async function movePaddleWrapper(d: number) {
   const movePaddleRawResp = await movePaddle(d);
   const movePaddleResp = await movePaddleRawResp.text();
   const movePaddleRespObj = JSON.parse(movePaddleResp);
@@ -98,9 +98,11 @@ export async function initDashboard() {
         </div>
 
       </div>
-      <button id="start-button" class="mt-6 p-3 bg-red-600 rounded-lg hover:bg-red-700 transition text-white font-medium">Click to join or reconnect</button>
-      <button id="ready-button" class="mt-6 p-3 bg-red-600 rounded-lg hover:bg-red-700 transition text-white font-medium">Click to set yourself ready</button>
-      <button id="giveup-button" class="mt-6 p-3 bg-red-600 rounded-lg hover:bg-red-700 transition text-white font-medium">FOREFIT (INSTANT)</button>
+      <div id="button-area" class="flex flex-col space-y-1">
+        <button id="start-button" class="mt-6 p-3 bg-green-600 rounded-lg hover:bg-green-700 transition text-white font-medium">Click to join or reconnect</button>
+        <button id="ready-button" class="mt-6 p-3 bg-green-600 rounded-lg hover:bg-green-700 transition text-white font-medium">Click to set yourself ready</button>
+        <button id="giveup-button" class="mt-6 p-3 bg-red-600 rounded-lg hover:bg-red-700 transition text-white font-medium">FOREFIT (INSTANT)</button>
+      </div>
       <p id="game-info"></p>
     </div>
   `;
@@ -238,7 +240,7 @@ export async function initDashboard() {
         console.error(regPlRespObj.err);
       }
     });
-    document.getElementById('giveup-button')!.addEventListener('click', () => {
+    document.getElementById('giveup-button')!.addEventListener('click', async () => {
       console.log("after clicking the giveup-button,");
       const forefitRawResp = await forefit();
       const forefitResp = await forefitRawResp.text();
@@ -349,8 +351,7 @@ export async function initDashboard() {
   // Render active section
   const hideableElements = {
     contentArea: document.getElementById('content-area')!,
-    startButton: document.getElementById('start-button')!,
-    giveupButton: document.getElementById('giveup-button')!,
+    buttonArea: document.getElementById('button-area')!,
     gameArea: document.getElementById('game-area')!,
     gameWindow: document.getElementById('game-window')!,
   };

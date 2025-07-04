@@ -29,9 +29,8 @@ export function renderHomeContent(hideableElements) {
     <p class="mb-4">Sección de inicio con texto e imagen de prueba.</p>
     <img src="https://placehold.co/1000x400/444444/ffffff?text=Demo" class="w-full rounded-lg mb-6" alt="Demo">
   `;
-  hideableElements.startButton.hidden = true;
-  hideableElements.giveupButton.hidden = true;
-  hideableElements.gameArea.hidden = true;
+  hideableElements.buttonArea.hidden = true;
+  hideableElements.gameArea.classList.add("hidden");
   hideableElements.gameWindow.hidden = true;
 }
 
@@ -39,9 +38,8 @@ export function renderPlayContent(hideableElements) {
   hideableElements.contentArea.innerHTML = `
   `;
   // on this view, show the button and the registered games list
-  hideableElements.startButton.hidden = false;
-  hideableElements.giveupButton.hidden = false;
-  hideableElements.gameArea.hidden = false;
+  hideableElements.buttonArea.hidden = false;
+  hideableElements.gameArea.classList.remove("hidden");
   hideableElements.gameWindow.hidden = false;
 }
 
@@ -51,8 +49,7 @@ export function renderStatsContent(hideableElements) {
     <p class="mb-4">Stats</p>
     <img src="https://placehold.co/1000x400/444444/ffffff?text=Demo" class="w-full rounded-lg" alt="Stats">
   `;
-  hideableElements.startButton.hidden = true;
-  hideableElements.giveupButton.hidden = true;
-  hideableElements.gameArea.hidden = true;
+  hideableElements.buttonArea.hidden = true;
+  hideableElements.gameArea.classList.add("hidden");
   hideableElements.gameWindow.hidden = true;
 }

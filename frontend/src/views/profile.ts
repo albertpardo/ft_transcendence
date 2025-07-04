@@ -1,7 +1,6 @@
 export async function renderProfileContent(hideableElements) {
-  hideableElements.startButton.hidden = true;
-  hideableElements.giveupButton.hidden = true;
-  hideableElements.gameArea.hidden = true;
+  hideableElements.buttonArea.hidden = true;
+  hideableElements.gameArea.classList.add("hidden");
   hideableElements.gameWindow.hidden = true;
   const userId = localStorage.getItem('userId') || sessionStorage.getItem('userId');
   const authToken : string = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');

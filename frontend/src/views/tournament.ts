@@ -149,9 +149,8 @@ async function fillInTheTournTable() {
 }
 
 export async function renderTournamentContent(hideableElements) {
-  hideableElements.startButton.hidden = true;
-  hideableElements.giveupButton.hidden = true;
-  hideableElements.gameArea.hidden = true;
+  hideableElements.buttonArea.hidden = true;
+  hideableElements.gameArea.classList.add("hidden");
   hideableElements.gameWindow.hidden = true;
   let tempHTML : string = `
     <h1 id="tourn-title">Hi</h1>
@@ -350,9 +349,8 @@ async function generateUpdateAllTourTable(canWeJoin: boolean) {
 }
 
 export async function renderTournamentManagerContent(hideableElements) {
-  hideableElements.startButton.hidden = true;
-  hideableElements.giveupButton.hidden = true;
-  hideableElements.gameArea.hidden = true;
+  hideableElements.buttonArea.hidden = true;
+  hideableElements.gameArea.classList.add("hidden");
   hideableElements.gameWindow.hidden = true;
   let tempHTML : string = `
     <p id="error-text-field" class="font-bold mb-4 text-xl" style="color:coral" hidden>You're already participating in a tournament.</p>
