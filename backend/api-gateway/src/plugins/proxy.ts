@@ -1,4 +1,5 @@
 import fp from 'fastify-plugin';
+import fastifyCookie from 'fastify-cookie'; 
 import { gunzipSync, brotliDecompressSync } from 'zlib';
 import fastifyHttpProxy from '@fastify/http-proxy';
 import { FastifyInstance } from 'fastify';
@@ -30,6 +31,9 @@ interface OnRequestFastifyRequest extends FastifyRequest {
 }
 
 
+// Register cookie plugin
+
+
 export default fp(async function (fastify: FastifyInstance): Promise<void> {
     fastify.addHook('onRequest', async (req, reply) => {
         const allowedOrigin = process.env.API_FRONTEND_URL || 'https://frontend-7nt4.onrender.com';
@@ -47,6 +51,10 @@ export default fp(async function (fastify: FastifyInstance): Promise<void> {
     
     fastify.get('/health', async (req: FastifyRequest, reply: FastifyReply): Promise<{ status: string }> => {
         return { status: 'ok' };
+    });
+    
+    fastify.register(fastifyCookie, {
+        secret: process.env.COOKIE_SECRET || 'supersecret', // optional for signed cookies
     });
 
     fastify.register(fastifyHttpProxy, {
