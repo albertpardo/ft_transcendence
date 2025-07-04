@@ -44,7 +44,7 @@ export default fp(async function (fastify: FastifyInstance): Promise<void> {
             reply.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
         }
         if (req.method === 'OPTIONS') {
-            reply.code(204).send();
+            reply.code(200).send();
             return;
         }
     });

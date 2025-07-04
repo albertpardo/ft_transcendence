@@ -22,7 +22,11 @@ fastify.get('/health', async (req, reply) => {
 const start = async () => {
     try {
         await fastify.listen({ port: process.env.PORT || 9001, host: '0.0.0.0' });
-        console.log(`User management service running at https://localhost:${process.env.PORT || 9001}`);
+        // console.log(`User management service running at ${fastify.server.address().address}:${process.env.PORT || 9001}`);
+        const address = fastify.server.address();
+        if (typeof address === 'object' && address !== null) {
+          console.log(`User management service running at http://${address.address}:${address.port}`);
+        }
     } catch (err) {
         fastify.log.error(err);
         process.exit(1);
