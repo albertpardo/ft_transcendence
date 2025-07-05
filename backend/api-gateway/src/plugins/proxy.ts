@@ -170,18 +170,55 @@ export default fp(async function (fastify: FastifyInstance) {
     // Finalize login after successful 2FA
     fastify.register(fastifyHttpProxy, {
         upstream: 'http://auth_service:9003',
-        prefix: '/api/auth/finalize-login',
-        rewritePrefix: '/api/security/auth/finalize-login',
+        prefix: '/api/auth/2fa/finalize-login',
+        rewritePrefix: '/api/security/auth/2fa/finalize-login',
         http2: false,
     });
 
+    // Check the status of user's 2FA
+    fastify.register(fastifyHttpProxy, {
+        upstream: 'http://auth_service:9003',
+        prefix: '/api/auth/2fa/status',
+        rewritePrefix: '/api/security/auth/2fa/status',
+        http2: false,
+        preHandler: async (req, reply) => {
+            try {
+                await req.jwtVerify();
+                const userId = (req.user as any)?.userId;
+                if (userId) {
+                    req.headers['x-user-id'] = String(userId);
+                }
+            } catch (err) {
+                reply.code(401).send({ error: 'Unauthorized' });
+            }
+        },
+    });
+    
+    // Verify 2FA
+    fastify.register(fastifyHttpProxy, {
+        upstream: 'http://auth_service:9003',
+        prefix: '/api/auth/2fa/verify',
+        rewritePrefix: '/api/security/auth/2fa/verify',
+        http2: false,
+        preHandler: async (req, reply) => {
+            try {
+                await req.jwtVerify();
+                const userId = (req.user as any)?.userId;
+                if (userId) {
+                    req.headers['x-user-id'] = String(userId);
+                }
+            } catch (err) {
+                reply.code(401).send({ error: 'Unauthorized' });
+            }
+        },
+    });    
 
     // inject token: for login & token generation after signup
     // block and modify response
     fastify.addHook('onSend', async (req, reply, payload) => {
         if ((req.url.startsWith('/api/login') || 
             req.url.startsWith('/api/signup') || 
-            req.url.startsWith('/api/auth/finalize-login')) && 
+            req.url.startsWith('/api/auth/2fa/finalize-login')) && 
             reply.statusCode === 200) {
             try {
                 let body;
@@ -199,13 +236,16 @@ export default fp(async function (fastify: FastifyInstance) {
             //    const data = typeof payload === 'string' ? JSON.parse(payload) : payload;
             //    console.log('📦 Login/signup response payload:', data);
 
-                if (!body.id || !body.username) {
-                    console.warn('⚠️ No id or username found in payload!');
+                const userId = body.id || body.userId;
+            //    if (!body.id || !body.userId || !body.username) {
+                if (!userId) {
+                    console.warn('⚠️ No id (or userId) or username found in payload!');
                     return payload;
                 }
 
                 // include has_2fa in token if present
-                const tokenPayload: any = { userId: body.id };
+                //const tokenPayload: any = { userId: body.id };
+                const tokenPayload: any = { userId };
                 if (typeof body.has_2fa === 'boolean') {
                     tokenPayload.has_2fa = body.has_2fa;
                 }
@@ -215,9 +255,10 @@ export default fp(async function (fastify: FastifyInstance) {
 
                 // return new JSON response
                 return JSON.stringify({
-                    id: body.id,
+                //    id: body.id,
+                    id: userId,
                     token,
-                    user: body.username,
+                    user: body.username, // 注意有些 finalize-login 不带 username，所以可以为 undefined
                     has_2fa: body.has_2fa ?? false,
                 });
             } catch (err) {

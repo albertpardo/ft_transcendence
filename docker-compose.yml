@@ -59,6 +59,18 @@ services:
     networks:
       - backend
 
+    auth_service:
+    build: ./backend/microservices/auth_service
+    container_name: trans_auth_service
+    expose:
+      - "9003"
+    volumes:
+      - ./backend/microservices/auth_service:/app
+      - /app/node_modules
+    restart: always
+    networks:
+      - backend
+
 #  chat_service:
 #    build: ./chat_service
 #    expose:
