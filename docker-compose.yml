@@ -198,6 +198,8 @@ services:
     volumes:
       - ${LOGS_ELASTIC_FOLDER}:/backup/logs_elastic:ro
       - ${BACKUP_ELASTIC_LOGS}:/backup/logs_elastic_backup
+    networks:
+      - backend
 
 # volumes used in ELK 
 volumes:

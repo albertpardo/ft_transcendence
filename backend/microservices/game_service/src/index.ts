@@ -5,6 +5,8 @@ import cors from '@fastify/cors';
 import { PongResponses, State, addPlayerCompletely, removeTheSock, getPongDoneness, getPongState, moveMyPaddle, gamesReadyLoopCheck, dataStreamer } from './pong';
 import { historyMain, getHistForPlayerFromDb } from './history';
 
+import { getLogTransportConfig } from '../../../../pino_utils/logTransportConfig';
+
 interface PongBodyReq {
   playerId: string,
   getIn: boolean,
@@ -22,10 +24,21 @@ const upperSocksMap = new Map<string, WebSocket>();
 
 const startServer = async () => {
   await historyMain();
+
+/*
   const fastify = Fastify({
     logger: true,
 //    querystringParser: str => qs.parse(str),
   });
+ */
+
+  const fastify = Fastify({
+    logger: {
+      transport: getLogTransportConfig()
+    }
+//    querystringParser: str => qs.parse(str),
+  });
+
   await fastify.register(websocket);
 
   await fastify.register(cors, {

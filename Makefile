@@ -18,8 +18,8 @@ endif
 
 all: create_folders
 	@echo > /dev/null
-	docker compose -f docker-compose.yml up --build
-#	docker compose -f docker-compose.yml up -d --build
+#	docker compose -f docker-compose.yml up --build
+	@docker compose -f docker-compose.yml up -d --build
 	
 	@echo "\n▉▉▉▉▉▉▉▉▉▉ WELCOME TO TRASCENDENCE PROJECT! ▉▉▉▉▉▉▉▉▉▉\n"
 	@echo "To check the system status run: make status\n"
@@ -38,15 +38,18 @@ create_folders:
 	done
 
 down:
-	docker compose -f docker-compose.yml down
+	@docker compose -f docker-compose.yml down
 
 # Docker down deleting docker volumes
 downvol:
-	docker compose -f docker-compose.yml down -v
+	@docker compose -f docker-compose.yml down -v
 
 # Delete ELK folder (and subfolders) used for logs and backups
 cleanfolders:
 	@rm -rf $(ELK_FOLDER)
+
+# For easy clean by apardo-m
+cleanapardo: downvol cleanfolders
 
 status:
 	@echo "\n▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉ CONTAINERS STATUS ▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉\n"
@@ -79,4 +82,4 @@ fresh:
 	$(MAKE) all
 	@echo "\n All dockers successfully starting up! \n"
 
-.PHONY: all create_folders down downvol clean fclean status re fresh
+.PHONY: all create_folders down downvol clean cleanapardo fclean status re fresh
