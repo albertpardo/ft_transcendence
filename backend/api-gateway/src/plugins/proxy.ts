@@ -14,7 +14,7 @@ if (!userManagementUrl) {
     throw new Error('USER_MANAGEMENT_URL environment variable is not set');
 }
 
-interface ProxyReplyOptions {
+/* interface ProxyReplyOptions {
     rewriteRequestHeaders: (req: import('fastify').FastifyRequest, headers: Record<string, any>) => Record<string, any>;
 }
 
@@ -22,9 +22,10 @@ interface LoginSignupPayload {
     id?: string;
     username?: string;
     [key: string]: any;
-}
+} */
 
 interface OnRequestFastifyRequest extends FastifyRequest {
+    method: string;
     headers: {
         origin?: string;
         [key: string]: any;
@@ -36,13 +37,17 @@ interface OnRequestFastifyRequest extends FastifyRequest {
 
 
 export default fp(async function (fastify: FastifyInstance): Promise<void> {
-    fastify.addHook('onRequest', async (req, reply) => {
+    fastify.register(fastifyCookie, {
+        secret: process.env.COOKIE_SECRET || 'supersecret', // optional for signed cookies
+    });
+    fastify.addHook('onRequest', async (req: OnRequestFastifyRequest, reply: FastifyReply) => {
         const allowedOrigin = process.env.API_FRONTEND_URL || 'https://frontend-7nt4.onrender.com';
         if (req.headers.origin === allowedOrigin) {
             reply.header('Access-Control-Allow-Origin', allowedOrigin);
             reply.header('Access-Control-Allow-Credentials', 'true');
             reply.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
             reply.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+              //  reply.header('Access-Control-Allow-Origin', req.headers.origin || '*');
         }
         if (req.method === 'OPTIONS') {
             reply.code(200).send();
@@ -54,9 +59,6 @@ export default fp(async function (fastify: FastifyInstance): Promise<void> {
         return { status: 'ok' };
     });
     
-    fastify.register(fastifyCookie, {
-        secret: process.env.COOKIE_SECRET || 'supersecret', // optional for signed cookies
-    });
 
     /* fastify.register(fastifyHttpProxy, {
         upstream: userManagementUrl,
@@ -65,7 +67,8 @@ export default fp(async function (fastify: FastifyInstance): Promise<void> {
         http2: false,
     });
  */
-fastify.post('/api/login', async (req, reply) => {
+// fastify.post('/api/login', async (req, reply) => {
+fastify.post('/api/login', async (req: FastifyRequest<{ Body: { username: string; password: string } }>, reply: FastifyReply) => {
   try {
     const res = await fetch(`${userManagementUrl}/api/user/login`, {
       method: 'POST',
@@ -76,8 +79,15 @@ fastify.post('/api/login', async (req, reply) => {
     });
 
     const encoding = res.headers.get('content-encoding');
+    const contentType = res.headers.get('content-type');
     const buf = await res.arrayBuffer();
     let rawBuf = Buffer.from(buf);
+
+    if (!contentType?.includes('application/json')) {
+      const text = rawBuf.toString('utf-8');
+      console.error('🔥 Upstream error response (non-JSON):', text.slice(0, 300));
+      return reply.code(502).send({ error: 'Invalid response from upstream service' });
+    }
 
     try {
       if (encoding === 'br') {
@@ -121,7 +131,9 @@ fastify.post('/api/login', async (req, reply) => {
         http2: false
     }); */
 
-    fastify.post('/api/signup', async (req, reply) => {
+    //fastify.post('/api/signup', async (req, reply) => {
+    fastify.post('/api/signup', async (req: FastifyRequest<{ Body: { username: string; password: string } }>, reply: FastifyReply) => {
+
   try {
     const res = await fetch(`${userManagementUrl}/api/user/signup`, {
       method: 'POST',
@@ -132,8 +144,15 @@ fastify.post('/api/login', async (req, reply) => {
     });
 
     const encoding = res.headers.get('content-encoding');
+    const contentType = res.headers.get('content-type');
     const buf = await res.arrayBuffer();
     let rawBuf = Buffer.from(buf);
+
+    if (!contentType?.includes('application/json')) {
+      const text = rawBuf.toString('utf-8');
+      console.error('🔥 Upstream error response (non-JSON):', text.slice(0, 300));
+      return reply.code(502).send({ error: 'Invalid response from upstream service' });
+    }
 
     try {
       if (encoding === 'br') {
@@ -147,11 +166,19 @@ fastify.post('/api/login', async (req, reply) => {
       }
     } catch (err) {
       console.warn('⚠️ Failed to decompress:', err);
+      return reply.code(502).send({ error: 'Decompression error from upstream' });
       // fallback to rawBuf
     }
 
     const raw = rawBuf.toString('utf-8');
-    const json = JSON.parse(raw);
+    // const json = JSON.parse(raw);
+    let json;
+    try {
+      json = JSON.parse(raw);
+    } catch (err) {
+      console.error('❌ Failed to parse JSON from upstream:', err);
+      return reply.code(502).send({ error: 'Invalid JSON response from upstream' });
+    }
 
     const token = fastify.jwt.sign({ userId: json.id });
 
@@ -194,20 +221,19 @@ fastify.post('/api/login', async (req, reply) => {
             }
             console.log('🧪 req.url:', req.url);
             console.log('🧪 req.raw.url:', req.raw.url);
-          /*   if (!req.url?.startsWith('/api/profile')) {
-                return; // skip JWT if not /api/profile
-            } */
+
 
             const auth = req.headers['authorization'];
-            if (!auth) {
-                console.warn('❌ No Authorization header found in request');
-                return reply.code(401).send({ error: 'Missing Authorization header' });
+
+            if (!auth && req.cookies?.authToken) {
+                req.headers.authorization = `Bearer ${req.cookies.authToken}`;
+                console.log('🍪 Injected Authorization header from authToken cookie')
             }
             console.log('🚀 rewriteRequestHeaders - forwarded auth:', req.headers.authorization);
             console.log('🔐🔐 Authorization Header:', req.headers['authorization']);
-             if (!req.headers.authorization && req.cookies?.authToken) {
-                req.headers.authorization = `Bearer ${req.cookies.authToken}`;
-                console.log('🍪 Injected Authorization header from authToken cookie');
+            if (!req.headers['authorization']) {
+                console.warn('❌ No Authorization header found in request');
+                return reply.code(401).send({ error: 'Missing Authorization header' });
             }
 
             try {
@@ -248,10 +274,10 @@ fastify.post('/api/login', async (req, reply) => {
         http2: false,
     });
 
-    fastify.addHook('onRequest', async (req: OnRequestFastifyRequest, reply: FastifyReply): Promise<void> => {
+ /*    fastify.addHook('onRequest', async (req: OnRequestFastifyRequest, reply: FastifyReply): Promise<void> => {
         reply.header('Access-Control-Allow-Origin', req.headers.origin || '*');
         reply.header('Access-Control-Allow-Credentials', 'true');
-    });
+    }); */
 
     interface OnSendRequest extends FastifyRequest {
         url: string;
@@ -332,7 +358,6 @@ fastify.post('/api/login', async (req, reply) => {
                       return JSON.stringify(body);
                     }
                   if (!body.id || !body.username) {
-                   
                     console.log('⚠️ Missing id or username, returning raw JSON without token');
                     return typeof raw === 'string' ? raw : JSON.stringify(body);
                   }
