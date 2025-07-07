@@ -58,13 +58,62 @@ export default fp(async function (fastify: FastifyInstance): Promise<void> {
         secret: process.env.COOKIE_SECRET || 'supersecret', // optional for signed cookies
     });
 
-    fastify.register(fastifyHttpProxy, {
+    /* fastify.register(fastifyHttpProxy, {
         upstream: userManagementUrl,
         prefix: '/api/login',
         rewritePrefix: '/api/user/login',
         http2: false,
     });
+ */
+fastify.post('/api/login', async (req, reply) => {
+  try {
+    const res = await fetch(`${userManagementUrl}/api/user/login`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify(req.body),
+    });
 
+    const encoding = res.headers.get('content-encoding');
+    const buf = await res.arrayBuffer();
+    let rawBuf = Buffer.from(buf);
+
+    try {
+      if (encoding === 'br') {
+        console.log('🧊 Brotli decompressing login response...');
+        rawBuf = brotliDecompressSync(rawBuf);
+      } else if (encoding === 'gzip') {
+        console.log('🔄 Gzip decompressing login response...');
+        rawBuf = gunzipSync(rawBuf);
+      } else {
+        console.log('📦 No compression detected or decoding not needed.');
+      }
+    } catch (err) {
+      console.warn('⚠️ Failed to decompress:', err);
+      // fallback to rawBuf
+    }
+
+    const raw = rawBuf.toString('utf-8');
+    const json = JSON.parse(raw);
+
+    const token = fastify.jwt.sign({ userId: json.id });
+
+    reply
+      .setCookie('authToken', token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none',
+        path: '/',
+      })
+      .type('application/json')
+      .send({ ...json, token });
+
+  } catch (err) {
+    console.error('❌ Login handler crashed:', err);
+    reply.code(500).send({ error: 'Internal Server Error during login' });
+  }
+});
     /* fastify.register(fastifyHttpProxy, {
         upstream: userManagementUrl,
         prefix: '/api/signup',
