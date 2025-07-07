@@ -43,7 +43,7 @@ services:
       - key: HEALTH_PORT
         value: "10000"
       - key: USER_MANAGEMENT_URL
-        value: https://user-management-XXXX.onrender.com
+        value: https://user-management-lsdg.onrender.com
     healthCheckPath: /health
 
   - type: web
