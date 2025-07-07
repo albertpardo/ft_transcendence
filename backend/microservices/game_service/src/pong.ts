@@ -97,7 +97,7 @@ class PongRuntime {
   private ball : Ball = { speed: {x: -200, y: 0}, coords: {x: WINDOW_SIZE.x/2, y: WINDOW_SIZE.y/2}};
   private Lpaddle : Paddle = { y: (WINDOW_SIZE.y - PADDLE_H)/2, h: PADDLE_H, d: 0 };
   private Rpaddle : Paddle = { y: (WINDOW_SIZE.y - PADDLE_H)/2, h: PADDLE_H, d: 0 };
-  private whoLost : string = "none";
+  public whoLost : string = "none";
   private scoreL : number = 0;
   private scoreR : number = 0;
   private LGaveUp : boolean = false;
@@ -210,6 +210,26 @@ class PongRuntime {
   };
 
   public mainLoop = async () => {
+    if (this.LplayerId === "failed" && this.RplayerId === "failed") {
+      this.whoLost = "both";
+      this.pongStarted = true;
+      this.pongDone = true;
+      return ;
+    }
+    if (this.LplayerId === "failed") {
+      this.whoLost = "left skip";
+      addMatch(playersMap.get(this.RplayerId), this.LplayerId, this.RplayerId, this.scoreL, this.scoreR, "R", this.gameType, "absence");
+      this.pongStarted = true;
+      this.pongDone = true;
+      return ;
+    }
+    if (this.RplayerId === "failed") {
+      this.whoLost = "right skip";
+      addMatch(playersMap.get(this.LplayerId), this.LplayerId, this.RplayerId, this.scoreL, this.scoreR, "L", this.gameType, "absence");
+      this.pongStarted = true;
+      this.pongDone = true;
+      return ;
+    }
     if (this.gameType === "tournament") {
       const startDate = Date.now();
       while (Date.now() - startDate < TOURNAMENT_READY_TIMEOUT) {
@@ -220,18 +240,23 @@ class PongRuntime {
       }
     }
     if (this.leftReady && !this.rightReady) {
-      this.whoLost = "right";
+      this.whoLost = "right fully";
       addMatch(playersMap.get(this.LplayerId), this.LplayerId, this.RplayerId, this.scoreL, this.scoreR, "L", this.gameType, "technical");
+      this.pongStarted = true;
+      this.pongDone = true;
       return ;
     }
     else if (!this.leftReady && this.rightReady) {
-      this.whoLost = "left";
+      this.whoLost = "left fully";
       addMatch(playersMap.get(this.LplayerId), this.LplayerId, this.RplayerId, this.scoreL, this.scoreR, "R", this.gameType, "technical");
+      this.pongStarted = true;
+      this.pongDone = true;
       return ;
     }
     else if (!this.leftReady && !this.rightReady) {
       this.whoLost = "both";
-      // no history? nah
+      this.pongStarted = true;
+      this.pongDone = true;
       return ;
     }
 
@@ -376,10 +401,10 @@ export function addPlayerCompletely(playerId: string, sock: WebSocket) {
 
 export function createTournamentGame(lId: string, rId: string) {
   if (playersMap.has(lId)) {
-    throw "Player already in " + playersMap.get(lId);
+    throw "L Player already in " + playersMap.get(lId);
   }
   if (playersMap.has(rId)) {
-    throw "Player already in " + playersMap.get(rId);
+    throw "R Player already in " + playersMap.get(rId);
   }
   const newid : string = makeid(32);
   gamesMap.set(newid, new PongRuntime);

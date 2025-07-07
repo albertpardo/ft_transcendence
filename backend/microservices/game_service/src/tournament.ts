@@ -80,7 +80,18 @@ class Tournament {
     for (let i : number = 0; i < Math.pow(2, this.currentStage - 1); i++) {
       let lId = this.Ids[this.currentStage - 1][2 * i];
       let rId = this.Ids[this.currentStage - 1][2 * i + 1];
-      this.gameIds[this.currentStage - 1][i] = createTournamentGame(lId, rId);
+      try {
+        this.gameIds[this.currentStage - 1][i] = createTournamentGame(lId, rId);
+      }
+      catch (e) {
+        this.gameIds[this.currentStage - 1][i] = "";
+        if (e[0] === 'L') {
+          this.Ids[this.currentStage - 1][2 * i] = "failed";
+        }
+        else {
+          this.Ids[this.currentStage - 1][2 * i + 1] = "failed";
+        }
+      }
     }
   }
 
@@ -97,8 +108,38 @@ class Tournament {
           return false;
         }
       }
+      // and if not? assume stopped?
     }
     return true;
+  }
+
+  private newStageFiller() {
+    // we're in the next stage already, which has been -1'd. To go back one, we +1. - 1 + 1 = 0.
+    let i : number = 0;
+    for (var gameId of this.gameIds[currentStage]) {
+      if (gamesMap.has(gameId)) {
+        if (gamesMap.get(gameId).whoLost === "left fully" || gamesMap.get(gameId).whoLost === "left skip") {
+          this.Ids[currentStage - 1][i] = gamesMap.get(gameId).RplayerId;
+        }
+        else if (gamesMap.get(gameId).whoLost === "right fully" || gamesMap.get(gameId).whoLost === "right skip") {
+          this.Ids[currentStage - 1][i] = gamesMap.get(gameId).LplayerId;
+        }
+        else {
+          this.Ids[currentStage - 1][i] = "failed";
+        }
+      }
+      else {
+        // in case we had a player already in a different game by that point,...
+        // this is so rare and bad that no history will be considered, idk idc.
+        if (this.Ids[currentStage][i * 2] === "failed") {
+          this.Ids[currentStage - 1][i] = this.Ids[currentStage][i * 2 + 1];
+        }
+        else if (this.Ids[currentStage][i * 2 + 1] === "failed") {
+          this.Ids[currentStage - 1][i] = this.Ids[currentStage][i * 2];
+        }
+      }
+      i++;
+    }
   }
 
   // loop checking for players in ts
@@ -145,12 +186,13 @@ class Tournament {
         await sleep(5e3);
       }
       console.log("tour: after stopped");
-      // TODO add the moving people on phase here
       this.currentStage -= 1;
       if (this.currentStage <= 0) {
         console.log("tour: bye");
         break ;
       }
+      // TODO add the moving people on phase here
+      this.newStageFiller();
     }
   }
 

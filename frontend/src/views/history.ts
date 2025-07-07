@@ -69,6 +69,9 @@ export async function renderHistoryContent(hideableElements) {
         if (entry.finish === "forefit") {
           res = "Win (enemy forefit)";
         }
+        else if (entry.finish === "absence" || entry.finish === "technical") {
+          res = "Win (enemy absence)";
+        }
         else {
           res = "Win";
         }
@@ -76,19 +79,27 @@ export async function renderHistoryContent(hideableElements) {
       else {
         if (entry.finish === "forefit") {
           res = "Loss (forefit)";
+        }
+        else if (entry.finish === "technical") {
+          res = "Loss (didn't show up)";
         }
         else {
           res = "Loss";
         }
       }
       side = "Left";
-      let respNn = await getNicknameForPlayerId(idR);
-      nicnknameVs = JSON.parse(await respNn.text())?.nickname;
+      if (entry.finish !== "absence") {
+        let respNn = await getNicknameForPlayerId(idL);
+        nicnknameVs = JSON.parse(await respNn.text())?.nickname;
+      }
     }
     else {
       if (entry.winner === "R") {
         if (entry.finish === "forefit") {
           res = "Win (enemy forefit)";
+        }
+        else if (entry.finish === "absence" || entry.finish === "technical") {
+          res = "Win (enemy absence)";
         }
         else {
           res = "Win";
@@ -98,13 +109,18 @@ export async function renderHistoryContent(hideableElements) {
         if (entry.finish === "forefit") {
           res = "Loss (forefit)";
         }
+        else if (entry.finish === "technical") {
+          res = "Loss (didn't show up)";
+        }
         else {
           res = "Loss";
         }
       }
       side = "Right";
-      let respNn = await getNicknameForPlayerId(idL);
-      nicnknameVs = JSON.parse(await respNn.text())?.nickname;
+      if (entry.finish !== "absence") {
+        let respNn = await getNicknameForPlayerId(idL);
+        nicnknameVs = JSON.parse(await respNn.text())?.nickname;
+      }
     }
     const thisdate = new Date(entry.date);
     tempInnerHTML += `<tr>
