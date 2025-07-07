@@ -73,39 +73,55 @@ export default fp(async function (fastify: FastifyInstance): Promise<void> {
     }); */
 
     fastify.post('/api/signup', async (req, reply) => {
-  const res = await fetch(`${userManagementUrl}/api/user/signup`, {
-    method: 'POST',
-    headers: {
-      'content-type': 'application/json',
-    },
-    body: JSON.stringify(req.body),
-  });
+  try {
+    const res = await fetch(`${userManagementUrl}/api/user/signup`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify(req.body),
+    });
 
-  const encoding = res.headers.get('content-encoding');
-  const buf = await res.arrayBuffer();
-  let raw: string;
+    const encoding = res.headers.get('content-encoding');
+    const buf = await res.arrayBuffer();
+    let rawBuf = Buffer.from(buf);
 
-  if (encoding === 'br') {
-    raw = brotliDecompressSync(Buffer.from(buf)).toString('utf-8');
-  } else if (encoding === 'gzip') {
-    raw = gunzipSync(Buffer.from(buf)).toString('utf-8');
-  } else {
-    raw = Buffer.from(buf).toString('utf-8');
+    try {
+      if (encoding === 'br') {
+        console.log('🧊 Brotli decompressing signup response...');
+        rawBuf = brotliDecompressSync(rawBuf);
+      } else if (encoding === 'gzip') {
+        console.log('🔄 Gzip decompressing signup response...');
+        rawBuf = gunzipSync(rawBuf);
+      } else {
+        console.log('📦 No compression detected or decoding not needed.');
+      }
+    } catch (err) {
+      console.warn('⚠️ Failed to decompress:', err);
+      // fallback to rawBuf
+    }
+
+    const raw = rawBuf.toString('utf-8');
+    const json = JSON.parse(raw);
+
+    const token = fastify.jwt.sign({ userId: json.id });
+
+    reply
+      .setCookie('authToken', token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none',
+        path: '/',
+      })
+      .type('application/json')
+      .send({ ...json, token });
+
+  } catch (err) {
+    console.error('❌ Signup handler crashed:', err);
+    reply.code(500).send({ error: 'Internal Server Error during signup' });
   }
-
-  const json = JSON.parse(raw);
-  const token = fastify.jwt.sign({ userId: json.id });
-
-  reply
-    .setCookie('authToken', token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'none',
-      path: '/',
-    })
-    .type('application/json')
-    .send({ ...json, token });
 });
+
 
     fastify.register(fastifyHttpProxy, {
         upstream: userManagementUrl,
