@@ -65,12 +65,47 @@ export default fp(async function (fastify: FastifyInstance): Promise<void> {
         http2: false,
     });
 
-    fastify.register(fastifyHttpProxy, {
+    /* fastify.register(fastifyHttpProxy, {
         upstream: userManagementUrl,
         prefix: '/api/signup',
         rewritePrefix: '/api/user/signup',
         http2: false
-    });
+    }); */
+
+    fastify.post('/api/signup', async (req, reply) => {
+  const res = await fetch(`${userManagementUrl}/api/user/signup`, {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify(req.body),
+  });
+
+  const encoding = res.headers.get('content-encoding');
+  const buf = await res.arrayBuffer();
+  let raw: string;
+
+  if (encoding === 'br') {
+    raw = brotliDecompressSync(Buffer.from(buf)).toString('utf-8');
+  } else if (encoding === 'gzip') {
+    raw = gunzipSync(Buffer.from(buf)).toString('utf-8');
+  } else {
+    raw = Buffer.from(buf).toString('utf-8');
+  }
+
+  const json = JSON.parse(raw);
+  const token = fastify.jwt.sign({ userId: json.id });
+
+  reply
+    .setCookie('authToken', token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+      path: '/',
+    })
+    .type('application/json')
+    .send({ ...json, token });
+});
 
     fastify.register(fastifyHttpProxy, {
         upstream: userManagementUrl,
