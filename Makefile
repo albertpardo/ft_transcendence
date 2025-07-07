@@ -1,4 +1,22 @@
-all:
+# Load vars from .env
+ifneq ("$(wildcard .env)","")
+    ELK_FOLDER := $(shell grep '^ELK_FOLDER=' .env | cut -d '=' -f 2)
+    LOGS_ELASTIC_FOLDER := $(shell grep '^LOGS_ELASTIC_FOLDER=' .env | cut -d '=' -f 2)
+    BACKUP_ELASTIC_LOGS := $(shell grep '^BACKUP_ELASTIC_LOGS=' .env | cut -d '=' -f 2)
+endif
+
+# Check loaded vars from .env
+ifeq ($(LOGS_ELASTIC_FOLDER),)
+    $(error "LOGS_ELASTIC_FOLDER no defined. Check LOGS_ELASTIC_FOLDER  in .env .")
+endif
+ifeq ($(BACKUP_ELASTIC_LOGS),)
+    $(error "BACKUP_ELASTIC_LOGSno defined. Check BACKUP_ELASTIC_LOGS in .env.")
+endif
+ifeq ($(BACKUP_ELASTIC_LOGS),)
+    $(error "BACKUP_ELASTIC_LOGS no defined. Check BACKUP_ELASTIC_LOGS  in .env .")
+endif
+
+all: create_folders
 	@echo > /dev/null
 	docker compose -f docker-compose.yml up --build
 #	docker compose -f docker-compose.yml up -d --build
@@ -8,8 +26,27 @@ all:
 	@echo "Access to user API(back) at: https://127.0.0.1:8443/api"
 	@echo "Access to profile view(front) at: http://127.0.0.1:3000"
 
+create_folders:
+	@for dir in "$(LOGS_ELASTIC_FOLDER)" "$(BACKUP_ELASTIC_LOGS)"; do \
+		if [ ! -d "$$dir" ]; then \
+			mkdir -p "$$dir"; \
+			chmod 777 "$$dir"; \
+			echo "La carpeta '$$dir' ha sido creada."; \
+		else \
+			echo "La carpeta '$$dir' ya existe."; \
+		fi \
+	done
+
 down:
 	docker compose -f docker-compose.yml down
+
+# Docker down deleting docker volumes
+downvol:
+	docker compose -f docker-compose.yml down -v
+
+# Delete ELK folder (and subfolders) used for logs and backups
+cleanfolders:
+	@rm -rf $(ELK_FOLDER)
 
 status:
 	@echo "\n▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉ CONTAINERS STATUS ▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉\n"
@@ -21,7 +58,7 @@ status:
 	@echo "\n▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉ NETWORK STATUS ▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉\n"
 	@docker network ls
 
-clean:
+clean: cleanfolders
 	@if [ -n "$$(docker ps -qa)" ]; then docker stop $$(docker ps -qa); fi
 	@if [ -n "$$(docker ps -qa)" ]; then docker rm $$(docker ps -qa); fi
 	@if [ -n "$$(docker images -qa)" ]; then docker rmi -f $$(docker images -qa); fi
@@ -42,4 +79,4 @@ fresh:
 	$(MAKE) all
 	@echo "\n All dockers successfully starting up! \n"
 
-.PHONY: all down clean fclean status re fresh
+.PHONY: all create_folders down downvol clean fclean status re fresh

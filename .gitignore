@@ -156,3 +156,6 @@ git-script.sh
 *package-lock.json
 package-lock.json
 */package-lock.json
+
+# elk
+/backend/elk/certs
