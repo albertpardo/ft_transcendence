@@ -188,6 +188,7 @@ class Tournament {
       this.gameCreator();
       while (!this.matchesStopped()) {
         // TODO prolly this dude needs to get the info of the finished games and distribute the people, actually. idk
+        console.log("waiting...");
         await sleep(5e3);
       }
       console.log("tour: after stopped");
@@ -249,7 +250,7 @@ export function checkParticipating(uuid: string) {
   throw "You don't participate in a tournament";
 }
 
-export function addTournament(tName: string, playersN: number, privacy: boolean, uuid: string) {
+export function addTournament(tName: string, playersN: number, privacy: boolean, uuid: string, sock: WebSocket) {
   if (playersParticipatingTourn.has(uuid)) {
     const tId = playersParticipatingTourn.get(uuid);
     if (typeof tId === "undefined") {
@@ -266,10 +267,15 @@ export function addTournament(tName: string, playersN: number, privacy: boolean,
   tourtoadd.mainLoop();
   tournamentMap.set(touridtoadd, tourtoadd);
   playersParticipatingTourn.set(uuid, touridtoadd);
+  if (!socksMap.has(uuid)) {
+    socksMap.set(uuid, sock);
+  }
+  console.log(uuid, "just created a tournament", touridtoadd);
   return (tourtoadd.tId);
 }
 
 export function joinTournament(tId: string, uuid: string, sock: WebSocket) {
+  console.log("joining tourn", tId, "as a", uuid);
   if (playersParticipatingTourn.has(uuid)) {
     throw "Player already participates in " + playersParticipatingTourn.get(uuid);
   }
@@ -371,7 +377,7 @@ export function confirmParticipation(uuid: string) {
     throw "undefined tId";
   }
   if (!tournamentMap.has(tId)) {
-    throw "tournamenMap has no " + tId;
+    throw "tournamentMap has no " + tId;
   }
   let tourn = tournamentMap.get(tId);
   if (typeof tourn === "undefined") {

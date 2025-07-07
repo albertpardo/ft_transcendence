@@ -232,10 +232,12 @@ class PongRuntime {
     }
     if (this.gameType === "tournament") {
       const startDate = Date.now();
+      console.log("st date:", startDate);
       while (Date.now() - startDate < TOURNAMENT_READY_TIMEOUT) {
         if (this.leftReady && this.rightReady) {
           break ;
         }
+        console.log("time passed:", Date.now() - startDate);
         await sleep(1e3);
       }
       if (this.leftReady && !this.rightReady) {
@@ -258,6 +260,9 @@ class PongRuntime {
         this.pongDone = true;
         return ;
       }
+    }
+    else {
+      console.log("everything seems normal.");
     }
 
     // now that the tournament-specific fail condition check is done, begin the cycle.
@@ -344,14 +349,12 @@ const nullState : State = {
 // this way, we'll always have to wait for a confirmation signal from the game runtime itself that the game is ready to start.
 //
 export function addPlayerCompletely(playerId: string, sock: WebSocket) {
-  console.log("yo! adding", playerId, "with an epic", sock);
   if (playersMap.has(playerId)) {
 //    console.log("oh no! player id", playerId, "already in!");
     if (socksMap.has(playerId) === false) {
       socksMap.set(playerId, sock);
 //      console.log("...however, they were most likely disconnected. re-connected now!");
       const currentRT : PongRuntime = gamesMap.get(playersMap.get(playerId));
-      console.log("for", playerId, "(reconn), the epic current rt was", currentRT);
       if (playerId === currentRT.LplayerId) {
         sock.send("added: L");
       }
@@ -376,14 +379,12 @@ export function addPlayerCompletely(playerId: string, sock: WebSocket) {
         continue ;
       }
       if (gameRuntime.LplayerId === "") {
-        console.log("found a game for", playerId, "!! it's", gameRuntime);
         gameRuntime.LplayerId = playerId;
         playersMap.set(playerId, gameId);
         sock.send("added: L");
         return gameRuntime.gameType;
       }
       else if (gameRuntime.RplayerId === "") {
-        console.log("found a game for", playerId, "!! it's", gameRuntime);
         gameRuntime.RplayerId = playerId;
         playersMap.set(playerId, gameId);
         sock.send("added: R");
@@ -414,11 +415,13 @@ export function createTournamentGame(lId: string, rId: string) {
   gamesMap.set(newid, new PongRuntime);
   gamesMap.get(newid).LplayerId = lId;
   gamesMap.get(newid).RplayerId = rId;
+  gamesMap.get(newid).gameType = "tournament";
   playersMap.set(lId, newid);
   playersMap.set(rId, newid);
-  console.log("socksMap from CTG from pong.ts:", socksMap);
   socksMap.get(lId).send("added: L");
   socksMap.get(rId).send("added: R");
+  needToSendStartedMap.set(lId, true);
+  needToSendStartedMap.set(rId, true);
   return (newid);
 }
 
@@ -453,32 +456,23 @@ function sendOnAbandon(lp: string, rp: string) {
 }
 
 export function forefit(playerId: string) {
-  console.log(playerId, "has asked to forefit.");
   if (playersMap.has(playerId)) {
-    console.log("they are in the playersmap");
     const gameId = playersMap.get(playerId);
     if (gamesMap.has(gameId)) {
-      console.log("they are in a game");
       if (gamesMap.get(gameId).pongStarted === false) {
-        console.log("the game hasn't started yet, so just remove them and the other player too and the game as well");
         const lpid = gamesMap.get(gameId).LplayerId;
         const rpid = gamesMap.get(gameId).RplayerId;
         sendOnAbandon(lpid, rpid);
         playersMap.delete(lpid);
         playersMap.delete(rpid);
         gamesMap.delete(gameId);
-        console.log("done. returning");
         return ;
       }
-      console.log("the game was already started, so making them lose");
       gamesMap.get(gameId).forefit(playerId);
-      console.log("giveup flag set");
       return ;
     }
-    console.log("the gameid wasn't in the gamesmap");
     return ;
   }
-  console.log("the playersmap didn't have the player");
 }
 
 export function moveMyPaddle(playerId: string, d: number) {

@@ -240,6 +240,16 @@ export async function initDashboard() {
         console.error(regPlRespObj.err);
       }
     });
+    document.getElementById('ready-button')!.addEventListener('click', async () => {
+      console.log("after clicking the ready-button,");
+      const readyPlRawResp = await confirmParticipation();
+      const readyPlResp = await readyPlRawResp.text();
+      const readyPlRespObj = JSON.parse(readyPlResp);
+      console.log(readyPlRespObj.gType);
+      if (readyPlRespObj.err !== "nil") {
+        console.error(readyPlRespObj.err);
+      }
+    });
     document.getElementById('giveup-button')!.addEventListener('click', async () => {
       console.log("after clicking the giveup-button,");
       const forefitRawResp = await forefit();
