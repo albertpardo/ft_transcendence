@@ -161,14 +161,19 @@ export function renderLogin(appElement: HTMLElement) {
 
 //	const intermediate0 = await response.text();
 //	console.log(intermediate0);
-         let data;
-        try {
+        const contentType = response.headers.get("Content-Type") || "";
+        if (!contentType.includes("application/json")) {
+          const fallback = await response.text(); // .text() is safe now
+          console.error("Received unexpected content type:", contentType);
+          throw new Error(`Expected JSON, got: ${contentType}, body: ${fallback}`);
+        }
+        let data = await response.json();
+        /* try {
           data = await response.json();
         } catch (jsonError) {
-          const text = await response.text();
-          console.log('Login response text (not json):', text);
+          console.error('Error parsing JSON response:', jsonError);
           throw new Error('Invalid JSON response');
-        }
+        } */
         console.log('**********Login response data:', data);
 
         if (!response.ok || data.error) {
@@ -181,10 +186,9 @@ export function renderLogin(appElement: HTMLElement) {
             username: data.user?.username || username,
             nickname: data.user?.nickname || username,
             avatar: data.user?.avatar || `https://i.pravatar.cc/150?u=${username}`
-          }));
-          window.location.hash = 'home';
-    
-        
+        }));
+        window.location.hash = 'home';
+
       } catch (error) {
         console.error('**********Login error caught:', error);
         errorElement.textContent = error instanceof Error ? error.message : 'Login failed';
@@ -238,7 +242,7 @@ export function renderLogin(appElement: HTMLElement) {
               
              // 'Origin': 'https://127.0.0.1:3000/',
             },
-            body: JSON.stringify({ nickname: nickname, username: username, email: email , password: password }),
+            body: JSON.stringify({ nickname: nickname, username: username, email: email , password: password }), 
             credentials: 'include',
             mode: 'cors',
         });
