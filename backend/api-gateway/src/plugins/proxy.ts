@@ -8,7 +8,7 @@ import { Readable } from 'stream';
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { Buffer } from 'buffer';
 
-const userManagementUrl = process.env.USER_MANAGEMENT_URL;
+const userManagementUrl = process.env.USER_MANAGEMENT_URL || 'http://user-management:9001';
 console.log('🚀 USER_MANAGEMENT_URL:', userManagementUrl);
 if (!userManagementUrl) {
     throw new Error('USER_MANAGEMENT_URL environment variable is not set');
