@@ -15,10 +15,22 @@ delete require.cache[require.resolve('./middlewares/auth')];
 const { rateLimitPlugin } = require('./plugins/rateLimit');
 const exampleRoutes = require('./routes/example');
 
+import { getLogTransportConfig } from './pino_utils/logTransportConfig';
+
+/*
 const server = Fastify ({
     logger: true,
     https: tlsConfig,
 })
+*/
+
+const server = Fastify ({
+    logger: {
+      transport: getLogTransportConfig()
+    },
+    https: tlsConfig,
+})
+
 
 //register plugins
 async function registerPlugin() {
