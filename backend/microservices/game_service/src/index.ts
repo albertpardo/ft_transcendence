@@ -37,8 +37,10 @@ const startServer = async () => {
   // Registra un plugin para prefijar las rutas API con '/api'
   const apiRoutes = async (fastify) => {
     fastify.get('/pong/game-ws', { websocket: true }, async (sock, req) => {
+      console.log("hit on game-ws by this:", req.url);
       const usp2 = new URLSearchParams(req.url);
       let playerId : string = usp2.get("/api/pong/game-ws?uuid") as string;
+      console.log("plid:", playerId);
       upperSocksMap.set(playerId, sock);
       sock.on('message', message => {
         sock.send("connected");
@@ -57,8 +59,11 @@ const startServer = async () => {
     });
     fastify.post('/pong/game/add', async (req, reply) => {
       let playerId : string = req.headers['x-user-id'] as string;
+      console.log("hit on game/add");
+      console.log("plid:", playerId);
       let sock : WebSocket;
       if (typeof playerId !== "undefined" && playerId !== "") {
+        console.log("first if entered");
         if (upperSocksMap.has(playerId) === false) {
           console.error("no associated socket found. this must never happen, i think.");
           return JSON.stringify({
@@ -69,12 +74,14 @@ const startServer = async () => {
         sock = upperSocksMap.get(playerId) as WebSocket;
         try {
           const gtype = addPlayerCompletely(playerId, sock);
+          console.log("try block passed");
           return JSON.stringify({
             gType: gtype,
             err: "nil",
           });
         }
         catch (e) {
+          console.log("caught!", e);
           if (e instanceof JoinError) {
             return JSON.stringify({
               gType: e.gType,
@@ -89,6 +96,7 @@ const startServer = async () => {
           }
         }
       }
+      console.log("after first if...");
       return JSON.stringify({
         gType: "",
         err: "undefined or empty playerId -- failed to verify?",
@@ -100,10 +108,17 @@ const startServer = async () => {
       let mov = jsonMsg.mov;
       if (typeof playerId !== "undefined" && playerId !== "") {
         if (typeof mov !== "undefined") {
-          moveMyPaddle(playerId, mov);
-          return JSON.stringify({
-            err: "nil",
-          });
+          try {
+            moveMyPaddle(playerId, mov);
+            return JSON.stringify({
+              err: "nil",
+            });
+          }
+          catch (e) {
+            return JSON.stringify({
+              err: e,
+            });
+          }
         }
         return JSON.stringify({
           err: "undefined mov",

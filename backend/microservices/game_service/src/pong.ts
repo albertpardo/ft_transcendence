@@ -238,26 +238,26 @@ class PongRuntime {
         }
         await sleep(1e3);
       }
-    }
-    if (this.leftReady && !this.rightReady) {
-      this.whoLost = "right fully";
-      addMatch(playersMap.get(this.LplayerId), this.LplayerId, this.RplayerId, this.scoreL, this.scoreR, "L", this.gameType, "technical");
-      this.pongStarted = true;
-      this.pongDone = true;
-      return ;
-    }
-    else if (!this.leftReady && this.rightReady) {
-      this.whoLost = "left fully";
-      addMatch(playersMap.get(this.LplayerId), this.LplayerId, this.RplayerId, this.scoreL, this.scoreR, "R", this.gameType, "technical");
-      this.pongStarted = true;
-      this.pongDone = true;
-      return ;
-    }
-    else if (!this.leftReady && !this.rightReady) {
-      this.whoLost = "both";
-      this.pongStarted = true;
-      this.pongDone = true;
-      return ;
+      if (this.leftReady && !this.rightReady) {
+        this.whoLost = "right fully";
+        addMatch(playersMap.get(this.LplayerId), this.LplayerId, this.RplayerId, this.scoreL, this.scoreR, "L", this.gameType, "technical");
+        this.pongStarted = true;
+        this.pongDone = true;
+        return ;
+      }
+      else if (!this.leftReady && this.rightReady) {
+        this.whoLost = "left fully";
+        addMatch(playersMap.get(this.LplayerId), this.LplayerId, this.RplayerId, this.scoreL, this.scoreR, "R", this.gameType, "technical");
+        this.pongStarted = true;
+        this.pongDone = true;
+        return ;
+      }
+      else if (!this.leftReady && !this.rightReady) {
+        this.whoLost = "both";
+        this.pongStarted = true;
+        this.pongDone = true;
+        return ;
+      }
     }
 
     // now that the tournament-specific fail condition check is done, begin the cycle.
@@ -344,12 +344,14 @@ const nullState : State = {
 // this way, we'll always have to wait for a confirmation signal from the game runtime itself that the game is ready to start.
 //
 export function addPlayerCompletely(playerId: string, sock: WebSocket) {
+  console.log("yo! adding", playerId, "with an epic", sock);
   if (playersMap.has(playerId)) {
 //    console.log("oh no! player id", playerId, "already in!");
     if (socksMap.has(playerId) === false) {
       socksMap.set(playerId, sock);
 //      console.log("...however, they were most likely disconnected. re-connected now!");
       const currentRT : PongRuntime = gamesMap.get(playersMap.get(playerId));
+      console.log("for", playerId, "(reconn), the epic current rt was", currentRT);
       if (playerId === currentRT.LplayerId) {
         sock.send("added: L");
       }
@@ -374,12 +376,14 @@ export function addPlayerCompletely(playerId: string, sock: WebSocket) {
         continue ;
       }
       if (gameRuntime.LplayerId === "") {
+        console.log("found a game for", playerId, "!! it's", gameRuntime);
         gameRuntime.LplayerId = playerId;
         playersMap.set(playerId, gameId);
         sock.send("added: L");
         return gameRuntime.gameType;
       }
       else if (gameRuntime.RplayerId === "") {
+        console.log("found a game for", playerId, "!! it's", gameRuntime);
         gameRuntime.RplayerId = playerId;
         playersMap.set(playerId, gameId);
         sock.send("added: R");
@@ -412,6 +416,7 @@ export function createTournamentGame(lId: string, rId: string) {
   gamesMap.get(newid).RplayerId = rId;
   playersMap.set(lId, newid);
   playersMap.set(rId, newid);
+  console.log("socksMap from CTG from pong.ts:", socksMap);
   socksMap.get(lId).send("added: L");
   socksMap.get(rId).send("added: R");
   return (newid);
@@ -485,6 +490,7 @@ export function moveMyPaddle(playerId: string, d: number) {
       } else {
         gamesMap.get(gameId).RpadMove(d);
       }
+      return ;
     }
     throw "Game not in map";
   }
@@ -499,6 +505,7 @@ export const gamesReadyLoopCheck = async () => {
         && needToSendStartedMap.get(gameRuntime.LplayerId) === true
         && needToSendStartedMap.get(gameRuntime.RplayerId) === true) {
           if (gameRuntime.gameType === "normal") {
+            console.log("I'm so normal.");
             gameRuntime.mainLoop();
 //            console.log("one game started: " + gameId + ", with left: " + gameRuntime.LplayerId + " and right: " + gameRuntime.RplayerId);
 //            console.log("sending the appropriate message to both clientis via ws");
@@ -509,6 +516,7 @@ export const gamesReadyLoopCheck = async () => {
             dataStreamer(gameRuntime.RplayerId);
           }
           else {
+            console.log("I'm so not normal!");
             gameRuntime.mainLoop();
 //            console.log("one game started: " + gameId + ", with left: " + gameRuntime.LplayerId + " and right: " + gameRuntime.RplayerId);
 //            console.log("sending the appropriate message to both clientis via ws");
@@ -536,10 +544,12 @@ const waitingForReconnect = async (playerId) => {
 //  console.log("sock was finally detected for", playerId);
 }
 
-export const dataStreamer = async (playerId) => {
+export const dataStreamer = async (playerId : string) => {
   let sock : WebSocket = socksMap.get(playerId);
   const runtime : PongRuntime = gamesMap.get(playersMap.get(playerId));
+  console.log("from", playerId + "'s datastreamer, before the while, runtime:", runtime);
   while (true) {
+    console.log("from", playerId + "'s datastreamer, in the while, runtime:", runtime);
     if (socksMap.has(playerId) === false) {
 //      console.log("player", playerId, "has currently no socks available.");
       await waitingForReconnect(playerId);
@@ -558,6 +568,7 @@ export const dataStreamer = async (playerId) => {
       if (runtime.LplayerId === playerId) {
         // only delete the game id if the datastreamer is from the left to avoid double delete
         // XXX TODO leaks?
+        // XXX mutex alert.
 //        delete gamesMap.get(playersMap.get(playerId));
         gamesMap.delete(playersMap.get(playerId));
       }
