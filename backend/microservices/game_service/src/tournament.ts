@@ -1,4 +1,4 @@
-import { gamesMap, playersMap, socksMap, sleep, makeid } from './pong';
+import { gamesMap, playersMap, socksMap, sleep, makeid, createTournamentGame } from './pong';
 
 export let playersParticipatingTourn = new Map<string, string>();
 
@@ -84,12 +84,17 @@ class Tournament {
         this.gameIds[this.currentStage - 1][i] = createTournamentGame(lId, rId);
       }
       catch (e) {
-        this.gameIds[this.currentStage - 1][i] = "";
-        if (e[0] === 'L') {
-          this.Ids[this.currentStage - 1][2 * i] = "failed";
+        if (typeof e === "string") {
+          this.gameIds[this.currentStage - 1][i] = "";
+          if (e[0] === 'L') {
+            this.Ids[this.currentStage - 1][2 * i] = "failed";
+          }
+          else {
+            this.Ids[this.currentStage - 1][2 * i + 1] = "failed";
+          }
         }
         else {
-          this.Ids[this.currentStage - 1][2 * i + 1] = "failed";
+          console.error(e);
         }
       }
     }
@@ -102,7 +107,7 @@ class Tournament {
     // TODO FIXME depending on the current stage, make a different sized array.
     // TODO don't forget about "failed" (also see above)
     // (which SHOULD be the same anyway but it's better from the data management model point of view)
-    for (var gameId of this.gameIds[currentStage - 1]) {
+    for (var gameId of this.gameIds[this.currentStage - 1]) {
       if (gamesMap.has(gameId)) {
         if (!gamesMap.get(gameId).pongDone) {
           return false;
@@ -116,26 +121,26 @@ class Tournament {
   private newStageFiller() {
     // we're in the next stage already, which has been -1'd. To go back one, we +1. - 1 + 1 = 0.
     let i : number = 0;
-    for (var gameId of this.gameIds[currentStage]) {
+    for (var gameId of this.gameIds[this.currentStage]) {
       if (gamesMap.has(gameId)) {
         if (gamesMap.get(gameId).whoLost === "left fully" || gamesMap.get(gameId).whoLost === "left skip") {
-          this.Ids[currentStage - 1][i] = gamesMap.get(gameId).RplayerId;
+          this.Ids[this.currentStage - 1][i] = gamesMap.get(gameId).RplayerId;
         }
         else if (gamesMap.get(gameId).whoLost === "right fully" || gamesMap.get(gameId).whoLost === "right skip") {
-          this.Ids[currentStage - 1][i] = gamesMap.get(gameId).LplayerId;
+          this.Ids[this.currentStage - 1][i] = gamesMap.get(gameId).LplayerId;
         }
         else {
-          this.Ids[currentStage - 1][i] = "failed";
+          this.Ids[this.currentStage - 1][i] = "failed";
         }
       }
       else {
         // in case we had a player already in a different game by that point,...
         // this is so rare and bad that no history will be considered, idk idc.
-        if (this.Ids[currentStage][i * 2] === "failed") {
-          this.Ids[currentStage - 1][i] = this.Ids[currentStage][i * 2 + 1];
+        if (this.Ids[this.currentStage][i * 2] === "failed") {
+          this.Ids[this.currentStage - 1][i] = this.Ids[this.currentStage][i * 2 + 1];
         }
-        else if (this.Ids[currentStage][i * 2 + 1] === "failed") {
-          this.Ids[currentStage - 1][i] = this.Ids[currentStage][i * 2];
+        else if (this.Ids[this.currentStage][i * 2 + 1] === "failed") {
+          this.Ids[this.currentStage - 1][i] = this.Ids[this.currentStage][i * 2];
         }
       }
       i++;

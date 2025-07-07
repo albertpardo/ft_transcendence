@@ -179,7 +179,7 @@ const startServer = async () => {
     });
     fastify.post('/pong/tour/enroll', async (req: FastifyRequest<{ Body: {tId: string} }>, reply) => {
       try {
-        const uuid = req?.headers['x-user-id'];
+        const uuid = req?.headers['x-user-id'] as string;
         if (typeof uuid === "undefined") {
           throw "undefined uuid";
         }
