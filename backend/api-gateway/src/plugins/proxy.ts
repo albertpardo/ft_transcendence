@@ -238,9 +238,10 @@ export default fp(async function (fastify: FastifyInstance): Promise<void> {
                   }
 
                   const token = fastify.jwt.sign({ userId: body.id });
-                  reply.type('application/json'); 
                   console.log('🔑 Token generated:', token);
-                  reply.setCookie('authToken', token, {
+                  reply
+                    .type('application/json')
+                    .setCookie('authToken', token, {
                       path: '/',
                       httpOnly: true,
                       secure: true,

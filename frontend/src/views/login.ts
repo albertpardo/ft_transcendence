@@ -161,13 +161,19 @@ export function renderLogin(appElement: HTMLElement) {
 
 //	const intermediate0 = await response.text();
 //	console.log(intermediate0);
-        let data;
-        try {
+        const contentType = response.headers.get("Content-Type") || "";
+        if (!contentType.includes("application/json")) {
+          const fallback = await response.text(); // .text() is safe now
+          console.error("Received unexpected content type:", contentType);
+          throw new Error(`Expected JSON, got: ${contentType}, body: ${fallback}`);
+        }
+        let data = await response.json();
+        /* try {
           data = await response.json();
         } catch (jsonError) {
           console.error('Error parsing JSON response:', jsonError);
           throw new Error('Invalid JSON response');
-        }
+        } */
         console.log('**********Login response data:', data);
 
         if (!response.ok || data.error) {
