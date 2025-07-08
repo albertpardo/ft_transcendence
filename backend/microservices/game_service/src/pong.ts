@@ -357,6 +357,9 @@ export function addPlayerCompletely(playerId: string, sock: WebSocket) {
     if (socksMap.has(playerId) === false) {
       socksMap.set(playerId, sock);
 //      console.log("...however, they were most likely disconnected. re-connected now!");
+      if (!gamesMap.has(playersMap.get(playerId))) {
+        throw "no game found for a located gameid";
+      }
       const currentRT : PongRuntime = gamesMap.get(playersMap.get(playerId));
       if (playerId === currentRT.LplayerId) {
         sock.send("added: L");
@@ -364,6 +367,9 @@ export function addPlayerCompletely(playerId: string, sock: WebSocket) {
       else {
         sock.send("added: R");
       }
+    }
+    if (!gamesMap.has(playersMap.get(playerId))) {
+      throw "no game found for a located gameid";
     }
     const gType = gamesMap.get(playersMap.get(playerId)).gameType;
     throw new JoinError({
@@ -553,6 +559,14 @@ export const dataStreamer = async (playerId : string) => {
   let sock : WebSocket = socksMap.get(playerId);
   const runtime : PongRuntime = gamesMap.get(playersMap.get(playerId));
   while (true) {
+    if (!playersMap.has(playerId)) {
+      console.log("player", playerId, "has disappeared from map");
+      break ;
+    }
+    if (!gamesMap.has(playersMap.get(playerId))) {
+      console.log("game has disappeared for player", playerId);
+      break ;
+    }
     if (socksMap.has(playerId) === false) {
       console.log("player", playerId, "has currently no socks available.");
       await waitingForReconnect(playerId);
@@ -568,13 +582,19 @@ export const dataStreamer = async (playerId : string) => {
 //    console.log(runtime.gstate);
     }
     else if (runtime.pongDone === true) {
-      sock.send(JSON.stringify(runtime.gstate));
       if (runtime.LplayerId === playerId) {
+        sock.send(JSON.stringify(runtime.gstate));
+        if (socksMap.has(runtime.RplayerId)) {
+          sock = socksMap.get(runtime.RplayerId);
+          sock.send(JSON.stringify(runtime.gstate));
+        }
         // only delete the game id if the datastreamer is from the left to avoid double delete
         // XXX TODO leaks?
         // XXX mutex alert.
-//        delete gamesMap.get(playersMap.get(playerId));
-        gamesMap.delete(playersMap.get(playerId));
+        playersMap.delete(runtime.RplayerId);
+        if (gamesMap.has(playersMap.get(playerId))) {
+          gamesMap.delete(playersMap.get(playerId));
+        }
       }
       playersMap.delete(playerId);
       break ;
