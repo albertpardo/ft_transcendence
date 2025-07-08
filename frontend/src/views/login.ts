@@ -156,7 +156,6 @@ export function renderLogin(appElement: HTMLElement) {
   }
 
   // Login form submission
-  //const loginForm = document.getElementById('login-form');
   if (loginForm) {
     loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -165,7 +164,8 @@ export function renderLogin(appElement: HTMLElement) {
       const password = (document.getElementById('login-password') as HTMLInputElement).value;
       const errorElement = document.getElementById('login-error') as HTMLElement;
       const submitButton = document.getElementById('submit-button') as HTMLButtonElement;
-      
+      console.log("okay, so we're trying to send username and passowrd:", username, password);
+      console.log("the object:", {username: username, password: password});
       // Clear previous errors
       errorElement.classList.add('hidden');
       errorElement.textContent = '';
@@ -176,27 +176,39 @@ export function renderLogin(appElement: HTMLElement) {
       
       try {
         // Try real API first
+        if (!API_BASE_URL) {
+          throw new Error('API base URL is not defined. Please set VITE_API_BASE_URL in your environment variables.');
+        }
+        console.log('Sending login fetch to:', `${API_BASE_URL}/api/login`);
+       
         const response = await fetch(`${API_BASE_URL}/api/login`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json,application/html,text/html,*/*',
-            'Origin': 'https://127.0.0.1:3000/',
+            
           },
-          body: JSON.stringify({ username, password }),
+          body: JSON.stringify({ username: username, password: password }),
           credentials: 'include',
           mode: 'cors',
         });
+        console.log('Login fetch response status:', response.status);
+        console.log('Login fetch response headers:', [...response.headers.entries()]);
 
-        const data = await response.json();
-//        console.log("in login, received data:", data);
+        const contentType = response.headers.get("Content-Type") || "";
+        if (!contentType.includes("application/json")) {
+          const fallback = await response.text(); // .text() is safe now
+          console.error("Received unexpected content type:", contentType);
+          throw new Error(`Expected JSON, got: ${contentType}, body: ${fallback}`);
+        }
+        let data = await response.json();
+
+       // console.log('**********Login response data:', data);
 
         if (!response.ok || data.error) {
           throw new Error(data.error || 'Login failed');
-//          const errorData = await response.json();
-//          throw new Error(errorData.message || 'Login failed');
         }
-       
+       // console.log('**********Storing auth token and user info');
        localStorage.setItem('authToken', data.token);
 	     localStorage.setItem('userId', data.id);
 
@@ -206,13 +218,14 @@ export function renderLogin(appElement: HTMLElement) {
        localStorage.setItem('user', JSON.stringify({ 
             username: data.user?.username || username,
             nickname: data.user?.nickname || username,
-            avatar: userAvatar
-//            avatar: data.user?.avatar || `https://i.pravatar.cc/150?u=${username}`
-          }));
-          window.location.hash = 'home';
-    
-        
+
+            avatar: data.user?.avatar || `https://i.pravatar.cc/150?u=${username}`
+        }));
+        window.location.hash = 'home';
+
+
       } catch (error) {
+        console.error('**********Login error caught:', error);
         errorElement.textContent = error instanceof Error ? error.message : 'Login failed';
         errorElement.classList.remove('hidden');
        
@@ -224,7 +237,6 @@ export function renderLogin(appElement: HTMLElement) {
   }
 
   // Registration form submission
- // const registerForm = document.getElementById('register-form');
   if (registerForm) {
     registerForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -252,21 +264,23 @@ export function renderLogin(appElement: HTMLElement) {
       registerButton.textContent = 'Registering...';
       
       try {
+        if (!API_BASE_URL) {
+          throw new Error('API base URL is not defined. Please set VITE_API_BASE_URL in your environment variables.');
+        }
         const response = await fetch(`${API_BASE_URL}/api/signup`,
           {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
               'Accept': 'application/json,application/html,text/html,*/*',
-              'Origin': 'https://127.0.0.1:3000/',
+              
+             // 'Origin': 'https://127.0.0.1:3000/',
             },
-            body: JSON.stringify({ nickname, username, email ,password }),
+            body: JSON.stringify({ nickname: nickname, username: username, email: email , password: password }), 
             credentials: 'include',
             mode: 'cors',
         });
 
-
-//        console.log(response);
         if (!response.ok) {
           const errorData = await response.json();
           throw new Error(errorData.message || 'Registration failed');

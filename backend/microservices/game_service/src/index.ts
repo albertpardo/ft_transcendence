@@ -1,4 +1,5 @@
 import Fastify from 'fastify';
+import type { FastifyInstance } from 'fastify';
 import websocket from '@fastify/websocket';
 import type { FastifyRequest } from 'fastify';
 import cors from '@fastify/cors';
@@ -28,16 +29,45 @@ const startServer = async () => {
   });
   await fastify.register(websocket);
 
-  await fastify.register(cors, {
-    origin: ['https://localhost:3000', 'https://127.0.0.1:3000'],
+  interface CorsOriginCallback {
+    (err: Error | null, allow?: boolean): void;
+  }
+
+  interface CorsOptions {
+    origin: (origin: string | undefined, cb: CorsOriginCallback) => void;
+    credentials: boolean;
+    allowedHeaders: string;
+    methods: string[];
+  }
+
+  await fastify.register(cors,
+    {
+      //origin: "*",
+    origin: (origin: string, cb: CorsOriginCallback) => {
+      const allowed = [
+        '*',
+/*         'http://localhost:5173',
+        'http://127.0.0.1:5173',
+        'https://localhost:3000',
+        'https://127.0.0.1:3000' */
+      ];
+      if (!origin || allowed.includes(origin)) {
+        cb(null, true);
+        return;
+      }
+      cb(new Error("Not allowed by CORS"), false);
+      
+    },
     credentials: true,
     allowedHeaders: 'Access-Content-Allow-Origin,Content-Type,Authorization,Upgrade',
+    methods: ['GET', 'POST', 'OPTIONS'],
   });
 
   // start the meta loop of checking if any of the games are full enough to be started.
   gamesReadyLoopCheck();
 
   // Registra un plugin para prefijar las rutas API con '/api'
+
   const apiRoutes = async (fastify) => {
     fastify.get('/pong/game-ws', { websocket: true }, async (sock, req: FastifyRequest<{ Body: PongBodyReq }>) => {
       const usp2 = new URLSearchParams(req.url);
@@ -51,6 +81,7 @@ const startServer = async () => {
         upperSocksMap.delete(playerId);
       });
     });
+
     fastify.get('/pong', async (request, reply) => {
       reply.headers({
         "Content-Security-Policy": "default-src 'self'",
@@ -58,6 +89,7 @@ const startServer = async () => {
       });
       return "Welcome to an \"html\" return for firefox testing purposes.<br>Enjoy your stay!";
     });
+
     fastify.post('/pong', async (req: FastifyRequest<{ Body: PongBodyReq }>, reply) => {
 //      let jsonMsg = JSON.parse(req.body);
       let jsonMsg = req.body;
@@ -71,10 +103,12 @@ const startServer = async () => {
           if (upperSocksMap.has(playerId) === false) {
             console.error("no associated socket found. this must never happen, i think.");
             return "somehow, the socket hasn't been found";
+
           }
           sock = upperSocksMap.get(playerId) as WebSocket;
           const resp : PongResponses = addPlayerCompletely(playerId, sock);
         }
+
         else if (typeof mov !== "undefined") {
           moveMyPaddle(playerId, mov);
         }
@@ -89,6 +123,7 @@ const startServer = async () => {
       const resp = await getHistForPlayerFromDb(req?.body.userId);
       return JSON.stringify(resp);
     });
+
   };
 
   fastify.register(apiRoutes, { prefix: '/api' });

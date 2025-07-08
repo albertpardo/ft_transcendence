@@ -3,31 +3,64 @@ export async function renderProfileContent(el: HTMLElement, bu: HTMLElement, gAr
   gArea.hidden = true;
   gWin.hidden = true;
   const userId = localStorage.getItem('userId') || sessionStorage.getItem('userId');
-  const authToken : string = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+
+  const authToken: string = localStorage.getItem('authToken') || sessionStorage.getItem('authToken') || "";
+
+
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   if (!authToken) {
     el.innerHTML = `<p class="text-red-500">You're not logged in. Please log in again.</p>`;
     return;
   }
+//debugg block  start
+function simpleJwtDecode(token: string) {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(atob(base64).split('').map(c =>
+      '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
+    ).join(''));
+    return JSON.parse(jsonPayload);
+  } catch {
+    return null;
+  }
+}
 
+// Usage:
+const decoded = simpleJwtDecode(authToken);
+if (!decoded) {
+  el.innerHTML = `<p class="text-red-500">Invalid token. Please log in again.</p>`;
+  return;
+}
+console.log("✅ Decoded token:", decoded);
+//debugg block end
   let userData;
   const authstringheader : string = "Bearer " + authToken;
   try {
     const res = await fetch(`${API_BASE_URL}/api/profile`, {
       method: 'GET',
       headers: {
-        "Use-me-to-authorize": authstringheader,
+        "Authorization": authstringheader,
+        "use-me-to-authorize": authstringheader,
         "Content-Type": "application/json",
       },
       credentials: 'include',
       mode: 'cors',
     });
 
-    if (!res.ok) throw new Error("Failed to fetch user data");
 
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`Failed to fetch user data: ${res.status} ${text}`);
+    }
+    console.log('🧪 ************************************************************************************');
+    console.log('Profile fetch status:', res.status);
+    console.log('Profile fetch headers:', [...res.headers.entries()]);
     userData = await res.json();
+
     console.log('🎸🎸🎸Received user on login:', userData);
+
   } catch (err) {
     console.error(err);
     el.innerHTML = `<p class="text-red-500">Error loading profile. Please try again later.</p>`;
@@ -279,7 +312,8 @@ export async function renderProfileContent(el: HTMLElement, bu: HTMLElement, gAr
         method: "PUT",
         headers: { 
           "Authorization": `Bearer ${authToken}`,
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
+         
         },
         credentials: 'include',
         body: JSON.stringify(updatedData)
@@ -341,7 +375,8 @@ export async function renderProfileContent(el: HTMLElement, bu: HTMLElement, gAr
     try {
       const response = await fetch(`${API_BASE_URL}/api/profile`, {
         headers: {
-          "Authorization": `Bearer ${authToken}`
+          "Authorization": `Bearer ${authToken}`,
+          'Accept-Encoding': 'identity',
         },
         method: "DELETE",
         credentials: 'include'

@@ -14,6 +14,7 @@ function makeid(length) {
    return result;
 }
 
+/* <<<<<<< HEAD
 exports.getPublicNickname = async (userId) => {
 	const nick = db.getNicknameById(userId);
 	if (!nick) {
@@ -25,21 +26,35 @@ exports.getPublicNickname = async (userId) => {
 
 exports.signup = async (username, password, nickname, email, avatar = '') => {
     const existing = db.getUserByUsernameOrEmail(username, email);
+======= */
+exports.signup = async (username, password, nickname, email) => {
+   try {
+    const existing = await db.getUserByUsernameOrEmail(username, email);
+
     if (existing) return { error: 'This user already exists' };
 
-    const nickexist = db.getNickname(nickname);
+    const nickexist = await db.getNickname(nickname);
     if (nickexist) return { error: 'This nickname already exists' };
 
     const hashed = await bcrypt.hash(password, 10);
 	const localid = makeid(64);
 	console.log("localid from the backend/microservices/user_management/services/userService.js is...");
 	console.log(localid);
+/* <<<<<<< HEAD
     const user = db.createUser({ id: localid, username, password: hashed, nickname, email, avatar });
     return { id: user.id, username: user.username, avatar: user.avatar };
+======= */
+    const user = await db.createUser({ id: localid, username, password: hashed, nickname, email});
+    return { id: user.id, username: user.username };
+   } catch (error) {
+    console.error("Error during signup:", error);
+    return { error: 'An error occurred during signup' };
+   }
+
 }
 
 exports.verifyUser = async (username, password) => {
-    const user = db.getUserByUsername(username);
+    const user = await db.getUserByUsername(username);
     if (!user) return false;
 
     const isMatch = await bcrypt.compare(password, user.password);
@@ -47,8 +62,10 @@ exports.verifyUser = async (username, password) => {
 };
 
 exports.login = async (username, password) => {
-    const user = db.getUserByUsername(username);
+    const user = await db.getUserByUsername(username);
     if (!user) return { error: 'This user does not exist!' };
+    console.log("user recvd:", user);
+    console.log("💥 reecieved login request: *** ", username, " *** 💥");
 
     const valid = await bcrypt.compare(password, user.password);
     if (!valid) return { error: 'Password is incorrect!' };
@@ -63,7 +80,8 @@ exports.login = async (username, password) => {
 };
 
 exports.getProfile = async (userId) => {
-    const user = db.getUserById(userId);
+    const user = await db.getUserById(userId);
+    console.log("DEBUG user from db.getUserById:", user);
     if (!user) return { error: 'This user does not exist!' };
 
     return {
@@ -71,13 +89,17 @@ exports.getProfile = async (userId) => {
         username: user.username,
         nickname: user.nickname || user.username,
         email: user.email,
+/* <<<<<<< HEAD
 //        password: user.password,
         avatar: user.avatar
+======= */
+        password: user.password //should not be returned, but it's here for consistency
+
     };
 }
 
 exports.updateProfile = async (userId, { username, nickname, email, password, avatar }) => {
-    const user = db.getUserById(userId);
+    const user = await db.getUserById(userId);
     if (!user) return { error: "User not found" };
 
     const updateFields = {
@@ -96,34 +118,34 @@ exports.updateProfile = async (userId, { username, nickname, email, password, av
     }
 
     if (username && username !== user.username) {
-        const existingUsername = db.getUserByUsernameOrEmail(username, user.email);
+        const existingUsername = await db.getUserByUsernameOrEmail(username, user.email);
         if (existingUsername && existingUsername.id !== userId) {
             return { error: "Username already in use" };
         }
     }
     
     if (nickname && nickname !== user.nickname) {
-        const nickexist = db.getNickname(nickname);
+        const nickexist = await db.getNickname(nickname);
         if (nickexist && nickexist.id !== userId) {
             return { error: "Nickname already in use" };
         }
     }
 
     if (email && email !== user.email) {
-        const existing = db.getUserByUsernameOrEmail(user.username, email);
+        const existing = await db.getUserByUsernameOrEmail(user.username, email);
         if (existing && existing.id !== userId) {
             return { error: "Email alrealdy in use" };
         }
     }
 
-    db.updateUser(userId, updateFields);
+    await db.updateUser(userId, updateFields);
     return { success: true };
 }
 
 exports.deleteProfile = async (userId) => {
-    const user = db.getUserById(userId);
+    const user = await db.getUserById(userId);
     if (!user) return { error: "User not found" };
 
-    db.deleteUser(userId);
+    await db.deleteUser(userId);
     return { success: true };
 }

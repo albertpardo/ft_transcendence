@@ -37,7 +37,9 @@ function getNickname(nickname) {
 
 function getUserById(id) {
     const stmt = db.prepare('SELECT * FROM users WHERE id = ?');
-    return stmt.get(id);
+    const resp = stmt.get(id);
+    console.log("resp is", resp);
+    return resp;
 }
 
 function createUser({ id, username, password, nickname, email, avatar = '' }) {
