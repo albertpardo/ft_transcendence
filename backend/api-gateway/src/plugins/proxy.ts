@@ -54,6 +54,7 @@ export default fp(async function (fastify: FastifyInstance): Promise<void> {
             return;
         }
     });
+
     
     fastify.get('/health', async (req: FastifyRequest, reply: FastifyReply): Promise<{ status: string }> => {
         return { status: 'ok' };
@@ -381,7 +382,8 @@ fastify.post('/api/login', async (req: FastifyRequest<{ Body: { username: string
                   if (req.url.startsWith('/api/profile')) {
                       console.log('🧾 Profile response, skipping token injection');
                       reply.type('application/json');
-                      return JSON.stringify(body);
+                      //return JSON.stringify(body);
+                      return body;
                     }
                   if (!body.id || !body.username) {
                     console.log('⚠️ Missing id or username, returning raw JSON without token');
