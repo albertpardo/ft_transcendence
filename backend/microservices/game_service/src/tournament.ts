@@ -196,6 +196,7 @@ class Tournament {
       this.currentStage -= 1;
       if (this.currentStage <= 0) {
         console.log("tour: bye");
+        this.alive = false;
         break ;
       }
       // TODO add the moving people on phase here
@@ -385,4 +386,28 @@ export function confirmParticipation(uuid: string) {
     throw "undefined tournament";
   }
   tourn.confirmPlayer(uuid);
+}
+
+export async function tournamentsLoopCheck() {
+  while (true) {
+  for (const [tid, tour] of tournamentMap) {
+    if (!tour.alive) {
+      console.log("from tlc: detected dead tournament", tid);
+      tournamentMap.delete(tid);
+      for (const [pid, tid2] of playersParticipatingTourn) {
+        if (tid2 === tid) {
+          console.log("rming player", pid, "from said tournament's associated map");
+          playersParticipatingTourn.delete(pid);
+        }
+      }
+      for (const [aid, tid3] of adminMap) {
+        if (tid3 === tid) {
+          console.log("rming admin", aid, "from said tournament's associated map");
+          adminMap.delete(aid);
+        }
+      }
+    }
+  }
+  await sleep(5e3);
+  }
 }

@@ -4,7 +4,7 @@ import type { FastifyRequest } from 'fastify';
 import cors from '@fastify/cors';
 import { State, addPlayerCompletely, removeTheSock, getPongState, forefit, moveMyPaddle, gamesReadyLoopCheck, dataStreamer, JoinError } from './pong';
 import { historyMain, getHistForPlayerFromDb } from './history';
-import { checkAdmining, checkParticipating, addTournament, joinTournament, listAllPublicTournaments, deleteTournament, getFullTournament, confirmParticipation } from './tournament';
+import { tournamentsLoopCheck, checkAdmining, checkParticipating, addTournament, joinTournament, listAllPublicTournaments, deleteTournament, getFullTournament, confirmParticipation } from './tournament';
 
 // id shall come from the req and be per-user unique and persistent (jwt)
 // getIn tells do we wanna move (false) or do we wanna get into a game (true)
@@ -33,6 +33,8 @@ const startServer = async () => {
 
   // start the meta loop of checking if any of the games are full enough to be started.
   gamesReadyLoopCheck();
+  // and for the torunaments -- to check on their alive-ness and remove if necessary.
+  tournamentsLoopCheck();
 
   // Registra un plugin para prefijar las rutas API con '/api'
   const apiRoutes = async (fastify) => {

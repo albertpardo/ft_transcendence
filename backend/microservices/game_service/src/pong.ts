@@ -559,7 +559,7 @@ export const dataStreamer = async (playerId : string) => {
       sock = socksMap.get(playerId);
       console.log("player", playerId, "found their sock");
     }
-    if (runtime.gameType === "tournament" && (runtime.leftReady === false || runtime.rightReady === false)) {
+    if (runtime.gameType === "tournament" && (runtime.leftReady === false || runtime.rightReady === false) && !runtime.pongDone) {
       console.log(playerId, "is waiting for left:", !runtime.leftReady, "right:", !runtime.rightReady, "; the player is", (runtime.LplayerId === playerId ? "L" : "R"));
       await sleep(1e3);
     }

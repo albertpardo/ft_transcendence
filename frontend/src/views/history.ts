@@ -89,7 +89,7 @@ export async function renderHistoryContent(hideableElements) {
       }
       side = "Left";
       if (entry.finish !== "absence") {
-        let respNn = await getNicknameForPlayerId(idL);
+        let respNn = await getNicknameForPlayerId(idR);
         nicnknameVs = JSON.parse(await respNn.text())?.nickname;
       }
     }

@@ -340,6 +340,12 @@ async function generateUpdateAllTourTable(canWeJoin: boolean) {
       if (resOfEnrollObj.err === "nil") {
         alert("enrolled in " + allPTRObj.res[newCount].tId);
         localStorage.setItem("tId", allPTRObj.res[newCount].tId);
+        for (let newerCount = 0; newerCount < count; newerCount += 1) {
+          let currentJB = document.getElementById(`join-button-${newerCount}`);
+          if (currentJB) {
+            currentJB.disabled = true;
+          }
+        }
       }
       else {
         alert("failed to enroll in " + allPTRObj.res[newCount].tId + " because: " + resOfEnrollObj.err);
@@ -450,7 +456,7 @@ export async function renderTournamentManagerContent(hideableElements) {
       });
     }
     else {
-      console.log("this warrants a fail");
+      console.log("can't allow generating a tournament");
       canWeJoin = false
       localStorage.setItem('tId', checkRespObj.tId);
       submitButton.disabled = true;
