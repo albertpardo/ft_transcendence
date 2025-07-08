@@ -23,7 +23,7 @@ class Tournament {
 
   public calculateJoinedPN() {
     let count : number = 0;
-    for (var player of this.Ids[this.stages - 1]) {
+    for (let player of this.Ids[this.stages - 1]) {
       if (player !== "") {
         count += 1;
       }
@@ -76,7 +76,6 @@ class Tournament {
   }
 
   private gameCreator() {
-    // TODO don't forget about "failed" (player id = failed? this means that the last game failed. award an instant tech win to the other player, if they exist.) (also see below)
     for (let i : number = 0; i < Math.pow(2, this.currentStage - 1); i++) {
       let lId = this.Ids[this.currentStage - 1][2 * i];
       let rId = this.Ids[this.currentStage - 1][2 * i + 1];
@@ -104,16 +103,18 @@ class Tournament {
     if (this.stages === 0 || this.currentStage === 0) {
       return true;
     }
-    // TODO FIXME depending on the current stage, make a different sized array.
-    // TODO don't forget about "failed" (also see above)
-    // (which SHOULD be the same anyway but it's better from the data management model point of view)
-    for (var gameId of this.gameIds[this.currentStage - 1]) {
+    console.log(this.gameIds);
+    for (let gameId of this.gameIds[this.currentStage - 1]) {
+      console.log("checking doneness for", gameId);
       if (gamesMap.has(gameId)) {
         if (!gamesMap.get(gameId).pongDone) {
+          console.log("nope,", gameId, "isn't done yet.");
           return false;
         }
       }
-      // and if not? assume stopped?
+      else {
+        console.log("somehow, not in map");
+      }
     }
     return true;
   }
@@ -121,7 +122,7 @@ class Tournament {
   private newStageFiller() {
     // we're in the next stage already, which has been -1'd. To go back one, we +1. - 1 + 1 = 0.
     let i : number = 0;
-    for (var gameId of this.gameIds[this.currentStage]) {
+    for (let gameId of this.gameIds[this.currentStage]) {
       if (gamesMap.has(gameId)) {
         if (gamesMap.get(gameId).whoLost === "left fully" || gamesMap.get(gameId).whoLost === "left skip") {
           this.Ids[this.currentStage - 1][i] = gamesMap.get(gameId).RplayerId;
@@ -188,7 +189,7 @@ class Tournament {
       this.gameCreator();
       while (!this.matchesStopped()) {
         // TODO prolly this dude needs to get the info of the finished games and distribute the people, actually. idk
-        console.log("waiting...");
+        console.log("waiting for matches to be stopped...");
         await sleep(5e3);
       }
       console.log("tour: after stopped");
@@ -207,7 +208,7 @@ class Tournament {
     if (this.currentStage <= 0) {
       throw "It should already be gone via the loop cleaning";
     }
-    for (var user of this.Ids[this.currentStage - 1]) {
+    for (let user of this.Ids[this.currentStage - 1]) {
       if (playersParticipatingTourn.has(user)) {
         playersParticipatingTourn.delete(user);
       }
@@ -216,7 +217,7 @@ class Tournament {
   }
 
   public confirmPlayer(uuid: string) {
-    for (var gId of this.gameIds[this.currentStage - 1]) {
+    for (let gId of this.gameIds[this.currentStage - 1]) {
       if (!gamesMap.has(gId)) {
         throw "gamesMap has no " + gId;
       }

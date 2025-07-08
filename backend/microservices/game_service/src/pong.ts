@@ -12,7 +12,7 @@ const PADDLE_X : number = 50;
 const PADDLE_SPEED : number = 300;
 const MIN_BALL_SPEED_Y : number = 100;
 const INTER_ROUND_COOLDOWN_TIME_MS : number = 1000 * 3;
-const TOURNAMENT_READY_TIMEOUT : number = 30;
+const TOURNAMENT_READY_TIMEOUT : number = 10;
 
 export class JoinError extends Error {
   public gType: string;
@@ -214,6 +214,7 @@ class PongRuntime {
       this.whoLost = "both";
       this.pongStarted = true;
       this.pongDone = true;
+      console.log("both fail");
       return ;
     }
     if (this.LplayerId === "failed") {
@@ -221,6 +222,7 @@ class PongRuntime {
       addMatch(playersMap.get(this.RplayerId), this.LplayerId, this.RplayerId, this.scoreL, this.scoreR, "R", this.gameType, "absence");
       this.pongStarted = true;
       this.pongDone = true;
+      console.log("left fail");
       return ;
     }
     if (this.RplayerId === "failed") {
@@ -228,16 +230,17 @@ class PongRuntime {
       addMatch(playersMap.get(this.LplayerId), this.LplayerId, this.RplayerId, this.scoreL, this.scoreR, "L", this.gameType, "absence");
       this.pongStarted = true;
       this.pongDone = true;
+      console.log("right fail");
       return ;
     }
     if (this.gameType === "tournament") {
       const startDate = Date.now();
-      console.log("st date:", startDate);
-      while (Date.now() - startDate < TOURNAMENT_READY_TIMEOUT) {
+      console.log("tournament! st date:", startDate);
+      while ((Date.now() - startDate)/1000 < TOURNAMENT_READY_TIMEOUT) {
         if (this.leftReady && this.rightReady) {
           break ;
         }
-        console.log("time passed:", Date.now() - startDate);
+        console.log("time passed:", (Date.now() - startDate)/1000);
         await sleep(1e3);
       }
       if (this.leftReady && !this.rightReady) {
@@ -418,8 +421,18 @@ export function createTournamentGame(lId: string, rId: string) {
   gamesMap.get(newid).gameType = "tournament";
   playersMap.set(lId, newid);
   playersMap.set(rId, newid);
-  socksMap.get(lId).send("added: L");
-  socksMap.get(rId).send("added: R");
+  if (socksMap.has(lId)) {
+    socksMap.get(lId).send("added: L");
+  }
+  else {
+    console.error("left disconnected before the tournament game could even be creaeted. whatever. they can reconnect");
+  }
+  if (socksMap.has(rId)) {
+    socksMap.get(rId).send("added: R");
+  }
+  else {
+    console.error("right disconnected before the tournament game could even be creaeted. whatever. they can reconnect");
+  }
   needToSendStartedMap.set(lId, true);
   needToSendStartedMap.set(rId, true);
   return (newid);
@@ -514,10 +527,8 @@ export const gamesReadyLoopCheck = async () => {
             gameRuntime.mainLoop();
 //            console.log("one game started: " + gameId + ", with left: " + gameRuntime.LplayerId + " and right: " + gameRuntime.RplayerId);
 //            console.log("sending the appropriate message to both clientis via ws");
-//            socksMap.get(gameRuntime.LplayerId).send("started");
-//            socksMap.get(gameRuntime.RplayerId).send("started");
-//            needToSendStartedMap.set(gameRuntime.LplayerId, false);
-//            needToSendStartedMap.set(gameRuntime.RplayerId, false);
+            needToSendStartedMap.set(gameRuntime.LplayerId, false);
+            needToSendStartedMap.set(gameRuntime.RplayerId, false);
             await sleep(10);
             dataStreamer(gameRuntime.LplayerId);
             dataStreamer(gameRuntime.RplayerId);
@@ -541,17 +552,16 @@ const waitingForReconnect = async (playerId) => {
 export const dataStreamer = async (playerId : string) => {
   let sock : WebSocket = socksMap.get(playerId);
   const runtime : PongRuntime = gamesMap.get(playersMap.get(playerId));
-  console.log("from", playerId + "'s datastreamer, before the while, runtime:", runtime);
   while (true) {
-    console.log("from", playerId + "'s datastreamer, in the while, runtime:", runtime);
     if (socksMap.has(playerId) === false) {
-//      console.log("player", playerId, "has currently no socks available.");
+      console.log("player", playerId, "has currently no socks available.");
       await waitingForReconnect(playerId);
       sock = socksMap.get(playerId);
+      console.log("player", playerId, "found their sock");
     }
     if (runtime.gameType === "tournament" && (runtime.leftReady === false || runtime.rightReady === false)) {
-      console.log("I,", playerId, "am waiting for... left:", !runtime.leftReady, "right:", !runtime.rightReady, "...one of them is me :)");
-      await sleep(5000 - FRAME_TIME_MS);
+      console.log(playerId, "is waiting for left:", !runtime.leftReady, "right:", !runtime.rightReady, "; the player is", (runtime.LplayerId === playerId ? "L" : "R"));
+      await sleep(1e3);
     }
     else if (runtime.pongDone === false) {
       sock.send(JSON.stringify(runtime.gstate));
