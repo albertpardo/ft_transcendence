@@ -168,10 +168,10 @@ fastify.post('/api/login', async (req: FastifyRequest<{ Body: { username: string
       const encoding = res.headers.get('content-encoding');
       if (encoding === 'br') {
         console.log('🧊 Brotli decompressing signup response...');
-        payload = brotliDecompressSync(rawBuf);
+        payload = brotliDecompressSync(rawBuf).toString('utf-8');
       } else if (encoding === 'gzip') {
         console.log('🔄 Gzip decompressing signup response...');
-        payload = gunzipSync(rawBuf);
+        payload = gunzipSync(rawBuf).toString('utf-8');
       } else {
         console.log('📦 No compression detected or decoding not needed.');
         payload = rawBuf.toString('utf-8');
