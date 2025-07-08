@@ -77,6 +77,7 @@ const startServer = async () => {
           });
         }
         catch (e) {
+          console.error("whoops on add", e);
           if (e instanceof JoinError) {
             return JSON.stringify({
               gType: e.gType,
