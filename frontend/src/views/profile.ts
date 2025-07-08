@@ -49,7 +49,6 @@ console.log("✅ Decoded token:", decoded);
       mode: 'cors',
     });
 
-    //console.log('🧪 API Gateway Content-Type:', res.headers.get('content-type'));
 
     if (!res.ok) {
       const text = await res.text();
@@ -57,7 +56,7 @@ console.log("✅ Decoded token:", decoded);
     }
     console.log('🧪 ************************************************************************************');
     console.log('Profile fetch status:', res.status);
-console.log('Profile fetch headers:', [...res.headers.entries()]);
+    console.log('Profile fetch headers:', [...res.headers.entries()]);
     userData = await res.json();
     console.log('🧪 User data fetched successfully:', userData);
   } catch (err) {

@@ -118,7 +118,6 @@ export function renderLogin(appElement: HTMLElement) {
   }
 
   // Login form submission
-  //const loginForm = document.getElementById('login-form');
   if (loginForm) {
     loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -159,8 +158,6 @@ export function renderLogin(appElement: HTMLElement) {
         console.log('Login fetch response status:', response.status);
         console.log('Login fetch response headers:', [...response.headers.entries()]);
 
-//	const intermediate0 = await response.text();
-//	console.log(intermediate0);
         const contentType = response.headers.get("Content-Type") || "";
         if (!contentType.includes("application/json")) {
           const fallback = await response.text(); // .text() is safe now
@@ -168,12 +165,7 @@ export function renderLogin(appElement: HTMLElement) {
           throw new Error(`Expected JSON, got: ${contentType}, body: ${fallback}`);
         }
         let data = await response.json();
-        /* try {
-          data = await response.json();
-        } catch (jsonError) {
-          console.error('Error parsing JSON response:', jsonError);
-          throw new Error('Invalid JSON response');
-        } */
+
         console.log('**********Login response data:', data);
 
         if (!response.ok || data.error) {
@@ -202,7 +194,6 @@ export function renderLogin(appElement: HTMLElement) {
   }
 
   // Registration form submission
- // const registerForm = document.getElementById('register-form');
   if (registerForm) {
     registerForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -247,10 +238,6 @@ export function renderLogin(appElement: HTMLElement) {
             mode: 'cors',
         });
 
-//	const intermediate = await response.text();
-//	console.log(intermediate);
-
-//        console.log(response);
         if (!response.ok) {
           const errorData = await response.json();
           throw new Error(errorData.message || 'Registration failed');

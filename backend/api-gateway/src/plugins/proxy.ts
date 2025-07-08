@@ -181,24 +181,7 @@ fastify.post('/api/login', async (req: FastifyRequest<{ Body: { username: string
       console.warn('⚠️ Failed to decompress:', err);
       return reply.code(502).send({ error: 'Decompression error from upstream' });
     }
-    /* try {
-      if (encoding === 'br') {
-        console.log('🧊 Brotli decompressing signup response...');
-        rawBuf = brotliDecompressSync(rawBuf);
-      } else if (encoding === 'gzip') {
-        console.log('🔄 Gzip decompressing signup response...');
-        rawBuf = gunzipSync(rawBuf);
-      } else {
-        console.log('📦 No compression detected or decoding not needed.');
-      }
-    } catch (err) {
-      console.warn('⚠️ Failed to decompress:', err);
-      return reply.code(502).send({ error: 'Decompression error from upstream' });
-      // fallback to rawBuf
-    } */
-
-    // const raw = rawBuf.toString('utf-8');
-    // const json = JSON.parse(raw);
+  
     let json;
     try {
       json = JSON.parse(payload);
@@ -264,12 +247,10 @@ fastify.post('/api/login', async (req: FastifyRequest<{ Body: { username: string
             }
 
             try {
-               // console.log('🔍🔐 Raw Authorization Header:', JSON.stringify(req.headers.authorization));
                 console.log('🔍🔐 JWT Secret in use:', process.env.JWT_SECRET);
                 console.log(`🔍🔐 Authorization header: ${auth}`);
                 console.log(`🔍🔐 cookie 🍪🍪 Authorization header: ${req.headers.authorization} 🍪🍪`);
                 await req.jwtVerify();
-                // await (req as FastifyRequest).jwtVerify();
                 console.log("🔐 Verified JWT in proxy preHandler");
                 const userId = (req as FastifyRequest).user?.userId;
                 if (userId) {
@@ -301,10 +282,6 @@ fastify.post('/api/login', async (req: FastifyRequest<{ Body: { username: string
         http2: false,
     });
 
- /*    fastify.addHook('onRequest', async (req: OnRequestFastifyRequest, reply: FastifyReply): Promise<void> => {
-        reply.header('Access-Control-Allow-Origin', req.headers.origin || '*');
-        reply.header('Access-Control-Allow-Credentials', 'true');
-    }); */
 
     interface OnSendRequest extends FastifyRequest {
         url: string;
@@ -385,7 +362,6 @@ fastify.post('/api/login', async (req: FastifyRequest<{ Body: { username: string
                         .type('application/json')
                         .header('content-encoding', null);
                       return JSON.stringify(body);
-                      // return body;
                     }
                   if (!body.id || !body.username) {
                     console.log('⚠️ Missing id or username, returning raw JSON without token');
@@ -417,7 +393,7 @@ fastify.post('/api/login', async (req: FastifyRequest<{ Body: { username: string
               return payload;
             }
         }
-            // debugg until 249 
+/*             // debugg until 249 
             if (typeof payload === 'string') {
                 console.log('✅ Final payload returned to client (string):', payload);
             } else if (Buffer.isBuffer(payload)) {
@@ -431,7 +407,7 @@ fastify.post('/api/login', async (req: FastifyRequest<{ Body: { username: string
             } else {
                 console.log('✅ Final payload returned to client (unknown type):', payload);
             }
-            console.log('↪️ About to return payload of type:', typeof payload);
+            console.log('↪️ About to return payload of type:', typeof payload); */
         return payload;
     });
 });
