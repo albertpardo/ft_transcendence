@@ -6,8 +6,8 @@ interface LogObject {
   [key: string]: any; // Permite propiedades adicionales
 }
 
-//export const logstashTransport = async (opts:any ) => {
-export default async function (opts: any) {
+//export default async function (opts: any) {
+export const logstashTransport = async (opts:any ) => {
   return {
     write: async (logLine: string ) => {
       try {
@@ -34,3 +34,4 @@ export default async function (opts: any) {
     }
   };
 };
+

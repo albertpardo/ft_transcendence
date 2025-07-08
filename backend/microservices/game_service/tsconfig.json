@@ -1,17 +1,24 @@
 {
   "compilerOptions": {
-	"target": "ES2020",
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "outDir": "./dist",
+    "incremental": true,
+    "target": "ES2022",
+    "module": "CommonJS",
     "rootDir": "./src",
-    "noImplicitAny": false
+    "moduleResolution": "Node",
+    "typeRoots": ["./node_modules/@types", "./src/types"],
+    "types": ["node"],
+    "resolveJsonModule": true,
+    "outDir": "./dist",
+    "noEmit": true,
+    "noEmitOnError": true,
+    "allowSyntheticDefaultImports": true,
+	"allowImportingTsExtensions":true,
+    "esModuleInterop": true	,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "noImplicitAny": true,
+    "skipLibCheck": true
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*.ts", "src/**/*.d.ts"],
   "exclude": ["node_modules"]
 }
-

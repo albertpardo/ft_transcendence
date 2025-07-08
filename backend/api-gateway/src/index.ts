@@ -17,6 +17,9 @@ const exampleRoutes = require('./routes/example');
 
 import { getLogTransportConfig } from './pino_utils/logTransportConfig';
 
+const pino = require('pino');
+const logger = pino(getLogTransportConfig());
+
 /*
 const server = Fastify ({
     logger: true,
@@ -25,9 +28,7 @@ const server = Fastify ({
 */
 
 const server = Fastify ({
-    logger: {
-      transport: getLogTransportConfig()
-    },
+    logger,
     https: tlsConfig,
 })
 

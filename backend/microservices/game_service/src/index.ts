@@ -5,7 +5,7 @@ import cors from '@fastify/cors';
 import { PongResponses, State, addPlayerCompletely, removeTheSock, getPongDoneness, getPongState, moveMyPaddle, gamesReadyLoopCheck, dataStreamer } from './pong';
 import { historyMain, getHistForPlayerFromDb } from './history';
 
-import { getLogTransportConfig } from '../../../../pino_utils/logTransportConfig';
+import { getLogTransportConfig } from './pino_utils/logTransportConfig';
 
 interface PongBodyReq {
   playerId: string,
@@ -35,7 +35,7 @@ const startServer = async () => {
   const fastify = Fastify({
     logger: {
       transport: getLogTransportConfig()
-    }
+    },
 //    querystringParser: str => qs.parse(str),
   });
 
