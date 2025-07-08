@@ -89,24 +89,31 @@ fastify.post('/api/login', async (req: FastifyRequest<{ Body: { username: string
       console.error('🔥 Upstream error response (non-JSON):', text.slice(0, 300));
       return reply.code(502).send({ error: 'Invalid response from upstream service' });
     }
-
+    let payload: string;
     try {
       if (encoding === 'br') {
         console.log('🧊 Brotli decompressing login response...');
-        rawBuf = brotliDecompressSync(rawBuf);
+        payload = brotliDecompressSync(rawBuf).toString('utf-8');
       } else if (encoding === 'gzip') {
         console.log('🔄 Gzip decompressing login response...');
-        rawBuf = gunzipSync(rawBuf);
+        payload = gunzipSync(rawBuf).toString('utf-8');
       } else {
         console.log('📦 No compression detected or decoding not needed.');
+        payload = rawBuf.toString('utf-8');
       }
     } catch (err) {
       console.warn('⚠️ Failed to decompress:', err);
-      // fallback to rawBuf
+      payload = rawBuf.toString('utf-8'); // fallback to rawBuf
     }
 
-    const raw = rawBuf.toString('utf-8');
-    const json = JSON.parse(raw);
+    // const raw = rawBuf.toString('utf-8');
+    let json;
+    try {
+      json = JSON.parse(payload);
+    } catch (err) {
+      console.error('❌ Failed to parse JSON from upstream:', err);
+      return reply.code(502).send({ error: 'Invalid JSON response from upstream' });
+    }
 
     const token = fastify.jwt.sign({ userId: json.id });
 
@@ -161,10 +168,10 @@ fastify.post('/api/login', async (req: FastifyRequest<{ Body: { username: string
       const encoding = res.headers.get('content-encoding');
       if (encoding === 'br') {
         console.log('🧊 Brotli decompressing signup response...');
-        payload = await brotliDecompressSync(rawBuf);
+        payload = brotliDecompressSync(rawBuf);
       } else if (encoding === 'gzip') {
         console.log('🔄 Gzip decompressing signup response...');
-        payload = await gunzipSync(rawBuf);
+        payload = gunzipSync(rawBuf);
       } else {
         console.log('📦 No compression detected or decoding not needed.');
         payload = rawBuf.toString('utf-8');
@@ -189,11 +196,11 @@ fastify.post('/api/login', async (req: FastifyRequest<{ Body: { username: string
       // fallback to rawBuf
     } */
 
-    const raw = rawBuf.toString('utf-8');
+    // const raw = rawBuf.toString('utf-8');
     // const json = JSON.parse(raw);
     let json;
     try {
-      json = JSON.parse(raw);
+      json = JSON.parse(payload);
     } catch (err) {
       console.error('❌ Failed to parse JSON from upstream:', err);
       return reply.code(502).send({ error: 'Invalid JSON response from upstream' });
