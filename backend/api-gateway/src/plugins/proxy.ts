@@ -74,6 +74,7 @@ fastify.post('/api/login', async (req: FastifyRequest<{ Body: { username: string
       method: 'POST',
       headers: {
         'content-type': 'application/json',
+        'Accept-Encoding': 'identity',
       },
       body: JSON.stringify(req.body),
     });
@@ -139,6 +140,7 @@ fastify.post('/api/login', async (req: FastifyRequest<{ Body: { username: string
       method: 'POST',
       headers: {
         'content-type': 'application/json',
+        'Accept-Encoding': 'identity',
       },
       body: JSON.stringify(req.body),
     });
@@ -154,7 +156,24 @@ fastify.post('/api/login', async (req: FastifyRequest<{ Body: { username: string
       return reply.code(502).send({ error: 'Invalid response from upstream service' });
     }
 
+    let payload: string;
     try {
+      const encoding = res.headers.get('content-encoding');
+      if (encoding === 'br') {
+        console.log('🧊 Brotli decompressing signup response...');
+        payload = await brotliDecompressSync(rawBuf);
+      } else if (encoding === 'gzip') {
+        console.log('🔄 Gzip decompressing signup response...');
+        payload = await gunzipSync(rawBuf);
+      } else {
+        console.log('📦 No compression detected or decoding not needed.');
+        payload = rawBuf.toString('utf-8');
+      }
+    } catch (err) {
+      console.warn('⚠️ Failed to decompress:', err);
+      return reply.code(502).send({ error: 'Decompression error from upstream' });
+    }
+    /* try {
       if (encoding === 'br') {
         console.log('🧊 Brotli decompressing signup response...');
         rawBuf = brotliDecompressSync(rawBuf);
@@ -168,7 +187,7 @@ fastify.post('/api/login', async (req: FastifyRequest<{ Body: { username: string
       console.warn('⚠️ Failed to decompress:', err);
       return reply.code(502).send({ error: 'Decompression error from upstream' });
       // fallback to rawBuf
-    }
+    } */
 
     const raw = rawBuf.toString('utf-8');
     // const json = JSON.parse(raw);
