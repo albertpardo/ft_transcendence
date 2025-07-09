@@ -1,17 +1,18 @@
-import { LOG_FOLDER, LOG_FILE } from './constants.ts'
-import { join } from 'path';
+import { LOG_FOLDER, LOG_FILE } from './constants'
+import { join, resolve } from 'path';
 import { fileTransport } from './file-transport';
 import { logstashTransport } from './logstash-transport'
-import pino from 'pino';
-
+//import pino from 'pino';
 
 // Función que devuelve la configuración del transporte
 export const getLogTransportConfig = () => {
-  return pino.transport({
+
+  console.log("getLogTransportConfig ->" + resolve(__dirname, 'file-transport.js'));
+  return {
     targets: [
       {
-//        target: './src/pino_utils/file-transport.ts', // Guarda logs en archivo
-        target: fileTransport, // Guarda logs en archivo
+ //       target: './dist/pino_utils/file-transport.js', // Guarda logs en archivo
+        target: resolve(__dirname, 'file-transport.js'),
         options: {
           destination: join('/shared_logs', 'app.log'),
           mkdir: true
@@ -24,13 +25,9 @@ export const getLogTransportConfig = () => {
         }
       },
       {
-//        target: './src/pino_utils/logstashTransport.ts', // Envío a Logstash
-        target: logstashTransport, // Envío a Logstash
+        target: resolve(__dirname, 'logstash-transport.js'), // Envío a Logstash
         level: 'info'
       }
-    ],
-    worker: {
-      enable: true
-    }
-  });
+    ]
+  };
 };

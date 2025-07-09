@@ -18,9 +18,11 @@ RUN npm install -g ts-node typescript ts-node-dev
 
 # Copy source code & certs
 COPY . .
+RUN chmod +x script.sh
 
 # Expose HTTPS port
 EXPOSE 8443
 
 # Run using ts-node (just like the local command)
-CMD ["npm", "run", "dev"]
+#CMD ["npm", "run", "dev"]
+CMD ["sh" , "./script.sh"]

@@ -15,10 +15,11 @@ delete require.cache[require.resolve('./middlewares/auth')];
 const { rateLimitPlugin } = require('./plugins/rateLimit');
 const exampleRoutes = require('./routes/example');
 
-import { getLogTransportConfig } from './pino_utils/logTransportConfig';
+//import { getLogTransportConfig } from './pino_utils/logTransportConfig';
+import { getLogTransportConfig } from '../dist/pino_utils/logTransportConfig';
 
-const pino = require('pino');
-const logger = pino(getLogTransportConfig());
+//const pino = require('pino');
+//const logger = pino(getLogTransportConfig());
 
 /*
 const server = Fastify ({
@@ -28,9 +29,11 @@ const server = Fastify ({
 */
 
 const server = Fastify ({
-    logger,
+    logger: {
+      transport: getLogTransportConfig()
+    },
     https: tlsConfig,
-})
+});
 
 
 //register plugins

@@ -34,4 +34,3 @@ export const logstashTransport = async (opts:any ) => {
     }
   };
 };
-
