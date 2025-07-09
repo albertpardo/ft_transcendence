@@ -371,6 +371,7 @@ export function addPlayerCompletely(playerId: string, sock: WebSocket) {
     if (!gamesMap.has(playersMap.get(playerId))) {
       throw "no game found for a located gameid";
     }
+    console.log("so the player was in already");
     const gType = gamesMap.get(playersMap.get(playerId)).gameType;
     throw new JoinError({
       gType: gType,
@@ -391,12 +392,18 @@ export function addPlayerCompletely(playerId: string, sock: WebSocket) {
         gameRuntime.LplayerId = playerId;
         playersMap.set(playerId, gameId);
         sock.send("added: L");
+        if (socksMap.has(gameRuntime.RplayerId)) {
+          socksMap.get(gameRuntime.RplayerId).send("opp joined");
+        }
         return gameRuntime.gameType;
       }
       else if (gameRuntime.RplayerId === "") {
         gameRuntime.RplayerId = playerId;
         playersMap.set(playerId, gameId);
         sock.send("added: R");
+        if (socksMap.has(gameRuntime.LplayerId)) {
+          socksMap.get(gameRuntime.LplayerId).send("opp joined");
+        }
         return gameRuntime.gameType;
       }
     }
