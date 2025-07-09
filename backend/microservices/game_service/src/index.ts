@@ -40,16 +40,13 @@ const startServer = async () => {
     methods: string[];
   }
 
-  await fastify.register(cors,
+  /* await fastify.register(cors,
     {
       //origin: "*",
     origin: (origin: string, cb: CorsOriginCallback) => {
       const allowed = [
         '*',
-/*         'http://localhost:5173',
-        'http://127.0.0.1:5173',
-        'https://localhost:3000',
-        'https://127.0.0.1:3000' */
+
       ];
       if (!origin || allowed.includes(origin)) {
         cb(null, true);
@@ -61,6 +58,12 @@ const startServer = async () => {
     credentials: true,
     allowedHeaders: 'Access-Content-Allow-Origin,Content-Type,Authorization,Upgrade',
     methods: ['GET', 'POST', 'OPTIONS'],
+  });
+ */
+await fastify.register(cors, {
+    origin: ['https://localhost:3000', 'https://127.0.0.1:3000'],
+    credentials: true,
+    allowedHeaders: 'Access-Content-Allow-Origin,Content-Type,Authorization,Upgrade',
   });
 
   // start the meta loop of checking if any of the games are full enough to be started.

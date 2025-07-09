@@ -1,7 +1,10 @@
 export async function renderProfileContent(el: HTMLElement, bu: HTMLElement, gArea: HTMLElement, gWin: HTMLElement) {
-  bu.hidden = true;
+  /* bu.hidden = true;
   gArea.hidden = true;
-  gWin.hidden = true;
+  gWin.hidden = true; */
+  bu.classList.add('hidden');
+  gArea.classList.add('hidden');
+  gWin.classList.add('hidden');
   const userId = localStorage.getItem('userId') || sessionStorage.getItem('userId');
 
   const authToken: string = localStorage.getItem('authToken') || sessionStorage.getItem('authToken') || "";
@@ -54,7 +57,6 @@ console.log("✅ Decoded token:", decoded);
       const text = await res.text();
       throw new Error(`Failed to fetch user data: ${res.status} ${text}`);
     }
-    console.log('🧪 ************************************************************************************');
     console.log('Profile fetch status:', res.status);
     console.log('Profile fetch headers:', [...res.headers.entries()]);
     userData = await res.json();
@@ -159,7 +161,7 @@ console.log("✅ Decoded token:", decoded);
     </div>
 
     <!-- Modal: Confirm Delete -->
-    <div id="delete-modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 hidden">
+    <div id="delete-modal" class="fixed inset-0 bg-black bg-opacity-75 items-center justify-center z-50 hidden">
       <div class="bg-gray-800 p-8 rounded-lg max-w-md w-full">
         <h3 class="text-xl font-bold text-white mb-4">Delete Account</h3>
         <p class="text-gray-300 mb-6">Are you sure you want to delete your account? This action cannot be undone.</p>
@@ -175,7 +177,7 @@ console.log("✅ Decoded token:", decoded);
     </div>
 
     <!-- Modal: Confirm Save -->
-    <div id="save-modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 hidden">
+    <div id="save-modal" class="fixed inset-0 bg-black bg-opacity-75 items-center justify-center z-50 hidden">
       <div class="bg-gray-800 p-8 rounded-lg max-w-md w-full">
         <h3 class="text-xl font-bold text-white mb-4">Confirm Save</h3>
         <p class="text-gray-300 mb-6">Are you sure you want to save these changes?</p>
@@ -201,7 +203,12 @@ console.log("✅ Decoded token:", decoded);
   `;
 
   const form = document.getElementById("profile-form") as HTMLFormElement;
-  const editBtn = document.getElementById("edit-btn")!;
+  if (!form) {
+    console.error("Profile form not found");
+    return;
+  }
+  const editBtn = document.getElementById("edit-btn");
+  
   const inputs = form.querySelectorAll("input");
   const saveBtn = document.getElementById("save-btn") as HTMLButtonElement;
   const deleteBtn = document.getElementById("delete-btn") as HTMLButtonElement;
@@ -216,10 +223,20 @@ console.log("✅ Decoded token:", decoded);
   const saveModal = document.getElementById("save-modal") as HTMLDivElement;
   const cancelSaveBtn = document.getElementById("cancel-save") as HTMLButtonElement;
   const confirmSaveBtn = document.getElementById("confirm-save") as HTMLButtonElement;
-  const passwordToggle = document.getElementById('password-toggle');
+  const passwordToggle = document.getElementById('password-toggle') as HTMLButtonElement;
   const passwordInput = document.getElementById('form-password') as HTMLInputElement;
-  const openEye = document.getElementById('open-eye');
-  const closedEye = document.getElementById('closed-eye');
+  const openEye = document.getElementById('open-eye') as HTMLImageElement;
+  const closedEye = document.getElementById('closed-eye') as HTMLImageElement;
+
+  if (
+    !editBtn || !saveBtn || !deleteBtn || !avatarInput || !avatarPreview || !displayUsername ||
+    !deleteModal || !cancelDeleteBtn || !confirmDeleteBtn ||
+    !saveModal || !cancelSaveBtn || !confirmSaveBtn ||
+    !passwordInput || !passwordToggle || !openEye || !closedEye
+  ) {
+    console.error("❌ Missing DOM element(s) in profile page.");
+    return; // corrected
+  }
 
 
   if (passwordInput && passwordToggle && openEye && closedEye) {
@@ -365,10 +382,12 @@ console.log("✅ Decoded token:", decoded);
 
   deleteBtn.addEventListener("click", () => {
     deleteModal.classList.remove("hidden");
+    deleteModal.classList.add("flex");
   });
 
   cancelDeleteBtn.addEventListener("click", () => {
     deleteModal.classList.add("hidden");
+    deleteModal.classList.remove("flex");
   });
 
   confirmDeleteBtn.addEventListener("click", async () => {
