@@ -606,9 +606,41 @@ export const dataStreamer = async (playerId : string) => {
 export function getGType(pId: string) {
   if (playersMap.has(pId)) {
     const gid = playersMap.get(pId);
+    if (typeof gid === "undefined") {
+      throw "undefined gameId";
+    }
     if (gamesMap.has(gid)) {
       const gr = gamesMap.get(gid);
+      if (typeof gr === "undefined") {
+        throw "undefined pongruntime";
+      }
       return gr.gameType;
+    }
+    throw "gamesMap doesn't have the player's gameid";
+  }
+  throw "Player not found in playersMap";
+}
+
+export function getOppId(pId: string) {
+  if (playersMap.has(pId)) {
+    const gid = playersMap.get(pId);
+    if (typeof gid === "undefined") {
+      throw "undefined gameId";
+    }
+    if (gamesMap.has(gid)) {
+      const gr = gamesMap.get(gid);
+      if (typeof gr === "undefined") {
+        throw "undefined pongruntime";
+      }
+      if (gr.LplayerId === pId) {
+        return gr.RplayerId;
+      }
+      if (gr.RplayerId === pId) {
+        return gr.LplayerId;
+      }
+      else {
+        throw "as a result of some freak accident, you're neither the left nor the right player in the game, thus, you can't have an opponent.";
+      }
     }
     throw "gamesMap doesn't have the player's gameid";
   }

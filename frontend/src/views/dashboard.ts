@@ -2,7 +2,7 @@
 import { registerPlayer, forefit, movePaddle, confirmParticipation } from './buttonClicking';
 import { route } from '../router';
 import { renderHomeContent, renderPlayContent, renderStatsContent } from './sections';
-import { renderHistoryContent } from './history';
+import { renderHistoryContent, getNicknameForPlayerId } from './history';
 import { renderProfileContent } from './profile';
 import { renderTournamentContent, renderTournamentManagerContent } from './tournament';
 import { State, nullState } from './pongrender';
@@ -32,7 +32,23 @@ async function getGameMetaInfo() {
   );
   const textFresp = await fresp.text();
   const parsedFresp = JSON.parse(textFresp);
-  return parsedFresp;
+  if (parsedFresp.err === "nil") {
+    const oppId = parsedFresp.oppId;
+    const oppName = await getNicknameForPlayerId(oppId);
+    const ret = {
+      gType: parsedFresp.gType;
+      oppName: oppName;
+    };
+    return (ret);
+  }
+  else {
+    console.error("suffered an error trying to get game info:", parsedFresp.err);
+    const ret = {
+      gType: "unknown";
+      oppName: "unknown";
+    };
+    return (ret);
+  }
 }
 
 export async function initDashboard() {
@@ -149,7 +165,7 @@ export async function initDashboard() {
   let started : boolean = false;
   let metaInfo = await getGameMetaInfo();
   if (localStorage.getItem("authToken")) {
-    gameInfo.innerHTML = "Game type: " + metaInfo.gType + "; versus: " + metaInfo.gType;
+    gameInfo.innerHTML = "Game type: " + metaInfo.gType + "; versus: " + metaInfo.oppName;
     socket = new WebSocket(`https://127.0.0.1:8443/api/pong/game-ws?uuid=${localStorage.getItem("userId")}&authorization=${localStorage.getItem("authToken")}`);
     socket.addEventListener("message", (event) => {
 //      console.log("I, a tokened player, receive:", event.data);
@@ -157,7 +173,7 @@ export async function initDashboard() {
       switch (event.data) {
         case "opp joined":
           metaInfo = await getGameMetaInfo();
-          gameInfo.innerHTML = "Game type: " + metaInfo.gType + "; versus: " + metaInfo.gType;
+          gameInfo.innerHTML = "Game type: " + metaInfo.gType + "; versus: " + metaInfo.oppName;
         case "connected":
 //          console.log("Welcome to pong.");
           break;
@@ -176,7 +192,7 @@ export async function initDashboard() {
           break;
         case "added: L":
           metaInfo = await getGameMetaInfo();
-          gameInfo.innerHTML = "Game type: " + metaInfo.gType + "; versus: " + metaInfo.gType;
+          gameInfo.innerHTML = "Game type: " + metaInfo.gType + "; versus: " + metaInfo.oppName;
           started = false;
           playerSide = "l";
           leftUpArrow.hidden = false;
@@ -188,7 +204,7 @@ export async function initDashboard() {
           break;
         case "added: R":
           metaInfo = await getGameMetaInfo();
-          gameInfo.innerHTML = "Game type: " + metaInfo.gType + "; versus: " + metaInfo.gType;
+          gameInfo.innerHTML = "Game type: " + metaInfo.gType + "; versus: " + metaInfo.oppName;
           started = false;
           playerSide = "r";
           rightUpArrow.hidden = false;
@@ -265,7 +281,7 @@ export async function initDashboard() {
       const regPlResp = await regPlRawResp.text();
       const regPlRespObj = JSON.parse(regPlResp);
       metaInfo = await getGameMetaInfo();
-      gameInfo.innerHTML = "Game type: " + metaInfo.gType + "; versus: " + metaInfo.gType;
+      gameInfo.innerHTML = "Game type: " + metaInfo.gType + "; versus: " + metaInfo.oppName;
       if (regPlRespObj.err !== "nil") {
         console.error(regPlRespObj.err);
       }

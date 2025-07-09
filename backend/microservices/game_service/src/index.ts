@@ -2,7 +2,7 @@ import Fastify from 'fastify';
 import websocket from '@fastify/websocket';
 import type { FastifyRequest } from 'fastify';
 import cors from '@fastify/cors';
-import { State, addPlayerCompletely, removeTheSock, getPongState, forefit, moveMyPaddle, gamesReadyLoopCheck, dataStreamer, JoinError } from './pong';
+import { State, addPlayerCompletely, removeTheSock, getPongState, forefit, moveMyPaddle, gamesReadyLoopCheck, dataStreamer, JoinError, getGType, getOppId } from './pong';
 import { historyMain, getHistForPlayerFromDb } from './history';
 import { tournamentsLoopCheck, checkAdmining, checkParticipating, addTournament, joinTournament, listAllPublicTournaments, deleteTournament, getFullTournament, confirmParticipation } from './tournament';
 
@@ -134,6 +134,28 @@ const startServer = async () => {
       return JSON.stringify({
         err: "undefined or empty playerId -- failed to verify?",
       });
+    });
+    fastify.get('/pong/game/info', async (req, reply) => {
+      let playerId : string = req.headers['x-user-id'] as string;
+      try {
+        if (typeof playerId !== "undefined" && playerId !== "") {
+          const gType = getGType(playerId);
+          const oppId = getOppId(playerId);
+          return JSON.stringify({
+            gType: gType,
+            oppId: oppId,
+            err: "nil",
+          });
+        }
+        throw "undefined or empty playerId -- failed to verify?";
+      }
+      catch (e) {
+        return JSON.stringify({
+          gType: "",
+          oppId: "",
+          err: e,
+        });
+      }
     });
     // TODO XXX add public pong hist by username?
     fastify.post('/pong/hist', async (req: FastifyRequest<{ Body: {userId: string} }>, reply) => {
