@@ -16,6 +16,24 @@ async function movePaddleWrapper(d: number) {
   }
 }
 
+async function getGameMetaInfo() {
+  const fresp = fetch(
+    `${API_BASE_URL}/api/pong/game/info`,
+    {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json,application/html,text/html,*/*',
+        'Origin': 'https://127.0.0.1:3000/',
+        'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
+      },
+      credentials: 'include',
+      mode: 'cors',
+    }
+  );
+  const textFresp = await fresp.text();
+  const parsedFresp = JSON.parse(textFresp);
+  return parsedFresp;
+}
 
 export async function initDashboard() {
   const hash = window.location.hash.replace('#', '') || 'home';
@@ -119,6 +137,7 @@ export async function initDashboard() {
   gameText.style.visibility = "hidden";
   // for some reason, doing a .hidden = false or true on this doesn't work.
   const scoreText : HTMLElement = document.getElementById("score-text");
+  let gameType = "normal";
 //  console.log(ball);
 //  console.log(lpad);
 //  console.log(rpad);
@@ -128,12 +147,17 @@ export async function initDashboard() {
   let playerSide : string = "tbd";
   // FIXME unused. remove or use.
   let started : boolean = false;
+  let metaInfo = await getGameMetaInfo();
   if (localStorage.getItem("authToken")) {
+    gameInfo.innerHTML = "Game type: " + metaInfo.gType + "; versus: " + metaInfo.gType;
     socket = new WebSocket(`https://127.0.0.1:8443/api/pong/game-ws?uuid=${localStorage.getItem("userId")}&authorization=${localStorage.getItem("authToken")}`);
     socket.addEventListener("message", (event) => {
 //      console.log("I, a tokened player, receive:", event.data);
       // XXX maybe a try catch? idk if it'd crash or something on a wrong input
       switch (event.data) {
+        case "opp joined":
+          metaInfo = await getGameMetaInfo();
+          gameInfo.innerHTML = "Game type: " + metaInfo.gType + "; versus: " + metaInfo.gType;
         case "connected":
 //          console.log("Welcome to pong.");
           break;
@@ -151,6 +175,8 @@ export async function initDashboard() {
           scoreText.innerHTML = "" + 0 + " : " + 0;
           break;
         case "added: L":
+          metaInfo = await getGameMetaInfo();
+          gameInfo.innerHTML = "Game type: " + metaInfo.gType + "; versus: " + metaInfo.gType;
           started = false;
           playerSide = "l";
           leftUpArrow.hidden = false;
@@ -161,6 +187,8 @@ export async function initDashboard() {
           scoreText.innerHTML = "" + 0 + " : " + 0;
           break;
         case "added: R":
+          metaInfo = await getGameMetaInfo();
+          gameInfo.innerHTML = "Game type: " + metaInfo.gType + "; versus: " + metaInfo.gType;
           started = false;
           playerSide = "r";
           rightUpArrow.hidden = false;
@@ -223,6 +251,7 @@ export async function initDashboard() {
             }
           }
           else {
+            gameType.innerHTML = "";
             gameText.style.visibility = "hidden";
             gameInfo.innerHTML = "";
             scoreText.innerHTML = "" + gameState.stateScoreL + " : " + gameState.stateScoreR;
@@ -235,7 +264,8 @@ export async function initDashboard() {
       const regPlRawResp = await registerPlayer();
       const regPlResp = await regPlRawResp.text();
       const regPlRespObj = JSON.parse(regPlResp);
-      console.log(regPlRespObj.gType);
+      metaInfo = await getGameMetaInfo();
+      gameInfo.innerHTML = "Game type: " + metaInfo.gType + "; versus: " + metaInfo.gType;
       if (regPlRespObj.err !== "nil") {
         console.error(regPlRespObj.err);
       }
@@ -245,7 +275,6 @@ export async function initDashboard() {
       const readyPlRawResp = await confirmParticipation();
       const readyPlResp = await readyPlRawResp.text();
       const readyPlRespObj = JSON.parse(readyPlResp);
-      console.log(readyPlRespObj.gType);
       if (readyPlRespObj.err !== "nil") {
         console.error(readyPlRespObj.err);
       }
