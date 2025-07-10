@@ -59,15 +59,18 @@ function updateUser(userId, updates) {
    const fields = [];
    const values = [];
    
-   if (!fields.length) {
-        throw new Error('No updates provided');
-    }
+   for (const [key, value] of Object.entries(updates)) {
+        if (typeof value !== 'undefined') {
+           fields.push(`${key} = ?`);
+           values.push(value);
+       }
+   }
+   if (fields.length === 0) {
+        console.warn("⚠️ No fields to update in updateUser");
+        return;
+   }
 
 
-    for (const [key, value] of Object.entries(updates)) {
-        fields.push(`${key} = ?`);
-        values.push(value);
-    }
     const sql = `UPDATE users SET ${fields.join(', ')} WHERE id = ?`;
     const stmt = db.prepare(sql);
     stmt.run(...values, userId);
