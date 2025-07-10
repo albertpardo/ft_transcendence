@@ -295,10 +295,12 @@ console.log("✅ Decoded token:", decoded);
   form.addEventListener("submit", (e) => {
     e.preventDefault();
     saveModal.classList.remove("hidden");
+    saveModal.classList.add("flex");
   });
 
   cancelSaveBtn.addEventListener("click", () => {
     saveModal.classList.add("hidden");
+    saveModal.classList.remove("flex");
   });
 
   confirmSaveBtn.addEventListener("click", async () => {
