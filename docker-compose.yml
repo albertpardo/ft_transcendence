@@ -53,6 +53,7 @@ services:
     expose:
       - "9002"
     volumes:
+      - ./backend/microservices/game_service:/app   # add by apardo-m
       - /app/node_modules      # use container-installed deps
       - ./backend/microservices/game_service/vol:/app/dbs
     restart: always
