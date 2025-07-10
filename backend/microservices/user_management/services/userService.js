@@ -94,7 +94,7 @@ exports.getProfile = async (userId) => {
 exports.updateProfile = async (userId, { username, nickname, email, password, avatar }) => {
     const user = await db.getUserById(userId);
     if (!user) return { error: "User not found" };
-
+ 
     const updateFields = {
         username: username ?? user.username,
         nickname: nickname ?? user.nickname,
@@ -127,9 +127,15 @@ exports.updateProfile = async (userId, { username, nickname, email, password, av
     if (email && email !== user.email) {
         const existing = await db.getUserByUsernameOrEmail(user.username, email);
         if (existing && existing.id !== userId) {
-            return { error: "Email alrealdy in use" };
+            return { error: "Email already in use" };
         }
     }
+    
+    
+    if (typeof avatar === 'string' && avatar !== user.avatar) {
+      updateFields.avatar = avatar;
+    }
+    console.log("updateFields:", updateFields);
 
     await db.updateUser(userId, updateFields);
     return { success: true };
