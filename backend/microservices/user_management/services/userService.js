@@ -14,11 +14,7 @@ function makeid(length) {
    return result;
 }
 
-/* <<<<<<< HEAD
 
-exports.signup = async (username, password, nickname, email) => {
-    const existing = db.getUserByUsernameOrEmail(username, email);
-    ======= */
     
 exports.getPublicNickname = async (userId) => {
         const nick = db.getNicknameById(userId);
@@ -42,12 +38,10 @@ exports.signup = async (username, password, nickname, email, avatar = '') => {
 	const localid = makeid(64);
 	console.log("localid from the backend/microservices/user_management/services/userService.js is...");
 	console.log(localid);
-/* <<<<<<< HEAD
+
     const user = db.createUser({ id: localid, username, password: hashed, nickname, email, avatar });
     return { id: user.id, username: user.username, avatar: user.avatar };
-======= */
-    const user = await db.createUser({ id: localid, username, password: hashed, nickname, email});
-    return { id: user.id, username: user.username };
+
    } catch (error) {
     console.error("Error during signup:", error);
     return { error: 'An error occurred during signup' };
@@ -91,10 +85,7 @@ exports.getProfile = async (userId) => {
         username: user.username,
         nickname: user.nickname || user.username,
         email: user.email,
-/* <<<<<<< HEAD
-//        password: user.password,
-        avatar: user.avatar
-======= */
+        avatar: user.avatar,
         password: user.password //should not be returned, but it's here for consistency
 
     };

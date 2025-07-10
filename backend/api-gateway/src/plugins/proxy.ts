@@ -344,10 +344,10 @@ fastify.post('/api/login', async (req: FastifyRequest<{ Body: { username: string
                     raw = rawBuffer.toString('utf-8');
                 }
                
-                console.log('📜 Raw body from stream:', raw);
+                //console.log('📜 Raw body from stream:', raw);//deleteme
                 try {
                   const body: LoginSignupResponseBody = JSON.parse(raw);
-                  console.log('🧾 Parsed JSON from stream:', body);
+                  //console.log('🧾 Parsed JSON from stream:', body);
                   if (req.url.startsWith('/api/profile')) {
                       console.log('🧾 Profile response, skipping token injection');
                       reply

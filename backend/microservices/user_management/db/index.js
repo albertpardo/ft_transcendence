@@ -46,23 +46,20 @@ function createUser({ id, username, password, nickname, email, avatar = '' }) {
     const stmt = db.prepare('INSERT INTO users (id, username, password, nickname, email, avatar) VALUES (?, ?, ?, ?, ?, ?)');
     const info = stmt.run(id, username, password, nickname, email, avatar);
 	const stmt2 = db.prepare('SELECT * FROM users WHERE id = ?');
-	const info2 = stmt2.all(id);
-    return { id: info2[0].id, username, avatar:info2[0].avatar };
+	// const info2 = stmt2.all(id);
+    const info2 = stmt2.get(id);
+    return { id: info2.id, username, avatar:info2.avatar };
+    // return { id: info2[0].id, username, avatar:info2[0].avatar };
 }
 
 function updateUser(userId, updates) {
-/*
-    const stmt = db.prepare(`
-        UPDATE users SET
-        username = ?,
-        nickname = ?,
-        email = ?,
-        password = ?,
-        avatar = ?
-        WHERE id = ?
-    `);
-    stmt.run(username, nickname, email, password, avatar || '', userId);
-*/
+    /* if (Object.keys(updates).length === 0) {
+        throw new Error('No updates provided');
+    } */
+   if (!fields.length) {
+        throw new Error('No updates provided');
+    }
+
     const fields = [];
     const values = [];
 
