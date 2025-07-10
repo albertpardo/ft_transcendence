@@ -53,9 +53,7 @@ function createUser({ id, username, password, nickname, email, avatar = '' }) {
 }
 
 function updateUser(userId, updates) {
-    /* if (Object.keys(updates).length === 0) {
-        throw new Error('No updates provided');
-    } */
+   
    const fields = [];
    const values = [];
    
