@@ -9,6 +9,13 @@ export default defineConfig({
     port: 3000,
     open: false, // Desactivamos la apertura automática del navegador
     host: '0.0.0.0', // Importante para que funcione en Docker
+/*HEAD
+    root: './', 
+    build: {
+    outDir: 'dist',
+    emptyOutDir: true,
+  }, */
+
     ...(isProduction ? {} : {
       https: {
         key: fs.readFileSync('certs/front.key'),

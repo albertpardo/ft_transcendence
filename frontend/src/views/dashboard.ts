@@ -2,10 +2,25 @@
 import { registerPlayer, movePaddle } from './buttonClicking';
 import { route } from '../router';
 import { renderHomeContent, renderPlayContent, renderTournamentContent, renderStatsContent } from './sections';
+import { renderHistoryContent } from './history';
 import { renderProfileContent } from './profile';
 import { State, nullState } from './pongrender';
 
-export function initDashboard() {
+function movePaddleWrapper(d: number) {
+  movePaddle(d, function (error, response) {
+    if (error) {
+      console.error(error);
+    }
+    else {
+      response?.text().then((result) => {
+//        console.log(result);
+      });
+    }
+  });
+}
+let socket : WebSocket| null = null;
+
+export async function initDashboard() {
   const hash = window.location.hash.replace('#', '') || 'home';
   const app = document.getElementById('app')!;
 
@@ -41,6 +56,7 @@ export function initDashboard() {
         <a href="#home" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='home'?'bg-blue-600':'bg-gray-700'}">Dashboard</a>
         <a href="#profile" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='profile'?'bg-blue-600':'bg-gray-700'}">Profile</a>
         <a href="#play" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='play'?'bg-blue-600':'bg-gray-700'}">Play Pong</a>
+        <a href="#history" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='play'?'bg-blue-600':'bg-gray-700'}">Match History</a>
         <a href="#tournament" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='tournament'?'bg-blue-600':'bg-gray-700'}">Tournament</a>
         <a href="#stats" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='stats'?'bg-blue-600':'bg-gray-700'}">Stats</a>
       </nav>
@@ -54,7 +70,7 @@ export function initDashboard() {
     <main id="content-area" class="pt-16 md:pt-0 md:ml-64 p-4 md:p-6 lg:p-8 xl:p-12 min-h-screen overflow-auto bg-gray-900"></main>
 
     <!-- Hidden Game Area -->
-    <div id="game-area" class="flex flex-col items-center justify-center" hidden>
+    <div id="game-area" class="flex flex-col items-center justify-center hidden">
       <div id="game-window" class="relative w-[1280px] h-[720px]">
 
         <!-- Left Controls -->
@@ -88,118 +104,179 @@ export function initDashboard() {
     </div>
   `;
 
-  const leftUpArrow: HTMLElement = document.getElementById("left-up") as HTMLElement;
-  const leftDownArrow : HTMLElement = document.getElementById("left-down") as HTMLElement;
-  const rightUpArrow : HTMLElement = document.getElementById("right-up") as HTMLElement;
-  const rightDownArrow : HTMLElement = document.getElementById("right-down") as HTMLElement;
-  const ball : HTMLElement = document.getElementById("ball") as HTMLElement;
-  const lpad : HTMLElement = document.getElementById("lpad") as HTMLElement;
-  const rpad : HTMLElement = document.getElementById("rpad") as HTMLElement;
-  let gameText : HTMLElement = document.getElementById("game-text") as HTMLElement;
+  const leftUpArrow: HTMLElement = document.getElementById("left-up")!;
+  const leftDownArrow : HTMLElement = document.getElementById("left-down")!;
+  const rightUpArrow : HTMLElement = document.getElementById("right-up")!;
+  const rightDownArrow : HTMLElement = document.getElementById("right-down")!;
+  const ball : HTMLElement = document.getElementById("ball")!;
+  const lpad : HTMLElement = document.getElementById("lpad")!;
+  const rpad : HTMLElement = document.getElementById("rpad")!;
+  let gameText : HTMLElement = document.getElementById("game-text")!;
   gameText.style.visibility = "hidden";
   // for some reason, doing a .hidden = false or true on this doesn't work.
-  const scoreText : HTMLElement = document.getElementById("score-text") as HTMLElement;
+  const scoreText : HTMLElement = document.getElementById("score-text")!;
 //  console.log(ball);
 //  console.log(lpad);
 //  console.log(rpad);
   //WEBSOCKET TIME!
-  const token = localStorage.getItem("authToken");
-  if (!token) {
-    console.error("No auth token found in localStorage. Please log in first.");
-    return;
-  }
-  const socket = token 
-    ? new WebSocket("wss://127.0.0.1:8443/api/pong/game-ws", [token]) 
-    : new WebSocket("wss://127.0.0.1:8443/api/pong/game-ws");
- 
+
   let gameState : State = nullState;
   let playerSide : string = "tbd";
+  // FIXME unused. remove or use.
   let started : boolean = false;
-  socket.addEventListener("message", (event) => {
-//    console.log("I, a tokened player, receive:", event.data);
-    // XXX maybe a try catch? idk if it'd crash or something on a wrong input
-    switch (event.data) {
-      case "connected":
-//        console.log("Welcome to pong.");
-        break;
-      case "added: L":
-        started = false;
-        playerSide = "l";
-        leftUpArrow.hidden = false;
-        leftDownArrow.hidden = false;
-        rightUpArrow.hidden = true;
-        rightDownArrow.hidden = true;
-        gameText.style.visibility = "hidden";
-        scoreText.innerHTML = "" + 0 + " : " + 0;
-        break;
-      case "added: R":
-        started = false;
-        playerSide = "r";
-        rightUpArrow.hidden = false;
-        rightDownArrow.hidden = false;
-        leftUpArrow.hidden = true;
-        leftDownArrow.hidden = true;
-        gameText.style.visibility = "hidden";
-        scoreText.innerHTML = "" + 0 + " : " + 0;
-        break;
-      case "started":
-        started = true;
-        break;
-      case "error":
-//        console.log("some error returned from the server");
-        break;
-      default:
-        gameState = JSON.parse(event.data);
-        ball.setAttribute("cx", (gameState.stateBall.coords.x).toString());
-        ball.setAttribute("cy", (gameState.stateBall.coords.y).toString());
-        lpad.setAttribute("y", (gameState.stateLP.y).toString());
-        rpad.setAttribute("y", (gameState.stateRP.y).toString());
+  if (localStorage.getItem("authToken")) {
+    if (socket !== null) {
+     socket.close();
+     socket = null;
+   }
+    socket = new WebSocket(`https://127.0.0.1:8443/api/pong/game-ws?uuid=${localStorage.getItem("userId")}&authorization=${localStorage.getItem("authToken")}`);
+    socket.addEventListener("message", (event) => {
+//      console.log("I, a tokened player, receive:", event.data);
+      // XXX maybe a try catch? idk if it'd crash or something on a wrong input
+      switch (event.data) {
+        case "connected":
+//          console.log("Welcome to pong.");
+          break;
+        case "added: L":
+          started = false;
+          playerSide = "l";
+          leftUpArrow.hidden = false;
+          leftDownArrow.hidden = false;
+          rightUpArrow.hidden = true;
+          rightDownArrow.hidden = true;
+          gameText.style.visibility = "hidden";
+          scoreText.innerHTML = "" + 0 + " : " + 0;
+          break;
+        case "added: R":
+          started = false;
+          playerSide = "r";
+          rightUpArrow.hidden = false;
+          rightDownArrow.hidden = false;
+          leftUpArrow.hidden = true;
+          leftDownArrow.hidden = true;
+          gameText.style.visibility = "hidden";
+          scoreText.innerHTML = "" + 0 + " : " + 0;
+          break;
+        case "started":
+          started = true;
+          break;
+        case "error":
+//          console.log("some error returned from the server");
+          break;
+        default:
+          gameState = JSON.parse(event.data);
+          ball.setAttribute("cx", "" + gameState.stateBall.coords.x);
+          ball.setAttribute("cy", "" + gameState.stateBall.coords.y);
+          lpad.setAttribute("y", "" + gameState.stateLP.y);
+          rpad.setAttribute("y", "" + gameState.stateRP.y);
 
-        if (gameState.stateWhoL !== "none" && gameState.stateWhoL !== "null state") {
-          gameText.style.visibility = "visible";
-          scoreText.innerHTML = "" + gameState.stateScoreL + " : " + gameState.stateScoreR;
-          if (playerSide === "l") {
-            switch (gameState.stateWhoL) {
-              case "left":
-                gameText.innerHTML = "You lost the round.";
-                break;
-              case "right":
-                gameText.innerHTML = "You won the round!";
-                break;
-              case "left fully":
-                started = false;
-                gameText.innerHTML = "You lost the game.";
-                break;
-              case "right fully":
-                started = false;
-                gameText.innerHTML = "You won the game!";
-                break;
-            }
-          } else if (playerSide === "r") {
-            switch (gameState.stateWhoL) {
-              case "right":
-                gameText.innerHTML = "You lost the round.";
-                break;
-              case "left":
-                gameText.innerHTML = "You won the round!";
-                break;
-              case "right fully":
-                started = false;
-                gameText.innerHTML = "You lost the game.";
-                break;
-              case "left fully":
-                started = false;
-                gameText.innerHTML = "You won the game!";
-                break;
+          if (gameState.stateWhoL !== "none" && gameState.stateWhoL !== "null state") {
+            gameText.style.visibility = "visible";
+            scoreText.innerHTML = "" + gameState.stateScoreL + " : " + gameState.stateScoreR;
+            if (playerSide === "l") {
+              switch (gameState.stateWhoL) {
+                case "left":
+                  gameText.innerHTML = "You lost the round.";
+                  break;
+                case "right":
+                  gameText.innerHTML = "You won the round!";
+                  break;
+                case "left fully":
+                  started = false;
+                  gameText.innerHTML = "You lost the game.";
+                  break;
+                case "right fully":
+                  started = false;
+                  gameText.innerHTML = "You won the game!";
+                  break;
+              }
+            } else if (playerSide === "r") {
+              switch (gameState.stateWhoL) {
+                case "right":
+                  gameText.innerHTML = "You lost the round.";
+                  break;
+                case "left":
+                  gameText.innerHTML = "You won the round!";
+                  break;
+                case "right fully":
+                  started = false;
+                  gameText.innerHTML = "You lost the game.";
+                  break;
+                case "left fully":
+                  started = false;
+                  gameText.innerHTML = "You won the game!";
+                  break;
+              }
             }
           }
+          else {
+            gameText.style.visibility = "hidden";
+            scoreText.innerHTML = "" + gameState.stateScoreL + " : " + gameState.stateScoreR;
+          }
+      }
+    });
+
+    document.getElementById('start-button')!.addEventListener('click', () => {
+      registerPlayer(function (error, response) {
+        if (error) {
+          console.error(error);
         }
         else {
-          gameText.style.visibility = "hidden";
-          scoreText.innerHTML = "" + gameState.stateScoreL + " : " + gameState.stateScoreR;
+          response?.text().then((result) => {
+//            console.log(result);
+          });
         }
-    }
-  });
+      });
+    });
+
+    leftUpArrow.addEventListener('mousedown', () => {
+      movePaddleWrapper(-2);
+    });
+
+    leftUpArrow.addEventListener('mouseup', () => {
+      movePaddleWrapper(0);
+    });
+
+    leftUpArrow.addEventListener('mouseleave', () => {
+      movePaddleWrapper(0);
+    });
+
+    leftDownArrow.addEventListener('mousedown', () => {
+      movePaddleWrapper(2);
+    });
+
+    leftDownArrow.addEventListener('mouseup', () => {
+      movePaddleWrapper(0);
+    });
+
+    leftDownArrow.addEventListener('mouseleave', () => {
+      movePaddleWrapper(0);
+    });
+
+    rightUpArrow.addEventListener('mousedown', () => {
+      movePaddleWrapper(-2);
+    });
+
+    rightUpArrow.addEventListener('mouseup', () => {
+      movePaddleWrapper(0);
+    });
+
+    rightUpArrow.addEventListener('mouseleave', () => {
+      movePaddleWrapper(0);
+    });
+
+    rightDownArrow.addEventListener('mousedown', () => {
+      movePaddleWrapper(2);
+    });
+
+    rightDownArrow.addEventListener('mouseup', () => {
+      movePaddleWrapper(0);
+    });
+
+    rightDownArrow.addEventListener('mouseleave', () => {
+      movePaddleWrapper(0);
+    });
+  }
   // Mobile menu functionality
   const mobileMenuToggle = document.getElementById('mobile-menu-toggle')!;
   const mobileMenuClose = document.getElementById('mobile-menu-close')!;
@@ -244,62 +321,12 @@ export function initDashboard() {
   // Logout functionality
   document.getElementById('logout-btn')!.addEventListener('click', () => {
     localStorage.removeItem('authToken');
-    socket.close();
+    localStorage.removeItem('userId');
+    if (socket !== null) {
+      socket.close();
+    }
     window.location.hash = 'login';
     route();
-  });
-
-  // Secret button (start the game, etc. this is for the game section)
-  document.getElementById('start-button')!.addEventListener('click', () => {
-    registerPlayer(socket);
-  });
-
-  leftUpArrow.addEventListener('mousedown', () => {
-    movePaddle(socket, -2);
-  });
-
-  leftUpArrow.addEventListener('mouseup', () => {
-    movePaddle(socket, 0);
-  });
-
-  leftUpArrow.addEventListener('mouseleave', () => {
-    movePaddle(socket, 0);
-  });
-
-  leftDownArrow.addEventListener('mousedown', () => {
-    movePaddle(socket, 2);
-  });
-
-  leftDownArrow.addEventListener('mouseup', () => {
-    movePaddle(socket, 0);
-  });
-
-  leftDownArrow.addEventListener('mouseleave', () => {
-    movePaddle(socket, 0);
-  });
-
-  rightUpArrow.addEventListener('mousedown', () => {
-    movePaddle(socket, -2);
-  });
-
-  rightUpArrow.addEventListener('mouseup', () => {
-    movePaddle(socket, 0);
-  });
-
-  rightUpArrow.addEventListener('mouseleave', () => {
-    movePaddle(socket, 0);
-  });
-
-  rightDownArrow.addEventListener('mousedown', () => {
-    movePaddle(socket, 2);
-  });
-
-  rightDownArrow.addEventListener('mouseup', () => {
-    movePaddle(socket, 0);
-  });
-
-  rightDownArrow.addEventListener('mouseleave', () => {
-    movePaddle(socket, 0);
   });
 
   // Render active section
@@ -308,13 +335,20 @@ export function initDashboard() {
   const gameArea = document.getElementById('game-area')!;
   const gameWindow = document.getElementById('game-window')!;
   switch (hash) {
-    case 'profile':    renderProfileContent(contentArea, startButton, gameArea, gameWindow);    break;
-    case 'play':       renderPlayContent(contentArea, startButton, gameArea, gameWindow);       break;
-    case 'tournament': renderTournamentContent(contentArea, startButton, gameArea, gameWindow); break;
-    case 'stats':      renderStatsContent(contentArea, startButton, gameArea, gameWindow);      break;
-    default:           renderHomeContent(contentArea, startButton, gameArea, gameWindow);
+    case 'profile':     renderProfileContent(contentArea, startButton, gameArea, gameWindow);     break;
+    case 'play':        renderPlayContent(contentArea, startButton, gameArea, gameWindow);        break;
+    case 'history':     renderHistoryContent(contentArea, startButton, gameArea, gameWindow);     break;
+    case 'tournament':  renderTournamentContent(contentArea, startButton, gameArea, gameWindow);  break;
+    case 'stats':       renderStatsContent(contentArea, startButton, gameArea, gameWindow);       break;
+    default:            renderHomeContent(contentArea, startButton, gameArea, gameWindow);
   }
+  gameArea.style.display = (hash === 'play') ? 'flex' : 'none';
 }
 
 // Initialize dashboard only once when starting the app
 initDashboard();
+
+window.addEventListener('hashchange', () => {
+  initDashboard();
+  console.log("Hash changed to:", window.location.hash);
+});

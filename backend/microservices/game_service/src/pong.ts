@@ -1,3 +1,5 @@
+import { addMatch, getAll } from './history';
+
 const ALPHA_MAX : number = 5*Math.PI/11;
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const FRAME_TIME : number = 1/30;
@@ -222,7 +224,7 @@ class PongRuntime {
         };
 //        console.log("ball lost by...", this.whoLost);
         await sleep(INTER_ROUND_COOLDOWN_TIME_MS);
-        if (this.scoreL > 3 || this.scoreR > 3) {
+        if (this.scoreL > 2 || this.scoreR > 2) {
           this.pongDone = true;
 //          console.log("game done.");
           if (this.whoLost === "left") {
@@ -231,6 +233,7 @@ class PongRuntime {
           else {
             this.gstate.stateWhoL = "right fully";
           }
+          addMatch(playersMap.get(this.LplayerId), this.LplayerId, this.RplayerId, this.scoreL, this.scoreR);
 //          this.gstate = nullState;
 //          this.gstate.stateScoreL = this.scoreL;
 //          this.gstate.stateScoreR = this.scoreR;
@@ -332,6 +335,7 @@ export function addPlayerCompletely(playerId: string, sock: WebSocket) : PongRes
 export function removeTheSock(sock: WebSocket) : void {
   for (const [p, s] of socksMap) {
     if (s === sock) {
+      // XXX close?
       socksMap.delete(p);
 //      console.log("player", p, "got their sock removed");
       return ;
@@ -404,6 +408,7 @@ export const gamesReadyLoopCheck = async () => {
       }
     }
     await sleep(5e3);
+//    getAll();
 //    console.log("one gamesreadyloop iteration passed");
   }
 }

@@ -1,6 +1,16 @@
 const userService = require('../services/userService');
 const jwt = require('jsonwebtoken');
 
+exports.getPublicNickname = async (request, reply) => {
+	const { userId } = request.body;
+	const result = await userService.getPublicNickname(userId);
+	console.log("hit from backend/microservices/user_management/controllers/userController.js", result);
+	if (result.error) {
+		return reply.code(400).send(result);
+	}
+	return reply.send(result);
+};
+
 exports.signup = async (request, reply) => {
     const { username, password, nickname, email } = request.body;
     const result = await userService.signup(username, password, nickname, email);
@@ -49,6 +59,8 @@ exports.updateProfile = async (request, reply) => {
     const userId = request.headers['x-user-id'];
     if (!userId) return reply.code(401).send({ error: 'Unauthorized' });
 
+    console.log('🌎 request.body:', request.body);
+
     const { username, nickname, email, password, avatar } = request.body;
 /*
     if (username) {
@@ -63,11 +75,13 @@ exports.updateProfile = async (request, reply) => {
         avatar
     });
 
+
     // if (result.error) reply.code(400).send(result);
      if (result.error) return reply.code(400).type('application/json').send(result);
 
     // reply.send({ message: "🏄 Profile updated successfully" });
     reply.type('application/json').send({ message: "🏄 Profile updated successfully" });
+
 }
 
 exports.deleteProfile = async (request, reply) => {
@@ -75,6 +89,7 @@ exports.deleteProfile = async (request, reply) => {
     if (!userId) return reply.code(401).send({ error: 'Unauthorized' });
 
     const result = await userService.deleteProfile(userId);
+
 
     // if (result.error) reply.code(400).send(result);
     if (result.error) return reply.code(400).type('application/json').send(result);

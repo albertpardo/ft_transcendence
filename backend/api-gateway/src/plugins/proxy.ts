@@ -8,21 +8,14 @@ import { Readable } from 'stream';
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { Buffer } from 'buffer';
 
+
 const userManagementUrl = process.env.USER_MANAGEMENT_URL || 'http://user_management:9001';
 console.log('🚀 USER_MANAGEMENT_URL:', userManagementUrl);
 if (!userManagementUrl) {
     throw new Error('USER_MANAGEMENT_URL environment variable is not set');
 }
 
-/* interface ProxyReplyOptions {
-    rewriteRequestHeaders: (req: import('fastify').FastifyRequest, headers: Record<string, any>) => Record<string, any>;
-}
 
-interface LoginSignupPayload {
-    id?: string;
-    username?: string;
-    [key: string]: any;
-} */
 
 interface OnRequestFastifyRequest extends FastifyRequest {
     method: string;
@@ -61,14 +54,6 @@ export default fp(async function (fastify: FastifyInstance): Promise<void> {
     });
     
 
-    /* fastify.register(fastifyHttpProxy, {
-        upstream: userManagementUrl,
-        prefix: '/api/login',
-        rewritePrefix: '/api/user/login',
-        http2: false,
-    });
- */
-// fastify.post('/api/login', async (req, reply) => {
 fastify.post('/api/login', async (req: FastifyRequest<{ Body: { username: string; password: string } }>, reply: FastifyReply) => {
   try {
     const res = await fetch(`${userManagementUrl}/api/user/login`, {
@@ -133,14 +118,7 @@ fastify.post('/api/login', async (req: FastifyRequest<{ Body: { username: string
     reply.code(500).send({ error: 'Internal Server Error during login' });
   }
 });
-    /* fastify.register(fastifyHttpProxy, {
-        upstream: userManagementUrl,
-        prefix: '/api/signup',
-        rewritePrefix: '/api/user/signup',
-        http2: false
-    }); */
 
-    //fastify.post('/api/signup', async (req, reply) => {
     fastify.post('/api/signup', async (req: FastifyRequest<{ Body: { username: string; password: string } }>, reply: FastifyReply) => {
 
   try {
@@ -181,24 +159,7 @@ fastify.post('/api/login', async (req: FastifyRequest<{ Body: { username: string
       console.warn('⚠️ Failed to decompress:', err);
       return reply.code(502).send({ error: 'Decompression error from upstream' });
     }
-    /* try {
-      if (encoding === 'br') {
-        console.log('🧊 Brotli decompressing signup response...');
-        rawBuf = brotliDecompressSync(rawBuf);
-      } else if (encoding === 'gzip') {
-        console.log('🔄 Gzip decompressing signup response...');
-        rawBuf = gunzipSync(rawBuf);
-      } else {
-        console.log('📦 No compression detected or decoding not needed.');
-      }
-    } catch (err) {
-      console.warn('⚠️ Failed to decompress:', err);
-      return reply.code(502).send({ error: 'Decompression error from upstream' });
-      // fallback to rawBuf
-    } */
-
-    // const raw = rawBuf.toString('utf-8');
-    // const json = JSON.parse(raw);
+  
     let json;
     try {
       json = JSON.parse(payload);
@@ -264,12 +225,10 @@ fastify.post('/api/login', async (req: FastifyRequest<{ Body: { username: string
             }
 
             try {
-               // console.log('🔍🔐 Raw Authorization Header:', JSON.stringify(req.headers.authorization));
                 console.log('🔍🔐 JWT Secret in use:', process.env.JWT_SECRET);
                 console.log(`🔍🔐 Authorization header: ${auth}`);
                 console.log(`🔍🔐 cookie 🍪🍪 Authorization header: ${req.headers.authorization} 🍪🍪`);
                 await req.jwtVerify();
-                // await (req as FastifyRequest).jwtVerify();
                 console.log("🔐 Verified JWT in proxy preHandler");
                 const userId = (req as FastifyRequest).user?.userId;
                 if (userId) {
@@ -294,17 +253,27 @@ fastify.post('/api/login', async (req: FastifyRequest<{ Body: { username: string
 
     fastify.register(fastifyHttpProxy, {
         upstream: 'http://game_service:9002',
+        prefix: '/api/pong',
+        rewritePrefix: '/api/pong',
+        httpMethods: ['POST'],
+        http2: false,
+
+    });
+
+    fastify.register(fastifyHttpProxy, {
+        upstream: 'http://game_service:9002',
         prefix: '/api/pong/game-ws',
         rewritePrefix: '/api/pong/game-ws',
         httpMethods: ['GET'],
         websocket: true,
         http2: false,
+//        preHandler: async (req, reply) => {
+//          console.log("prehandler ws");
+//          console.log(req.headers);
+//          console.log("and the url is: ", req.url);
+//        }
     });
 
- /*    fastify.addHook('onRequest', async (req: OnRequestFastifyRequest, reply: FastifyReply): Promise<void> => {
-        reply.header('Access-Control-Allow-Origin', req.headers.origin || '*');
-        reply.header('Access-Control-Allow-Credentials', 'true');
-    }); */
 
     interface OnSendRequest extends FastifyRequest {
         url: string;
@@ -375,17 +344,16 @@ fastify.post('/api/login', async (req: FastifyRequest<{ Body: { username: string
                     raw = rawBuffer.toString('utf-8');
                 }
                
-                console.log('📜 Raw body from stream:', raw);
+                //console.log('📜 Raw body from stream:', raw);//deleteme
                 try {
                   const body: LoginSignupResponseBody = JSON.parse(raw);
-                  console.log('🧾 Parsed JSON from stream:', body);
+                  //console.log('🧾 Parsed JSON from stream:', body);
                   if (req.url.startsWith('/api/profile')) {
                       console.log('🧾 Profile response, skipping token injection');
                       reply
                         .type('application/json')
                         .header('content-encoding', null);
                       return JSON.stringify(body);
-                      // return body;
                     }
                   if (!body.id || !body.username) {
                     console.log('⚠️ Missing id or username, returning raw JSON without token');
@@ -417,7 +385,7 @@ fastify.post('/api/login', async (req: FastifyRequest<{ Body: { username: string
               return payload;
             }
         }
-            // debugg until 249 
+/*             // debugg until 249 
             if (typeof payload === 'string') {
                 console.log('✅ Final payload returned to client (string):', payload);
             } else if (Buffer.isBuffer(payload)) {
@@ -431,7 +399,7 @@ fastify.post('/api/login', async (req: FastifyRequest<{ Body: { username: string
             } else {
                 console.log('✅ Final payload returned to client (unknown type):', payload);
             }
-            console.log('↪️ About to return payload of type:', typeof payload);
+            console.log('↪️ About to return payload of type:', typeof payload); */
         return payload;
     });
 });

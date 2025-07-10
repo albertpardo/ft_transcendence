@@ -154,6 +154,7 @@ users.db
 # Desktop Services Store
 .DS_Store
 
+*package-lock.json
 package-lock.json
 */package-lock.json
 Dockerfile_dev

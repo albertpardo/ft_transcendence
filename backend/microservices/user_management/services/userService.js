@@ -14,9 +14,21 @@ function makeid(length) {
    return result;
 }
 
-exports.signup = async (username, password, nickname, email) => {
+
+    
+exports.getPublicNickname = async (userId) => {
+        const nick = db.getNicknameById(userId);
+        if (!nick) {
+            return { error: "couldn't get nickname; user might be non-existent" };
+        }
+        console.log("hit from backend/microservices/user_management/services/userService.js", nick);
+        return nick;
+    }
+
+exports.signup = async (username, password, nickname, email, avatar = '') => {
    try {
     const existing = await db.getUserByUsernameOrEmail(username, email);
+
     if (existing) return { error: 'This user already exists' };
 
     const nickexist = await db.getNickname(nickname);
@@ -26,12 +38,15 @@ exports.signup = async (username, password, nickname, email) => {
 	const localid = makeid(64);
 	console.log("localid from the backend/microservices/user_management/services/userService.js is...");
 	console.log(localid);
-    const user = await db.createUser({ id: localid, username, password: hashed, nickname, email});
-    return { id: user.id, username: user.username };
+
+    const user = db.createUser({ id: localid, username, password: hashed, nickname, email, avatar });
+    return { id: user.id, username: user.username, avatar: user.avatar };
+
    } catch (error) {
     console.error("Error during signup:", error);
     return { error: 'An error occurred during signup' };
    }
+
 }
 
 exports.verifyUser = async (username, password) => {
@@ -51,7 +66,13 @@ exports.login = async (username, password) => {
     const valid = await bcrypt.compare(password, user.password);
     if (!valid) return { error: 'Password is incorrect!' };
 
-    return { id: user.id, username: user.username };
+    return { 
+        id: user.id, 
+        username: user.username, 
+        nickname: user.nickname || user.username, 
+        email: user.email, 
+        avatar: user.avatar 
+    };
 };
 
 exports.getProfile = async (userId) => {
@@ -64,7 +85,9 @@ exports.getProfile = async (userId) => {
         username: user.username,
         nickname: user.nickname || user.username,
         email: user.email,
+        avatar: user.avatar,
         password: user.password //should not be returned, but it's here for consistency
+
     };
 }
 
@@ -76,8 +99,15 @@ exports.updateProfile = async (userId, { username, nickname, email, password, av
         username: username ?? user.username,
         nickname: nickname ?? user.nickname,
         email: email ?? user.email,
-        password: user.password,
+//        password: user.password,
         avatar: avatar ?? user.avatar
+    }
+
+    if (password && password !== "" && !password.startsWith("$2b$") && typeof password === 'string') {
+        const isSame = await bcrypt.compare(password, user.password);
+        if (!isSame) {
+            updateFields.password = await bcrypt.hash(password, 10);
+        }
     }
 
     if (username && username !== user.username) {
@@ -92,10 +122,6 @@ exports.updateProfile = async (userId, { username, nickname, email, password, av
         if (nickexist && nickexist.id !== userId) {
             return { error: "Nickname already in use" };
         }
-    }
-
-    if (password && password !== "") {
-        updateFields.password = await bcrypt.hash(password, 10);
     }
 
     if (email && email !== user.email) {

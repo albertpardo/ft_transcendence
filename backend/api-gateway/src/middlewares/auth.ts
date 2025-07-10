@@ -2,18 +2,19 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 
 console.log("🛡️ Auth middleware loaded!");
+let itwasasocket : boolean = false;
 
 // JWT verification using authMiddleware
 export async function authMiddleware(req: FastifyRequest, reply: FastifyReply) {
+
+
+    itwasasocket = false;
 
     if (!(req.url?.startsWith('/health'))) {
         console.log("🔍 Incoming request URL:", req.url);
         console.log("🔍 jwtVerify type in middleware:", typeof req.jwtVerify);
         console.log("🔍🔍🔍 All keys on req:", Object.keys(req));
-
         console.log('🔍 Full headers before jwtVerify:', req.headers);
-//        console.log('and the wonderful request raw shall be:');
-//        console.log(req.raw);
         console.log('🔍 Authorization Header outside try:', String(req.headers['authorization']));
     }
 
@@ -25,10 +26,14 @@ export async function authMiddleware(req: FastifyRequest, reply: FastifyReply) {
 
     try {
 //        if (req?.headers['sec-websocket-protocol'] !== null) {
+        const usp1 = new URLSearchParams(req.url);
+        if (req.headers["upgrade"] === "websocket") {
+          itwasasocket = true;
+          req.headers["authorization"] = "Bearer " + usp1.get("authorization");
         
-        if (req.headers.upgrade === 'websocket' && !req.headers['authorization'] && req?.headers['sec-websocket-protocol']) {
+        /* if (req.headers.upgrade === 'websocket' && !req.headers['authorization'] && req?.headers['sec-websocket-protocol']) {
           req.headers['authorization'] = "Bearer " + req.headers['sec-websocket-protocol'];
-          delete req.headers['sec-websocket-protocol'];
+          delete req.headers['sec-websocket-protocol']; */
         }
        
         console.log('🔍 Raw Authorization Header inside try00:', String(req.headers['authorization']));
@@ -49,12 +54,19 @@ export async function authMiddleware(req: FastifyRequest, reply: FastifyReply) {
 
         await req.jwtVerify(); //verfication by secret automatically
         console.log('✅ JWT verified, user:', req.user);
+//        console.log('req.url was:', req.url);
 
         //inject user ID or username into headers (for downstream services)
         const userId = (req.user as any)?.userId;
         if (userId) {
+            if (itwasasocket) {
+              if (usp1.get("/api/pong/game-ws?uuid") !== userId) {
+                throw "uuid mismatch";
+              }
+            }
             req.headers['x-user-id'] = String(userId);
             console.log(`📦 Injected x-user-id = ${userId} into headers`);
+//            console.log(req.headers);
         }
     } catch (err: any) {
         console.error('❌ JWT verification failed:', err.message);

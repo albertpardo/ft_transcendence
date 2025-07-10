@@ -22,19 +22,7 @@ async function userRoutes(fastify, options) {
         console.log(`No route matched for ${req.method} ${req.url}`);
         reply.code(404).send({ error: 'Not found' });
     });
-/*    
-    fastify.get('/api/user/profile', async (req, reply) => {
-        const userId = req.headers['x-user-id'];
-        if (!userId) return reply.code(401).send({ error: 'Unauthorized'});
 
-        //mock user information
-        return {
-            userId,
-            nickname: 'testing user',
-            email: 'test@example.com'
-        };
-    });
-*/
 }
 
 module.exports = userRoutes;

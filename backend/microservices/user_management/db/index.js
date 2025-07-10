@@ -12,6 +12,12 @@ const init = db.prepare(`
 );
 init.run();
 
+function getNicknameById(userId) {
+	const stmt = db.prepare('SELECT nickname FROM users WHERE id = ?');
+	console.log("hit from backend/microservices/user_management/db/index.js");
+	return stmt.get(userId);
+}
+
 function getUserByUsernameOrEmail(username, email) {
     const stmt = db.prepare('SELECT * FROM users WHERE username = ? OR email = ?');
     return stmt.get(username, email);
@@ -36,27 +42,24 @@ function getUserById(id) {
     return resp;
 }
 
-function createUser({ id, username, password, nickname, email }) {
-    const stmt = db.prepare('INSERT INTO users (id, username, password, nickname, email) VALUES (?, ?, ?, ?, ?)');
-    const info = stmt.run(id, username, password, nickname, email);
+function createUser({ id, username, password, nickname, email, avatar = '' }) {
+    const stmt = db.prepare('INSERT INTO users (id, username, password, nickname, email, avatar) VALUES (?, ?, ?, ?, ?, ?)');
+    const info = stmt.run(id, username, password, nickname, email, avatar);
 	const stmt2 = db.prepare('SELECT * FROM users WHERE id = ?');
-	const info2 = stmt2.all(id);
-    return { id: info2[0].id, username };
+	// const info2 = stmt2.all(id);
+    const info2 = stmt2.get(id);
+    return { id: info2.id, username, avatar:info2.avatar };
+    // return { id: info2[0].id, username, avatar:info2[0].avatar };
 }
 
 function updateUser(userId, updates) {
-/*
-    const stmt = db.prepare(`
-        UPDATE users SET
-        username = ?,
-        nickname = ?,
-        email = ?,
-        password = ?,
-        avatar = ?
-        WHERE id = ?
-    `);
-    stmt.run(username, nickname, email, password, avatar || '', userId);
-*/
+    /* if (Object.keys(updates).length === 0) {
+        throw new Error('No updates provided');
+    } */
+   if (!fields.length) {
+        throw new Error('No updates provided');
+    }
+
     const fields = [];
     const values = [];
 
@@ -75,6 +78,7 @@ function deleteUser(userId) {
 }
 
 module.exports = {
+	getNicknameById,
     getUserByUsernameOrEmail,
     getUserByUsername,
     getUserById,
