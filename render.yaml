@@ -62,3 +62,20 @@ services:
       - key: PORT
         value: "9001"
     healthCheckPath: /health
+
+  - type: web
+    name: game_service
+    env: docker
+    repo: https://github.com/albertpardo/ft_transcendence.git
+    branch: render
+    rootDir: backend/microservices/game_service
+    dockerfilePath: Dockerfile
+    plan: free
+    autoDeploy: true
+    buildFilter:
+      paths:
+        - backend/microservices/game_service/**
+    envVars:
+      - key: PORT
+        value: "9002"
+    healthCheckPath: /health

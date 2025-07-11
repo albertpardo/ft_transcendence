@@ -58,7 +58,9 @@ services:
       - backend
 
   game_service:
-    build: ./backend/microservices/game_service
+    build:
+      context: ./backend/microservices/game_service
+      dockerfile: Dockerfile_dev
     container_name: trans_game_service
     expose:
       - "9002"

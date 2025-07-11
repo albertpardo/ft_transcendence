@@ -61,7 +61,7 @@ const startServer = async () => {
   });
  */
 await fastify.register(cors, {
-    origin: ['https://localhost:3000', 'https://127.0.0.1:3000'],
+    origin: ['https://localhost:3000', 'https://127.0.0.1:3000', 'https://frontend-7nt4.onrender.com'],
     credentials: true,
     allowedHeaders: 'Access-Content-Allow-Origin,Content-Type,Authorization,Upgrade',
   });
