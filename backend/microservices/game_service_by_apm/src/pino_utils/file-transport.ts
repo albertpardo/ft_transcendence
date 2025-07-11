@@ -8,7 +8,8 @@ interface LogObject {
   [key: string]: any; // Permite propiedades adicionales
 }
 
-export default async function (opts: any) {
+//export default async function (opts: any) {
+export const fileTransport = async (opts:any ) => {
   const filePath = join(LOG_FOLDER, LOG_FILE);
   
   const stream = createWriteStream(filePath, { flags: 'a' });

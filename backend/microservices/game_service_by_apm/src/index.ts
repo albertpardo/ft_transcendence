@@ -1,11 +1,16 @@
 import Fastify from 'fastify';
-import websocket from '@fastify/websocket';
-import type { FastifyRequest } from 'fastify';
+import websocket, { WebSocket as FastifyWebSocket } from '@fastify/websocket';
+//import type { FastifyRequest } from 'fastify';
 import cors from '@fastify/cors';
 import { PongResponses, State, addPlayerCompletely, removeTheSock, getPongDoneness, getPongState, moveMyPaddle, gamesReadyLoopCheck, dataStreamer } from './pong';
 import { historyMain, getHistForPlayerFromDb } from './history';
 
 import { getLogTransportConfig } from '../dist/pino_utils/logTransportConfig';
+
+// Para evitar errores con TypeScript
+import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
+//import { WebSocket } from 'ws'; 
+
 
 interface PongBodyReq {
   playerId: string,
@@ -24,6 +29,7 @@ const upperSocksMap = new Map<string, WebSocket>();
 
 const startServer = async () => {
   await historyMain();
+
 /*
   const fastify = Fastify({
     logger: true,
@@ -37,7 +43,7 @@ const startServer = async () => {
     },
 //    querystringParser: str => qs.parse(str),
   });
-  
+
   await fastify.register(websocket);
 
   await fastify.register(cors, {
@@ -50,27 +56,27 @@ const startServer = async () => {
   gamesReadyLoopCheck();
 
   // Registra un plugin para prefijar las rutas API con '/api'
-  const apiRoutes = async (fastify) => {
-    fastify.get('/pong/game-ws', { websocket: true }, async (sock, req: FastifyRequest<{ Body: PongBodyReq }>) => {
+  const apiRoutes = async (fastify: FastifyInstance) => {
+    fastify.get('/pong/game-ws', { websocket: true }, async (sock: WebSocket, req: FastifyRequest<{ Body: PongBodyReq }>) => {
       const usp2 = new URLSearchParams(req.url);
       let playerId : string = usp2.get("/api/pong/game-ws?uuid") as string;
       upperSocksMap.set(playerId, sock);
-      sock.on('message', message => {
+      sock.on('message',  (message: any) => {
         sock.send("connected");
       });
-      sock.on('close', event => {
+      sock.on('close', (event: any) => {
         removeTheSock(sock);
         upperSocksMap.delete(playerId);
       });
     });
-    fastify.get('/pong', async (request, reply) => {
+    fastify.get('/pong', async (request: FastifyRequest, reply: FastifyReply)=> {
       reply.headers({
         "Content-Security-Policy": "default-src 'self'",
         "Content-Type": "text/html",
       });
       return "Welcome to an \"html\" return for firefox testing purposes.<br>Enjoy your stay!";
     });
-    fastify.post('/pong', async (req: FastifyRequest<{ Body: PongBodyReq }>, reply) => {
+    fastify.post('/pong', async (req: FastifyRequest<{ Body: PongBodyReq }>, reply: FastifyReply) => {
 //      let jsonMsg = JSON.parse(req.body);
       let jsonMsg = req.body;
       // this user id should be completely verified by now.
@@ -97,7 +103,7 @@ const startServer = async () => {
       return "done inerfacing via post";
     });
     // TODO XXX add public pong hist by username?
-    fastify.post('/pong/hist', async (req: FastifyRequest<{ Body: {userId: string} }>, reply) => {
+    fastify.post('/pong/hist', async (req: FastifyRequest<{ Body: {userId: string} }>, reply: FastifyReply) => {
       const resp = await getHistForPlayerFromDb(req?.body.userId);
       return JSON.stringify(resp);
     });

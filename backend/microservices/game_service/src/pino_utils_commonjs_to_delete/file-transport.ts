@@ -1,6 +1,7 @@
-import { createWriteStream } from 'fs';
-import { join } from 'path';
-import { PINO_FILE, LOG_FOLDER, LOG_FILE, APP_LOG_AUTH } from './constants'
+const fs = require('fs');
+const path = require('path');
+const constants = require('./constants');
+
 
 interface LogObject {
   source?: string;
@@ -8,10 +9,12 @@ interface LogObject {
   [key: string]: any; // Permite propiedades adicionales
 }
 
-export default async function (opts: any) {
-  const filePath = join(LOG_FOLDER, LOG_FILE);
+//export default async function (opts: any) {
+//export const fileTransport = async (opts:any ) => {
+module.exports = async function (opts: any) {
+  const filePath = path.join(constants.LOG_FOLDER, constants.LOG_FILE);
   
-  const stream = createWriteStream(filePath, { flags: 'a' });
+  const stream = fs.createWriteStream(filePath, { flags: 'a' });
 
   return {
     write: async (logLine: string) => {
@@ -19,10 +22,10 @@ export default async function (opts: any) {
         const logObj: LogObject = JSON.parse(logLine);
  
         if (!logObj.source) {
-          logObj.source = APP_LOG_AUTH;
+          logObj.source = constants.APP_LOG_AUTH;
         }
 
-        logObj.via = PINO_FILE;
+        logObj.via = constants.PINO_FILE;
 
         stream.write(JSON.stringify(logObj) + '\n');
       } catch (err: unknown ) {
