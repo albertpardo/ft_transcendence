@@ -7,6 +7,7 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules
+      - shared_logs:/shared_logs
     ports:
       - "3000:3000"
     depends_on:
@@ -27,6 +28,7 @@ services:
     volumes:
       - ./backend/api-gateway:/app
       - /app/node_modules      # use container-installed deps
+      - shared_logs:/shared_logs
     env_file:
       - ./backend/api-gateway/.env
     restart: always
@@ -41,6 +43,7 @@ services:
     volumes:
       - ./backend/microservices/user_management:/app
       - /app/node_modules      # use container-installed deps
+      - shared_logs:/shared_logs
     environment:
       - ./backend/microservices/user_management/.env
     restart: always
@@ -56,6 +59,7 @@ services:
       - ./backend/microservices/game_service:/app   # add by apardo-m
       - /app/node_modules      # use container-installed deps
       - ./backend/microservices/game_service/vol:/app/dbs
+      - shared_logs:/shared_logs
     restart: always
     networks:
       - backend

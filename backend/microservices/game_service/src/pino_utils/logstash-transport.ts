@@ -25,7 +25,7 @@ export default async function (opts: any) {
 		});
       } catch (err) {
 	     if (err) {
-           console.error('Logstash transport error:', err.message || err);
+           console.error('logstash-transport error:', err.message || err);
          }
       }
     }
