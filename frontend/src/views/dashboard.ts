@@ -129,7 +129,9 @@ export async function initDashboard() {
      socket.close();
      socket = null;
    }
-    socket = new WebSocket(`https://127.0.0.1:8443/api/pong/game-ws?uuid=${localStorage.getItem("userId")}&authorization=${localStorage.getItem("authToken")}`);
+   const API_BASE_URL = process.env.VITE_API_BASE_URL || 'https://127.0.1:8443';
+    // socket = new WebSocket(`https://127.0.0.1:8443/api/pong/game-ws?uuid=${localStorage.getItem("userId")}&authorization=${localStorage.getItem("authToken")}`);
+    socket = new WebSocket(`${API_BASE_URL}/api/pong/game-ws?uuid=${localStorage.getItem("userId")}&authorization=${localStorage.getItem("authToken")}`);
     socket.addEventListener("message", (event) => {
 //      console.log("I, a tokened player, receive:", event.data);
       // XXX maybe a try catch? idk if it'd crash or something on a wrong input
@@ -348,7 +350,22 @@ export async function initDashboard() {
 // Initialize dashboard only once when starting the app
 initDashboard();
 
+function bindDashboardEvents() {
+  // Logout functionality
+  document.getElementById('logout-btn')?.addEventListener('click', () => {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('userId');
+    if (socket !== null) {
+      socket.close();
+    }
+    window.location.hash = 'login';
+    route();
+  });
+}
+
+
 window.addEventListener('hashchange', () => {
   initDashboard();
+  bindDashboardEvents();
   console.log("Hash changed to:", window.location.hash);
 });
