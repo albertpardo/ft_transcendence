@@ -67,7 +67,7 @@ services:
     name: game_service
     env: docker
     repo: https://github.com/albertpardo/ft_transcendence.git
-    branch: feature/game_service
+    branch: render
     rootDir: backend/microservices/game_service
     dockerfilePath: Dockerfile
     plan: free
