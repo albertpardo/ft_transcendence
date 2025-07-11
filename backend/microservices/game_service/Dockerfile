@@ -7,6 +7,10 @@ RUN npm install
 
 COPY . .
 
+RUN mkdir -p./data
+
+#COPY ./data/mydb.sqlite ./data/
+
 RUN npm run build
 
 EXPOSE 9002
