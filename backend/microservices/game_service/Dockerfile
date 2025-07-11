@@ -7,7 +7,7 @@ RUN npm install
 
 COPY . .
 
-RUN mkdir -p./data
+RUN mkdir -p ./data
 
 #COPY ./data/mydb.sqlite ./data/
 
