@@ -79,3 +79,7 @@ services:
       - key: PORT
         value: "9002"
     healthCheckPath: /health
+    ports:
+      - port: 10000
+        protocol: http
+        internal: true
