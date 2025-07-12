@@ -136,6 +136,14 @@ await fastify.register(cors, {
   healthApp.get('/health', async (req, reply) => {
     return { status: 'ok' };
   });
+  
+  healthApp.head('/', async (req, reply) => {
+    reply.status(200).send();
+  });
+
+  healthApp.get('/', async (req, reply) => {
+    return { status: 'healthy' };
+  });
   await healthApp.listen({ port: 10000, host: '0.0.0.0' });
   
   await fastify.listen({ port: 9002, host: '0.0.0.0' });
