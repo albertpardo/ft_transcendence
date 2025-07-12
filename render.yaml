@@ -79,4 +79,3 @@ services:
       - key: PORT
         value: "9002"
     healthCheckPath: /health
-    healthCheckPort: 9002
