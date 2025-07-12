@@ -85,6 +85,10 @@ await fastify.register(cors, {
       });
     });
 
+    fastify.get('/health', async (req, reply) => {
+      return { status: 'ok' };
+    });
+    
     fastify.get('/pong', async (request, reply) => {
       reply.headers({
         "Content-Security-Policy": "default-src 'self'",
