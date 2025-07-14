@@ -152,7 +152,7 @@ async function fillInTheTournTable() {
         let currMaxPN : number = Math.pow(2, i + 1);
         let currentTitle : string = ["table-contender-", "table-quarterfinal-", "table-semifinal-"][3 - i - 1];
         for (let j = 0; j < currMaxPN; j++) {
-          if (tourn?.Ids[i][j] !== "") {
+          if (tourn?.Ids[i][j] !== "" && tourn?.Ids[i][j] !== "failed") {
             let respNn = await getNicknameForPlayerId(tourn?.Ids[i][j]);
             let nicnknameVs = JSON.parse(await respNn.text())?.nickname;
             document.getElementById(`${currentTitle}${j + 1}`).innerHTML = "<b>" + nicnknameVs + "</b>";
@@ -285,7 +285,7 @@ export async function renderTournamentContent(hideableElements) {
       });
     }
     else {
-      console.log("just checked and you don't participate in anything:", checkPartRespObj.err);
+      console.log("just checked and you don't participate in anything OR you admin the thing:", checkPartRespObj.err);
       tournLeaveButton.disabled = true;
     }
   }

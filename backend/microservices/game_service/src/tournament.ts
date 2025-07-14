@@ -44,6 +44,7 @@ class Tournament {
       throw "Everyone is already in";
     }
     this.Ids[this.stages - 1][i] = participantId;
+    console.log("added", participantId);
   }
 
   constructor(tName: string, adminId: string, isItPrivate: boolean = true, playersN: number, tId: string) {
@@ -212,6 +213,7 @@ class Tournament {
     for (let user of this.Ids[this.currentStage - 1]) {
       if (playersParticipatingTourn.has(user)) {
         playersParticipatingTourn.delete(user);
+        console.log("players participating delete", user, "from eliminateSelf");
       }
     }
     // TODO run thru game ids and clean ts up
@@ -228,10 +230,12 @@ class Tournament {
       }
       if (runtime.LplayerId === uuid) {
         runtime.leftReady = true;
+        console.log("lp", uuid, "confirmed");
         return ;
       }
       if (runtime.RplayerId === uuid) {
         runtime.rightReady = true;
+        console.log("rp", uuid, "confirmed");
         return ;
       }
     }
@@ -239,7 +243,17 @@ class Tournament {
   }
 
   public eliminatePlayer(uuid: string) {
-    let forefitless : boolean = true;
+    console.log("beginning to eliminate", uuid);
+    let forefit : boolean = false;
+    let i : number = 0;
+    for (let pId of this.Ids[this.currentStage - 1]) {
+      if (pId === uuid) {
+        this.Ids[this.currentStage - 1][i] = "";
+        console.log("cleaned the appropriate Ids...");
+        break ;
+      }
+      i++;
+    }
     for (let gId of this.gameIds[this.currentStage - 1]) {
       if (gId === "") {
         continue ;
@@ -254,12 +268,17 @@ class Tournament {
       if (runtime.LplayerId === uuid) {
         if (runtime.RplayerId !== "") {
           runtime.forefit(uuid);
-          forefitless = false;
+          forefit = true;
+          console.log("made a lp forefit for", uuid, "while cleaning");
         }
         else {
           runtime.LplayerId = "failed";
           if (playersMap.has(uuid)) {
             playersMap.delete(uuid);
+            console.log("players map delete", uuid, "from eliminate player, for gid", gId, "as a left player");
+          }
+          else {
+            console.log("just set lp as failed, already didn't exist in the playersmap..", uuid);
           }
         }
         break ;
@@ -267,29 +286,25 @@ class Tournament {
       if (runtime.RplayerId === uuid) {
         if (runtime.LplayerId !== "") {
           runtime.forefit(uuid);
-          forefitless = false;
+          forefit = true;
+          console.log("made a lp forefit for", uuid, "while cleaning");
         }
         else {
           runtime.RplayerId = "failed";
           if (playersMap.has(uuid)) {
             playersMap.delete(uuid);
+            console.log("players map delete", uuid, "from eliminate player, for gid", gId, "as a right player");
+          }
+          else {
+            console.log("just set rp as failed, already didn't exist in the playersmap..", uuid);
           }
         }
         break ;
       }
     }
-    let i : number = 0;
-    for (let pId of this.Ids[this.currentStage - 1]) {
-      if (pId === uuid) {
-        this.Ids[this.currentStage - 1][i] = "failed";
-        if (forefitless) {
-          if (playersMap.has(uuid)) {
-            playersMap.delete(uuid);
-          }
-        }
-        break ;
-      }
-      i++;
+    if (playersMap.has(uuid) && !forefit) {
+      console.log("one extra deletion of", uuid, "because forefit at the end and still exists in playersMap");
+      playersMap.delete(uuid);
     }
   }
 }
@@ -330,6 +345,7 @@ export function addTournament(tName: string, playersN: number, privacy: boolean,
   playersParticipatingTourn.set(uuid, touridtoadd);
   if (!socksMap.has(uuid)) {
     socksMap.set(uuid, sock);
+    console.log("the sockmap had no sock for an admin. added!");
   }
   console.log(uuid, "just created a tournament", touridtoadd);
   return (tourtoadd.tId);
@@ -420,6 +436,7 @@ export function leaveTournament(uuid: string) {
       }
       tour.eliminatePlayer(uuid);
       playersParticipatingTourn.delete(uuid);
+      console.log("according to all known laws of science, player", uuid, "eliminated from", tId);
     }
     else {
       playersParticipatingTourn.delete(uuid);
