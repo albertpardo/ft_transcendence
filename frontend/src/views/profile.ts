@@ -89,7 +89,7 @@ console.log("✅ Decoded token:", decoded);
       <div class="flex flex-col md:flex-row gap-12">
         <div class="md:w-1/3 flex flex-col items-center space-y-6">
           <div class="bg-gray-800 p-6 rounded-lg w-full flex flex-col items-center">
-            <img id="avatar-preview" src="${avatar || '/public/assets/images/default-avatar.png'}"
+            <img id="avatar-preview" src="${avatar || '/assets/images/default-avatar.png'}"
                  alt="Profile Avatar" class="w-40 h-40 rounded-full border-4 border-blue-600 mb-6">
             <h2 id="display-username" class="text-3xl font-bold mt-2">${username}</h2>
             <p class="text-gray-400 text-lg mt-2">@${nickname}</p>
