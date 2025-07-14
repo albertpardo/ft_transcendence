@@ -22,6 +22,8 @@ interface PongBodyReq {
 const upperSocksMap = new Map<string, WebSocket>();
 //const qs = fastQuerystring();
 
+const appName = "game_service"
+
 const startServer = async () => {
   await historyMain();
 /*
@@ -31,12 +33,15 @@ const startServer = async () => {
   });
  */
 
-  const fastify = Fastify({
-    logger: {
-      transport: getLogTransportConfig()
+const fastify = Fastify({
+  logger: {
+    transport: getLogTransportConfig(),
+    base: {
+      appName: appName
     },
+  },
 //    querystringParser: str => qs.parse(str),
-  });
+});
   
   await fastify.register(websocket);
 
