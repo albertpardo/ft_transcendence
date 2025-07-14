@@ -26,7 +26,7 @@ interface OnRequestFastifyRequest extends FastifyRequest {
 }
 
 
-// Register cookie plugin
+// Register cookie plugin 
 
 
 export default fp(async function (fastify: FastifyInstance): Promise<void> {
@@ -98,7 +98,7 @@ fastify.post('/api/login', async (req: FastifyRequest<{ Body: { username: string
       json = JSON.parse(payload);
     } catch (err) {
       console.error('❌ Failed to parse JSON from upstream:', err);
-      return reply.code(502).send({ error: 'Invalid JSON response from upstream' });
+      return reply.code(502).send({ error: 'Invalid JSON response from upstr eam' });
     }
 
     const token = fastify.jwt.sign({ userId: json.id });
@@ -242,9 +242,9 @@ fastify.post('/api/login', async (req: FastifyRequest<{ Body: { username: string
             }
         },
     });
-
+    const gameServiceUrl = process.env.GAME_SERVICE_URL || 'http://game_service:9002';
     fastify.register(fastifyHttpProxy, {
-        upstream: 'http://game_service:9002',
+        upstream: gameServiceUrl,
         prefix: '/api/pong',
         rewritePrefix: '/api/pong',
         httpMethods: ['GET'],
@@ -252,7 +252,7 @@ fastify.post('/api/login', async (req: FastifyRequest<{ Body: { username: string
     });
 
     fastify.register(fastifyHttpProxy, {
-        upstream: 'http://game_service:9002',
+        upstream: gameServiceUrl,
         prefix: '/api/pong',
         rewritePrefix: '/api/pong',
         httpMethods: ['POST'],
@@ -261,7 +261,7 @@ fastify.post('/api/login', async (req: FastifyRequest<{ Body: { username: string
     });
 
     fastify.register(fastifyHttpProxy, {
-        upstream: 'http://game_service:9002',
+        upstream: gameServiceUrl,
         prefix: '/api/pong/game-ws',
         rewritePrefix: '/api/pong/game-ws',
         httpMethods: ['GET'],

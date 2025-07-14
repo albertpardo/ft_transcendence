@@ -5,7 +5,6 @@ import { renderHomeContent, renderPlayContent, renderTournamentContent, renderSt
 import { renderHistoryContent } from './history';
 import { renderProfileContent } from './profile';
 import { State, nullState } from './pongrender';
-//require('dotenv').config({ path: __dirname + '/../.env' });
 
 function movePaddleWrapper(d: number) {
   movePaddle(d, function (error, response) {
@@ -14,7 +13,6 @@ function movePaddleWrapper(d: number) {
     }
     else {
       response?.text().then((result) => {
-//        console.log(result);
       });
     }
   });
@@ -116,10 +114,7 @@ export async function initDashboard() {
   gameText.style.visibility = "hidden";
   // for some reason, doing a .hidden = false or true on this doesn't work.
   const scoreText : HTMLElement = document.getElementById("score-text")!;
-//  console.log(ball);
-//  console.log(lpad);
-//  console.log(rpad);
-  //WEBSOCKET TIME!
+
 
   let gameState : State = nullState;
   let playerSide : string = "tbd";
@@ -226,7 +221,6 @@ export async function initDashboard() {
         }
         else {
           response?.text().then((result) => {
-//            console.log(result);
           });
         }
       });
