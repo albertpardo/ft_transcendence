@@ -267,11 +267,6 @@ fastify.post('/api/login', async (req: FastifyRequest<{ Body: { username: string
         httpMethods: ['GET'],
         websocket: true,
         http2: false,
-//        preHandler: async (req, reply) => {
-//          console.log("prehandler ws");
-//          console.log(req.headers);
-//          console.log("and the url is: ", req.url);
-//        }
     });
 
 
@@ -385,21 +380,7 @@ fastify.post('/api/login', async (req: FastifyRequest<{ Body: { username: string
               return payload;
             }
         }
-/*             // debugg until 249 
-            if (typeof payload === 'string') {
-                console.log('✅ Final payload returned to client (string):', payload);
-            } else if (Buffer.isBuffer(payload)) {
-                console.log('✅ Final payload returned to client (buffer):', payload.toString());
-            } else if (typeof payload === 'object') {
-                try {
-                    console.log('✅ Final payload returned to client (json):', JSON.stringify(payload));
-                } catch {
-                    console.log('✅ Final payload returned to client (object):', payload);
-                }
-            } else {
-                console.log('✅ Final payload returned to client (unknown type):', payload);
-            }
-            console.log('↪️ About to return payload of type:', typeof payload); */
+
         return payload;
     });
 });

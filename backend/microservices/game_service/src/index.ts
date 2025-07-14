@@ -5,7 +5,7 @@ import type { FastifyRequest } from 'fastify';
 import cors from '@fastify/cors';
 import { PongResponses, State, addPlayerCompletely, removeTheSock, getPongDoneness, getPongState, moveMyPaddle, gamesReadyLoopCheck, dataStreamer } from './pong';
 import { historyMain, getHistForPlayerFromDb } from './history';
-const healthApp = Fastify({ logger: true });
+// const healthApp = Fastify({ logger: true });
 
 interface PongBodyReq {
   playerId: string,
@@ -28,6 +28,15 @@ const startServer = async () => {
     logger: true,
 //    querystringParser: str => qs.parse(str),
   });
+
+  interface HealthResponse {
+    status: string;
+  }
+
+  fastify.get('/health', async (req: FastifyRequest, reply): Promise<HealthResponse> => {
+    return { status: 'ok' };
+  });
+  
   await fastify.register(websocket);
 
   interface CorsOriginCallback {
@@ -133,7 +142,7 @@ await fastify.register(cors, {
 
   fastify.register(apiRoutes, { prefix: '/api' });
   
-  healthApp.get('/health', async (req, reply) => {
+/*   healthApp.get('/health', async (req, reply) => {
     return { status: 'ok' };
   });
   
@@ -144,7 +153,7 @@ await fastify.register(cors, {
   healthApp.get('/', async (req, reply) => {
     return { status: 'healthy' };
   });
-  await healthApp.listen({ port: 10000, host: '0.0.0.0' });
+  await healthApp.listen({ port: 10000, host: '0.0.0.0' }); */
   
   await fastify.listen({ port: 9002, host: '0.0.0.0' });
 };

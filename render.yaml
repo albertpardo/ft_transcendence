@@ -78,7 +78,7 @@ services:
     envVars:
       - key: PORT
         value: "9002"
-      - key: HEALTH_PORT
-        value: "10000"
+      # - key: HEALTH_PORT
+      #   value: "10000"
     healthCheckPath: /health
    
