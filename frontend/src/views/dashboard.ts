@@ -5,6 +5,7 @@ import { renderHomeContent, renderPlayContent, renderTournamentContent, renderSt
 import { renderHistoryContent } from './history';
 import { renderProfileContent } from './profile';
 import { State, nullState } from './pongrender';
+//require('dotenv').config({ path: __dirname + '/../.env' });
 
 function movePaddleWrapper(d: number) {
   movePaddle(d, function (error, response) {
@@ -129,7 +130,7 @@ export async function initDashboard() {
      socket.close();
      socket = null;
    }
-   const API_BASE_URL = process.env.VITE_API_BASE_URL || 'https://127.0.1:8443';
+   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://127.0.1:8443';
     // socket = new WebSocket(`https://127.0.0.1:8443/api/pong/game-ws?uuid=${localStorage.getItem("userId")}&authorization=${localStorage.getItem("authToken")}`);
     socket = new WebSocket(`${API_BASE_URL}/api/pong/game-ws?uuid=${localStorage.getItem("userId")}&authorization=${localStorage.getItem("authToken")}`);
     socket.addEventListener("message", (event) => {
