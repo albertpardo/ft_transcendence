@@ -2,9 +2,32 @@ import Fastify from 'fastify';
 import websocket from '@fastify/websocket';
 import type { FastifyRequest } from 'fastify';
 import cors from '@fastify/cors';
-import { State, addPlayerCompletely, removeTheSock, getPongState, forefit, moveMyPaddle, gamesReadyLoopCheck, dataStreamer, JoinError, getGType, getOppId } from './pong';
+import {
+  State,
+  addPlayerCompletely,
+  removeTheSock,
+  getPongState,
+  forefit,
+  moveMyPaddle,
+  gamesReadyLoopCheck,
+  dataStreamer,
+  JoinError,
+  getGType,
+  getOppId
+} from './pong';
 import { historyMain, getHistForPlayerFromDb } from './history';
-import { tournamentsLoopCheck, checkAdmining, checkParticipating, addTournament, joinTournament, listAllPublicTournaments, deleteTournament, getFullTournament, confirmParticipation } from './tournament';
+import {
+  tournamentsLoopCheck,
+  checkAdmining,
+  checkParticipating,
+  addTournament,
+  joinTournament,
+  listAllPublicTournaments,
+  deleteTournament,
+  leaveTournament,
+  getFullTournament,
+  confirmParticipation
+} from './tournament';
 
 // id shall come from the req and be per-user unique and persistent (jwt)
 // getIn tells do we wanna move (false) or do we wanna get into a game (true)
@@ -256,6 +279,19 @@ const startServer = async () => {
     fastify.get('/pong/tour/delete', async (req, reply) => {
       try {
         deleteTournament(req?.headers['x-user-id'] as string);
+        return JSON.stringify({
+          err: "nil",
+        });
+      }
+      catch (e) {
+        return JSON.stringify({
+          err: e,
+        });
+      }
+    });
+    fastify.get('/pong/tour/leave', async (req, reply) => {
+      try {
+        leaveTournament(req?.headers['x-user-id'] as string);
         return JSON.stringify({
           err: "nil",
         });

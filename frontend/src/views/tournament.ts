@@ -59,6 +59,24 @@ async function deleteTournament() {
   return fresp;
 }
 
+async function leaveTournament() {
+  const fresp = fetch(
+    `${API_BASE_URL}/api/pong/tour/leave`,
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json,application/html,text/html,*/*',
+        'Origin': 'https://127.0.0.1:3000/',
+        'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
+      },
+      credentials: 'include',
+      mode: 'cors',
+    }
+  );
+  return fresp;
+}
+
 async function getCompleteTournamentInfo() {
   const fresp = fetch(
     `${API_BASE_URL}/api/pong/tour/peridinfo`,
@@ -188,6 +206,18 @@ export async function renderTournamentContent(hideableElements) {
       </tr>
     </tbody>
     </table>
+    <div class="flex flex-col space-y-1">
+    <button id="leave-tourn" disabled
+     class=
+     "
+       w-full px-4 py-2 text-white bg-red-600
+       rounded-md hover:bg-red-700 focus:outline-none
+       focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+       focus:ring-offset-gray-800
+       disabled:border-gray-200 disabled:bg-gray-700 disabled:text-gray-500 disabled:shadow-none
+     ">
+      Leave tournament (participant only)
+    </button>
     <button id="force-rm-tourn" disabled
      class=
      "
@@ -197,16 +227,20 @@ export async function renderTournamentContent(hideableElements) {
        focus:ring-offset-gray-800
        disabled:border-gray-200 disabled:bg-gray-700 disabled:text-gray-500 disabled:shadow-none
      ">
-      COMPLETELY ANIHILATE THE TOURNAMENT (admin only)
+      COMPLETELY ANNIHILATE THE TOURNAMENT (admin only)
     </button>
+    </div>
   `;
   hideableElements.contentArea.innerHTML = tempHTML;
-  const tournAnihilationButton = document.getElementById("force-rm-tourn");
+  let tournAnihilationButton = document.getElementById("force-rm-tourn");
+  let tournLeaveButton = document.getElementById("leave-tourn");
+  let doIAdmin : boolean = false;
   if (tournAnihilationButton) {
-    const checkOnTournamentRawResp = await adminCheck();
-    const checkResp = await checkOnTournamentRawResp.text();
-    const checkRespObj = JSON.parse(checkResp);
-    if (checkRespObj.err === "nil") {
+    const checkAdminRawResp = await adminCheck();
+    const checkAdminResp = await checkAdminRawResp.text();
+    const checkAdminRespObj = JSON.parse(checkAdminResp);
+    if (checkAdminRespObj.err === "nil") {
+      doIAdmin = true;
       tournAnihilationButton.removeAttribute('disabled');
       tournAnihilationButton.addEventListener("click", async () => {
         const rawResOfDelete = await deleteTournament();
@@ -224,10 +258,39 @@ export async function renderTournamentContent(hideableElements) {
       });
     }
     else {
-      console.log("just checked and you don't admin anything:", checkRespObj.err);
+      console.log("just checked and you don't admin anything:", checkAdminRespObj.err);
       tournAnihilationButton.disabled = true;
     }
   }
+  if (tournLeaveButton) {
+    tournLeaveButton.disabled = true;
+    const checkPartRawResp = await participantCheck();
+    const checkPartResp = await checkPartRawResp.text();
+    const checkPartRespObj = JSON.parse(checkPartResp);
+    if (checkPartRespObj.err === "nil" && !doIAdmin) {
+      tournLeaveButton.removeAttribute('disabled');
+      tournLeaveButton.addEventListener("click", async () => {
+        const rawResOfLeave = await leaveTournament();
+        const resOfLeave = await rawResOfLeave.text();
+        const resOfLeaveObj = JSON.parse(resOfLeave);
+        if (resOfLeaveObj.err === "nil") {
+          alert("left the tournament");
+          localStorage.removeItem("tId");
+          tournLeaveButton.disabled = true;
+        }
+        else {
+          console.error("failed to leave tournament:", resOfLeaveObj.err);
+        }
+        await fillInTheTournTable();
+      });
+    }
+    else {
+      console.log("just checked and you don't participate in anything:", checkPartRespObj.err);
+      tournLeaveButton.disabled = true;
+    }
+  }
+  console.log(tournAnihilationButton);
+  console.log(tournLeaveButton);
 
   await fillInTheTournTable();
 }
@@ -419,10 +482,10 @@ export async function renderTournamentManagerContent(hideableElements) {
   if (tournamentForm) {
     const submitButton = document.getElementById('register-tournament-button') as HTMLButtonElement;
     const checkPartRawResp = await participantCheck();
-    const checkResp = await checkPartRawResp.text();
-    const checkRespObj = JSON.parse(checkResp);
-    console.log("check resp obj:", checkRespObj);
-    if (checkRespObj.err !== "nil") {
+    const checkPartResp = await checkPartRawResp.text();
+    const checkPartRespObj = JSON.parse(checkPartResp);
+    console.log("check part resp obj:", checkPartRespObj);
+    if (checkPartRespObj.err !== "nil") {
       canWeJoin = true;
       submitButton.removeAttribute('disabled');
       // "no tournament for this player found" => proceed with allowing to create the tournament
@@ -458,7 +521,7 @@ export async function renderTournamentManagerContent(hideableElements) {
     else {
       console.log("can't allow generating a tournament");
       canWeJoin = false
-      localStorage.setItem('tId', checkRespObj.tId);
+      localStorage.setItem('tId', checkPartRespObj.tId);
       submitButton.disabled = true;
       errorField.hidden = true;
       myTournamentField.innerHTML = "<a href=\"" + document.URL.substring(0, document.URL.search("#")) + "#tournament" + "\"><b><i>Click to view</b></i></a>"

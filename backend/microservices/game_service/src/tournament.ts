@@ -222,16 +222,75 @@ class Tournament {
       if (!gamesMap.has(gId)) {
         throw "gamesMap has no " + gId;
       }
-      if (gamesMap.get(gId).LplayerId === uuid) {
-        gamesMap.get(gId).leftReady = true;
+      const runtime = gamesMap.get(gId);
+      if (typeof runtime === "undefined") {
+        throw "undefined game runtime";
+      }
+      if (runtime.LplayerId === uuid) {
+        runtime.leftReady = true;
         return ;
       }
-      if (gamesMap.get(gId).RplayerId === uuid) {
-        gamesMap.get(gId).rightReady = true;
+      if (runtime.RplayerId === uuid) {
+        runtime.rightReady = true;
         return ;
       }
     }
     throw "Player not in tournament's games";
+  }
+
+  public eliminatePlayer(uuid: string) {
+    let forefitless : boolean = true;
+    for (let gId of this.gameIds[this.currentStage - 1]) {
+      if (gId === "") {
+        continue ;
+      }
+      if (!gamesMap.has(gId)) {
+        throw "gamesMap has no " + gId;
+      }
+      const runtime = gamesMap.get(gId);
+      if (typeof runtime === "undefined") {
+        throw "undefined game runtime";
+      }
+      if (runtime.LplayerId === uuid) {
+        if (runtime.RplayerId !== "") {
+          runtime.forefit(uuid);
+          forefitless = false;
+        }
+        else {
+          runtime.LplayerId = "failed";
+          if (playersMap.has(uuid)) {
+            playersMap.delete(uuid);
+          }
+        }
+        break ;
+      }
+      if (runtime.RplayerId === uuid) {
+        if (runtime.LplayerId !== "") {
+          runtime.forefit(uuid);
+          forefitless = false;
+        }
+        else {
+          runtime.RplayerId = "failed";
+          if (playersMap.has(uuid)) {
+            playersMap.delete(uuid);
+          }
+        }
+        break ;
+      }
+    }
+    let i : number = 0;
+    for (let pId of this.Ids[this.currentStage - 1]) {
+      if (pId === uuid) {
+        this.Ids[this.currentStage - 1][i] = "failed";
+        if (forefitless) {
+          if (playersMap.has(uuid)) {
+            playersMap.delete(uuid);
+          }
+        }
+        break ;
+      }
+      i++;
+    }
   }
 }
 
@@ -342,6 +401,33 @@ export function deleteTournament(adminId: string) {
   }
   else {
     throw "You don't admin anything";
+  }
+}
+
+export function leaveTournament(uuid: string) {
+  if (adminMap.has(uuid)) {
+    throw "You can't just leave a tournament you're adminning.";
+  }
+  if (playersParticipatingTourn.has(uuid)) {
+    const tId = playersParticipatingTourn.get(uuid);
+    if (typeof tId === "undefined") {
+      throw "tid is undefined";
+    }
+    if (tournamentMap.has(tId)) {
+      const tour = tournamentMap.get(tId);
+      if (typeof tour === "undefined") {
+        throw "tour is undefined";
+      }
+      tour.eliminatePlayer(uuid);
+      playersParticipatingTourn.delete(uuid);
+    }
+    else {
+      playersParticipatingTourn.delete(uuid);
+      throw "Tournament doesn't exist for some reason";
+    }
+  }
+  else {
+    throw "You don't participate in anything";
   }
 }
 
