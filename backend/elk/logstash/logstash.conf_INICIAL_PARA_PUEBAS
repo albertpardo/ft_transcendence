@@ -5,12 +5,7 @@ input {
   }
 
   file {
-	path => [
-      "/shared_logs/game_service.log",
-      "/shared_logs/user_management.log",
-      "/shared_logs/api_gateway.log",
-      "/shared_logs/frontend.log"
-    ]
+    path => "/shared_logs/game_service.log"
     start_position => "beginning"
     codec => json
     tags => ["file"]
@@ -52,12 +47,6 @@ filter {
     }
   }
 
-
-  # Eliminar posibles  "_" de appname
-  mutate {
-    gsub => ["appname", "_", ""]
-  }
-
   # Validación segura del campo "log.source"
   if [source] and [source] =~ /^\w+([-._]\w+)*$/ {
     mutate {
@@ -71,18 +60,34 @@ filter {
 }
 
 output {
-  elasticsearch {
-    hosts => ["${ELASTIC_URL}"]
-    user => "${ELASTIC_US}"
-    password => "${ELASTIC_PASSWORD}"
-    ssl_enabled => true
-    ssl_verification_mode => "full"
-    ssl_certificate_authorities => ["/usr/share/logstash/config/certs/ca/ca.crt"]
-    ilm_enabled => true
-    ilm_policy => "logs_policy"
-    ilm_rollover_alias => "%{[appname]}%{[via]}"
-    ilm_pattern => "000001"
-    manage_template => false
+  if "file" in [tags] {
+    elasticsearch {
+      hosts => ["${ELASTIC_URL}"]
+      user => "${ELASTIC_US}"
+      password => "${ELASTIC_PASSWORD}"
+      ssl_enabled => true
+      ssl_verification_mode => "full"
+      ssl_certificate_authorities => ["/usr/share/logstash/config/certs/ca/ca.crt"]
+      ilm_enabled => true
+      ilm_policy => "pongfile_policy"
+      ilm_rollover_alias => "pongfile"
+      ilm_pattern => "000001"
+      manage_template => false
+    }
+  } else {
+    elasticsearch {
+      hosts => ["${ELASTIC_URL}"]
+      user => "${ELASTIC_US}"
+      password => "${ELASTIC_PASSWORD}"
+      ssl_enabled => true
+      ssl_verification_mode => "full"
+      ssl_certificate_authorities => ["/usr/share/logstash/config/certs/ca/ca.crt"]
+      ilm_enabled => true
+      ilm_policy => "ponghttp_policy"
+      ilm_rollover_alias => "ponghttp"
+      ilm_pattern => "000001"
+      manage_template => false
+    }
   }
 
   stdout {

@@ -33,15 +33,15 @@ const startServer = async () => {
   });
  */
 
-const fastify = Fastify({
-  logger: {
-    transport: getLogTransportConfig(),
-    base: {
-      appName: appName
+  const fastify = Fastify({
+    logger: {
+      transport: getLogTransportConfig(),
+      base: {
+        appName: appName
+      },
     },
-  },
 //    querystringParser: str => qs.parse(str),
-});
+  });
   
   await fastify.register(websocket);
 
