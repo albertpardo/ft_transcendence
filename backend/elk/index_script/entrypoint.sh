@@ -47,12 +47,7 @@ create_index_pattern() {
 
   echo "  ➕ Creating index pattern '$index_pattern'..."
 
-  create_response=$(curl -s -w "%{http_code}" --cacert "$CA_CERT" \
-    -u "$USER:$PASS" \
-    -X POST "$KIBANA_URL/api/saved_objects/index-pattern" \
-    -H "kbn-xsrf: true" \
-    -H "Content-Type: application/json" \
-    -d @- <<EOF
+  payload=$(cat <<EOF
 {
   "attributes": {
     "title": "${index_pattern}-*",
@@ -61,6 +56,13 @@ create_index_pattern() {
 }
 EOF
 )
+
+  create_response=$(curl -s -w "%{http_code}" --cacert "$CA_CERT" \
+    -u "$USER:$PASS" \
+    -X POST "$KIBANA_URL/api/saved_objects/index-pattern" \
+    -H "kbn-xsrf: true" \
+    -H "Content-Type: application/json" \
+    -d "$payload")
 
   http_code=$(echo "$create_response" | tail -c 4)
   body=$(echo "$create_response" | sed "s/$http_code$//")
@@ -122,11 +124,7 @@ echo "============================"
 
 echo "🔍 ILM :$POLICY_NAME..."
 
-response=$(curl -s -o /dev/null -w "%{http_code}" -X PUT "$ELASTIC_URL/_ilm/policy/$POLICY_NAME" \
-  --cacert "$CA_CERT" \
-  -H "Content-Type: application/json" \
-  -u $USER:$PASS \
-  -d @- <<EOF
+payload=$(cat <<EOF
 {
   "policy": {
     "phases": {
@@ -151,6 +149,12 @@ response=$(curl -s -o /dev/null -w "%{http_code}" -X PUT "$ELASTIC_URL/_ilm/poli
 EOF
 )
 
+response=$(curl -s -o /dev/null -w "%{http_code}" -X PUT "$ELASTIC_URL/_ilm/policy/$POLICY_NAME" \
+  --cacert "$CA_CERT" \
+  -H "Content-Type: application/json" \
+  -u $USER:$PASS \
+  -d "$payload")
+
 if [ "$response" -ne 200 ] && [ "$response" -ne 201 ]; then
   echo " - ❌ Error ILM policy (HTTP $response). EXIT."
   exit 1
@@ -168,12 +172,8 @@ create_template () {
   alias=$1
 
   echo "🔍 Apply ${alias}_template..."
-
-  response=$(curl -s -o /dev/null -w "%{http_code}" -X PUT "$ELASTIC_URL/_index_template/${alias}_template" \
-    --cacert "$CA_CERT" \
-    -H "Content-Type: application/json" \
-    -u $USER:$PASS \
-    -d @- <<EOF
+  
+  payload=$(cat <<EOF
 {
   "index_patterns": ["${alias}-*"],
   "template": {
@@ -200,8 +200,14 @@ create_template () {
 EOF
 )
 
+  response=$(curl -s -o /dev/null -w "%{http_code}" -X PUT "$ELASTIC_URL/_index_template/${alias}_template" \
+    --cacert "$CA_CERT" \
+    -H "Content-Type: application/json" \
+    -u $USER:$PASS \
+    -d "$payload")
+
   if [ "$response" -ne 200 ] && [ "$response" -ne 201 ]; then
-    echo " - ❌ Error pongfile_template (HTTP $response). Exit"
+    echo " - ❌ Error ${alias}_template (HTTP $response). Exit"
     exit 1
   fi
 
@@ -236,11 +242,7 @@ create_initial_index () {
   else
     echo " - 🔍 Creating initial index '${index_name}'..."
 
-    response=$(curl -s -o /dev/null -w "%{http_code}" -X PUT "$ELASTIC_URL/${index_name}" \
-      --cacert "$CA_CERT" \
-      -H "Content-Type: application/json" \
-      -u $USER:$PASS \
-      -d @- <<EOF
+    payload=$(cat <<EOF
 {
   "aliases": {
     "${alias}": {
@@ -250,6 +252,12 @@ create_initial_index () {
 }
 EOF
 )
+
+    response=$(curl -s -o /dev/null -w "%{http_code}" -X PUT "$ELASTIC_URL/${index_name}" \
+      --cacert "$CA_CERT" \
+      -H "Content-Type: application/json" \
+      -u $USER:$PASS \
+      -d "$payload")
 
     if [ "$response" -ne 200 ] && [ "$response" -ne 201 ]; then
       echo " - ❌ Error creating ${index_name} (HTTP $response). EXIT."
@@ -277,11 +285,7 @@ echo "============================"
 echo
 echo "🔍 Start snapshot repository $SNAPSHOT_REPOSITORY_NAME..."
 
-response=$(curl -s -o /dev/null -w "%{http_code}" -X PUT "$ELASTIC_URL/_snapshot/$SNAPSHOT_REPOSITORY_NAME" \
-  --cacert "$CA_CERT" \
-  -H "Content-Type: application/json" \
-  -u $USER:$PASS \
-  -d @- <<EOF
+payload=$(cat <<EOF
 {
   "type": "fs",
   "settings": {
@@ -291,6 +295,12 @@ response=$(curl -s -o /dev/null -w "%{http_code}" -X PUT "$ELASTIC_URL/_snapshot
 }
 EOF
 )
+
+response=$(curl -s -o /dev/null -w "%{http_code}" -X PUT "$ELASTIC_URL/_snapshot/$SNAPSHOT_REPOSITORY_NAME" \
+  --cacert "$CA_CERT" \
+  -H "Content-Type: application/json" \
+  -u $USER:$PASS \
+  -d "$payload")
 
 if [ "$response" -ne 200 ] && [ "$response" -ne 201 ]; then
   echo " - ❌ Error in snapshot repository (HTTP $response). EXIT."
@@ -303,11 +313,7 @@ echo " - ✅ Snapshot repository $SNAPSHOT_REPOSITORY_NAME OK!."
 
 echo "🔍 Setup snapshot policy: $SNAPSHOT_POLICY_NAME..."
 
-create_response=$(curl -s -w "\n%{http_code}" -X PUT "$ELASTIC_URL/_slm/policy/$SNAPSHOT_POLICY_NAME" \
-  --cacert "$CA_CERT" \
-  -H "Content-Type: application/json" \
-  -u $USER:$PASS \
-  -d @- <<EOF
+payload=$(cat <<EOF
 {
   "schedule": "0 0/15 * * * ?",
   "name": "<snapshot-{now}>",
@@ -325,6 +331,12 @@ create_response=$(curl -s -w "\n%{http_code}" -X PUT "$ELASTIC_URL/_slm/policy/$
 }
 EOF
 )
+
+create_response=$(curl -s -w "\n%{http_code}" -X PUT "$ELASTIC_URL/_slm/policy/$SNAPSHOT_POLICY_NAME" \
+  --cacert "$CA_CERT" \
+  -H "Content-Type: application/json" \
+  -u $USER:$PASS \
+  -d "$payload")
 
 body=$(echo "$create_response" | sed '$d')
 http_code=$(echo "$create_response" | tail -n1)
