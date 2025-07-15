@@ -11,6 +11,7 @@ async function userRoutes(fastify, options) {
     console.log("Registering user routes...");
     fastify.post('/signup', userController.signup);
     fastify.post('/login', userController.login);
+    fastify.post('/public/nickname', userController.getPublicNickname);
     fastify.get('/profile', userController.getProfile);
     fastify.put('/profile', userController.updateProfile);
     fastify.delete('/profile', userController.deleteProfile);
