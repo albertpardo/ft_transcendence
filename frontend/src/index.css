@@ -1,3 +1,38 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@keyframes ping {
+  75%, 100% { 
+    transform: scale(1.1); 
+    opacity: 0;
+  }
+}
+
+.animate-ping {
+  animation: ping 0.5s cubic-bezier(0,0,0.2,1) 1;
+}
+
+rect, circle {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@keyframes paddlePing {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; transform: scale(1.1); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes ballPulse {
+  0%, 100% { r: 3; }
+  50% { r: 6; }
+}
+
+.animate-paddle-ping {
+  animation: paddlePing 0.5s ease;
+}
+
+.animate-ball-pulse {
+  animation: ballPulse 0.3s ease;
+}

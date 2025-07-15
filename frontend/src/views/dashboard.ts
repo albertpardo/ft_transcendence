@@ -5,6 +5,7 @@ import { renderHomeContent, renderPlayContent, renderTournamentContent, renderSt
 import { renderHistoryContent } from './history';
 import { renderProfileContent } from './profile';
 import { State, nullState } from './pongrender';
+import confetti from 'canvas-confetti';
 
 function movePaddleWrapper(d: number) {
   movePaddle(d, function (error, response) {
@@ -19,6 +20,37 @@ function movePaddleWrapper(d: number) {
   });
 }
 
+function triggerConfetti() {
+  const gameWindow = document.getElementById('game-window');
+  if (!gameWindow) return;
+
+  const rect = gameWindow.getBoundingClientRect();
+  const x = (rect.left + rect.width / 2) / window.innerWidth;
+  const y = (rect.top + rect.height / 4) / window.innerHeight;
+
+  confetti({
+    particleCount: 150,
+    spread: 70,
+    origin: { x, y },
+    colors: ['#4ade80', '#f87171', '#fbbf24', '#60a5fa']
+  });
+}
+
+function triggerPaddleEffect(paddleId: string) {
+  const paddle = document.getElementById(paddleId);
+  if (!paddle) return;
+
+  paddle.classList.add('animate-paddle-ping');
+  setTimeout(() => paddle.classList.remove('animate-paddle-ping'), 500);
+}
+
+function triggerBallEffect() {
+  const ball = document.getElementById('ball');
+  if (!ball) return;
+  
+  ball.classList.add('animate-ball-pulse');
+  setTimeout(() => ball.classList.remove('animate-ball-pulse'), 300);
+}
 
 export async function initDashboard() {
   const hash = window.location.hash.replace('#', '') || 'home';
@@ -81,16 +113,16 @@ export async function initDashboard() {
 
         <!-- SVG Field -->
         <svg width="1280" height="720">
-          <rect width="100%" height="100%" fill="black" />
-          <rect id="lpad" x="40" y="310" width="10" height="100" fill="white" />
-          <rect id="rpad" x="1230" y="310" width="10" height="100" fill="white" />
-          <circle id="ball" cx="640" cy="360" r="3" fill="white" />
-          <text id="score-text" x="640" y="60" font-family="Monospace" font-size="40" fill="white" text-anchor=middle>
-            0 : 0
-          </text>
-          <text id="game-text" x="640" y="200" font-family="Sans-serif" font-size="60" fill="white" text-anchor=middle>
-            Placeholder text
-          </text>
+        <rect width="100%" height="100%" fill="black" />
+        <rect id="lpad" x="40" y="310" width="10" height="100" class="fill-white" />
+        <rect id="rpad" x="1230" y="310" width="10" height="100" class="fill-white" />
+        <circle id="ball" cx="640" cy="360" r="3" class="fill-white" />
+        <text id="score-text" x="640" y="60" font-family="Monospace" font-size="40" class="fill-white" text-anchor="middle">
+          0 : 0
+        </text>
+        <text id="game-text" x="640" y="200" font-family="Sans-serif" font-size="60" text-anchor="middle" class="opacity-0 transition-all duration-300 fill-white">
+          Welcome to Pong!
+        </text>
         </svg>
 
         <!-- Right Controls -->
@@ -113,6 +145,12 @@ export async function initDashboard() {
   const rpad : HTMLElement = document.getElementById("rpad");
   let gameText : HTMLElement = document.getElementById("game-text");
   gameText.style.visibility = "hidden";
+  // gameText.style.visibility = "visible";
+  gameText.classList.remove('opacity-0');
+
+  gameText.classList.remove('animate-win-pulse', 'animate-lose-pulse', 'animate-text-glow');
+
+
   // for some reason, doing a .hidden = false or true on this doesn't work.
   const scoreText : HTMLElement = document.getElementById("score-text");
 //  console.log(ball);
@@ -126,6 +164,10 @@ export async function initDashboard() {
   let started : boolean = false;
   if (localStorage.getItem("authToken")) {
     socket = new WebSocket(`https://127.0.0.1:8443/api/pong/game-ws?uuid=${localStorage.getItem("userId")}&authorization=${localStorage.getItem("authToken")}`);
+    gameText.classList.remove(
+      'animate-win-pulse', 'animate-lose-pulse', 'animate-text-glow',
+      'fill-red-400', 'fill-green-400', 'fill-red-500', 'fill-green-500'
+    );
     socket.addEventListener("message", (event) => {
 //      console.log("I, a tokened player, receive:", event.data);
       // XXX maybe a try catch? idk if it'd crash or something on a wrong input
@@ -141,7 +183,12 @@ export async function initDashboard() {
           rightUpArrow.hidden = true;
           rightDownArrow.hidden = true;
           gameText.style.visibility = "hidden";
-          scoreText.innerHTML = "" + 0 + " : " + 0;
+          scoreText.classList.add('opacity-0');
+          /*   setTimeout(() => {
+              scoreText.innerHTML = `${gameState.stateScoreL} : ${gameState.stateScoreR}`;
+              scoreText.classList.remove('scale-110', 'text-green-300');
+            }, 150); */
+           scoreText.innerHTML = "" + 0 + " : " + 0;  
           break;
         case "added: R":
           started = false;
@@ -151,6 +198,11 @@ export async function initDashboard() {
           leftUpArrow.hidden = true;
           leftDownArrow.hidden = true;
           gameText.style.visibility = "hidden";
+          scoreText.classList.add('opacity-0');
+          /*   setTimeout(() => {
+              scoreText.innerHTML = `${gameState.stateScoreL} : ${gameState.stateScoreR}`;
+              scoreText.classList.remove('scale-110', 'text-green-300');
+            }, 150); */
           scoreText.innerHTML = "" + 0 + " : " + 0;
           break;
         case "started":
@@ -160,53 +212,79 @@ export async function initDashboard() {
 //          console.log("some error returned from the server");
           break;
         default:
-          gameState = JSON.parse(event.data);
-          ball.setAttribute("cx", gameState.stateBall.coords.x);
-          ball.setAttribute("cy", gameState.stateBall.coords.y);
-          lpad.setAttribute("y", gameState.stateLP.y);
-          rpad.setAttribute("y", gameState.stateRP.y);
+         // gameState = JSON.parse(event.data);
+          const newState =JSON.parse(event.data);
+          /*  gameText.style.visibility = "hidden";
+            gameText.classList.add('opacity-0'); */
+           ball.setAttribute("cx", newState.stateBall.coords.x);
+           ball.setAttribute("cy", newState.stateBall.coords.y);
+           lpad.setAttribute("y", newState.stateLP.y);
+           rpad.setAttribute("y", newState.stateRP.y);
+           scoreText.innerHTML = `${newState.stateScoreL} : ${newState.stateScoreR}`;
+
+          if (newState.stateBall.hitLPaddle) triggerPaddleEffect('lpad');
+          if (newState.stateBall.hitRPaddle) triggerPaddleEffect('rpad');
+          if (newState.stateBall.hitWall) triggerBallEffect();
+          gameState = newState;
+          
+
+
 
           if (gameState.stateWhoL !== "none" && gameState.stateWhoL !== "null state") {
             gameText.style.visibility = "visible";
+            gameText.classList.remove('opacity-0');
+            // gameText.classList.remove('animate-win-pulse', 'animate-lose-pulse', 'animate-text-glow');
+            
             scoreText.innerHTML = "" + gameState.stateScoreL + " : " + gameState.stateScoreR;
             if (playerSide === "l") {
               switch (gameState.stateWhoL) {
                 case "left":
                   gameText.innerHTML = "You lost the round.";
+                  gameText.classList.add('animate-lose-pulse', 'fill-red-400');
                   break;
                 case "right":
                   gameText.innerHTML = "You won the round!";
+                  gameText.classList.add('animate-win-pulse', 'animate-text-glow', 'fill-green-400');
                   break;
                 case "left fully":
                   started = false;
                   gameText.innerHTML = "You lost the game.";
+                  gameText.classList.add('animate-lose-pulse', 'text-5xl', 'fill-red-500');
                   break;
                 case "right fully":
                   started = false;
                   gameText.innerHTML = "You won the game!";
+                  gameText.classList.add('animate-win-pulse', 'animate-text-glow', 'text-5xl', 'fill-green-500');
+                  setTimeout(() => triggerConfetti(), 300);
                   break;
               }
             } else if (playerSide === "r") {
               switch (gameState.stateWhoL) {
                 case "right":
                   gameText.innerHTML = "You lost the round.";
+                  gameText.classList.add('animate-lose-pulse', 'fill-red-400');
                   break;
                 case "left":
                   gameText.innerHTML = "You won the round!";
+                  gameText.classList.add('animate-win-pulse', 'animate-text-glow', 'fill-green-400');
                   break;
                 case "right fully":
                   started = false;
                   gameText.innerHTML = "You lost the game.";
+                  gameText.classList.add('animate-lose-pulse', 'text-5xl', 'fill-red-500');
                   break;
                 case "left fully":
                   started = false;
                   gameText.innerHTML = "You won the game!";
+                  gameText.classList.add('animate-win-pulse', 'animate-text-glow', 'text-5xl', 'fill-green-500');
+                  setTimeout(() => triggerConfetti(), 300);
                   break;
               }
             }
           }
           else {
             gameText.style.visibility = "hidden";
+            
             scoreText.innerHTML = "" + gameState.stateScoreL + " : " + gameState.stateScoreR;
           }
       }
