@@ -16,7 +16,7 @@ const { rateLimitPlugin } = require('./plugins/rateLimit');
 const exampleRoutes = require('./routes/example');
 
 const server = Fastify ({
-    logger: true,
+//    logger: true,
     https: tlsConfig,
 })
 

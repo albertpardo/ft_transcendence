@@ -44,7 +44,7 @@ class Tournament {
       throw "Everyone is already in";
     }
     this.Ids[this.stages - 1][i] = participantId;
-    console.log("added", participantId);
+    console.log("added", participantId, "to", this.tId);
   }
 
   constructor(tName: string, adminId: string, isItPrivate: boolean = true, playersN: number, tId: string) {
@@ -64,26 +64,32 @@ class Tournament {
   }
 
   private checkEveryonePresent() {
-    if (this.stages === 0 || this.currentStage === 0) {
+    if (this.stages <= 0 || this.currentStage <= 0) {
+      console.log("zeroth stage -- yup, everyone present");
       return true;
     }
     for (let i : number = 0; i < Math.pow(2, this.currentStage); i++) {
       if (this.Ids[this.currentStage - 1][i] === "") {
+        console.log("since the player number", i, "isn't present, return false");
         return false;
       }
     }
     this.started = true;
+    console.log("started = true, return true for presence");
     return true;
   }
 
   private gameCreator() {
     for (let i : number = 0; i < Math.pow(2, this.currentStage - 1); i++) {
+      console.log("creating game", i);
       let lId = this.Ids[this.currentStage - 1][2 * i];
       let rId = this.Ids[this.currentStage - 1][2 * i + 1];
       try {
         this.gameIds[this.currentStage - 1][i] = createTournamentGame(lId, rId);
+        console.log("great success in creating a game");
       }
       catch (e) {
+        console.log("motherfu- got an error:", e);
         if (typeof e === "string") {
           this.gameIds[this.currentStage - 1][i] = "";
           if (e[0] === 'L') {
@@ -94,19 +100,20 @@ class Tournament {
           }
         }
         else {
-          console.error(e);
+          console.log("ts wasn't even a string");
         }
       }
     }
   }
 
   private matchesStopped() {
-    if (this.stages === 0 || this.currentStage === 0) {
+    if (this.stages <= 0 || this.currentStage <= 0) {
+      console.log("<= zero stages, YES stopped");
       return true;
     }
-    console.log(this.gameIds);
+    console.log("gameids in matches stopped:", this.gameIds);
     for (let gameId of this.gameIds[this.currentStage - 1]) {
-      console.log("checking doneness for", gameId);
+      console.log("checking stopped (pongDone) for", gameId);
       if (gamesMap.has(gameId)) {
         if (!gamesMap.get(gameId).pongDone) {
           console.log("nope,", gameId, "isn't done yet.");
@@ -114,7 +121,7 @@ class Tournament {
         }
       }
       else {
-        console.log("somehow, not in map");
+        console.log("somehow,", gameId, "not in map");
       }
     }
     return true;
@@ -123,7 +130,9 @@ class Tournament {
   private newStageFiller() {
     // we're in the next stage already, which has been -1'd. To go back one, we +1. - 1 + 1 = 0.
     let i : number = 0;
+    console.log("the curstage var is", this.currentStage, "thus the finished stage was", this.currentStage - 1);
     for (let gameId of this.gameIds[this.currentStage]) {
+      console.log("filling the new stage for", gameId);
       if (gamesMap.has(gameId)) {
         if (gamesMap.get(gameId).whoLost === "left fully" || gamesMap.get(gameId).whoLost === "left skip") {
           this.Ids[this.currentStage - 1][i] = gamesMap.get(gameId).RplayerId;

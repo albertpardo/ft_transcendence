@@ -421,6 +421,7 @@ export function addPlayerCompletely(playerId: string, sock: WebSocket) {
 }
 
 export function createTournamentGame(lId: string, rId: string) {
+  console.log("starting to create with", lId, "and", rId);
   if (playersMap.has(lId)) {
     throw "L Player already in " + playersMap.get(lId);
   }
@@ -428,7 +429,8 @@ export function createTournamentGame(lId: string, rId: string) {
     throw "R Player already in " + playersMap.get(rId);
   }
   const newid : string = makeid(32);
-  gamesMap.set(newid, new PongRuntime);
+  const prt = new PongRuntime;
+  gamesMap.set(newid, prt);
   gamesMap.get(newid).LplayerId = lId;
   gamesMap.get(newid).RplayerId = rId;
   gamesMap.get(newid).gameType = "tournament";
@@ -448,6 +450,7 @@ export function createTournamentGame(lId: string, rId: string) {
   }
   needToSendStartedMap.set(lId, true);
   needToSendStartedMap.set(rId, true);
+  console.log("the prt object in question", gamesMap.get(newid));
   return (newid);
 }
 

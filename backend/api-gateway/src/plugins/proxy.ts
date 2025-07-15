@@ -54,23 +54,23 @@ export default fp(async function (fastify: FastifyInstance) {
                 .send();
               return;
             }
-            console.log('🚀 rewriteRequestHeaders - forwarded auth:', req.headers.authorization);
-            console.log('🔐🔐 Authorization Header:', req.headers['authorization']);
+//            console.log('🚀 rewriteRequestHeaders - forwarded auth:', req.headers.authorization);
+//            console.log('🔐🔐 Authorization Header:', req.headers['authorization']);
 
             try {
-                console.log('🔍🔐 Raw Authorization Header:', JSON.stringify(req.headers.authorization));
-                console.log('🔍🔐 JWT Secret in use:', process.env.JWT_SECRET);
+//                console.log('🔍🔐 Raw Authorization Header:', JSON.stringify(req.headers.authorization));
+//                console.log('🔍🔐 JWT Secret in use:', process.env.JWT_SECRET);
 
                 await req.jwtVerify();
-                console.log("🔐 Verified JWT in proxy preHandler");
+//                console.log("🔐 Verified JWT in proxy preHandler");
 
                 const userId = (req.user as any)?.userId;
                 if (userId) {
                     req.headers['x-user-id'] = String(userId);
-                    console.log(`📦 Injected x-user-id = ${userId} into headers`);
+//                    console.log(`📦 Injected x-user-id = ${userId} into headers`);
                 }
             } catch (err: any) {
-                console.error('❌ Proxy-level JWT verification failed:', err.message);
+//                console.error('❌ Proxy-level JWT verification failed:', err.message);
                 reply.code(401).send({ error: 'Unauthorized in proxy' });
             }
         },
@@ -116,13 +116,13 @@ export default fp(async function (fastify: FastifyInstance) {
                 } else {
                     body = payload;
                 }
-                console.log('📦 Final parsed payload:', body);
+//                console.log('📦 Final parsed payload:', body);
  
             //    const data = typeof payload === 'string' ? JSON.parse(payload) : payload;
             //    console.log('📦 Login/signup response payload:', data);
 
                 if (!body.id || !body.username) {
-                    console.warn('⚠️ No id or username found in payload!');
+//                    console.warn('⚠️ No id or username found in payload!');
                     return payload;
                 }
 
@@ -135,7 +135,7 @@ export default fp(async function (fastify: FastifyInstance) {
                     user: body.username,
                 });
             } catch (err) {
-                console.error('⚠️ Failed to parse payload or generate token:', err);
+//                console.error('⚠️ Failed to parse payload or generate token:', err);
                 return payload; // fallback to original
             }
         }

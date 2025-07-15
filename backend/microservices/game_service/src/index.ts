@@ -43,7 +43,7 @@ const upperSocksMap = new Map<string, WebSocket>();
 const startServer = async () => {
   await historyMain();
   const fastify = Fastify({
-    logger: true,
+//    logger: true,
 //    querystringParser: str => qs.parse(str),
   });
   await fastify.register(websocket);
