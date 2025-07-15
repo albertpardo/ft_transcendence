@@ -495,6 +495,7 @@ export function forefit(playerId: string) {
         playersMap.delete(lpid);
         playersMap.delete(rpid);
         gamesMap.delete(gameId);
+        console.log("double deleted the players", lpid, rpid, "and the gid", gameId, "cuz abandon");
         return ;
       }
       gamesMap.get(gameId).forefit(playerId);
@@ -568,6 +569,7 @@ const waitingForReconnect = async (playerId) => {
 export const dataStreamer = async (playerId : string) => {
   let sock : WebSocket = socksMap.get(playerId);
   const runtime : PongRuntime = gamesMap.get(playersMap.get(playerId));
+  console.log("data streamer", playerId, "says: pm is", playersMap);
   while (true) {
     if (!playersMap.has(playerId)) {
       console.log("player", playerId, "has disappeared from map");
@@ -601,12 +603,25 @@ export const dataStreamer = async (playerId : string) => {
         // only delete the game id if the datastreamer is from the left to avoid double delete
         // XXX TODO leaks?
         // XXX mutex alert.
-        playersMap.delete(runtime.RplayerId);
+        if (playersMap.has(runtime.RplayerId)) {
+          console.log("deleting rpid", runtime.RplayerId, "from pmap in datastreamer's pongdone thing (being a left player ourselves)");
+          playersMap.delete(runtime.RplayerId);
+        }
         if (gamesMap.has(playersMap.get(playerId))) {
+          console.log("deleting gid", playersMap.get(playerId), "from gmap in datastreamer's pongdone thing (being a left player ourselves)");
           gamesMap.delete(playersMap.get(playerId));
         }
+        if (playersMap.has(playerId)) {
+          console.log("deleting lpid", playerId, "from pmap in datastreamer's pongdone thing (being a left player ourselves)");
+          playersMap.delete(playerId);
+        }
       }
-      playersMap.delete(playerId);
+      else if (runtime.RplayerId === playerId) {
+        if (playersMap.has(playerId)) {
+          console.log("deleting rpid", playerId, "from pmap in datastreamer's pongdone thing (being a left player ourselves)");
+          playersMap.delete(playerId);
+        }
+      }
       break ;
     }
     await sleep(FRAME_TIME_MS);

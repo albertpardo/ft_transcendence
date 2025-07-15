@@ -15,8 +15,8 @@ class Tournament {
   private gameSfIds : Array<string> = ["", ""];
   private gameFIds : Array<string> = [""];
   public gameIds : Array<Array<string>> = [this.gameFIds, this.gameSfIds, this.gameQfIds];
-  public stages : number = 1;
-  public currentStage : number = 1;
+  public stages : number = 0;
+  public currentStage : number = 0;
   public tId : string = "";
   public started : boolean = false;
   public alive : boolean = true;
@@ -130,31 +130,44 @@ class Tournament {
   private newStageFiller() {
     // we're in the next stage already, which has been -1'd. To go back one, we +1. - 1 + 1 = 0.
     let i : number = 0;
-    console.log("the curstage var is", this.currentStage, "thus the finished stage was", this.currentStage - 1);
+    console.log("the curstage var is", this.currentStage, "thus the index to use is", this.currentStage - 1);
+    console.log("game ids in this:", this.gameIds);
+    console.log("and the game map:", gamesMap);
     for (let gameId of this.gameIds[this.currentStage]) {
       console.log("filling the new stage for", gameId);
+      console.log("i =", i, "; i*2 =", i * 2, "; i*2+1 =", i * 2 + 1);
       if (gamesMap.has(gameId)) {
+        console.log("if 1");
         if (gamesMap.get(gameId).whoLost === "left fully" || gamesMap.get(gameId).whoLost === "left skip") {
+          console.log("if 1.1");
           this.Ids[this.currentStage - 1][i] = gamesMap.get(gameId).RplayerId;
         }
         else if (gamesMap.get(gameId).whoLost === "right fully" || gamesMap.get(gameId).whoLost === "right skip") {
+          console.log("elif 1.2");
           this.Ids[this.currentStage - 1][i] = gamesMap.get(gameId).LplayerId;
         }
         else {
+          console.log("else 1.3");
           this.Ids[this.currentStage - 1][i] = "failed";
         }
       }
       else {
+        console.log("else 2");
         // in case we had a player already in a different game by that point,...
-        // this is so rare and bad that no history will be considered, idk idc.
         if (this.Ids[this.currentStage][i * 2] === "failed") {
+          console.log("if 2.1");
           this.Ids[this.currentStage - 1][i] = this.Ids[this.currentStage][i * 2 + 1];
         }
         else if (this.Ids[this.currentStage][i * 2 + 1] === "failed") {
+          console.log("elif 2.2");
           this.Ids[this.currentStage - 1][i] = this.Ids[this.currentStage][i * 2];
+        }
+        else {
+          console.log("mysterious nothing");
         }
       }
       i++;
+      console.log("i incremented and is now", i);
     }
   }
 
@@ -191,26 +204,28 @@ class Tournament {
   // 8
   public mainLoop = async () => {
     while (this.alive) {
-      console.log("tour: before everyone present");
+      console.log("stage", this.currentStage, "tour: before everyone present");
       while (!this.checkEveryonePresent()) {
         await sleep(5e3);
       }
-      console.log("tour: after everyone present, before checking for stopped");
+      console.log("stage", this.currentStage, "tour: after everyone present, before checking for stopped");
       this.gameCreator();
       while (!this.matchesStopped()) {
         // TODO prolly this dude needs to get the info of the finished games and distribute the people, actually. idk
-        console.log("waiting for matches to be stopped...");
+        console.log("stage", this.currentStage, "waiting for matches to be stopped...");
         await sleep(5e3);
       }
-      console.log("tour: after stopped");
+      console.log("stage", this.currentStage, "tour: after stopped");
       this.currentStage -= 1;
       if (this.currentStage <= 0) {
-        console.log("tour: bye");
+        console.log("stage", this.currentStage, "tour: bye");
         this.alive = false;
         break ;
       }
+      console.log("stage", this.currentStage, "tour: after subtraction");
       // TODO add the moving people on phase here
       this.newStageFiller();
+      console.log("stage", this.currentStage, "tour: after newstagefiller");
     }
   }
 
