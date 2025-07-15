@@ -19,7 +19,7 @@ if (!userManagementUrl) {
 
 interface OnRequestFastifyRequest extends FastifyRequest {
     method: string;
-    headers: {
+    headers: { 
         origin?: string;
         [key: string]: any;
     };
@@ -185,6 +185,13 @@ fastify.post('/api/login', async (req: FastifyRequest<{ Body: { username: string
     reply.code(500).send({ error: 'Internal Server Error during signup' });
   }
 });
+    
+    fastify.register(fastifyHttpProxy, {
+        upstream: userManagementUrl,
+        prefix: '/api/public/nickname',
+        rewritePrefix: '/api/user/public/nickname',
+        http2: false,
+    });
 
 
     fastify.register(fastifyHttpProxy, {
