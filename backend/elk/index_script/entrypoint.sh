@@ -9,8 +9,16 @@ KIBANA_URL="${KIBANA_URL}"
 
 CA_CERT="/root/certs/ca/ca.crt"
 
+# constanst
+POLICY_NAME="logs_policy"
+SNAPSHOT_REPOSITORY_NAME="my_backup"
+
 # Definir el array con los patrones para usar como index patterns
 patterns="gameservice usermanagement apigateway frontend"
+
+# Fichero de dashboard al que hay que actualizar con los nuevos IDs generados al crear los indexpatterns
+NDJSON_IN="/root/dashboard_example.ndjson" 
+NDJSON_OUT="/root/dashboard_example_copy.ndjson" 
 
 ########## INDEX PATTERN #####
 echo "============================"
@@ -18,10 +26,6 @@ echo "🔧 CREATING INDEX PATTERNS"
 echo "============================"
 
 declare -A new_ids
-
-# Fichero de dashboard al que hay que actualizar con los nuevos IDs generados al crear los indexpatterns
-NDJSON_IN="/root/dashboard_example.ndjson" 
-NDJSON_OUT="/root/dashboard_example_copy.ndjson" 
 
 create_index_pattern() {
   index_pattern="$1"
@@ -49,7 +53,7 @@ create_index_pattern() {
     -H "Content-Type: application/json" \
     -d '{
       "attributes": {
-        "title": "'"$index_pattern"'",
+        "title": "'"$index_pattern"-*'",
         "timeFieldName": "@timestamp"
       }
     }')
@@ -109,12 +113,12 @@ echo "🏁 Done: Index patterns created."
 ###### ILM POLICY ###########
 echo
 echo "============================"
-echo "🔧 CREATING LOGS POLICY"
+echo "🔧 CREATING $POLICY_NAME"
 echo "============================"
 
-echo "🔍 ILM :logs_policy..."
+echo "🔍 ILM :$POLICY_NAME..."
 
-response=$(curl -s -o /dev/null -w "%{http_code}" -X PUT "$ELASTIC_URL/_ilm/policy/logs_policy" \
+response=$(curl -s -o /dev/null -w "%{http_code}" -X PUT "$ELASTIC_URL/_ilm/policy/$POLICY_NAME" \
   --cacert "$CA_CERT" \
   -H "Content-Type: application/json" \
   -u $USER:$PASS -d '
@@ -141,11 +145,11 @@ response=$(curl -s -o /dev/null -w "%{http_code}" -X PUT "$ELASTIC_URL/_ilm/poli
 }')
 
 if [ "$response" -ne 200 ] && [ "$response" -ne 201 ]; then
-  echo " - ❌ Error pongfile_policy ILM (HTTP $response). EXIT."
+  echo " - ❌ Error ILM policy (HTTP $response). EXIT."
   exit 1
 fi
 
-echo " - ✅ pongfile ILM policy OK!."
+echo " - ✅ ILM policy OK!."
 
 ###### TEMPLATES  ###########
 echo
@@ -229,7 +233,7 @@ create_initial_index () {
       --cacert "$CA_CERT" \
       -H "Content-Type: application/json" \
       -u $USER:$PASS \
-            -d @- <<EOF
+      -d @- <<EOF
 {
   "aliases": {
     "${alias}": {
