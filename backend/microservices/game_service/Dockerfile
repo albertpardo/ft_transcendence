@@ -15,4 +15,5 @@ RUN npm run build
 
 EXPOSE 9002
 
-CMD ["npm", "start"]
+# CMD ["npm", "start"]
+CMD ["node", "dist/index.js"]
