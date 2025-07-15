@@ -171,6 +171,39 @@ class Tournament {
     }
   }
 
+  private oldStuffDeleter() {
+    // we're in the next stage already, which has been -1'd. To go back one, we +1. - 1 + 1 = 0.
+    console.log("the curstage var is", this.currentStage, "thus the index to use is", this.currentStage - 1);
+    console.log("game ids in this:", this.gameIds);
+    console.log("and the game map:", gamesMap);
+    for (let gameId of this.gameIds[this.currentStage]) {
+      console.log("cleaning up for", gameId);
+      if (gamesMap.has(gameId)) {
+        const lid = gamesMap.get(gameId).LplayerId;
+        const rid = gamesMap.get(gameId).RplayerId;
+        if (playersMap.has(lid)) {
+          playersMap.delete(lid);
+          console.log("from within the OSD deleted lid", lid, "of game", gameId);
+        }
+        else {
+          console.log("from within the OSD didn't find lid", lid, "in pmap of game", gameId);
+        }
+        if (playersMap.has(rid)) {
+          playersMap.delete(rid);
+          console.log("from within the OSD deleted rid", rid, "of game", gameId);
+        }
+        else {
+          console.log("from within the OSD didn't find rid", rid, "in pmap of game", gameId);
+        }
+        gamesMap.delete(gameId);
+        console.log("also rmd gid", gameId);
+      }
+      else {
+        console.log("from within the OSD, didn't find the game id!!!!!!!!!", gameId);
+      }
+    }
+  }
+
   // loop checking for players in ts
   //
   // when EVERYONE is here, start all the games
@@ -211,33 +244,55 @@ class Tournament {
       console.log("stage", this.currentStage, "tour: after everyone present, before checking for stopped");
       this.gameCreator();
       while (!this.matchesStopped()) {
-        // TODO prolly this dude needs to get the info of the finished games and distribute the people, actually. idk
         console.log("stage", this.currentStage, "waiting for matches to be stopped...");
         await sleep(5e3);
       }
       console.log("stage", this.currentStage, "tour: after stopped");
       this.currentStage -= 1;
       if (this.currentStage <= 0) {
-        console.log("stage", this.currentStage, "tour: bye");
+        if (this.currentStage === 0 ) {
+          // finished correctly
+          if (gamesMap.has(this.gameIds[0][0])) {
+            const lastGame = gamesMap.get(this.gameIds[0][0]);
+            if (lastGame.whoLost === "left fully" || lastGame.whoLost === "left skip") {
+              this.winner = lastGame.RplayerId;
+            }
+            else if (lastGame.whoLost === "right fully" || lastGame.whoLost === "right skip") {
+              this.winner = lastGame.LplayerId;
+            }
+            else if (lastGame.whoLost === "both") {
+              this.winner = "failed";
+            }
+            else {
+              console.log("now explain to me: how did you get here?");
+            }
+            console.log("WINNER CHOSEN:", this.winner);
+          }
+          else {
+            console.log("holy shit i think somebody deleted the very last game way too soon");
+          }
+        }
+
+        console.log("tour", this.tId, "awaiting a minute till auto-shutdown");
+        await sleep(60e3);
+        console.log("tour", this.tId, "bye");
         this.alive = false;
         break ;
       }
       console.log("stage", this.currentStage, "tour: after subtraction");
-      // TODO add the moving people on phase here
       this.newStageFiller();
       console.log("stage", this.currentStage, "tour: after newstagefiller");
+      this.oldStuffDeleter();
+      console.log("stage", this.currentStage, "tour: after oldstuffdeleter");
     }
   }
 
   public eliminateSelf() {
     this.alive = false;
-    if (this.currentStage <= 0) {
-      throw "It should already be gone via the loop cleaning";
-    }
-    for (let user of this.Ids[this.currentStage - 1]) {
-      if (playersParticipatingTourn.has(user)) {
-        playersParticipatingTourn.delete(user);
-        console.log("players participating delete", user, "from eliminateSelf");
+    for (const [pid, tid] of playersParticipatingTourn) {
+      if (tid === this.tId) {
+        playersParticipatingTourn.delete(pid);
+        console.log("players participating delete", pid, "from eliminateSelf in tournament", this.tId);
       }
     }
     // TODO run thru game ids and clean ts up
