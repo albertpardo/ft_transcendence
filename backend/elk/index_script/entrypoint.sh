@@ -9,9 +9,10 @@ KIBANA_URL="${KIBANA_URL}"
 
 CA_CERT="/root/certs/ca/ca.crt"
 
-# constanst
+# constants
 POLICY_NAME="logs_policy"
 SNAPSHOT_REPOSITORY_NAME="my_backup"
+SNAPSHOT_POLICY_NAME="mi-politica-snapshot"
 
 # Definir el array con los patrones para usar como index patterns
 patterns="gameservice usermanagement apigateway frontend"
@@ -51,12 +52,15 @@ create_index_pattern() {
     -X POST "$KIBANA_URL/api/saved_objects/index-pattern" \
     -H "kbn-xsrf: true" \
     -H "Content-Type: application/json" \
-    -d '{
-      "attributes": {
-        "title": "'"$index_pattern"-*'",
-        "timeFieldName": "@timestamp"
-      }
-    }')
+    -d @- <<EOF
+{
+  "attributes": {
+    "title": "${index_pattern}-*",
+    "timeFieldName": "@timestamp"
+  }
+}
+EOF
+)
 
   http_code=$(echo "$create_response" | tail -c 4)
   body=$(echo "$create_response" | sed "s/$http_code$//")
@@ -121,7 +125,8 @@ echo "🔍 ILM :$POLICY_NAME..."
 response=$(curl -s -o /dev/null -w "%{http_code}" -X PUT "$ELASTIC_URL/_ilm/policy/$POLICY_NAME" \
   --cacert "$CA_CERT" \
   -H "Content-Type: application/json" \
-  -u $USER:$PASS -d '
+  -u $USER:$PASS \
+  -d @- <<EOF
 {
   "policy": {
     "phases": {
@@ -142,7 +147,9 @@ response=$(curl -s -o /dev/null -w "%{http_code}" -X PUT "$ELASTIC_URL/_ilm/poli
       }
     }
   }
-}')
+}
+EOF
+)
 
 if [ "$response" -ne 200 ] && [ "$response" -ne 201 ]; then
   echo " - ❌ Error ILM policy (HTTP $response). EXIT."
@@ -173,8 +180,8 @@ create_template () {
     "settings": {
       "index": {
         "lifecycle": {
-          "name": "logs_policy",
-          "rollover_alias": "${alias}"
+          "name": "$POLICY_NAME",
+          "rollover_alias": "$alias"
         },
         "number_of_shards": 1,
         "number_of_replicas": 0
@@ -268,39 +275,43 @@ echo "============================"
 echo "🔧 CONFIGURE SNAPSHOST"
 echo "============================"
 echo
-echo "🔍 Start snapshot repository 'my_backup'..."
+echo "🔍 Start snapshot repository $SNAPSHOT_REPOSITORY_NAME..."
 
-response=$(curl -s -o /dev/null -w "%{http_code}" -X PUT "$ELASTIC_URL/_snapshot/my_backup" \
+response=$(curl -s -o /dev/null -w "%{http_code}" -X PUT "$ELASTIC_URL/_snapshot/$SNAPSHOT_REPOSITORY_NAME" \
   --cacert "$CA_CERT" \
   -H "Content-Type: application/json" \
-  -u $USER:$PASS -d '
+  -u $USER:$PASS \
+  -d @- <<EOF
 {
   "type": "fs",
   "settings": {
     "location": "/mnt/snapshots",
     "compress": true
   }
-}')
+}
+EOF
+)
 
 if [ "$response" -ne 200 ] && [ "$response" -ne 201 ]; then
   echo " - ❌ Error in snapshot repository (HTTP $response). EXIT."
   exit 1
 fi
 
-echo " - ✅ Snapshot repository 'my_backup' OK!."
+echo " - ✅ Snapshot repository $SNAPSHOT_REPOSITORY_NAME OK!."
 
 # Crear política 
 
-echo "🔍 Setup snapshot policy: 'mi-politica-snapshot'..."
+echo "🔍 Setup snapshot policy: $SNAPSHOT_POLICY_NAME..."
 
-create_response=$(curl -s -w "\n%{http_code}" -X PUT "$ELASTIC_URL/_slm/policy/mi-politica-snapshot" \
+create_response=$(curl -s -w "\n%{http_code}" -X PUT "$ELASTIC_URL/_slm/policy/$SNAPSHOT_POLICY_NAME" \
   --cacert "$CA_CERT" \
   -H "Content-Type: application/json" \
-  -u $USER:$PASS -d '
+  -u $USER:$PASS \
+  -d @- <<EOF
 {
   "schedule": "0 0/15 * * * ?",
   "name": "<snapshot-{now}>",
-  "repository": "my_backup",
+  "repository": "$SNAPSHOT_REPOSITORY_NAME",
   "config": {
     "indices": ["*"],
     "ignore_unavailable": false,
@@ -311,7 +322,9 @@ create_response=$(curl -s -w "\n%{http_code}" -X PUT "$ELASTIC_URL/_slm/policy/m
     "min_count": 1,
     "max_count": 3
   }
-}')
+}
+EOF
+)
 
 body=$(echo "$create_response" | sed '$d')
 http_code=$(echo "$create_response" | tail -n1)
@@ -322,13 +335,14 @@ if [ "$http_code" -ne 200 ] && [ "$http_code" -ne 201 ]; then
   exit 1
 fi
 
-echo " - ✅ snapshot policy 'mi-politica-snapshot' OK!."
+echo " - ✅ snapshot policy $SNAPSHOT_POLICY_NAME OK!."
 
-# EXECUTE mi-politica-snapshot 
+# EXECUTE SNAPSHOT POLICY  
+
 echo
-echo "🔍 Start snapshot policy : 'mi-politica-snapshot'..."
+echo "🔍 Start snapshot policy : $SNAPSHOT_POLICY_NAME..."
 
-execute_response=$(curl -s -w "\n%{http_code}" -X POST "$ELASTIC_URL/_slm/policy/mi-politica-snapshot/_execute" \
+execute_response=$(curl -s -w "\n%{http_code}" -X POST "$ELASTIC_URL/_slm/policy/$SNAPSHOT_POLICY_NAME/_execute" \
   --cacert "$CA_CERT" \
   -H "Content-Type: application/json" \
   -u $USER:$PASS)
