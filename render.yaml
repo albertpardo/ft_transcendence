@@ -3,7 +3,7 @@ services:
     name: frontend
     env: docker
     repo: https://github.com/albertpardo/ft_transcendence.git
-    branch: main
+    branch: render
     rootDir: frontend
     dockerfilePath: Dockerfile
     plan: free
@@ -12,7 +12,6 @@ services:
       paths:
         - frontend/**
     buildCommand: npm run build
-    startCommand: npm run preview
     envVars:
       - key: NODE_ENV
         value: production
@@ -21,35 +20,37 @@ services:
       - key: VITE_API_BASE_URL
         value: https://api-gateway-71gx.onrender.com
     healthCheckPath: /
-    # ports: 
-    #   - 3000
 
   - type: web
     name: api-gateway
     env: docker
     repo: https://github.com/albertpardo/ft_transcendence.git
-    branch: main
+    branch: render
     rootDir: backend/api-gateway
     dockerfilePath: Dockerfile
     plan: free
     autoDeploy: true
     buildFilter:
-      paths:
+      paths: 
         - backend/api-gateway/**
+    # buildCommand: ""
+    # startCommand: ""
     envVars:
       - key: PORT
         value: "8443"
       - key: API_BASE_URL
         value: https://api-gateway-71gx.onrender.com
+      - key: HEALTH_PORT
+        value: "10000"
+      - key: USER_MANAGEMENT_URL
+        value: https://user-management-lsdg.onrender.com
     healthCheckPath: /health
-    # ports:
-    #   - 8443
 
   - type: web
     name: user_management
     env: docker
     repo: https://github.com/albertpardo/ft_transcendence.git
-    branch: main
+    branch: render
     rootDir: backend/microservices/user_management
     dockerfilePath: Dockerfile
     plan: free
@@ -61,6 +62,21 @@ services:
       - key: PORT
         value: "9001"
     healthCheckPath: /health
-    # ports:
-    #   - 9001
 
+  - type: web
+    name: game_service
+    env: docker
+    repo: https://github.com/albertpardo/ft_transcendence.git
+    branch: render
+    rootDir: backend/microservices/game_service
+    dockerfilePath: Dockerfile
+    plan: free
+    autoDeploy: true
+    buildFilter:
+      paths:
+        - backend/microservices/game_service/**
+    envVars:
+      - key: PORT
+        value: "9002"
+    healthCheckPath: /health
+    startCommand: node dist/index.js

@@ -17,11 +17,11 @@ function movePaddleWrapper(d: number) {
     }
     else {
       response?.text().then((result) => {
-//        console.log(result);
       });
     }
   });
 }
+
 
 function triggerConfetti() {
   const gameWindow = document.getElementById('game-window');
@@ -137,6 +137,7 @@ function triggerBallEffect() {
   setTimeout(() => ball.classList.remove('animate-ball-pulse'), 300);
 }
 
+
 export async function initDashboard() {
   const hash = window.location.hash.replace('#', '') || 'home';
   const app = document.getElementById('app')!;
@@ -187,7 +188,7 @@ export async function initDashboard() {
     <main id="content-area" class="pt-16 md:pt-0 md:ml-64 p-4 md:p-6 lg:p-8 xl:p-12 min-h-screen overflow-auto bg-gray-900"></main>
 
     <!-- Hidden Game Area -->
-    <div id="game-area" class="flex flex-col items-center justify-center" hidden>
+    <div id="game-area" class="flex flex-col items-center justify-center hidden">
       <div id="game-window" class="relative w-[1280px] h-[720px]">
         <div id="rain-overlay" class="absolute inset-0 z-50 pointer-events-none hidden"></div>
 
@@ -231,6 +232,7 @@ export async function initDashboard() {
     </div>
   `;
 
+
   const leftUpArrow: HTMLElement = document.getElementById("left-up");
   const leftDownArrow : HTMLElement = document.getElementById("left-down");
   const rightUpArrow : HTMLElement = document.getElementById("right-up");
@@ -250,23 +252,23 @@ export async function initDashboard() {
   // gameText.classList.remove('animate-win-pulse', 'animate-lose-pulse', 'animate-text-glow');
 
 
+
   // for some reason, doing a .hidden = false or true on this doesn't work.
-  const scoreText : HTMLElement = document.getElementById("score-text");
-//  console.log(ball);
-//  console.log(lpad);
-//  console.log(rpad);
-  //WEBSOCKET TIME!
-  let socket : WebSocket;
+  const scoreText : HTMLElement = document.getElementById("score-text")!;
+
+
   let gameState : State = nullState;
   let playerSide : string = "tbd";
   // FIXME unused. remove or use.
   let started : boolean = false;
   if (localStorage.getItem("authToken")) {
+
     socket = new WebSocket(`${API_BASE_URL}/api/pong/game-ws?uuid=${localStorage.getItem("userId")}&authorization=${localStorage.getItem("authToken")}`);
     gameText.classList.remove(
       'animate-win-pulse', 'animate-lose-pulse', 'animate-text-glow',
       'fill-red-400', 'fill-green-400', 'fill-red-500', 'fill-green-500'
     );
+
     socket.addEventListener("message", (event) => {
 //      console.log("I, a tokened player, receive:", event.data);
       // XXX maybe a try catch? idk if it'd crash or something on a wrong input
@@ -312,6 +314,7 @@ export async function initDashboard() {
         case "error":
           break;
         default:
+
           const newState: State =JSON.parse(event.data);
 
            ball.setAttribute("cx", newState.stateBall.coords.x);
@@ -331,6 +334,7 @@ export async function initDashboard() {
 
           gameState = newState;
           
+
 
 
 
@@ -411,7 +415,6 @@ export async function initDashboard() {
         }
         else {
           response?.text().then((result) => {
-//            console.log(result);
           });
         }
       });
@@ -510,7 +513,9 @@ export async function initDashboard() {
   document.getElementById('logout-btn')!.addEventListener('click', () => {
     localStorage.removeItem('authToken');
     localStorage.removeItem('userId');
-    socket.close();
+    if (socket !== null) {
+      socket.close();
+    }
     window.location.hash = 'login';
     route();
   });
@@ -528,7 +533,28 @@ export async function initDashboard() {
     case 'stats':       renderStatsContent(contentArea, startButton, gameArea, gameWindow);       break;
     default:            renderHomeContent(contentArea, startButton, gameArea, gameWindow);
   }
+  gameArea.style.display = (hash === 'play') ? 'flex' : 'none';
 }
 
 // Initialize dashboard only once when starting the app
 initDashboard();
+
+function bindDashboardEvents() {
+  // Logout functionality
+  document.getElementById('logout-btn')?.addEventListener('click', () => {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('userId');
+    if (socket !== null) {
+      socket.close();
+    }
+    window.location.hash = 'login';
+    route();
+  });
+}
+
+
+window.addEventListener('hashchange', () => {
+  initDashboard();
+  bindDashboardEvents();
+  console.log("Hash changed to:", window.location.hash);
+});

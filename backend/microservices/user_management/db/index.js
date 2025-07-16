@@ -37,37 +37,38 @@ function getNickname(nickname) {
 
 function getUserById(id) {
     const stmt = db.prepare('SELECT * FROM users WHERE id = ?');
-    return stmt.get(id);
+    const resp = stmt.get(id);
+    console.log("resp is", resp);
+    return resp;
 }
 
 function createUser({ id, username, password, nickname, email, avatar = '' }) {
     const stmt = db.prepare('INSERT INTO users (id, username, password, nickname, email, avatar) VALUES (?, ?, ?, ?, ?, ?)');
     const info = stmt.run(id, username, password, nickname, email, avatar);
 	const stmt2 = db.prepare('SELECT * FROM users WHERE id = ?');
-	const info2 = stmt2.all(id);
-    return { id: info2[0].id, username, avatar:info2[0].avatar };
+	// const info2 = stmt2.all(id);
+    const info2 = stmt2.get(id);
+    return { id: info2.id, username, avatar:info2.avatar };
+    // return { id: info2[0].id, username, avatar:info2[0].avatar };
 }
 
 function updateUser(userId, updates) {
-/*
-    const stmt = db.prepare(`
-        UPDATE users SET
-        username = ?,
-        nickname = ?,
-        email = ?,
-        password = ?,
-        avatar = ?
-        WHERE id = ?
-    `);
-    stmt.run(username, nickname, email, password, avatar || '', userId);
-*/
-    const fields = [];
-    const values = [];
+   
+   const fields = [];
+   const values = [];
+   
+   for (const [key, value] of Object.entries(updates)) {
+        if (typeof value !== 'undefined') {
+           fields.push(`${key} = ?`);
+           values.push(value);
+       }
+   }
+   if (fields.length === 0) {
+        console.warn("⚠️ No fields to update in updateUser");
+        return;
+   }
 
-    for (const [key, value] of Object.entries(updates)) {
-        fields.push(`${key} = ?`);
-        values.push(value);
-    }
+
     const sql = `UPDATE users SET ${fields.join(', ')} WHERE id = ?`;
     const stmt = db.prepare(sql);
     stmt.run(...values, userId);

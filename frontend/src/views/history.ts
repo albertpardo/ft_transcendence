@@ -59,7 +59,11 @@ export async function renderHistoryContent(el: HTMLElement, bu: HTMLElement, gAr
       <tbody>
 `;
   // TODO FIXME spam protection? cache the thing maybe? make it independently get downloaded in the background once every something minutes.
-  const rawHist = await getHistoryForPlayerId(localStorage.getItem('userId'));
+  const userId = localStorage.getItem('userId');
+  if (!userId) {
+    throw new Error("User ID not found in localStorage.");
+  }
+  const rawHist = await getHistoryForPlayerId(userId);
   const rawHistBody = await rawHist.text();
   const parsedHist = JSON.parse(rawHistBody);
   for (const entry of parsedHist) {
