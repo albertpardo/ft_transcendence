@@ -130,6 +130,7 @@ class Tournament {
   private newStageFiller() {
     // we're in the next stage already, which has been -1'd. To go back one, we +1. - 1 + 1 = 0.
     let i : number = 0;
+    console.log("starting new stage filler.");
     console.log("the curstage var is", this.currentStage, "thus the index to use is", this.currentStage - 1);
     console.log("game ids in this:", this.gameIds);
     console.log("and the game map:", gamesMap);
@@ -173,6 +174,7 @@ class Tournament {
 
   private oldStuffDeleter() {
     // we're in the next stage already, which has been -1'd. To go back one, we +1. - 1 + 1 = 0.
+    console.log("starting old stuff deleter.");
     console.log("the curstage var is", this.currentStage, "thus the index to use is", this.currentStage - 1);
     console.log("game ids in this:", this.gameIds);
     console.log("and the game map:", gamesMap);
@@ -324,64 +326,66 @@ class Tournament {
   public eliminatePlayer(uuid: string) {
     console.log("beginning to eliminate", uuid);
     let forefit : boolean = false;
-    let i : number = 0;
-    for (let pId of this.Ids[this.currentStage - 1]) {
-      if (pId === uuid) {
-        this.Ids[this.currentStage - 1][i] = "";
-        console.log("cleaned the appropriate Ids...");
-        break ;
-      }
-      i++;
-    }
-    for (let gId of this.gameIds[this.currentStage - 1]) {
-      if (gId === "") {
-        continue ;
-      }
-      if (!gamesMap.has(gId)) {
-        throw "gamesMap has no " + gId;
-      }
-      const runtime = gamesMap.get(gId);
-      if (typeof runtime === "undefined") {
-        throw "undefined game runtime";
-      }
-      if (runtime.LplayerId === uuid) {
-        if (runtime.RplayerId !== "") {
-          runtime.forefit(uuid);
-          forefit = true;
-          console.log("made a lp forefit for", uuid, "while cleaning");
+    if (this.currentStage > 0) {
+      let i : number = 0;
+      for (let pId of this.Ids[this.currentStage - 1]) {
+        if (pId === uuid) {
+          this.Ids[this.currentStage - 1][i] = "";
+          console.log("cleaned the appropriate Ids' id...");
+          break ;
         }
-        else {
-          runtime.LplayerId = "failed";
-          if (playersMap.has(uuid)) {
-            playersMap.delete(uuid);
-            console.log("players map delete", uuid, "from eliminate player, for gid", gId, "as a left player");
+        i++;
+      }
+      for (let gId of this.gameIds[this.currentStage - 1]) {
+        if (gId === "") {
+          continue ;
+        }
+        if (!gamesMap.has(gId)) {
+          throw "gamesMap has no " + gId;
+        }
+        const runtime = gamesMap.get(gId);
+        if (typeof runtime === "undefined") {
+          throw "undefined game runtime";
+        }
+        if (runtime.LplayerId === uuid) {
+          if (runtime.RplayerId !== "") {
+            runtime.forefit(uuid);
+            forefit = true;
+            console.log("made a lp forefit for", uuid, "while cleaning");
           }
           else {
-            console.log("just set lp as failed, already didn't exist in the playersmap..", uuid);
+            runtime.LplayerId = "failed";
+            if (playersMap.has(uuid)) {
+              playersMap.delete(uuid);
+              console.log("players map delete", uuid, "from eliminate player, for gid", gId, "as a left player");
+            }
+            else {
+              console.log("just set lp as failed, already didn't exist in the playersmap..", uuid);
+            }
           }
+          break ;
         }
-        break ;
-      }
-      if (runtime.RplayerId === uuid) {
-        if (runtime.LplayerId !== "") {
-          runtime.forefit(uuid);
-          forefit = true;
-          console.log("made a lp forefit for", uuid, "while cleaning");
-        }
-        else {
-          runtime.RplayerId = "failed";
-          if (playersMap.has(uuid)) {
-            playersMap.delete(uuid);
-            console.log("players map delete", uuid, "from eliminate player, for gid", gId, "as a right player");
+        if (runtime.RplayerId === uuid) {
+          if (runtime.LplayerId !== "") {
+            runtime.forefit(uuid);
+            forefit = true;
+            console.log("made a lp forefit for", uuid, "while cleaning");
           }
           else {
-            console.log("just set rp as failed, already didn't exist in the playersmap..", uuid);
+            runtime.RplayerId = "failed";
+            if (playersMap.has(uuid)) {
+              playersMap.delete(uuid);
+              console.log("players map delete", uuid, "from eliminate player, for gid", gId, "as a right player");
+            }
+            else {
+              console.log("just set rp as failed, already didn't exist in the playersmap..", uuid);
+            }
           }
+          break ;
         }
-        break ;
       }
     }
-    if (playersMap.has(uuid) && !forefit) {
+    if (playersMap.has(uuid) && forefit) {
       console.log("one extra deletion of", uuid, "because forefit at the end and still exists in playersMap");
       playersMap.delete(uuid);
     }
@@ -500,6 +504,11 @@ export function deleteTournament(adminId: string) {
 }
 
 export function leaveTournament(uuid: string) {
+  console.log("leave tournament called by", uuid);
+  console.log("here's players map:", playersMap);
+  console.log("here's players participating map:", playersParticipatingTourn);
+  console.log("here's gamesMap:", gamesMap);
+  console.log("here's tournament map:", tournamentMap);
   if (adminMap.has(uuid)) {
     throw "You can't just leave a tournament you're adminning.";
   }

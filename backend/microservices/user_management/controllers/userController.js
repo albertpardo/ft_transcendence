@@ -3,7 +3,6 @@ const userService = require('../services/userService');
 exports.getPublicNickname = async (request, reply) => {
 	const { userId } = request.body;
 	const result = await userService.getPublicNickname(userId);
-	console.log("hit from backend/microservices/user_management/controllers/userController.js", result);
 	if (result.error) {
 		return reply.code(400).send(result);
 	}

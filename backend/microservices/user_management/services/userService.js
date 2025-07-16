@@ -19,7 +19,6 @@ exports.getPublicNickname = async (userId) => {
 	if (!nick) {
 		return { error: "couldn't get nickname; user might be non-existent" };
 	}
-	console.log("hit from backend/microservices/user_management/services/userService.js", nick);
 	return nick;
 }
 
@@ -32,8 +31,6 @@ exports.signup = async (username, password, nickname, email, avatar = '') => {
 
     const hashed = await bcrypt.hash(password, 10);
 	const localid = makeid(64);
-	console.log("localid from the backend/microservices/user_management/services/userService.js is...");
-	console.log(localid);
     const user = db.createUser({ id: localid, username, password: hashed, nickname, email, avatar });
     return { id: user.id, username: user.username, avatar: user.avatar };
 }

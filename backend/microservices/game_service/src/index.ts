@@ -297,6 +297,7 @@ const startServer = async () => {
         });
       }
       catch (e) {
+        console.log("an error on leaving caught. an error which is", e);
         return JSON.stringify({
           err: e,
         });

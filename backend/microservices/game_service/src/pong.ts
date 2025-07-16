@@ -212,6 +212,7 @@ class PongRuntime {
   public mainLoop = async () => {
     if (this.LplayerId === "failed" && this.RplayerId === "failed") {
       this.whoLost = "both";
+      this.gstate.stateWhoL = "both";
       this.pongStarted = true;
       this.pongDone = true;
       console.log("both fail");
@@ -219,6 +220,7 @@ class PongRuntime {
     }
     if (this.LplayerId === "failed") {
       this.whoLost = "left skip";
+      this.gstate.stateWhoL = "left fully";
       addMatch(playersMap.get(this.RplayerId), this.LplayerId, this.RplayerId, this.scoreL, this.scoreR, "R", this.gameType, "absence");
       this.pongStarted = true;
       this.pongDone = true;
@@ -227,6 +229,7 @@ class PongRuntime {
     }
     if (this.RplayerId === "failed") {
       this.whoLost = "right skip";
+      this.gstate.stateWhoL = "right fully";
       addMatch(playersMap.get(this.LplayerId), this.LplayerId, this.RplayerId, this.scoreL, this.scoreR, "L", this.gameType, "absence");
       this.pongStarted = true;
       this.pongDone = true;
@@ -245,6 +248,7 @@ class PongRuntime {
       }
       if (this.leftReady && !this.rightReady) {
         this.whoLost = "right fully";
+        this.gstate.stateWhoL = "right fully";
         addMatch(playersMap.get(this.LplayerId), this.LplayerId, this.RplayerId, this.scoreL, this.scoreR, "L", this.gameType, "technical");
         this.pongStarted = true;
         this.pongDone = true;
@@ -252,6 +256,7 @@ class PongRuntime {
       }
       else if (!this.leftReady && this.rightReady) {
         this.whoLost = "left fully";
+        this.gstate.stateWhoL = "left fully";
         addMatch(playersMap.get(this.LplayerId), this.LplayerId, this.RplayerId, this.scoreL, this.scoreR, "R", this.gameType, "technical");
         this.pongStarted = true;
         this.pongDone = true;
@@ -259,6 +264,7 @@ class PongRuntime {
       }
       else if (!this.leftReady && !this.rightReady) {
         this.whoLost = "both";
+        this.gstate.stateWhoL = "both";
         this.pongStarted = true;
         this.pongDone = true;
         return ;
@@ -295,9 +301,11 @@ class PongRuntime {
           this.pongDone = true;
 //          console.log("game done.");
           if (this.whoLost === "left") {
+            this.whoLost = "left fully";
             this.gstate.stateWhoL = "left fully";
           }
           else {
+            this.whoLost = "right fully";
             this.gstate.stateWhoL = "right fully";
           }
           if (this.LGaveUp) {
@@ -307,7 +315,7 @@ class PongRuntime {
             addMatch(playersMap.get(this.LplayerId), this.LplayerId, this.RplayerId, this.scoreL, this.scoreR, "L", this.gameType, "forefit");
           }
           else {
-            addMatch(playersMap.get(this.LplayerId), this.LplayerId, this.RplayerId, this.scoreL, this.scoreR, (this.whoLost === "left" ? "R" : "L"), this.gameType, "normal");
+            addMatch(playersMap.get(this.LplayerId), this.LplayerId, this.RplayerId, this.scoreL, this.scoreR, (this.whoLost[0] === 'l' ? "R" : "L"), this.gameType, "normal");
           }
 //          this.gstate = nullState;
 //          this.gstate.stateScoreL = this.scoreL;
