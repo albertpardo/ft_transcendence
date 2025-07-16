@@ -95,6 +95,24 @@ async function getCompleteTournamentInfo() {
   return fresp;
 }
 
+async function getFinalist() {
+  const fresp = fetch(
+    `${API_BASE_URL}/api/pong/tour/finalist`,
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json,application/html,text/html,*/*',
+        'Origin': 'https://127.0.0.1:3000/',
+        'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
+      },
+      credentials: 'include',
+      mode: 'cors',
+    }
+  );
+  return fresp;
+}
+
 async function fillInTheTournTable() {
   const tournAllInfoRawResp = await getCompleteTournamentInfo();
   const tournAllInfoResp = await tournAllInfoRawResp.text();
@@ -158,9 +176,28 @@ async function fillInTheTournTable() {
             document.getElementById(`${currentTitle}${j + 1}`).innerHTML = "<b>" + nicnknameVs + "</b>";
           }
           else {
+            // TODO this just highlights the importance of protections against injection. TODO TODO TODO FIXME XXX FIXME TODO TODO TODO.
             document.getElementById(`${currentTitle}${j + 1}`).innerHTML = "<i>empty</i>";
           }
         }
+      }
+      const finRawResp = await getFinalist();
+      const finResp = await finRawResp.text();
+      const finObj = JSON.parse(finResp);
+      if (finObj.err === "nil") {
+        if (finObj.res !== "") {
+          const finId = finObj.res;
+          // looks familiar?
+          let respNn = await getNicknameForPlayerId(finId);
+          let nicnknameVs = JSON.parse(await respNn.text())?.nickname;
+          document.getElementById('table-finalist').innerHTML = "<b>" + nicnknameVs + "</b>";
+        }
+        else {
+          document.getElementById('table-finalist').innerHTML = "finalist!";
+        }
+      }
+      else {
+        console.error("finalist lookup error:", e);
       }
     }
   }

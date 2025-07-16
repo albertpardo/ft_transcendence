@@ -602,3 +602,21 @@ export async function tournamentsLoopCheck() {
   await sleep(5e3);
   }
 }
+
+export function getFinalist(uuid: string) {
+  if (playersParticipatingTourn.has(uuid)) {
+    const tid = playersParticipatingTourn.get(uuid);
+    if (typeof tid === "undefined") {
+      throw "undefined tid";
+    }
+    if (tournamentMap.has(tid)) {
+      const tour = tournamentMap.get(tid);
+      if (typeof tour === "undefined") {
+        throw "undefined tour";
+      }
+      return tour.winner;
+    }
+    throw "Tournament not found in tid-tourn map";
+  }
+  throw "Player not found in players-tournaments map";
+}

@@ -26,7 +26,8 @@ import {
   deleteTournament,
   leaveTournament,
   getFullTournament,
-  confirmParticipation
+  confirmParticipation,
+  getFinalist  
 } from './tournament';
 
 // id shall come from the req and be per-user unique and persistent (jwt)
@@ -306,6 +307,21 @@ const startServer = async () => {
     fastify.get('/pong/tour/peridinfo', async (req, reply) => {
       try {
         const res = getFullTournament(req?.headers['x-user-id'] as string);
+        return JSON.stringify({
+          res: res,
+          err: "nil",
+        });
+      }
+      catch (e) {
+        return JSON.stringify({
+          res: {},
+          err: e,
+        });
+      }
+    });
+    fastify.get('/pong/tour/finalist', async (req, reply) => {
+      try {
+        const res = getFinalist(req?.headers['x-user-id'] as string);
         return JSON.stringify({
           res: res,
           err: "nil",

@@ -638,9 +638,9 @@ export const dataStreamer = async (playerId : string) => {
   }
 }
 
-export function getGType(pId: string) {
-  if (playersMap.has(pId)) {
-    const gid = playersMap.get(pId);
+export function getGType(uuid: string) {
+  if (playersMap.has(uuid)) {
+    const gid = playersMap.get(uuid);
     if (typeof gid === "undefined") {
       throw "undefined gameId";
     }
@@ -656,9 +656,9 @@ export function getGType(pId: string) {
   throw "Player not found in playersMap";
 }
 
-export function getOppId(pId: string) {
-  if (playersMap.has(pId)) {
-    const gid = playersMap.get(pId);
+export function getOppId(uuid: string) {
+  if (playersMap.has(uuid)) {
+    const gid = playersMap.get(uuid);
     if (typeof gid === "undefined") {
       throw "undefined gameId";
     }
@@ -667,10 +667,10 @@ export function getOppId(pId: string) {
       if (typeof gr === "undefined") {
         throw "undefined pongruntime";
       }
-      if (gr.LplayerId === pId) {
+      if (gr.LplayerId === uuid) {
         return gr.RplayerId;
       }
-      if (gr.RplayerId === pId) {
+      if (gr.RplayerId === uuid) {
         return gr.LplayerId;
       }
       else {
