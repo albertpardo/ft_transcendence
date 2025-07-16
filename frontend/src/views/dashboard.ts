@@ -23,26 +23,6 @@ function movePaddleWrapper(d: number) {
   });
 }
 
-/* function triggerConfetti() {
-  const gameWindow = document.getElementById('game-window');
-  if (!gameWindow) return;
-
-  const rect = gameWindow.getBoundingClientRect();
-  const x = (rect.left + rect.width / 2) / window.innerWidth;
-  const y = (rect.top + rect.height / 4) / window.innerHeight;
-
-  confetti({
-    particleCount: 4242,
-    spread: 142,
-    startVelocity: 30,
-    scalar: 1.2,
-    shapes: ['circle', 'square', 'triangle'],
-    ticks: 250,
-    origin: { x, y },
-    colors: ['#4ade80', '#f87171', '#fbbf24', '#60a5fa']
-  });
-} */
-
 function triggerConfetti() {
   const gameWindow = document.getElementById('game-window');
   if (!gameWindow) return;
@@ -106,6 +86,31 @@ function triggerConfetti() {
   }), 600);
 }
 
+function triggerRainEffect() {
+  const overlay = document.getElementById('rain-overlay');
+  if (!overlay) return;
+
+  overlay.innerHTML = ''; // Clear old rain
+  overlay.classList.remove('hidden');
+
+  for (let i = 0; i < 150; i++) {
+    const drop = document.createElement('div');
+    drop.classList.add('rain-drop');
+    drop.style.left = `${Math.random() * 100}%`;
+    drop.style.animationDuration = `${0.4 + Math.random() * 0.6}s`;
+    drop.style.animationDelay = `${Math.random()}s`;
+    overlay.appendChild(drop);
+  }
+
+  // Optional lightning flash
+  overlay.style.backgroundColor = 'rgba(255,255,255,0.1)';
+  setTimeout(() => overlay.style.backgroundColor = 'transparent', 100);
+
+  setTimeout(() => {
+    overlay.classList.add('hidden');
+    overlay.innerHTML = '';
+  }, 2000);
+}
 
 function triggerPaddleEffect(paddleId: string) {
   const paddle = document.getElementById(paddleId);
@@ -175,6 +180,7 @@ export async function initDashboard() {
     <!-- Hidden Game Area -->
     <div id="game-area" class="flex flex-col items-center justify-center" hidden>
       <div id="game-window" class="relative w-[1280px] h-[720px]">
+        <div id="rain-overlay" class="absolute inset-0 z-50 pointer-events-none hidden"></div>
 
         <!-- Left Controls -->
         <div class="absolute left-0 top-1/2 transform -translate-y-1/2 flex flex-col space-y-4 z-10">
@@ -221,9 +227,7 @@ export async function initDashboard() {
     gameText.classList.remove('opacity-0');
     gameText.classList.remove('animate-win-pulse', 'animate-lose-pulse', 'animate-text-glow');
   } 
-  // gameText.style.visibility = "hidden";
-  // gameText.style.visibility = "visible";
-  // gameText.classList.remove('opacity-0');
+
 
   // gameText.classList.remove('animate-win-pulse', 'animate-lose-pulse', 'animate-text-glow');
 
@@ -263,10 +267,10 @@ export async function initDashboard() {
           scoreText.classList.add('opacity-0');
             setTimeout(() => {
               scoreText.innerHTML = `${gameState.stateScoreL} : ${gameState.stateScoreR}`;
-             // scoreText.classList.remove('scale-110', 'text-green-300');
+
              scoreText.classList.remove('opacity-0');
             }, 150);
-          //  scoreText.innerHTML = "" + 0 + " : " + 0;  
+    
           break;
         case "added: R":
           started = false;
@@ -279,22 +283,19 @@ export async function initDashboard() {
           scoreText.classList.add('opacity-0');
             setTimeout(() => {
               scoreText.innerHTML = `${gameState.stateScoreL} : ${gameState.stateScoreR}`;
-              // scoreText.classList.remove('scale-110', 'text-green-300');
+
               scoreText.classList.remove('opacity-0');
             }, 150);
-          // scoreText.innerHTML = "" + 0 + " : " + 0;
+
           break;
         case "started":
           started = true;
           break;
         case "error":
-//          console.log("some error returned from the server");
           break;
         default:
-         // gameState = JSON.parse(event.data);
           const newState: State =JSON.parse(event.data);
-          /*  gameText.style.visibility = "hidden";
-            gameText.classList.add('opacity-0'); */
+
            ball.setAttribute("cx", newState.stateBall.coords.x);
            ball.setAttribute("cy", newState.stateBall.coords.y);
            lpad.setAttribute("y", newState.stateLP.y);
@@ -326,13 +327,11 @@ export async function initDashboard() {
               switch (gameState.stateWhoL) {
                 case "left":
                   gameText.innerHTML = "You lost the round.";
-                  // gameText.classList.add('animate-lose-pulse', 'fill-red-400');
                   gameText.classList.remove('fill-white'); 
                   gameText.setAttribute("fill", "#f87171");
                   break;
                 case "right":
                   gameText.innerHTML = "You won the round!";
-                  // gameText.classList.add('animate-win-pulse', 'animate-text-glow', 'fill-green-400');
                   gameText.classList.remove('fill-white');
                   gameText.setAttribute("fill", "#4ade80");
                   break;
@@ -340,14 +339,13 @@ export async function initDashboard() {
                   started = false;
                   gameText.innerHTML = "You lost the game.";
                   gameText.classList.remove('fill-white');
-                  // gameText.classList.add('animate-lose-pulse', 'text-5xl', 'fill-red-500');
                   gameText.setAttribute("fill", "#f87171");
+                  setTimeout(() => triggerRainEffect(), 300);
                   break;
                 case "right fully":
                   started = false;
                   gameText.innerHTML = "You won the game!";
                   gameText.classList.remove('fill-white');
-                  // gameText.classList.add('animate-win-pulse', 'animate-text-glow', 'text-5xl', 'fill-green-500');
                   gameText.setAttribute("fill", "#4ade80");
                   setTimeout(() => triggerConfetti(), 300);
                   break;
@@ -357,25 +355,22 @@ export async function initDashboard() {
                 case "right":
                   gameText.innerHTML = "You lost the round.";
                   gameText.classList.remove('fill-white');  
-                  // gameText.classList.add('animate-lose-pulse', 'fill-red-400');
                   gameText.setAttribute("fill", "#f87171");
                   break;
                 case "left":
                   gameText.innerHTML = "You won the round!";
                   gameText.classList.remove('fill-white');
-                  // gameText.classList.add('animate-win-pulse', 'animate-text-glow', 'fill-green-400');
                   gameText.setAttribute("fill", "#4ade80");
                   break;
                 case "right fully":
-                  started = false;
+                  started = false; 
                   gameText.innerHTML = "You lost the game.";
-                  // gameText.classList.add('animate-lose-pulse', 'text-5xl', 'fill-red-500');
                   gameText.setAttribute("fill", "#f87171");
+                  setTimeout(() => triggerRainEffect(), 300);
                   break;
                 case "left fully":
                   started = false;
                   gameText.innerHTML = "You won the game!";
-                  // gameText.classList.add('animate-win-pulse', 'animate-text-glow', 'text-5xl', 'fill-green-500');
                   gameText.setAttribute("fill", "#4ade80");
                   setTimeout(() => triggerConfetti(), 300);
                   break;
