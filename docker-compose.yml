@@ -34,7 +34,7 @@ services:
       - game_service
     volumes:
       - ./backend/api-gateway:/app
-      - /app/node_modules      # use container-installed deps
+      - /app/node_modules      # use container-installed deps 
     env_file:
       - ./backend/api-gateway/.env
     restart: always
