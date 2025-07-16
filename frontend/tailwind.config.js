@@ -13,6 +13,10 @@ module.exports = {
     'items-center',
     'justify-center',
     'bg-gray-900',
+    'fill-red-400',
+    'fill-green-400',
+    'fill-red-500',
+    'fill-green-500',
   ],
   darkMode: false,
   theme: {
