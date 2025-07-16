@@ -113,11 +113,20 @@ function triggerRainEffect() {
 }
 
 function triggerPaddleEffect(paddleId: string) {
-  const paddle = document.getElementById(paddleId);
-  if (!paddle) return;
+  const group = document.getElementById(`${paddleId}-group`);
+  if (!group) return;
 
-  paddle.classList.add('animate-paddle-ping');
-  setTimeout(() => paddle.classList.remove('animate-paddle-ping'), 500);
+  const pivotX = paddleId === 'lpad' ? 45 : 1235; // x + width/2
+  const pivotY = 360;
+  group.setAttribute(
+    'transform',
+    `translate(${pivotX},${pivotY}) scale(1.2) translate(${-pivotX},${-pivotY})`
+  ); 
+
+  setTimeout(() => {
+    group.removeAttribute('filter'); // corrected
+    group.removeAttribute('transform'); // corrected
+  }, 300);
 }
 
 function triggerBallEffect() {
@@ -190,9 +199,18 @@ export async function initDashboard() {
 
         <!-- SVG Field -->
         <svg width="1280" height="720">
+        <defs>
+          <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+           <feDropShadow dx="0" dy="0" stdDeviation="10" flood-color="#00ff00" />
+          </filter>
+        </defs>
         <rect width="100%" height="100%" fill="black" />
-        <rect id="lpad" x="40" y="310" width="10" height="100" class="fill-white" />
-        <rect id="rpad" x="1230" y="310" width="10" height="100" class="fill-white" />
+        <g id="lpad-group">
+          <rect id="lpad" x="40" y="310" width="10" height="100" class="fill-white" />
+        </g>
+        <g id="rpad-group">
+          <rect id="rpad" x="1230" y="310" width="10" height="100" class="fill-white" />
+        </g>
         <circle id="ball" cx="640" cy="360" r="3" class="fill-white" />
         <text id="score-text" x="640" y="60" font-family="Monospace" font-size="40" class="fill-white" text-anchor="middle">
           0 : 0
