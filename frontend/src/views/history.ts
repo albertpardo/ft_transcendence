@@ -42,16 +42,22 @@ async function getNicknameForPlayerId(userId: string) {
 }
 
 export async function renderHistoryContent(el: HTMLElement, bu: HTMLElement, gArea: HTMLElement, gWin: HTMLElement) {
+
   let tempInnerHTML : string = `
-    <h1 class="text-3xl font-bold mb-6">Match History</h1>
-    <p class="mb-4">History of matches</p>
-    <table class="table-fixed"><tbody><tr>
-    <th>Date</th>
-    <th>Opponent</th>
-    <th>Score</th>
-    <th>Result</th>
-    </tr>
-  `;
+  <h1 class="text-3xl font-bold mb-6 text-white">Match History</h1>
+  <p class="mb-4 text-white">History of matches</p>
+  <div class="flex justify-center">
+    <table class="table-fixed border-separate border-spacing-x-6 bg-gray-900 text-white w-auto">
+      <thead>
+        <tr>
+          <th class="px-6 py-3 text-center">Result</th>
+          <th class="px-6 py-3 text-center">Score</th>
+          <th class="px-6 py-3 text-center">Opponent</th>
+          <th class="px-6 py-3 text-center">Date</th>
+        </tr>
+      </thead>
+      <tbody>
+`;
   // TODO FIXME spam protection? cache the thing maybe? make it independently get downloaded in the background once every something minutes.
   const userId = localStorage.getItem('userId');
   if (!userId) {
@@ -72,14 +78,33 @@ export async function renderHistoryContent(el: HTMLElement, bu: HTMLElement, gAr
     const respNickR = await getNicknameForPlayerId(idR);
     const respNickRBody = await respNickR.text();
     nicknameR = JSON.parse(respNickRBody)?.nickname;
+
+    const isLocalLeft = localStorage.getItem('userId') === idL;
+    const localScore = isLocalLeft ? entry.scoreL : entry.scoreR;
+    const oppScore = isLocalLeft ? entry.scoreR : entry.scoreL;
+    const opponent = isLocalLeft ? nicknameR : nicknameL;
+    const didWin = localScore > oppScore;
+    const resultText = didWin ? 'Victory' : 'Loss';
+    const resultColorClass = didWin ? 'text-green-400 font-semibold' : 'text-red-500 font-semibold';
+
     const thisdate = new Date(entry.date);
-    tempInnerHTML += `<tr>
-      <td>${thisdate.toDateString()}, ${thisdate.toTimeString()}</td>
-      <td>${localStorage.getItem('userId') === idL ? nicknameR : nicknameL}</td>
-      <td>${entry.scoreL} : ${entry.scoreR}</td>
-      <td>${localStorage.getItem('userId') === idL ? (entry.scoreL > entry.scoreR ? "Victory" : "Loss") : (entry.scoreL < entry.scoreR ? "Victory" : "Loss")}</td>
-      </tr>
-    `;
+    const formattedDate = thisdate.toLocaleString('en-GB', {
+      year: 'numeric',
+      month: 'numeric',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+    }).replace(',', '').replace(',', ''); 
+    // const rowClass = entry.win ? 'text-green-400' : 'text-red-500';
+    const rowClass = ''; 
+    tempInnerHTML += `<tr class="${rowClass}">
+      <td class="${resultColorClass} text-center">${resultText}</td>
+      <td class="text-center">${localScore} : ${oppScore}</td>
+      <td class="text-red-500 text-center">${opponent}</td>
+      <td class="text-center">${formattedDate}</td>
+    </tr>`;
+
+
   }
   el.innerHTML = tempInnerHTML;
   bu.hidden = true;

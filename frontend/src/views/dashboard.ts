@@ -5,6 +5,10 @@ import { renderHomeContent, renderPlayContent, renderTournamentContent, renderSt
 import { renderHistoryContent } from './history';
 import { renderProfileContent } from './profile';
 import { State, nullState } from './pongrender';
+import confetti from 'canvas-confetti';
+
+// Import VITE_API_BASE_URL from environment variables
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 function movePaddleWrapper(d: number) {
   movePaddle(d, function (error, response) {
@@ -17,7 +21,122 @@ function movePaddleWrapper(d: number) {
     }
   });
 }
-let socket : WebSocket| null = null;
+
+
+function triggerConfetti() {
+  const gameWindow = document.getElementById('game-window');
+  if (!gameWindow) return;
+
+  const rect = gameWindow.getBoundingClientRect();
+  const x = (rect.left + rect.width / 2) / window.innerWidth;
+  const y = (rect.top + rect.height / 4) / window.innerHeight;
+
+  const colors = ['#4ade80', '#f87171', '#fbbf24', '#60a5fa'];
+
+  // 💥 Main burst
+  confetti({
+    particleCount: 150,
+    spread: 90,
+    startVelocity: 50,
+    origin: { x, y },
+    colors,
+    scalar: 1.3
+  });
+
+  // 🎇 Streamers burst
+  confetti({
+    particleCount: 100,
+    angle: 60,
+    spread: 55,
+    decay: 0.9,
+    gravity: 0.3,
+    origin: { x: x - 0.2, y },
+    scalar: 1.8,
+    colors
+  });
+
+  confetti({
+    particleCount: 100,
+    angle: 120,
+    spread: 55,
+    decay: 0.9,
+    gravity: 0.3,
+    origin: { x: x + 0.2, y },
+    scalar: 1.8,
+    colors
+  });
+
+  // ✨ Follow-up bursts
+  setTimeout(() => confetti({
+    particleCount: 80,
+    spread: 120,
+    startVelocity: 40,
+    origin: { x, y },
+    scalar: 1.1,
+    colors
+  }), 300);
+
+  setTimeout(() => confetti({
+    particleCount: 60,
+    spread: 100,
+    startVelocity: 35,
+    origin: { x, y },
+    scalar: 1.2,
+    colors
+  }), 600);
+}
+
+function triggerRainEffect() {
+  const overlay = document.getElementById('rain-overlay');
+  if (!overlay) return;
+
+  overlay.innerHTML = ''; // Clear old rain
+  overlay.classList.remove('hidden');
+
+  for (let i = 0; i < 150; i++) {
+    const drop = document.createElement('div');
+    drop.classList.add('rain-drop');
+    drop.style.left = `${Math.random() * 100}%`;
+    drop.style.animationDuration = `${0.4 + Math.random() * 0.6}s`;
+    drop.style.animationDelay = `${Math.random()}s`;
+    overlay.appendChild(drop);
+  }
+
+  // Optional lightning flash
+  overlay.style.backgroundColor = 'rgba(255,255,255,0.1)';
+  setTimeout(() => overlay.style.backgroundColor = 'transparent', 100);
+
+  setTimeout(() => {
+    overlay.classList.add('hidden');
+    overlay.innerHTML = '';
+  }, 2000);
+}
+
+function triggerPaddleEffect(paddleId: string) {
+  const group = document.getElementById(`${paddleId}-group`);
+  if (!group) return;
+
+  const pivotX = paddleId === 'lpad' ? 45 : 1235; // x + width/2
+  const pivotY = 360;
+  group.setAttribute(
+    'transform',
+    `translate(${pivotX},${pivotY}) scale(1.2) translate(${-pivotX},${-pivotY})`
+  ); 
+
+  setTimeout(() => {
+    group.removeAttribute('filter'); // corrected
+    group.removeAttribute('transform'); // corrected
+  }, 300);
+}
+
+function triggerBallEffect() {
+  const ball = document.getElementById('ball');
+  if (!ball) return;
+  
+  ball.classList.add('animate-ball-pulse');
+  setTimeout(() => ball.classList.remove('animate-ball-pulse'), 300);
+}
+
 
 export async function initDashboard() {
   const hash = window.location.hash.replace('#', '') || 'home';
@@ -55,7 +174,7 @@ export async function initDashboard() {
         <a href="#home" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='home'?'bg-blue-600':'bg-gray-700'}">Dashboard</a>
         <a href="#profile" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='profile'?'bg-blue-600':'bg-gray-700'}">Profile</a>
         <a href="#play" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='play'?'bg-blue-600':'bg-gray-700'}">Play Pong</a>
-        <a href="#history" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='play'?'bg-blue-600':'bg-gray-700'}">Match History</a>
+        <a href="#history" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='history'?'bg-blue-600':'bg-gray-700'}">Match History</a>
         <a href="#tournament" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='tournament'?'bg-blue-600':'bg-gray-700'}">Tournament</a>
         <a href="#stats" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='stats'?'bg-blue-600':'bg-gray-700'}">Stats</a>
       </nav>
@@ -71,6 +190,7 @@ export async function initDashboard() {
     <!-- Hidden Game Area -->
     <div id="game-area" class="flex flex-col items-center justify-center hidden">
       <div id="game-window" class="relative w-[1280px] h-[720px]">
+        <div id="rain-overlay" class="absolute inset-0 z-50 pointer-events-none hidden"></div>
 
         <!-- Left Controls -->
         <div class="absolute left-0 top-1/2 transform -translate-y-1/2 flex flex-col space-y-4 z-10">
@@ -80,16 +200,25 @@ export async function initDashboard() {
 
         <!-- SVG Field -->
         <svg width="1280" height="720">
-          <rect width="100%" height="100%" fill="black" />
-          <rect id="lpad" x="40" y="310" width="10" height="100" fill="white" />
-          <rect id="rpad" x="1230" y="310" width="10" height="100" fill="white" />
-          <circle id="ball" cx="640" cy="360" r="3" fill="white" />
-          <text id="score-text" x="640" y="60" font-family="Monospace" font-size="40" fill="white" text-anchor=middle>
-            0 : 0
-          </text>
-          <text id="game-text" x="640" y="200" font-family="Sans-serif" font-size="60" fill="white" text-anchor=middle>
-            Placeholder text
-          </text>
+        <defs>
+          <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+           <feDropShadow dx="0" dy="0" stdDeviation="10" flood-color="#00ff00" />
+          </filter>
+        </defs>
+        <rect width="100%" height="100%" fill="black" />
+        <g id="lpad-group">
+          <rect id="lpad" x="40" y="310" width="10" height="100" class="fill-white" />
+        </g>
+        <g id="rpad-group">
+          <rect id="rpad" x="1230" y="310" width="10" height="100" class="fill-white" />
+        </g>
+        <circle id="ball" cx="640" cy="360" r="3" class="fill-white" />
+        <text id="score-text" x="640" y="60" font-family="Monospace" font-size="40" class="fill-white" text-anchor="middle">
+          0 : 0
+        </text>
+        <text id="game-text" x="640" y="200" font-family="Sans-serif" font-size="60" text-anchor="middle" class="opacity-0 transition-all duration-300 fill-white">
+          Welcome to Pong!
+        </text>
         </svg>
 
         <!-- Right Controls -->
@@ -103,15 +232,27 @@ export async function initDashboard() {
     </div>
   `;
 
-  const leftUpArrow: HTMLElement = document.getElementById("left-up")!;
-  const leftDownArrow : HTMLElement = document.getElementById("left-down")!;
-  const rightUpArrow : HTMLElement = document.getElementById("right-up")!;
-  const rightDownArrow : HTMLElement = document.getElementById("right-down")!;
-  const ball : HTMLElement = document.getElementById("ball")!;
-  const lpad : HTMLElement = document.getElementById("lpad")!;
-  const rpad : HTMLElement = document.getElementById("rpad")!;
-  let gameText : HTMLElement = document.getElementById("game-text")!;
-  gameText.style.visibility = "hidden";
+
+  const leftUpArrow: HTMLElement = document.getElementById("left-up");
+  const leftDownArrow : HTMLElement = document.getElementById("left-down");
+  const rightUpArrow : HTMLElement = document.getElementById("right-up");
+  const rightDownArrow : HTMLElement = document.getElementById("right-down");
+  const ball : HTMLElement = document.getElementById("ball");
+  const lpad : HTMLElement = document.getElementById("lpad");
+  const rpad : HTMLElement = document.getElementById("rpad");
+  
+  let gameText : HTMLElement | null = document.getElementById("game-text");
+  if (gameText) {
+    gameText.style.visibility = "hidden";
+    gameText.classList.remove('opacity-0');
+    gameText.classList.remove('animate-win-pulse', 'animate-lose-pulse', 'animate-text-glow');
+  } 
+
+
+  // gameText.classList.remove('animate-win-pulse', 'animate-lose-pulse', 'animate-text-glow');
+
+
+
   // for some reason, doing a .hidden = false or true on this doesn't work.
   const scoreText : HTMLElement = document.getElementById("score-text")!;
 
@@ -121,13 +262,13 @@ export async function initDashboard() {
   // FIXME unused. remove or use.
   let started : boolean = false;
   if (localStorage.getItem("authToken")) {
-    if (socket !== null) {
-     socket.close();
-     socket = null;
-   }
-   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://127.0.1:8443';
-    // socket = new WebSocket(`https://127.0.0.1:8443/api/pong/game-ws?uuid=${localStorage.getItem("userId")}&authorization=${localStorage.getItem("authToken")}`);
+
     socket = new WebSocket(`${API_BASE_URL}/api/pong/game-ws?uuid=${localStorage.getItem("userId")}&authorization=${localStorage.getItem("authToken")}`);
+    gameText.classList.remove(
+      'animate-win-pulse', 'animate-lose-pulse', 'animate-text-glow',
+      'fill-red-400', 'fill-green-400', 'fill-red-500', 'fill-green-500'
+    );
+
     socket.addEventListener("message", (event) => {
 //      console.log("I, a tokened player, receive:", event.data);
       // XXX maybe a try catch? idk if it'd crash or something on a wrong input
@@ -143,7 +284,13 @@ export async function initDashboard() {
           rightUpArrow.hidden = true;
           rightDownArrow.hidden = true;
           gameText.style.visibility = "hidden";
-          scoreText.innerHTML = "" + 0 + " : " + 0;
+          scoreText.classList.add('opacity-0');
+            setTimeout(() => {
+              scoreText.innerHTML = `${gameState.stateScoreL} : ${gameState.stateScoreR}`;
+
+             scoreText.classList.remove('opacity-0');
+            }, 150);
+    
           break;
         case "added: R":
           started = false;
@@ -153,63 +300,110 @@ export async function initDashboard() {
           leftUpArrow.hidden = true;
           leftDownArrow.hidden = true;
           gameText.style.visibility = "hidden";
-          scoreText.innerHTML = "" + 0 + " : " + 0;
+          scoreText.classList.add('opacity-0');
+            setTimeout(() => {
+              scoreText.innerHTML = `${gameState.stateScoreL} : ${gameState.stateScoreR}`;
+
+              scoreText.classList.remove('opacity-0');
+            }, 150);
+
           break;
         case "started":
           started = true;
           break;
         case "error":
-//          console.log("some error returned from the server");
           break;
         default:
-          gameState = JSON.parse(event.data);
-          ball.setAttribute("cx", "" + gameState.stateBall.coords.x);
-          ball.setAttribute("cy", "" + gameState.stateBall.coords.y);
-          lpad.setAttribute("y", "" + gameState.stateLP.y);
-          rpad.setAttribute("y", "" + gameState.stateRP.y);
+
+          const newState: State =JSON.parse(event.data);
+
+           ball.setAttribute("cx", newState.stateBall.coords.x);
+           ball.setAttribute("cy", newState.stateBall.coords.y);
+           lpad.setAttribute("y", newState.stateLP.y);
+           rpad.setAttribute("y", newState.stateRP.y);
+           try {
+             if (newState.stateBall.hitLPaddle) triggerPaddleEffect('lpad');
+             if (newState.stateBall.hitRPaddle) triggerPaddleEffect('rpad');
+             if (newState.stateBall.hitWall) triggerBallEffect();
+
+           } catch (e) {
+            console.error("Error updating game state:", e);
+            }
+           scoreText.innerHTML = `${newState.stateScoreL} : ${newState.stateScoreR}`;
+           scoreText.classList.remove('opacity-0');
+
+          gameState = newState;
+          
+
+
+
 
           if (gameState.stateWhoL !== "none" && gameState.stateWhoL !== "null state") {
             gameText.style.visibility = "visible";
+            gameText.classList.remove('opacity-0');
+            // gameText.classList.remove('animate-win-pulse', 'animate-lose-pulse', 'animate-text-glow');
+            
             scoreText.innerHTML = "" + gameState.stateScoreL + " : " + gameState.stateScoreR;
+            scoreText.classList.remove('opacity-0');
             if (playerSide === "l") {
               switch (gameState.stateWhoL) {
                 case "left":
                   gameText.innerHTML = "You lost the round.";
+                  gameText.classList.remove('fill-white'); 
+                  gameText.setAttribute("fill", "#f87171");
                   break;
                 case "right":
                   gameText.innerHTML = "You won the round!";
+                  gameText.classList.remove('fill-white');
+                  gameText.setAttribute("fill", "#4ade80");
                   break;
                 case "left fully":
                   started = false;
                   gameText.innerHTML = "You lost the game.";
+                  gameText.classList.remove('fill-white');
+                  gameText.setAttribute("fill", "#f87171");
+                  setTimeout(() => triggerRainEffect(), 300);
                   break;
                 case "right fully":
                   started = false;
                   gameText.innerHTML = "You won the game!";
+                  gameText.classList.remove('fill-white');
+                  gameText.setAttribute("fill", "#4ade80");
+                  setTimeout(() => triggerConfetti(), 300);
                   break;
               }
             } else if (playerSide === "r") {
               switch (gameState.stateWhoL) {
                 case "right":
                   gameText.innerHTML = "You lost the round.";
+                  gameText.classList.remove('fill-white');  
+                  gameText.setAttribute("fill", "#f87171");
                   break;
                 case "left":
                   gameText.innerHTML = "You won the round!";
+                  gameText.classList.remove('fill-white');
+                  gameText.setAttribute("fill", "#4ade80");
                   break;
                 case "right fully":
-                  started = false;
+                  started = false; 
                   gameText.innerHTML = "You lost the game.";
+                  gameText.setAttribute("fill", "#f87171");
+                  setTimeout(() => triggerRainEffect(), 300);
                   break;
                 case "left fully":
                   started = false;
                   gameText.innerHTML = "You won the game!";
+                  gameText.setAttribute("fill", "#4ade80");
+                  setTimeout(() => triggerConfetti(), 300);
                   break;
               }
             }
           }
           else {
             gameText.style.visibility = "hidden";
+            
             scoreText.innerHTML = "" + gameState.stateScoreL + " : " + gameState.stateScoreR;
+            scoreText.classList.remove('opacity-0');
           }
       }
     });

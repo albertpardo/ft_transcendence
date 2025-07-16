@@ -1,3 +1,6 @@
+
+# Use Node with Alpine for small size
+
 FROM node:23-slim
 # Install dependencies we need for ts-node (including typescript)
 WORKDIR /app
