@@ -157,7 +157,7 @@ users.db
 *package-lock.json
 package-lock.json
 */package-lock.json
-Dockerfile_dev
+
 node_modules
 dist
 npm-debug.log
