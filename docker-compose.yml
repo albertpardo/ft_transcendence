@@ -121,7 +121,6 @@ services:
       - XPACK_ENCRYPTED_SAVED_OBJECTS_ENCRYPTION_KEY=${XPACK_ENCRYPTED_SAVED_OBJECTS_ENCRYPTION_KEY}
       - XPACK_REPORTING_ENCRYPTION_KEY=${XPACK_REPORTING_ENCRYPTION_KEY}
       - XPACK_SECURITY_ENCRYPTION_KEY=${XPACK_SECURITY_ENCRYPTION_KEY}
-    mem_limit: ${KB_MEM_LIMIT}
     networks:
       - backend
     healthcheck:
@@ -148,7 +147,6 @@ services:
       - ELASTIC_US=${ELASTIC_US}
       - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
       - KIBANA_PASSWORD=${KIBANA_PASSWORD}
-    mem_limit: ${SETUP_MEM_LIMIT}
     networks:
       - backend
       
@@ -187,7 +185,6 @@ services:
       - ELASTIC_URL=${ELASTIC_URL}
       - ELASTIC_US=${ELASTIC_US}
       - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
-    mem_limit: ${LS_MEM_LIMIT}
     networks:
       - backend
       
