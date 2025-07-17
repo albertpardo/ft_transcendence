@@ -10,6 +10,9 @@ import confetti from 'canvas-confetti';
 // Import VITE_API_BASE_URL from environment variables
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
+// Declare socket at the module level
+let socket: WebSocket | null = null;
+
 function movePaddleWrapper(d: number) {
   movePaddle(d, function (error, response) {
     if (error) {
@@ -233,15 +236,15 @@ export async function initDashboard() {
   `;
 
 
-  const leftUpArrow: HTMLElement = document.getElementById("left-up");
-  const leftDownArrow : HTMLElement = document.getElementById("left-down");
-  const rightUpArrow : HTMLElement = document.getElementById("right-up");
-  const rightDownArrow : HTMLElement = document.getElementById("right-down");
-  const ball : HTMLElement = document.getElementById("ball");
-  const lpad : HTMLElement = document.getElementById("lpad");
-  const rpad : HTMLElement = document.getElementById("rpad");
+  const leftUpArrow: HTMLElement = document.getElementById("left-up")!;
+  const leftDownArrow : HTMLElement = document.getElementById("left-down")!;
+  const rightUpArrow : HTMLElement = document.getElementById("right-up")!;
+  const rightDownArrow : HTMLElement = document.getElementById("right-down")!;
+  const ball : HTMLElement = document.getElementById("ball")!;
+  const lpad : HTMLElement = document.getElementById("lpad")!;
+  const rpad : HTMLElement = document.getElementById("rpad")!;
   
-  let gameText : HTMLElement | null = document.getElementById("game-text");
+  let gameText : HTMLElement | null = document.getElementById("game-text")!;
   if (gameText) {
     gameText.style.visibility = "hidden";
     gameText.classList.remove('opacity-0');
@@ -269,7 +272,7 @@ export async function initDashboard() {
       'fill-red-400', 'fill-green-400', 'fill-red-500', 'fill-green-500'
     );
 
-    socket.addEventListener("message", (event) => {
+    socket.addEventListener("message", (event: MessageEvent<string>) => {
 //      console.log("I, a tokened player, receive:", event.data);
       // XXX maybe a try catch? idk if it'd crash or something on a wrong input
       switch (event.data) {
@@ -317,11 +320,11 @@ export async function initDashboard() {
 
           const newState: State =JSON.parse(event.data);
 
-           ball.setAttribute("cx", newState.stateBall.coords.x);
-           ball.setAttribute("cy", newState.stateBall.coords.y);
-           lpad.setAttribute("y", newState.stateLP.y);
-           rpad.setAttribute("y", newState.stateRP.y);
-           try {
+           ball.setAttribute("cx","" + newState.stateBall.coords.x);
+           ball.setAttribute("cy","" + newState.stateBall.coords.y);
+           lpad.setAttribute("y", "" + newState.stateLP.y);
+           rpad.setAttribute("y", "" + newState.stateRP.y);
+        /*    try {
              if (newState.stateBall.hitLPaddle) triggerPaddleEffect('lpad');
              if (newState.stateBall.hitRPaddle) triggerPaddleEffect('rpad');
              if (newState.stateBall.hitWall) triggerBallEffect();
@@ -330,7 +333,7 @@ export async function initDashboard() {
             console.error("Error updating game state:", e);
             }
            scoreText.innerHTML = `${newState.stateScoreL} : ${newState.stateScoreR}`;
-           scoreText.classList.remove('opacity-0');
+           scoreText.classList.remove('opacity-0'); */
 
           gameState = newState;
           
@@ -341,7 +344,6 @@ export async function initDashboard() {
           if (gameState.stateWhoL !== "none" && gameState.stateWhoL !== "null state") {
             gameText.style.visibility = "visible";
             gameText.classList.remove('opacity-0');
-            // gameText.classList.remove('animate-win-pulse', 'animate-lose-pulse', 'animate-text-glow');
             
             scoreText.innerHTML = "" + gameState.stateScoreL + " : " + gameState.stateScoreR;
             scoreText.classList.remove('opacity-0');
@@ -550,7 +552,7 @@ function bindDashboardEvents() {
     window.location.hash = 'login';
     route();
   });
-}
+} 
 
 
 window.addEventListener('hashchange', () => {
