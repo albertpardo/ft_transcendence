@@ -45,7 +45,6 @@ export async function renderHistoryContent(el: HTMLElement, bu: HTMLElement, gAr
 
   let tempInnerHTML : string = `
   <h1 class="text-3xl font-bold mb-6 text-white">Match History</h1>
-  <p class="mb-4 text-white">History of matches</p>
   <div class="flex justify-center">
     <table class="table-fixed border-separate border-spacing-x-6 bg-gray-900 text-white w-auto">
       <thead>
