@@ -6,6 +6,7 @@ import { PongResponses, State, addPlayerCompletely, removeTheSock, getPongDonene
 import { historyMain, getHistForPlayerFromDb } from './history';
 
 import { getLogTransportConfig } from '../dist/pino_utils/logTransportConfig';
+import { logFormat } from './pino_utils/log_format';
 
 interface PongBodyReq {
   playerId: string,
@@ -42,11 +43,12 @@ const startServer = async () => {
     },
 //    querystringParser: str => qs.parse(str),
   });
- 
+/* 
   fastify.log.info({
-			source: "startserver function",
+			source: startServer.name,
 		},"---startserver () info ----")
-
+*/
+  fastify.log.info(logFormat(startServer.name,"---startserver () info ----"));
   await fastify.register(websocket);
 
   await fastify.register(cors, {

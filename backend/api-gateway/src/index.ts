@@ -19,6 +19,7 @@ const exampleRoutes = require('./routes/example');
 
 // Start by apardo-m
 import { getLogTransportConfig } from '../dist/pino_utils/logTransportConfig';
+import { logFormat } from './pino_utils/log_format';
 const appName = "api_gateway"
 // End by apardo-m
 
@@ -183,15 +184,15 @@ async function start() {
         console.log("🚀 Fastify is booting up...");
     }
     try {
-    await healthServer.listen({
-        port: Number(process.env.HEALTH_PORT),
-        host: '0.0.0.0',
-        listenTextResolver: (address: string): string => {
-            // This verifies the actual bound address
-            console.log(`ACTUAL BINDING: ${address}`);
-            return `Health server listening on ${address}`;
-        }
-    });
+        await healthServer.listen({
+            port: Number(process.env.HEALTH_PORT),
+            host: '0.0.0.0',
+            listenTextResolver: (address: string): string => {
+                // This verifies the actual bound address
+                console.log(`ACTUAL BINDING: ${address}`);
+                return `Health server listening on ${address}`;
+            }
+        });
 
         await registerPlugin()
 
@@ -202,9 +203,12 @@ async function start() {
         await server.ready();
         const address = await server.listen({ port: Number(process.env.PORT), host: '0.0.0.0' });
     //    server.log.info(`Server listening on ${address}`)
-         server.log.info({
-		    source: "start function",
-		 },`Server listening on ${address}`);
+/*
+        server.log.info({
+		   source: start.name,
+		},`Server listening on ${address}`);
+*/	   
+        server.log.info(logFormat(start.name,`Server listening on ${address}`));
 
 /*
         server.listen({ port:8443, host: '0.0.0.0' }, (err: Error, address: string) => {
@@ -215,10 +219,28 @@ async function start() {
             server.log.info(`Server listening on ${address}`)
         })
  */       
+/*
 		console.log(`HTTP health check server listening on ${process.env.HEALTH_PORT}`);
         console.log(server.printRoutes());
+*/		
+        server.log.info(logFormat(start.name,`HTTP health check server listening on ${process.env.HEALTH_PORT}`));
+        server.log.info(logFormat(start.name, server.printRoutes()));
     } catch (err) {
-        server.log.error(err)
+       server.log.error(err)
+//        server.log.info(logFormat(start.name, err)); // err es del tipo unknow no se como gestionarlo por que logFormat espera un string
+/*
+ posible solucion:
+
+try {
+    // Código que puede lanzar un error
+} catch (err: unknown) {
+    if (err instanceof Error) {
+        console.error(err.message); // Acceso seguro a propiedades de Error
+    } else {
+        console.error('An unknown error occurred');
+    }
+}
+*/
         process.exit(1)
     }
 }
