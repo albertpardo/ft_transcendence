@@ -11,11 +11,11 @@ CA_CERT="/root/certs/ca/ca.crt"
 
 # constants
 POLICY_NAME="logs_policy"
-SNAPSHOT_REPOSITORY_NAME="my_backup"
-SNAPSHOT_POLICY_NAME="mi-politica-snapshot"
+SNAPSHOT_REPOSITORY_NAME="snapshot_backup"
+SNAPSHOT_POLICY_NAME="snapshot_policy"
 
 # Definir el array con los patrones para usar como index patterns
-patterns="gameservice usermanagement apigateway frontend"
+patterns="gameservice usermanagement apigateway"
 
 # Fichero de dashboard al que hay que actualizar con los nuevos IDs generados al crear los indexpatterns
 NDJSON_IN="/root/dashboard_example.ndjson" 
