@@ -426,6 +426,9 @@ export function addTournament(tName: string, playersN: number, privacy: boolean,
     }
     throw "You already participate in a tournament";
   }
+  if (playersMap.has(uuid)) {
+    throw "You're already participating in a game";
+  }
   if (tName === "" || !(playersN === 2 || playersN === 4 || playersN === 8) || uuid === "") {
     throw "Invalid tournament creation parameters";
   }
@@ -447,6 +450,9 @@ export function joinTournament(tId: string, uuid: string, sock: WebSocket) {
   console.log("joining tourn", tId, "as a", uuid);
   if (playersParticipatingTourn.has(uuid)) {
     throw "Player already participates in " + playersParticipatingTourn.get(uuid);
+  }
+  if (playersMap.has(uuid)) {
+    throw "You're already participating in a game";
   }
   if (tournamentMap.has(tId)) {
     const currentTour = tournamentMap.get(tId);
@@ -586,6 +592,12 @@ export function confirmParticipation(uuid: string) {
     throw "undefined tournament";
   }
   tourn.confirmPlayer(uuid);
+  if (socksMap.has(uuid)) {
+    socksMap.get(uuid).send("confirmed");
+  }
+  else {
+    console.log("weird. we confirmed the participation but the player just straight up got no sock.");
+  }
 }
 
 export async function tournamentsLoopCheck() {
@@ -636,4 +648,29 @@ export function getFinalist(uuid: string) {
     throw "Tournament not found in tid-tourn map";
   }
   throw "Player not found in players-tournaments map";
+}
+
+export function checkInTour(uuid: string) {
+  if (adminMap.has(uuid)) {
+    return (true);
+  }
+  if (playersParticipatingTourn.has(uuid)) {
+    return (true);
+  }
+  return (false);
+}
+
+export function checkTourReady(uuid: string) {
+  if (playersMap.has(uuid)) {
+    if (gamesMap.has(playersMap.get(uuid))) {
+      if (uuid === gamesMap.get(playersMap.get(uuid)).LplayerId) {
+        return gamesMap.get(playersMap.get(uuid)).leftReady;
+      }
+      else {
+        return gamesMap.get(playersMap.get(uuid)).rightReady;
+      }
+    }
+  }
+  return (true);
+  // lying to the user to simply make the button disabled.
 }

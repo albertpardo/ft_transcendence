@@ -361,10 +361,10 @@ const nullState : State = {
 //
 export function addPlayerCompletely(playerId: string, sock: WebSocket) {
   if (playersMap.has(playerId)) {
-//    console.log("oh no! player id", playerId, "already in!");
+    console.log("oh no! player id", playerId, "already in!");
     if (socksMap.has(playerId) === false) {
       socksMap.set(playerId, sock);
-//      console.log("...however, they were most likely disconnected. re-connected now!");
+      console.log("...however, they were most likely disconnected. re-connected now!");
       if (!gamesMap.has(playersMap.get(playerId))) {
         throw "no game found for a located gameid";
       }
@@ -689,4 +689,11 @@ export function getOppId(uuid: string) {
     throw "gamesMap doesn't have the player's gameid";
   }
   throw "Player not found in playersMap";
+}
+
+export function checkInPong(uuid: string) {
+  if (playersMap.has(uuid)) {
+    return (true);
+  }
+  return (false);
 }

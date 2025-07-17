@@ -77,7 +77,7 @@ async function leaveTournament() {
   return fresp;
 }
 
-async function getCompleteTournamentInfo() {
+export async function getCompleteTournamentInfo() {
   const fresp = fetch(
     `${API_BASE_URL}/api/pong/tour/peridinfo`,
     {

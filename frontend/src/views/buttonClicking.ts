@@ -73,3 +73,54 @@ export async function confirmParticipation() {
   );
   return fresp;
 }
+
+export async function checkIsInTournament() {
+  const fresp = fetch(
+    `${API_BASE_URL}/api/pong/tour/check`,
+    {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json,application/html,text/html,*/*',
+        'Origin': 'https://127.0.0.1:3000/',
+        'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
+      },
+      credentials: 'include',
+      mode: 'cors',
+    }
+  );
+  return fresp;
+}
+
+export async function checkReady() {
+  const fresp = fetch(
+    `${API_BASE_URL}/api/pong/tour/checkready`,
+    {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json,application/html,text/html,*/*',
+        'Origin': 'https://127.0.0.1:3000/',
+        'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
+      },
+      credentials: 'include',
+      mode: 'cors',
+    }
+  );
+  return fresp;
+}
+
+export async function checkIsInGame() {
+  const fresp = fetch(
+    `${API_BASE_URL}/api/pong/game/check`,
+    {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json,application/html,text/html,*/*',
+        'Origin': 'https://127.0.0.1:3000/',
+        'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
+      },
+      credentials: 'include',
+      mode: 'cors',
+    }
+  );
+  return fresp;
+}

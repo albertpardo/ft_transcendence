@@ -3,6 +3,7 @@ import websocket from '@fastify/websocket';
 import type { FastifyRequest } from 'fastify';
 import cors from '@fastify/cors';
 import {
+  sleep,
   State,
   addPlayerCompletely,
   removeTheSock,
@@ -13,7 +14,8 @@ import {
   dataStreamer,
   JoinError,
   getGType,
-  getOppId
+  getOppId,
+  checkInPong
 } from './pong';
 import { historyMain, getHistForPlayerFromDb } from './history';
 import {
@@ -27,7 +29,9 @@ import {
   leaveTournament,
   getFullTournament,
   confirmParticipation,
-  getFinalist  
+  getFinalist,
+  checkInTour,
+  checkTourReady 
 } from './tournament';
 
 // id shall come from the req and be per-user unique and persistent (jwt)
@@ -85,12 +89,18 @@ const startServer = async () => {
       let playerId : string = req.headers['x-user-id'] as string;
       let sock : WebSocket;
       if (typeof playerId !== "undefined" && playerId !== "") {
-        if (upperSocksMap.has(playerId) === false) {
-          console.error("no associated socket found. this must never happen, i think.");
-          return JSON.stringify({
-            gType: "",
-            err: "somehow, the socket hasn't been found",
-          });
+        let retries : number = 5;
+        while (upperSocksMap.has(playerId) === false) {
+          if (retries <= 0) {
+            console.log(playerId, "outta retries.");
+            return JSON.stringify({
+              gType: "",
+              err: "somehow, the socket hasn't been found",
+            });
+          }
+          console.error("no associated socket found for", playerId, ", probable sync issue. retrying", retries, "more times...");
+          retries--;
+          await sleep(1e3);
         }
         sock = upperSocksMap.get(playerId) as WebSocket;
         try {
@@ -101,7 +111,7 @@ const startServer = async () => {
           });
         }
         catch (e) {
-          console.error("whoops on add", e);
+          console.error("whoops on add:", e);
           if (e instanceof JoinError) {
             return JSON.stringify({
               gType: e.gType,
@@ -157,6 +167,12 @@ const startServer = async () => {
       }
       return JSON.stringify({
         err: "undefined or empty playerId -- failed to verify?",
+      });
+    });
+    fastify.get('/pong/game/check', async (req, reply) => {
+      const res = checkInPong(req?.headers['x-user-id'] as string);
+      return JSON.stringify({
+        res: res,
       });
     });
     fastify.get('/pong/game/info', async (req, reply) => {
@@ -303,6 +319,18 @@ const startServer = async () => {
           err: e,
         });
       }
+    });
+    fastify.get('/pong/tour/check', async (req, reply) => {
+      const res = checkInTour(req?.headers['x-user-id'] as string);
+      return JSON.stringify({
+        res: res,
+      });
+    });
+    fastify.get('/pong/tour/checkready', async (req, reply) => {
+      const res = checkTourReady(req?.headers['x-user-id'] as string);
+      return JSON.stringify({
+        res: res,
+      });
     });
     fastify.get('/pong/tour/peridinfo', async (req, reply) => {
       try {

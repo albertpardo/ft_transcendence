@@ -1,10 +1,10 @@
 // src/views/dashboard.ts
-import { registerPlayer, forefit, movePaddle, confirmParticipation } from './buttonClicking';
+import { registerPlayer, forefit, movePaddle, confirmParticipation, checkIsInGame, checkReady, checkIsInTournament } from './buttonClicking';
 import { route } from '../router';
 import { renderHomeContent, renderPlayContent, renderStatsContent } from './sections';
 import { renderHistoryContent, getNicknameForPlayerId } from './history';
 import { renderProfileContent } from './profile';
-import { renderTournamentContent, renderTournamentManagerContent } from './tournament';
+import { renderTournamentContent, renderTournamentManagerContent, getCompleteTournamentInfo } from './tournament';
 import { State, nullState } from './pongrender';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -60,6 +60,27 @@ async function getGameMetaInfo() {
     };
     return (ret);
   }
+}
+
+async function checkIsInGameWrapper() {
+  const checkIsInGameRaw = await checkIsInGame();
+  const checkIsInGameRes = await checkIsInGameRaw.text();
+  const checkIsInGameObj = JSON.parse(checkIsInGameRes);
+  return (checkIsInGameObj?.res);
+}
+
+async function checkReadyWrapper() {
+  const checkReadyRaw = await checkReady();
+  const checkReadyRes = await checkReadyRaw.text();
+  const checkReadyObj = JSON.parse(checkReadyRes);
+  return (checkReadyObj?.res);
+}
+
+async function checkIsInTourWrapper() {
+  const checkIsInTourRaw = await checkIsInTournament();
+  const checkIsInTourRes = await checkIsInTourRaw.text();
+  const checkIsInTourObj = JSON.parse(checkIsInTourRes);
+  return (checkIsInTourObj?.res);
 }
 
 export async function initDashboard() {
@@ -144,9 +165,30 @@ export async function initDashboard() {
 
       </div>
       <div id="button-area" class="flex flex-col space-y-1">
-        <button id="start-button" class="mt-6 p-3 bg-green-600 rounded-lg hover:bg-green-700 transition text-white font-medium">Click to join or reconnect</button>
-        <button id="ready-button" class="mt-6 p-3 bg-green-600 rounded-lg hover:bg-green-700 transition text-white font-medium">Click to set yourself ready</button>
-        <button id="giveup-button" class="mt-6 p-3 bg-red-600 rounded-lg hover:bg-red-700 transition text-white font-medium">FOREFIT (INSTANT)</button>
+        <button id="start-button" disabled
+        class=
+        "
+          mt-6 p-3 bg-green-600 rounded-lg hover:bg-green-700 transition text-white font-medium
+          disabled:border-gray-200 disabled:bg-gray-700 disabled:text-gray-500 disabled:shadow-none
+        ">
+          Click to join or reconnect
+        </button>
+        <button id="ready-button" disabled
+        class=
+        "
+          mt-6 p-3 bg-green-600 rounded-lg hover:bg-green-700 transition text-white font-medium
+          disabled:border-gray-200 disabled:bg-gray-700 disabled:text-gray-500 disabled:shadow-none
+        ">
+          Click to set yourself ready
+        </button>
+        <button id="giveup-button" disabled
+        class=
+        "
+          mt-6 p-3 bg-red-600 rounded-lg hover:bg-red-700 transition text-white font-medium
+          disabled:border-gray-200 disabled:bg-gray-700 disabled:text-gray-500 disabled:shadow-none
+        ">
+          INSTANTLY forefit
+        </button>
       </div>
       <p id="game-info"></p>
     </div>
@@ -175,14 +217,44 @@ export async function initDashboard() {
   // FIXME unused. remove or use.
   let started : boolean = false;
   let metaInfo = await getGameMetaInfo();
+  let reconn : boolean = false;
   if (localStorage.getItem("authToken")) {
     if (metaInfo.gType === "unknown") {
       gameInfo.innerHTML = "";
+      document.getElementById("start-button").disabled = false;
+      document.getElementById("ready-button").disabled = await checkReadyWrapper();
+      document.getElementById("giveup-button").disabled = true;
     }
     else {
+      document.getElementById("start-button").disabled = true;
+      document.getElementById("ready-button").disabled = await checkReadyWrapper();
+      document.getElementById("giveup-button").disabled = false;
+      console.log("oh snap! maybe reconnect the socket?");
+      reconn = true;
       gameInfo.innerHTML = "Game type: " + metaInfo.gType + "; versus: " + metaInfo.oppName;
     }
     socket = new WebSocket(`https://127.0.0.1:8443/api/pong/game-ws?uuid=${localStorage.getItem("userId")}&authorization=${localStorage.getItem("authToken")}`);
+    if (reconn) {
+      const regPlRawResp = await registerPlayer();
+      const regPlResp = await regPlRawResp.text();
+      const regPlRespObj = JSON.parse(regPlResp);
+      metaInfo = await getGameMetaInfo();
+      if (metaInfo.gType === "unknown") {
+        gameInfo.innerHTML = "";
+        document.getElementById("start-button").disabled = false;
+        document.getElementById("ready-button").disabled = await checkReadyWrapper();
+        document.getElementById("giveup-button").disabled = true;
+      }
+      else {
+        gameInfo.innerHTML = "Game type: " + metaInfo.gType + "; versus: " + metaInfo.oppName;
+        document.getElementById("start-button").disabled = true;
+        document.getElementById("ready-button").disabled = await checkReadyWrapper();
+        document.getElementById("giveup-button").disabled = false;
+      }
+      if (regPlRespObj.err !== "nil") {
+        console.log(regPlRespObj);
+      }
+    }
     socket.addEventListener("message", async (event) => {
 //      console.log("I, a tokened player, receive:", event.data);
       // XXX maybe a try catch? idk if it'd crash or something on a wrong input
@@ -199,6 +271,9 @@ export async function initDashboard() {
         case "connected":
 //          console.log("Welcome to pong.");
           break;
+        case "confirmed":
+          document.getElementById('ready-button').disabled = true;
+          break;
         case "abandon":
           started = false;
           playerSide = "tbd";
@@ -211,6 +286,8 @@ export async function initDashboard() {
           <tspan x="640" dy="1.2em">The match has been abandoned</tspan>
           <tspan x="640" dy="1.2em">by either of the two players</tspan>`;
           scoreText.innerHTML = "" + 0 + " : " + 0;
+          document.getElementById("giveup-button").disabled = true;
+          document.getElementById("start-button").disabled = false;
           break;
         case "added: L":
           metaInfo = await getGameMetaInfo();
@@ -271,14 +348,23 @@ export async function initDashboard() {
                   gameText.innerHTML = "You won the round!";
                   break;
                 case "left fully":
+                  document.getElementById("giveup-button").disabled = true;
+                  document.getElementById("ready-button").disabled = true;
+                  document.getElementById("start-button").disabled = false;
                   started = false;
                   gameText.innerHTML = "You lost the game.";
                   break;
                 case "right fully":
+                  document.getElementById("giveup-button").disabled = true;
+                  document.getElementById("ready-button").disabled = true;
+                  document.getElementById("start-button").disabled = false;
                   started = false;
                   gameText.innerHTML = "You won the game!";
                   break;
                 case "both":
+                  document.getElementById("giveup-button").disabled = true;
+                  document.getElementById("ready-button").disabled = true;
+                  document.getElementById("start-button").disabled = false;
                   started = false;
                   gameText.innerHTML = "In a rare dispay of absense, nobody won";
                   break;
@@ -292,14 +378,23 @@ export async function initDashboard() {
                   gameText.innerHTML = "You won the round!";
                   break;
                 case "right fully":
+                  document.getElementById("giveup-button").disabled = true;
+                  document.getElementById("ready-button").disabled = true;
+                  document.getElementById("start-button").disabled = false;
                   started = false;
                   gameText.innerHTML = "You lost the game.";
                   break;
                 case "left fully":
+                  document.getElementById("giveup-button").disabled = true;
+                  document.getElementById("ready-button").disabled = true;
+                  document.getElementById("start-button").disabled = false;
                   started = false;
                   gameText.innerHTML = "You won the game!";
                   break;
                 case "both":
+                  document.getElementById("giveup-button").disabled = true;
+                  document.getElementById("ready-button").disabled = true;
+                  document.getElementById("start-button").disabled = false;
                   started = false;
                   gameText.innerHTML = "In a rare dispay of absense, nobody won";
                   break;
@@ -322,7 +417,15 @@ export async function initDashboard() {
       if (metaInfo.gType === "unknown") {
         gameInfo.innerHTML = "";
       }
+      else if (metaInfo.gType === "tournament") {
+        document.getElementById("start-button").disabled = true;
+        document.getElementById("ready-button").disabled = await checkReadyWrapper();
+        document.getElementById("giveup-button").disabled = false;
+      }
       else {
+        document.getElementById("start-button").disabled = true;
+        document.getElementById("ready-button").disabled = true;
+        document.getElementById("giveup-button").disabled = false;
         gameInfo.innerHTML = "Game type: " + metaInfo.gType + "; versus: " + metaInfo.oppName;
       }
       if (regPlRespObj.err !== "nil") {
@@ -337,9 +440,14 @@ export async function initDashboard() {
       if (readyPlRespObj.err !== "nil") {
         console.error(readyPlRespObj.err);
       }
+      else {
+        document.getElementById('ready-button').disabled = true;
+      }
     });
     document.getElementById('giveup-button')!.addEventListener('click', async () => {
       console.log("after clicking the giveup-button,");
+      document.getElementById("start-button").disabled = false;
+      document.getElementById("giveup-button").disabled = true;
       const forefitRawResp = await forefit();
       const forefitResp = await forefitRawResp.text();
       const forefitRespObj = JSON.parse(forefitResp);
