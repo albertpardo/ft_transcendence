@@ -365,6 +365,7 @@ export async function initDashboard() {
                   gameText.classList.remove('fill-white');
                   gameText.setAttribute("fill", "#f87171");
                   setTimeout(() => triggerRainEffect(), 300);
+                  document.getElementById('start-button')!.style.display = 'block';
                   break;
                 case "right fully":
                   started = false;
@@ -372,6 +373,7 @@ export async function initDashboard() {
                   gameText.classList.remove('fill-white');
                   gameText.setAttribute("fill", "#4ade80");
                   setTimeout(() => triggerConfetti(), 300);
+                  document.getElementById('start-button')!.style.display = 'block';
                   break;
               }
             } else if (playerSide === "r") {
@@ -391,12 +393,14 @@ export async function initDashboard() {
                   gameText.innerHTML = "You lost the game.";
                   gameText.setAttribute("fill", "#f87171");
                   setTimeout(() => triggerRainEffect(), 300);
+                  document.getElementById('start-button')!.style.display = 'block';
                   break;
                 case "left fully":
                   started = false;
                   gameText.innerHTML = "You won the game!";
                   gameText.setAttribute("fill", "#4ade80");
                   setTimeout(() => triggerConfetti(), 300);
+                  document.getElementById('start-button')!.style.display = 'block';
                   break;
               }
             }
@@ -411,6 +415,8 @@ export async function initDashboard() {
     });
 
     document.getElementById('start-button')!.addEventListener('click', () => {
+      document.getElementById('start-button')!.style.display = 'none';
+
       registerPlayer(function (error, response) {
         if (error) {
           console.error(error);
@@ -469,6 +475,22 @@ export async function initDashboard() {
     rightDownArrow.addEventListener('mouseleave', () => {
       movePaddleWrapper(0);
     });
+
+    
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowUp' || e.key === 'w'|| e.key === 'W') {
+        movePaddleWrapper(-2); // move up
+      } else if (e.key === 'ArrowDown' || e.key === 's'|| e.key === 'S') {
+        movePaddleWrapper(2); // move down
+      }
+    });
+
+    window.addEventListener('keyup', (e) => {
+      if (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'w' || e.key === 'W' || e.key === 's' || e.key === 'S') {
+        movePaddleWrapper(0); // stop moving
+      }
+    });
+
   }
   // Mobile menu functionality
   const mobileMenuToggle = document.getElementById('mobile-menu-toggle')!;
