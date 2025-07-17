@@ -24,6 +24,6 @@ RUN npm install -g serve
 EXPOSE 3000
 EXPOSE 10000
 
-# CMD ["serve", "-s", "dist", "-l", "3000"]
-COPY start.sh ./
-CMD ["./start.sh"]
+CMD ["serve", "-s", "dist", "-l", "3000"]
+# COPY start.sh ./
+# CMD ["./start.sh"]
