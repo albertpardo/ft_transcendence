@@ -464,6 +464,20 @@ export async function initDashboard() {
     rightDownArrow.addEventListener('mouseleave', () => {
       movePaddleWrapper(0);
     });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowUp' || e.key === 'w'|| e.key === 'W') {
+        movePaddleWrapper(-2); // move up
+      } else if (e.key === 'ArrowDown' || e.key === 's'|| e.key === 'S') {
+        movePaddleWrapper(2); // move down
+      }
+    });
+
+    window.addEventListener('keyup', (e) => {
+      if (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'w' || e.key === 'W' || e.key === 's' || e.key === 'S') {
+        movePaddleWrapper(0); // stop moving
+      }
+    });
   }
   // Mobile menu functionality
   const mobileMenuToggle = document.getElementById('mobile-menu-toggle')!;
