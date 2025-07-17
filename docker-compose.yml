@@ -28,7 +28,7 @@ services:
     volumes:
       - ./backend/api-gateway:/app
       - /app/node_modules      # use container-installed deps
-      - shared_logs:/shared_logs
+      - shared_logs:/shared_logs  # add by apardo-m 
     env_file:
       - ./backend/api-gateway/.env
     restart: always
@@ -43,7 +43,7 @@ services:
     volumes:
       - ./backend/microservices/user_management:/app
       - /app/node_modules      # use container-installed deps
-      - shared_logs:/shared_logs
+      - shared_logs:/shared_logs   # add by apardo-m 
     environment:
       - ./backend/microservices/user_management/.env
     restart: always
@@ -59,7 +59,7 @@ services:
       - ./backend/microservices/game_service:/app   # add by apardo-m
       - /app/node_modules      # use container-installed deps
       - ./backend/microservices/game_service/vol:/app/dbs
-      - shared_logs:/shared_logs
+      - shared_logs:/shared_logs  # add by apardo-m 
     restart: always
     networks:
       - backend

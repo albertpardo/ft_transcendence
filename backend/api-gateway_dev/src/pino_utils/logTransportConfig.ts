@@ -1,12 +1,13 @@
 import { LOG_FOLDER, LOG_FILE } from './constants'
-import { join } from 'path';
+import { join, resolve } from 'path';
 
-// Función que devuelve la configuración del transporte
+// transport config
 export const getLogTransportConfig = () => {
+
   return {
     targets: [
       {
-        target: './file-transport.ts', // Guarda logs en archivo
+        target: resolve(__dirname, 'file-transport.js'),
         options: {
           destination: join('/shared_logs', 'app.log'),
           mkdir: true
@@ -19,10 +20,9 @@ export const getLogTransportConfig = () => {
         }
       },
       {
-        target: './logstash-transport.ts', // Envío a Logstash
+        target: resolve(__dirname, 'logstash-transport.js'), // Envío a Logstash
         level: 'info'
       }
     ]
   };
 };
-

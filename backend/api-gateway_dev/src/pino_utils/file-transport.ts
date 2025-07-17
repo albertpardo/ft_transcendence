@@ -2,7 +2,6 @@ import { createWriteStream } from 'fs';
 import { join } from 'path';
 import { PINO_FILE, LOG_FOLDER, LOG_FILE, APP_LOG_AUTH } from './constants'
 
-
 interface LogObject {
   source?: string;
   via?: string;
@@ -26,10 +25,13 @@ export default async function (opts: any) {
         logObj.via = PINO_FILE;
 
         stream.write(JSON.stringify(logObj) + '\n');
-      } catch (err) {
-        console.error('file-transport error:', err.message);
+      } catch (err: unknown ) {
+	     if (err instanceof Error) {
+           console.error('file-transport error:', err.message);
+         } else {
+          console.error('Error desconocido', err);
+         }
       }
     }
   };
 }
-

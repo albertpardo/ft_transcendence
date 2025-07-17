@@ -47,6 +47,9 @@ downvol:
 # Delete ELK folder (and subfolders) used for logs and backups
 cleanfolders:
 	@rm -rf $(ELK_FOLDER)
+	@rm -rf ./backend/microservices/game_service/dist/
+#	@rm -rf ./backend/api-gateway/dist/
+
 
 # For easy clean by apardo-m
 cleanapardo: downvol cleanfolders

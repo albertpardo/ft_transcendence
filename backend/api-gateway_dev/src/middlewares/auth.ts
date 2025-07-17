@@ -7,22 +7,18 @@ let itwasasocket : boolean = false;
 // JWT verification using authMiddleware
 export async function authMiddleware(req: FastifyRequest, reply: FastifyReply) {
 
-
     itwasasocket = false;
+    console.log("🔍 Incoming request URL:", req.url);
+    console.log("🔍 jwtVerify type in middleware:", typeof req.jwtVerify);
+    console.log("🔍🔍🔍 All keys on req:", Object.keys(req));
 
-    if (!(req.url?.startsWith('/health'))) {
-        console.log("🔍 Incoming request URL:", req.url);
-        console.log("🔍 jwtVerify type in middleware:", typeof req.jwtVerify);
-        console.log("🔍🔍🔍 All keys on req:", Object.keys(req));
-        console.log('🔍 Full headers before jwtVerify:', req.headers);
-        console.log('🔍 Authorization Header outside try:', String(req.headers['authorization']));
-    }
+    console.log('🔍 Full headers before jwtVerify:', req.headers);
+    console.log('🔍 Authorization Header outside try:', String(req.headers['authorization']));
+
 
     // if requested URL is public, skip auth
-    const publicPaths = ['/api/signup', '/api/login', '/api/public', '/api/health'];
+    const publicPaths = ['/api/signup', '/api/login', '/api/public'];
     if (publicPaths.some(path => req.url?.startsWith(path))) return;
-    // if (publicPaths.some(path => req.url?.startsWitth('/health'))) return; // allow health check without auth
-    if (req.url?.startsWith('/health')) return; // allow health check without auth
 
     try {
 //        if (req?.headers['sec-websocket-protocol'] !== null) {
@@ -30,10 +26,6 @@ export async function authMiddleware(req: FastifyRequest, reply: FastifyReply) {
         if (req.headers["upgrade"] === "websocket") {
           itwasasocket = true;
           req.headers["authorization"] = "Bearer " + usp1.get("authorization");
-        
-        /* if (req.headers.upgrade === 'websocket' && !req.headers['authorization'] && req?.headers['sec-websocket-protocol']) {
-          req.headers['authorization'] = "Bearer " + req.headers['sec-websocket-protocol'];
-          delete req.headers['sec-websocket-protocol']; */
         }
        
         console.log('🔍 Raw Authorization Header inside try00:', String(req.headers['authorization']));
@@ -42,10 +34,7 @@ export async function authMiddleware(req: FastifyRequest, reply: FastifyReply) {
 //            req.headers['authorization'] = req.headers['use-me-to-authorize'];
 //            delete req.headers['use-me-to-authorize'];
             if (req.headers['use-me-to-authorize']) {
-                    const useMeToAuthorize = req.headers['use-me-to-authorize'];
-                    req.headers['authorization'] = `Bearer ${
-                        typeof useMeToAuthorize === 'string' ? useMeToAuthorize.replace(/^Bearer\s*/, '') : ''
-                }`;
+                req.headers['authorization'] = `Bearer ${req.headers['use-me-to-authorize'].replace(/^Bearer\s*/, '')}`;
                 delete req.headers['use-me-to-authorize'];
             }
         }

@@ -6,8 +6,7 @@ interface LogObject {
   [key: string]: any; // Permite propiedades adicionales
 }
 
-//export default async function (opts: any) {
-export const logstashTransport = async (opts:any ) => {
+export default async function (opts: any) {
   return {
     write: async (logLine: string ) => {
       try {
@@ -23,7 +22,7 @@ export const logstashTransport = async (opts:any ) => {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(logObj),
-        });
+		});
       } catch (err: unknown ) {
 	     if (err instanceof Error) {
            console.error('Logstash transport error:', err.message);

@@ -23,9 +23,11 @@ export default async function (opts: any) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(logObj),
 		});
-      } catch (err) {
-	     if (err) {
-           console.error('logstash-transport error:', err.message || err);
+      } catch (err: unknown ) {
+	     if (err instanceof Error) {
+           console.error('file-transport error:', err.message);
+         } else {
+          console.error('Error desconocido', err);
          }
       }
     }

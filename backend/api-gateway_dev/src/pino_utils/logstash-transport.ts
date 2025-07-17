@@ -16,16 +16,20 @@ export default async function (opts: any) {
           logObj.source = APP_LOG_AUTH;
         }
 
-	logObj.via = PINO_HTTP;
+        logObj.via = PINO_HTTP;
        
         await fetch('http://logstash:5044', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(logObj),
-        });
-      } catch (err) {
-        console.error('Logstash transport error:', err.message);
+		});
+      } catch (err: unknown ) {
+	     if (err instanceof Error) {
+           console.error('Logstash transport error:', err.message);
+         } else {
+          console.error('Error desconocido', err);
+         }
       }
     }
   };
-}
+};

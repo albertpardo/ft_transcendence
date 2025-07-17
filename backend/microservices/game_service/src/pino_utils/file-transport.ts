@@ -25,9 +25,11 @@ export default async function (opts: any) {
         logObj.via = PINO_FILE;
 
         stream.write(JSON.stringify(logObj) + '\n');
-      } catch (err) {
-	     if (err) {
-           console.error('file-transport error:', err.message || err);
+      } catch (err: unknown ) {
+	     if (err instanceof Error) {
+           console.error('file-transport error:', err.message);
+         } else {
+          console.error('Error desconocido', err);
          }
       }
     }

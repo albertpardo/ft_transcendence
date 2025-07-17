@@ -42,7 +42,11 @@ const startServer = async () => {
     },
 //    querystringParser: str => qs.parse(str),
   });
-  
+ 
+  fastify.log.info({
+			source: "startserver function",
+		},"---startserver () info ----")
+
   await fastify.register(websocket);
 
   await fastify.register(cors, {
