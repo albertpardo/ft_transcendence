@@ -278,6 +278,10 @@ export async function initDashboard() {
                   started = false;
                   gameText.innerHTML = "You won the game!";
                   break;
+                case "both":
+                  started = false;
+                  gameText.innerHTML = "In a rare dispay of absense, nobody won";
+                  break;
               }
             } else if (playerSide === "r") {
               switch (gameState.stateWhoL) {
@@ -294,6 +298,10 @@ export async function initDashboard() {
                 case "left fully":
                   started = false;
                   gameText.innerHTML = "You won the game!";
+                  break;
+                case "both":
+                  started = false;
+                  gameText.innerHTML = "In a rare dispay of absense, nobody won";
                   break;
               }
             }
