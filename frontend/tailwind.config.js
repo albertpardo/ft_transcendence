@@ -18,7 +18,7 @@ module.exports = {
     'fill-red-500',
     'fill-green-500',
   ],
-  darkMode: false,
+  darkMode: "media", // or 'class'
   theme: {
     extend: {
       animation: {
