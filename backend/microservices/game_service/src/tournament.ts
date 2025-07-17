@@ -275,10 +275,10 @@ class Tournament {
           }
         }
 
-        console.log("tour", this.tId, "awaiting a minute till auto-shutdown");
+        console.log("tour", this.tId, "awaiting a minute till auto-shutdown; meanwhile deleting everything");
+        this.alive = false;
         await sleep(60e3);
         console.log("tour", this.tId, "bye");
-        this.alive = false;
         break ;
       }
       console.log("stage", this.currentStage, "tour: after subtraction");
@@ -294,10 +294,17 @@ class Tournament {
     for (const [pid, tid] of playersParticipatingTourn) {
       if (tid === this.tId) {
         playersParticipatingTourn.delete(pid);
+        if (playersMap.has(pid)) {
+          if (gamesMap.has(playersMap.get(pid))) {
+            console.log("deleting game", gamesMap.get(playersMap.get(pid)), "gamesmap from eliminateSelf");
+            gamesMap.delete(playersMap.get(pid));
+          }
+          console.log("deleting player", pid, "from playersmap from eliminateSelf");
+          playersMap.delete(pid);
+        }
         console.log("players participating delete", pid, "from eliminateSelf in tournament", this.tId);
       }
     }
-    // TODO run thru game ids and clean ts up
   }
 
   public confirmPlayer(uuid: string) {
@@ -348,6 +355,7 @@ class Tournament {
           throw "undefined game runtime";
         }
         if (runtime.LplayerId === uuid) {
+          console.log("met our player in", runtime);
           if (runtime.RplayerId !== "") {
             runtime.forefit(uuid);
             forefit = true;
@@ -366,6 +374,7 @@ class Tournament {
           break ;
         }
         if (runtime.RplayerId === uuid) {
+          console.log("met our player in", runtime);
           if (runtime.LplayerId !== "") {
             runtime.forefit(uuid);
             forefit = true;
@@ -385,8 +394,8 @@ class Tournament {
         }
       }
     }
-    if (playersMap.has(uuid) && forefit) {
-      console.log("one extra deletion of", uuid, "because forefit at the end and still exists in playersMap");
+    if (playersMap.has(uuid)) {
+      console.log("one extra deletion of", uuid, "from playersmap");
       playersMap.delete(uuid);
     }
   }
@@ -589,6 +598,14 @@ export async function tournamentsLoopCheck() {
         if (tid2 === tid) {
           console.log("rming player", pid, "from said tournament's associated map");
           playersParticipatingTourn.delete(pid);
+          if (playersMap.has(pid)) {
+            if (gamesMap.has(playersMap.get(pid))) {
+              console.log("deleting game", gamesMap.get(playersMap.get(pid)), "gamesmap from tlc");
+              gamesMap.delete(playersMap.get(pid));
+            }
+            console.log("deleting player", pid, "from playersmap from tlc");
+            playersMap.delete(pid);
+          }
         }
       }
       for (const [aid, tid3] of adminMap) {

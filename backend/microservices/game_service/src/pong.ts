@@ -632,6 +632,15 @@ export const dataStreamer = async (playerId : string) => {
           }
         }
       }
+      else {
+        if (runtime.LplayerId === playerId) {
+          sock.send(JSON.stringify(runtime.gstate));
+          if (socksMap.has(runtime.RplayerId)) {
+            sock = socksMap.get(runtime.RplayerId);
+            sock.send(JSON.stringify(runtime.gstate));
+          }
+        }
+      }
       break ;
     }
     await sleep(FRAME_TIME_MS);
