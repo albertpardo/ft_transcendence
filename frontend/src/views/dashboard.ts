@@ -12,6 +12,9 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // Declare socket at the module level
 let socket: WebSocket | null = null;
+let gameState: State = nullState;
+let playerSide: string = "tbd";
+let started: boolean = false;
 
 function movePaddleWrapper(d: number) {
   movePaddle(d, function (error, response) {
@@ -140,6 +143,94 @@ function triggerBallEffect() {
   setTimeout(() => ball.classList.remove('animate-ball-pulse'), 300);
 }
 
+function cleanupGameArea() {
+  const gameWindow = document.getElementById('game-window');
+  if (gameWindow) {
+    gameWindow.innerHTML = `
+      <div id="rain-overlay" class="absolute inset-0 z-50 pointer-events-none hidden"></div>
+      <!-- Left Controls -->
+      <div class="absolute left-0 top-1/2 transform -translate-y-1/2 flex flex-col space-y-4 z-10">
+        <button id="left-up" class="bg-white text-black p-3 rounded shadow" hidden>^</button>
+        <button id="left-down" class="bg-white text-black p-3 rounded shadow" hidden>v</button>
+      </div>
+      <!-- SVG Field -->
+      <svg width="1280" height="720">
+        <defs>
+          <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+           <feDropShadow dx="0" dy="0" stdDeviation="10" flood-color="#00ff00" />
+          </filter>
+        </defs>
+        <rect width="100%" height="100%" fill="black" />
+        <g id="lpad-group">
+          <rect id="lpad" x="40" y="310" width="10" height="100" class="fill-white" />
+        </g>
+        <g id="rpad-group">
+          <rect id="rpad" x="1230" y="310" width="10" height="100" class="fill-white" />
+        </g>
+        <circle id="ball" cx="640" cy="360" r="3" class="fill-white" />
+        <text id="score-text" x="640" y="60" font-family="Monospace" font-size="40" class="fill-white" text-anchor="middle">
+          0 : 0
+        </text>
+        <text id="game-text" x="640" y="200" font-family="Sans-serif" font-size="60" text-anchor="middle" class="opacity-0 transition-all duration-300 fill-white">
+          Welcome to Pong!
+        </text>
+      </svg>
+      <!-- Right Controls -->
+      <div class="absolute right-0 top-1/2 transform -translate-y-1/2 flex flex-col space-y-4 z-10">
+        <button id="right-up" class="bg-white text-black p-3 rounded shadow" hidden>^</button>
+        <button id="right-down" class="bg-white text-black p-3 rounded shadow" hidden>v</button>
+      </div>
+    `;
+  }
+}
+
+function handleKeyDown(e: KeyboardEvent) {
+  if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') {
+    movePaddleWrapper(-2);
+  } else if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') {
+    movePaddleWrapper(2);
+  }
+}
+
+function handleKeyUp(e: KeyboardEvent) {
+  if (['ArrowUp', 'ArrowDown', 'w', 'W', 's', 'S'].includes(e.key)) {
+    movePaddleWrapper(0);
+  }
+}
+
+// Add:
+window.addEventListener('keydown', handleKeyDown);
+window.addEventListener('keyup', handleKeyUp);
+
+// Remove:
+window.removeEventListener('keydown', handleKeyDown);
+window.removeEventListener('keyup', handleKeyUp);
+function removeGameEventListeners() {
+  const leftUpArrow = document.getElementById("left-up");
+  const leftDownArrow = document.getElementById("left-down");
+  const rightUpArrow = document.getElementById("right-up");
+  const rightDownArrow = document.getElementById("right-down");
+
+  [leftUpArrow, leftDownArrow, rightUpArrow, rightDownArrow].forEach(btn => {
+    if (btn) {
+      btn.replaceWith(btn.cloneNode(true)); // Removes all event listeners
+    }
+  });
+
+  window.removeEventListener('keydown', handleKeyDown);
+  window.removeEventListener('keyup', handleKeyUp);
+}
+
+function resetGameState() {
+  if (socket) {
+    socket.close();
+    socket = null;
+  }
+  // Reset game state
+  gameState = nullState;
+  playerSide = "tbd";
+  started = false;
+}
 
 export async function initDashboard() {
   const hash = window.location.hash.replace('#', '') || 'home';
@@ -260,10 +351,10 @@ export async function initDashboard() {
   const scoreText : HTMLElement = document.getElementById("score-text")!;
 
 
-  let gameState : State = nullState;
-  let playerSide : string = "tbd";
+/*    gameState : State = nullState;
+  playerSide : string = "tbd";
   // FIXME unused. remove or use.
-  let started : boolean = false;
+  started : boolean = false; */
   if (localStorage.getItem("authToken")) {
 
     socket = new WebSocket(`${API_BASE_URL}/api/pong/game-ws?uuid=${localStorage.getItem("userId")}&authorization=${localStorage.getItem("authToken")}`);
@@ -476,22 +567,18 @@ export async function initDashboard() {
       movePaddleWrapper(0);
     });
 
-    
-    window.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowUp' || e.key === 'w'|| e.key === 'W') {
-        movePaddleWrapper(-2); // move up
-      } else if (e.key === 'ArrowDown' || e.key === 's'|| e.key === 'S') {
-        movePaddleWrapper(2); // move down
-      }
-    });
 
-    window.addEventListener('keyup', (e) => {
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+    
+
+ /*    window.addEventListener('keyup', (e) => {
       if (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'w' || e.key === 'W' || e.key === 's' || e.key === 'S') {
         movePaddleWrapper(0); // stop moving
       }
-    });
+    }); */
 
-  }
+  
   // Mobile menu functionality
   const mobileMenuToggle = document.getElementById('mobile-menu-toggle')!;
   const mobileMenuClose = document.getElementById('mobile-menu-close')!;
@@ -558,8 +645,13 @@ export async function initDashboard() {
     default:            renderHomeContent(contentArea, startButton, gameArea, gameWindow);
   }
   gameArea.style.display = (hash === 'play') ? 'flex' : 'none';
+  if (hash !== 'play') {
+  cleanupGameArea();
+  removeGameEventListeners();
+ // resetGameState();
 }
-
+}
+}
 // Initialize dashboard only once when starting the app
 initDashboard();
 
