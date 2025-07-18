@@ -226,21 +226,8 @@ async function start() {
         server.log.info(logFormat(start.name,`HTTP health check server listening on ${process.env.HEALTH_PORT}`));
         server.log.info(logFormat(start.name, server.printRoutes()));
     } catch (err) {
-       server.log.error(err)
-//        server.log.info(logFormat(start.name, err)); // err es del tipo unknow no se como gestionarlo por que logFormat espera un string
-/*
- posible solucion:
-
-try {
-    // Código que puede lanzar un error
-} catch (err: unknown) {
-    if (err instanceof Error) {
-        console.error(err.message); // Acceso seguro a propiedades de Error
-    } else {
-        console.error('An unknown error occurred');
-    }
-}
-*/
+//       server.log.error(err)
+        server.log.error(logFormat(start.name, err));
         process.exit(1)
     }
 }
