@@ -16,8 +16,10 @@ let gameState: State = nullState;
 let playerSide: string = "tbd";
 let started: boolean = false;
 
-function movePaddleWrapper(d: number) {
-  movePaddle(d, function (error, response) {
+
+
+const movePaddleWrapper = (d: number) => {
+  movePaddle(d, (error, response) => {
     if (error) {
       console.error(error);
     }
@@ -29,7 +31,7 @@ function movePaddleWrapper(d: number) {
 }
 
 
-function triggerConfetti() {
+const triggerConfetti = () => {
   const gameWindow = document.getElementById('game-window');
   if (!gameWindow) return;
 
@@ -92,7 +94,7 @@ function triggerConfetti() {
   }), 600);
 }
 
-function triggerRainEffect() {
+const triggerRainEffect = () => {
   const overlay = document.getElementById('rain-overlay');
   if (!overlay) return;
 
@@ -118,7 +120,7 @@ function triggerRainEffect() {
   }, 2000);
 }
 
-function triggerPaddleEffect(paddleId: string) {
+const triggerPaddleEffect = (paddleId: string) => {
   const group = document.getElementById(`${paddleId}-group`);
   if (!group) return;
 
@@ -135,7 +137,7 @@ function triggerPaddleEffect(paddleId: string) {
   }, 300);
 }
 
-function triggerBallEffect() {
+const triggerBallEffect = () => {
   const ball = document.getElementById('ball');
   if (!ball) return;
   
@@ -143,7 +145,7 @@ function triggerBallEffect() {
   setTimeout(() => ball.classList.remove('animate-ball-pulse'), 300);
 }
 
-function cleanupGameArea() {
+const cleanupGameArea = () => {
   const gameWindow = document.getElementById('game-window');
   if (gameWindow) {
     gameWindow.innerHTML = `
@@ -184,7 +186,7 @@ function cleanupGameArea() {
   }
 }
 
-function handleKeyDown(e: KeyboardEvent) {
+const handleKeyDown = (e: KeyboardEvent) => {
   if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') {
     movePaddleWrapper(-2);
   } else if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') {
@@ -192,7 +194,7 @@ function handleKeyDown(e: KeyboardEvent) {
   }
 }
 
-function handleKeyUp(e: KeyboardEvent) {
+const handleKeyUp = (e: KeyboardEvent) => {
   if (['ArrowUp', 'ArrowDown', 'w', 'W', 's', 'S'].includes(e.key)) {
     movePaddleWrapper(0);
   }
@@ -205,7 +207,7 @@ window.addEventListener('keyup', handleKeyUp);
 // Remove:
 window.removeEventListener('keydown', handleKeyDown);
 window.removeEventListener('keyup', handleKeyUp);
-function removeGameEventListeners() {
+const removeGameEventListeners = () => {
   const leftUpArrow = document.getElementById("left-up");
   const leftDownArrow = document.getElementById("left-down");
   const rightUpArrow = document.getElementById("right-up");
@@ -221,12 +223,12 @@ function removeGameEventListeners() {
   window.removeEventListener('keyup', handleKeyUp);
 }
 
-function resetGameState() {
+// Reset game state
+const resetGameState = () => {
   if (socket) {
     socket.close();
     socket = null;
   }
-  // Reset game state
   gameState = nullState;
   playerSide = "tbd";
   started = false;
@@ -357,305 +359,308 @@ export async function initDashboard() {
   started : boolean = false; */
   if (localStorage.getItem("authToken")) {
 
-    socket = new WebSocket(`${API_BASE_URL}/api/pong/game-ws?uuid=${localStorage.getItem("userId")}&authorization=${localStorage.getItem("authToken")}`);
-    gameText.classList.remove(
-      'animate-win-pulse', 'animate-lose-pulse', 'animate-text-glow',
-      'fill-red-400', 'fill-green-400', 'fill-red-500', 'fill-green-500'
-    );
+      socket = new WebSocket(`${API_BASE_URL}/api/pong/game-ws?uuid=${localStorage.getItem("userId")}&authorization=${localStorage.getItem("authToken")}`);
+      gameText.classList.remove(
+        'animate-win-pulse', 'animate-lose-pulse', 'animate-text-glow',
+        'fill-red-400', 'fill-green-400', 'fill-red-500', 'fill-green-500'
+      );
 
-    socket.addEventListener("message", (event: MessageEvent<string>) => {
-//      console.log("I, a tokened player, receive:", event.data);
-      // XXX maybe a try catch? idk if it'd crash or something on a wrong input
-      switch (event.data) {
-        case "connected":
-//          console.log("Welcome to pong.");
-          break;
-        case "added: L":
-          started = false;
-          playerSide = "l";
-          leftUpArrow.hidden = false;
-          leftDownArrow.hidden = false;
-          rightUpArrow.hidden = true;
-          rightDownArrow.hidden = true;
-          gameText.style.visibility = "hidden";
-          scoreText.classList.add('opacity-0');
-            setTimeout(() => {
-              scoreText.innerHTML = `${gameState.stateScoreL} : ${gameState.stateScoreR}`;
+      socket.addEventListener("message", (event: MessageEvent<string>) => {
+  //      console.log("I, a tokened player, receive:", event.data);
+        // XXX maybe a try catch? idk if it'd crash or something on a wrong input
+        switch (event.data) {
+          case "connected":
+  //          console.log("Welcome to pong.");
+            break;
+          case "added: L":
+            started = false;
+            playerSide = "l";
+            leftUpArrow.hidden = false;
+            leftDownArrow.hidden = false;
+            rightUpArrow.hidden = true;
+            rightDownArrow.hidden = true;
+            gameText.style.visibility = "hidden";
+            scoreText.classList.add('opacity-0');
+              setTimeout(() => {
+                scoreText.innerHTML = `${gameState.stateScoreL} : ${gameState.stateScoreR}`;
 
-             scoreText.classList.remove('opacity-0');
-            }, 150);
-    
-          break;
-        case "added: R":
-          started = false;
-          playerSide = "r";
-          rightUpArrow.hidden = false;
-          rightDownArrow.hidden = false;
-          leftUpArrow.hidden = true;
-          leftDownArrow.hidden = true;
-          gameText.style.visibility = "hidden";
-          scoreText.classList.add('opacity-0');
-            setTimeout(() => {
-              scoreText.innerHTML = `${gameState.stateScoreL} : ${gameState.stateScoreR}`;
-
-              scoreText.classList.remove('opacity-0');
-            }, 150);
-
-          break;
-        case "started":
-          started = true;
-          break;
-        case "error":
-          break;
-        default:
-
-          const newState: State =JSON.parse(event.data);
-
-           ball.setAttribute("cx","" + newState.stateBall.coords.x);
-           ball.setAttribute("cy","" + newState.stateBall.coords.y);
-           lpad.setAttribute("y", "" + newState.stateLP.y);
-           rpad.setAttribute("y", "" + newState.stateRP.y);
-        /*    try {
-             if (newState.stateBall.hitLPaddle) triggerPaddleEffect('lpad');
-             if (newState.stateBall.hitRPaddle) triggerPaddleEffect('rpad');
-             if (newState.stateBall.hitWall) triggerBallEffect();
-
-           } catch (e) {
-            console.error("Error updating game state:", e);
-            }
-           scoreText.innerHTML = `${newState.stateScoreL} : ${newState.stateScoreR}`;
-           scoreText.classList.remove('opacity-0'); */
-
-          gameState = newState;
-          
-
-
-
-
-          if (gameState.stateWhoL !== "none" && gameState.stateWhoL !== "null state") {
-            gameText.style.visibility = "visible";
-            gameText.classList.remove('opacity-0');
+               scoreText.classList.remove('opacity-0');
+              }, 150);
             
-            scoreText.innerHTML = "" + gameState.stateScoreL + " : " + gameState.stateScoreR;
-            scoreText.classList.remove('opacity-0');
-            if (playerSide === "l") {
-              switch (gameState.stateWhoL) {
-                case "left":
-                  gameText.innerHTML = "You lost the round.";
-                  gameText.classList.remove('fill-white'); 
-                  gameText.setAttribute("fill", "#f87171");
-                  break;
-                case "right":
-                  gameText.innerHTML = "You won the round!";
-                  gameText.classList.remove('fill-white');
-                  gameText.setAttribute("fill", "#4ade80");
-                  break;
-                case "left fully":
-                  started = false;
-                  gameText.innerHTML = "You lost the game.";
-                  gameText.classList.remove('fill-white');
-                  gameText.setAttribute("fill", "#f87171");
-                  setTimeout(() => triggerRainEffect(), 300);
-                  document.getElementById('start-button')!.style.display = 'block';
-                  break;
-                case "right fully":
-                  started = false;
-                  gameText.innerHTML = "You won the game!";
-                  gameText.classList.remove('fill-white');
-                  gameText.setAttribute("fill", "#4ade80");
-                  setTimeout(() => triggerConfetti(), 300);
-                  document.getElementById('start-button')!.style.display = 'block';
-                  break;
+            break;
+          case "added: R":
+            started = false;
+            playerSide = "r";
+            rightUpArrow.hidden = false;
+            rightDownArrow.hidden = false;
+            leftUpArrow.hidden = true;
+            leftDownArrow.hidden = true;
+            gameText.style.visibility = "hidden";
+            scoreText.classList.add('opacity-0');
+              setTimeout(() => {
+                scoreText.innerHTML = `${gameState.stateScoreL} : ${gameState.stateScoreR}`;
+
+                scoreText.classList.remove('opacity-0');
+              }, 150);
+
+            break;
+          case "started":
+            started = true;
+            break;
+          case "error":
+            break;
+          default:
+
+            const newState: State =JSON.parse(event.data);
+
+             ball.setAttribute("cx","" + newState.stateBall.coords.x);
+             ball.setAttribute("cy","" + newState.stateBall.coords.y);
+             lpad.setAttribute("y", "" + newState.stateLP.y);
+             rpad.setAttribute("y", "" + newState.stateRP.y);
+          /*    try {
+               if (newState.stateBall.hitLPaddle) triggerPaddleEffect('lpad');
+               if (newState.stateBall.hitRPaddle) triggerPaddleEffect('rpad');
+               if (newState.stateBall.hitWall) triggerBallEffect();
+
+             } catch (e) {
+              console.error("Error updating game state:", e);
               }
-            } else if (playerSide === "r") {
-              switch (gameState.stateWhoL) {
-                case "right":
-                  gameText.innerHTML = "You lost the round.";
-                  gameText.classList.remove('fill-white');  
-                  gameText.setAttribute("fill", "#f87171");
-                  break;
-                case "left":
-                  gameText.innerHTML = "You won the round!";
-                  gameText.classList.remove('fill-white');
-                  gameText.setAttribute("fill", "#4ade80");
-                  break;
-                case "right fully":
-                  started = false; 
-                  gameText.innerHTML = "You lost the game.";
-                  gameText.setAttribute("fill", "#f87171");
-                  setTimeout(() => triggerRainEffect(), 300);
-                  document.getElementById('start-button')!.style.display = 'block';
-                  break;
-                case "left fully":
-                  started = false;
-                  gameText.innerHTML = "You won the game!";
-                  gameText.setAttribute("fill", "#4ade80");
-                  setTimeout(() => triggerConfetti(), 300);
-                  document.getElementById('start-button')!.style.display = 'block';
-                  break;
+             scoreText.innerHTML = `${newState.stateScoreL} : ${newState.stateScoreR}`;
+             scoreText.classList.remove('opacity-0'); */
+
+            gameState = newState;
+            
+
+
+
+
+            if (gameState.stateWhoL !== "none" && gameState.stateWhoL !== "null state") {
+              gameText.style.visibility = "visible";
+              gameText.classList.remove('opacity-0');
+
+              scoreText.innerHTML = "" + gameState.stateScoreL + " : " + gameState.stateScoreR;
+              scoreText.classList.remove('opacity-0');
+              if (playerSide === "l") {
+                switch (gameState.stateWhoL) {
+                  case "left":
+                    gameText.innerHTML = "You lost the round.";
+                    gameText.classList.remove('fill-white'); 
+                    gameText.setAttribute("fill", "#f87171");
+                    break;
+                  case "right":
+                    gameText.innerHTML = "You won the round!";
+                    gameText.classList.remove('fill-white');
+                    gameText.setAttribute("fill", "#4ade80");
+                    break;
+                  case "left fully":
+                    started = false;
+                    gameText.innerHTML = "You lost the game.";
+                    gameText.classList.remove('fill-white');
+                    gameText.setAttribute("fill", "#f87171");
+                    setTimeout(() => triggerRainEffect(), 300);
+                    document.getElementById('start-button')!.style.display = 'block';
+                    break;
+                  case "right fully":
+                    started = false;
+                    gameText.innerHTML = "You won the game!";
+                    gameText.classList.remove('fill-white');
+                    gameText.setAttribute("fill", "#4ade80");
+                    setTimeout(() => triggerConfetti(), 300);
+                    document.getElementById('start-button')!.style.display = 'block';
+                    break;
+                }
+              } else if (playerSide === "r") {
+                switch (gameState.stateWhoL) {
+                  case "right":
+                    gameText.innerHTML = "You lost the round.";
+                    gameText.classList.remove('fill-white');  
+                    gameText.setAttribute("fill", "#f87171");
+                    break;
+                  case "left":
+                    gameText.innerHTML = "You won the round!";
+                    gameText.classList.remove('fill-white');
+                    gameText.setAttribute("fill", "#4ade80");
+                    break;
+                  case "right fully":
+                    started = false; 
+                    gameText.innerHTML = "You lost the game.";
+                    gameText.setAttribute("fill", "#f87171");
+                    setTimeout(() => triggerRainEffect(), 300);
+                    document.getElementById('start-button')!.style.display = 'block';
+                    break;
+                  case "left fully":
+                    started = false;
+                    gameText.innerHTML = "You won the game!";
+                    gameText.setAttribute("fill", "#4ade80");
+                    setTimeout(() => triggerConfetti(), 300);
+                    document.getElementById('start-button')!.style.display = 'block';
+                    break;
+                }
               }
             }
+            else {
+              gameText.style.visibility = "hidden";
+
+              scoreText.innerHTML = "" + gameState.stateScoreL + " : " + gameState.stateScoreR;
+              scoreText.classList.remove('opacity-0');
+            }
+        }
+      });
+
+      document.getElementById('start-button')!.addEventListener('click', () => {
+        document.getElementById('start-button')!.style.display = 'none';
+
+        registerPlayer(function (error, response) {
+          if (error) {
+            console.error(error);
           }
           else {
-            gameText.style.visibility = "hidden";
-            
-            scoreText.innerHTML = "" + gameState.stateScoreL + " : " + gameState.stateScoreR;
-            scoreText.classList.remove('opacity-0');
+            response?.text().then((result) => {
+            });
           }
-      }
-    });
+        });
+      });
 
-    document.getElementById('start-button')!.addEventListener('click', () => {
-      document.getElementById('start-button')!.style.display = 'none';
+      leftUpArrow.addEventListener('mousedown', () => {
+        movePaddleWrapper(-2);
+      });
 
-      registerPlayer(function (error, response) {
-        if (error) {
-          console.error(error);
+      leftUpArrow.addEventListener('mouseup', () => {
+        movePaddleWrapper(0);
+      });
+
+      leftUpArrow.addEventListener('mouseleave', () => {
+        movePaddleWrapper(0);
+      });
+
+      leftDownArrow.addEventListener('mousedown', () => {
+        movePaddleWrapper(2);
+      });
+
+      leftDownArrow.addEventListener('mouseup', () => {
+        movePaddleWrapper(0);
+      });
+
+      leftDownArrow.addEventListener('mouseleave', () => {
+        movePaddleWrapper(0);
+      });
+
+      rightUpArrow.addEventListener('mousedown', () => {
+        movePaddleWrapper(-2);
+      });
+
+      rightUpArrow.addEventListener('mouseup', () => {
+        movePaddleWrapper(0);
+      });
+
+      rightUpArrow.addEventListener('mouseleave', () => {
+        movePaddleWrapper(0);
+      });
+
+      rightDownArrow.addEventListener('mousedown', () => {
+        movePaddleWrapper(2);
+      });
+
+      rightDownArrow.addEventListener('mouseup', () => {
+        movePaddleWrapper(0);
+      });
+
+      rightDownArrow.addEventListener('mouseleave', () => {
+        movePaddleWrapper(0);
+      });
+
+
+      window.addEventListener('keydown', handleKeyDown);
+      window.addEventListener('keyup', handleKeyUp);
+
+
+   /*    window.addEventListener('keyup', (e) => {
+        if (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'w' || e.key === 'W' || e.key === 's' || e.key === 'S') {
+          movePaddleWrapper(0); // stop moving
         }
-        else {
-          response?.text().then((result) => {
-          });
+      }); */
+
+    
+    // Mobile menu functionality
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle')!;
+    const mobileMenuClose = document.getElementById('mobile-menu-close')!;
+    const sidebar = document.getElementById('sidebar')!;
+    const backdrop = document.getElementById('mobile-backdrop')!;
+
+    function openMobileMenu() {
+      sidebar.classList.remove('-translate-x-full');
+      backdrop.classList.remove('opacity-0', 'pointer-events-none');
+      backdrop.classList.add('opacity-100');
+      document.body.classList.add('overflow-hidden');
+    }
+
+    function closeMobileMenu() {
+      sidebar.classList.add('-translate-x-full');
+      backdrop.classList.add('opacity-0', 'pointer-events-none');
+      backdrop.classList.remove('opacity-100');
+      document.body.classList.remove('overflow-hidden');
+    }
+
+    mobileMenuToggle.addEventListener('click', openMobileMenu);
+    mobileMenuClose.addEventListener('click', closeMobileMenu);
+    backdrop.addEventListener('click', closeMobileMenu);
+
+    // Close mobile menu when navigation link is clicked
+    const navLinks = document.querySelectorAll('.nav-link');
+    navLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        if (window.innerWidth < 768) { // md breakpoint
+          closeMobileMenu();
         }
       });
     });
 
-    leftUpArrow.addEventListener('mousedown', () => {
-      movePaddleWrapper(-2);
-    });
-
-    leftUpArrow.addEventListener('mouseup', () => {
-      movePaddleWrapper(0);
-    });
-
-    leftUpArrow.addEventListener('mouseleave', () => {
-      movePaddleWrapper(0);
-    });
-
-    leftDownArrow.addEventListener('mousedown', () => {
-      movePaddleWrapper(2);
-    });
-
-    leftDownArrow.addEventListener('mouseup', () => {
-      movePaddleWrapper(0);
-    });
-
-    leftDownArrow.addEventListener('mouseleave', () => {
-      movePaddleWrapper(0);
-    });
-
-    rightUpArrow.addEventListener('mousedown', () => {
-      movePaddleWrapper(-2);
-    });
-
-    rightUpArrow.addEventListener('mouseup', () => {
-      movePaddleWrapper(0);
-    });
-
-    rightUpArrow.addEventListener('mouseleave', () => {
-      movePaddleWrapper(0);
-    });
-
-    rightDownArrow.addEventListener('mousedown', () => {
-      movePaddleWrapper(2);
-    });
-
-    rightDownArrow.addEventListener('mouseup', () => {
-      movePaddleWrapper(0);
-    });
-
-    rightDownArrow.addEventListener('mouseleave', () => {
-      movePaddleWrapper(0);
-    });
-
-
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('keyup', handleKeyUp);
-    
-
- /*    window.addEventListener('keyup', (e) => {
-      if (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'w' || e.key === 'W' || e.key === 's' || e.key === 'S') {
-        movePaddleWrapper(0); // stop moving
-      }
-    }); */
-
-  
-  // Mobile menu functionality
-  const mobileMenuToggle = document.getElementById('mobile-menu-toggle')!;
-  const mobileMenuClose = document.getElementById('mobile-menu-close')!;
-  const sidebar = document.getElementById('sidebar')!;
-  const backdrop = document.getElementById('mobile-backdrop')!;
-
-  function openMobileMenu() {
-    sidebar.classList.remove('-translate-x-full');
-    backdrop.classList.remove('opacity-0', 'pointer-events-none');
-    backdrop.classList.add('opacity-100');
-    document.body.classList.add('overflow-hidden');
-  }
-
-  function closeMobileMenu() {
-    sidebar.classList.add('-translate-x-full');
-    backdrop.classList.add('opacity-0', 'pointer-events-none');
-    backdrop.classList.remove('opacity-100');
-    document.body.classList.remove('overflow-hidden');
-  }
-
-  mobileMenuToggle.addEventListener('click', openMobileMenu);
-  mobileMenuClose.addEventListener('click', closeMobileMenu);
-  backdrop.addEventListener('click', closeMobileMenu);
-
-  // Close mobile menu when navigation link is clicked
-  const navLinks = document.querySelectorAll('.nav-link');
-  navLinks.forEach(link => {
-    link.addEventListener('click', () => {
-      if (window.innerWidth < 768) { // md breakpoint
+    // Close mobile menu on window resize to desktop
+    window.addEventListener('resize', () => {
+      if (window.innerWidth >= 768) {
         closeMobileMenu();
       }
     });
-  });
 
-  // Close mobile menu on window resize to desktop
-  window.addEventListener('resize', () => {
-    if (window.innerWidth >= 768) {
-      closeMobileMenu();
+    // Logout functionality
+    document.getElementById('logout-btn')!.addEventListener('click', () => {
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('userId');
+      if (socket !== null) {
+        socket.close();
+      }
+      window.location.hash = 'login';
+      route();
+    });
+
+    // Render active section
+    const contentArea = document.getElementById('content-area')!;
+    const startButton = document.getElementById('start-button')!;
+    const gameArea = document.getElementById('game-area')!;
+    const gameWindow = document.getElementById('game-window')!;
+    switch (hash) {
+      case 'profile':     renderProfileContent(contentArea, startButton, gameArea, gameWindow);     break;
+      case 'play':        renderPlayContent(contentArea, startButton, gameArea, gameWindow);        break;
+      case 'history':     renderHistoryContent(contentArea, startButton, gameArea, gameWindow);     break;
+      case 'tournament':  renderTournamentContent(contentArea, startButton, gameArea, gameWindow);  break;
+      case 'stats':       renderStatsContent(contentArea, startButton, gameArea, gameWindow);       break;
+      default:            renderHomeContent(contentArea, startButton, gameArea, gameWindow);
     }
-  });
-
-  // Logout functionality
-  document.getElementById('logout-btn')!.addEventListener('click', () => {
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('userId');
-    if (socket !== null) {
-      socket.close();
+    gameArea.style.display = (hash === 'play') ? 'flex' : 'none';
+    if (hash !== 'play') {
+      cleanupGameArea();
+      removeGameEventListeners();
+      resetGameState();
     }
-    window.location.hash = 'login';
-    route();
-  });
-
-  // Render active section
-  const contentArea = document.getElementById('content-area')!;
-  const startButton = document.getElementById('start-button')!;
-  const gameArea = document.getElementById('game-area')!;
-  const gameWindow = document.getElementById('game-window')!;
-  switch (hash) {
-    case 'profile':     renderProfileContent(contentArea, startButton, gameArea, gameWindow);     break;
-    case 'play':        renderPlayContent(contentArea, startButton, gameArea, gameWindow);        break;
-    case 'history':     renderHistoryContent(contentArea, startButton, gameArea, gameWindow);     break;
-    case 'tournament':  renderTournamentContent(contentArea, startButton, gameArea, gameWindow);  break;
-    case 'stats':       renderStatsContent(contentArea, startButton, gameArea, gameWindow);       break;
-    default:            renderHomeContent(contentArea, startButton, gameArea, gameWindow);
+    if (hash === 'play' && localStorage.getItem("authToken")) {
+      startGameLogic(localStorage.getItem("authToken")!);
+    }
   }
-  gameArea.style.display = (hash === 'play') ? 'flex' : 'none';
-  if (hash !== 'play') {
-  cleanupGameArea();
-  removeGameEventListeners();
- // resetGameState();
-}
-}
 }
 // Initialize dashboard only once when starting the app
-initDashboard();
+// initDashboard();
 
-function bindDashboardEvents() {
+const bindDashboardEvents = () => {
   // Logout functionality
   document.getElementById('logout-btn')?.addEventListener('click', () => {
     localStorage.removeItem('authToken');
@@ -668,9 +673,304 @@ function bindDashboardEvents() {
   });
 } 
 
+const startGameLogic = (authToken: string) => {
+
+  const leftUpArrow = document.getElementById("left-up")!;
+  const leftDownArrow = document.getElementById("left-down")!;
+  const rightUpArrow = document.getElementById("right-up")!;
+  const rightDownArrow = document.getElementById("right-down")!;
+  const ball = document.getElementById("ball")!;
+  const lpad = document.getElementById("lpad")!;
+  const rpad = document.getElementById("rpad")!;
+  const gameText = document.getElementById("game-text")!;
+  const scoreText = document.getElementById("score-text")!;
+  
+
+  // Reset game text
+  gameText.style.visibility = "hidden";
+  gameText.innerHTML = "Welcome to Pong!";
+  gameText.setAttribute("fill", "white"); // Default fill
+  gameText.classList.remove(
+    'fill-red-400', 'fill-green-400', 
+    'fill-red-500', 'fill-green-500', 
+    'animate-win-pulse', 'animate-lose-pulse', 'animate-text-glow'
+  );
+
+  scoreText.innerHTML = "0 : 0";
+  scoreText.classList.add('opacity-0');
+  setTimeout(() => {
+    scoreText.classList.remove('opacity-0');
+  }, 150);
+
+  if (socket) {
+    socket.removeEventListener("message", () => {});
+
+    socket.close();
+    socket = null;
+  }
+  socket = new WebSocket(`${API_BASE_URL}/api/pong/game-ws?uuid=${localStorage.getItem("userId")}&authorization=${authToken}`);
+
+  gameText.classList.remove(
+    'animate-win-pulse', 'animate-lose-pulse', 'animate-text-glow',
+    'fill-red-400', 'fill-green-400', 'fill-red-500', 'fill-green-500'
+  );
+
+  socket.addEventListener("message", (event: MessageEvent<string>) => {
+    switch (event.data) {
+      case "connected":
+        break;
+      case "added: L":
+        started = false;
+        playerSide = "l";
+        leftUpArrow.hidden = false;
+        leftDownArrow.hidden = false;
+        rightUpArrow.hidden = true;
+        rightDownArrow.hidden = true;
+        gameText.style.visibility = "hidden";
+        scoreText.classList.add('opacity-0');
+        setTimeout(() => {
+          scoreText.innerHTML = `${gameState.stateScoreL} : ${gameState.stateScoreR}`;
+          scoreText.classList.remove('opacity-0');
+        }, 150);
+        break;
+      case "added: R":
+        started = false;
+        playerSide = "r";
+        rightUpArrow.hidden = false;
+        rightDownArrow.hidden = false;
+        leftUpArrow.hidden = true;
+        leftDownArrow.hidden = true;
+        gameText.style.visibility = "hidden";
+        scoreText.classList.add('opacity-0');
+        setTimeout(() => {
+          scoreText.innerHTML = `${gameState.stateScoreL} : ${gameState.stateScoreR}`;
+          scoreText.classList.remove('opacity-0');
+        }, 150);
+        break;
+      case "started":
+        started = true;
+        break;
+      default:
+        try {
+          const newState: State = JSON.parse(event.data);
+          gameState = newState;
+
+          ball.setAttribute("cx", "" + newState.stateBall.coords.x);
+          ball.setAttribute("cy", "" + newState.stateBall.coords.y);
+          lpad.setAttribute("y", "" + newState.stateLP.y);
+          rpad.setAttribute("y", "" + newState.stateRP.y);
+
+          if (gameState.stateWhoL !== "none" && gameState.stateWhoL !== "null state") {
+            gameText.style.visibility = "visible";
+            scoreText.innerHTML = `${newState.stateScoreL} : ${newState.stateScoreR}`;
+            if (playerSide === "l") {
+              switch (gameState.stateWhoL) {
+                case "left":
+                  handleGameMessage(event);
+                  break;
+                case "right":
+                  handleGameMessage(event);
+                  break;
+                case "left fully":
+                  started = false;
+                  handleGameMessage(event);
+                  setTimeout(() => triggerRainEffect(), 300);
+                  document.getElementById('start-button')!.style.display = 'block';
+                  break;
+                case "right fully":
+                  started = false;
+                  handleGameMessage(event);
+                  setTimeout(() => triggerConfetti(), 300);
+                  document.getElementById('start-button')!.style.display = 'block';
+                  break;
+              }
+            } else if (playerSide === "r") {
+              switch (gameState.stateWhoL) {
+                case "right":
+                  handleGameMessage(event);
+                  break;
+                case "left":
+                  handleGameMessage(event);
+                  break;
+                case "right fully":
+                  started = false;
+                  handleGameMessage(event);
+                  setTimeout(() => triggerRainEffect(), 300);
+                  document.getElementById('start-button')!.style.display = 'block';
+                  break;
+                case "left fully":
+                  started = false;
+                  handleGameMessage(event);
+                  setTimeout(() => triggerConfetti(), 300);
+                  document.getElementById('start-button')!.style.display = 'block';
+                  break;
+              }
+            }
+          } else {
+            gameText.style.visibility = "hidden";
+            scoreText.innerHTML = `${gameState.stateScoreL} : ${gameState.stateScoreR}`;
+          }
+        } catch (e) {
+          console.error("Error parsing game state:", e);
+        }
+    }
+  });
+
+  document.getElementById('start-button')!.addEventListener('click', () => {
+    document.getElementById('start-button')!.style.display = 'none';
+    registerPlayer(function (error, response) {
+      if (error) console.error(error);
+    });
+  });
+
+  // Add button and keyboard event listeners
+  leftUpArrow.addEventListener('mousedown', () => movePaddleWrapper(-2));
+  leftUpArrow.addEventListener('mouseup', () => movePaddleWrapper(0));
+  leftDownArrow.addEventListener('mousedown', () => movePaddleWrapper(2));
+  leftDownArrow.addEventListener('mouseup', () => movePaddleWrapper(0));
+
+  rightUpArrow.addEventListener('mousedown', () => movePaddleWrapper(-2));
+  rightUpArrow.addEventListener('mouseup', () => movePaddleWrapper(0));
+  rightDownArrow.addEventListener('mousedown', () => movePaddleWrapper(2));
+  rightDownArrow.addEventListener('mouseup', () => movePaddleWrapper(0));
+
+  window.addEventListener('keydown', handleKeyDown);
+  window.addEventListener('keyup', handleKeyUp);
+};
+
 
 window.addEventListener('hashchange', () => {
+  const hash = window.location.hash.replace('#', '') || 'home';
+  if (hash !== 'play') {
+    cleanupGameArea();
+    removeGameEventListeners();
+    resetGameState();
+  }
+
+  if (hash === 'play' && localStorage.getItem("authToken")) {
+    if (socket) {
+      socket.close();
+      socket = null;
+    }
+    gameState = nullState;
+    startGameLogic(localStorage.getItem("authToken")!);
+  }
   initDashboard();
   bindDashboardEvents();
   console.log("Hash changed to:", window.location.hash);
 });
+
+interface GameMessageEvent extends MessageEvent<string> {}
+
+interface GameElements {
+  ball: HTMLElement;
+  lpad: HTMLElement;
+  rpad: HTMLElement;
+  gameText: HTMLElement;
+  scoreText: HTMLElement;
+  startButton: HTMLElement;
+}
+
+const handleGameMessage = (event: GameMessageEvent): void => {
+  switch (event.data) {
+    case "connected":
+      break;
+    case "added: L":
+      started = false;
+      playerSide = "l";
+      const gameTextL = document.getElementById("game-text") as HTMLElement;
+      const scoreTextL = document.getElementById("score-text") as HTMLElement;
+      gameTextL.style.visibility = "hidden";
+      scoreTextL.classList.add('opacity-0');
+      setTimeout(() => {
+        scoreTextL.innerHTML = `${gameState.stateScoreL} : ${gameState.stateScoreR}`;
+        scoreTextL.classList.remove('opacity-0');
+      }, 150);
+      break;
+    case "started":
+      started = true;
+      break;
+    default:
+      try {
+        const newState: State = JSON.parse(event.data);
+        gameState = newState;
+
+        // Update ball and paddles
+        const elements: GameElements = {
+          ball: document.getElementById("ball") as HTMLElement,
+          lpad: document.getElementById("lpad") as HTMLElement,
+          rpad: document.getElementById("rpad") as HTMLElement,
+          gameText: document.getElementById("game-text") as HTMLElement,
+          scoreText: document.getElementById("score-text") as HTMLElement,
+          startButton: document.getElementById('start-button') as HTMLElement,
+        };
+
+        elements.ball.setAttribute("cx", "" + newState.stateBall.coords.x);
+        elements.ball.setAttribute("cy", "" + newState.stateBall.coords.y);
+        elements.lpad.setAttribute("y", "" + newState.stateLP.y);
+        elements.rpad.setAttribute("y", "" + newState.stateRP.y);
+
+        if (gameState.stateWhoL !== "none" && gameState.stateWhoL !== "null state") {
+          elements.gameText.style.visibility = "visible";
+          elements.scoreText.innerHTML = `${newState.stateScoreL} : ${newState.stateScoreR}`;
+
+          if (playerSide === "l") {
+            switch (gameState.stateWhoL) {
+              case "left":
+                elements.gameText.innerHTML = "You lost the round.";
+                elements.gameText.setAttribute("fill", "#f87171");
+                break;
+              case "right":
+                elements.gameText.innerHTML = "You won the round!";
+                elements.gameText.setAttribute("fill", "#4ade80");
+                break;
+              case "left fully":
+                started = false;
+                elements.gameText.innerHTML = "You lost the game.";
+                elements.gameText.setAttribute("fill", "#f87171");
+                setTimeout(() => triggerRainEffect(), 300);
+                elements.startButton.style.display = 'block';
+                break;
+              case "right fully":
+                started = false;
+                elements.gameText.innerHTML = "You won the game!";
+                elements.gameText.setAttribute("fill", "#4ade80");
+                setTimeout(() => triggerConfetti(), 300);
+                elements.startButton.style.display = 'block';
+                break;
+            }
+          } else if (playerSide === "r") {
+            switch (gameState.stateWhoL) {
+              case "right":
+                elements.gameText.innerHTML = "You lost the round.";
+                elements.gameText.setAttribute("fill", "#f87171");
+                break;
+              case "left":
+                elements.gameText.innerHTML = "You won the round!";
+                elements.gameText.setAttribute("fill", "#4ade80");
+                break;
+              case "right fully":
+                started = false;
+                elements.gameText.innerHTML = "You lost the game.";
+                elements.gameText.setAttribute("fill", "#f87171");
+                setTimeout(() => triggerRainEffect(), 300);
+                elements.startButton.style.display = 'block';
+                break;
+              case "left fully":
+                started = false;
+                elements.gameText.innerHTML = "You won the game!";
+                elements.gameText.setAttribute("fill", "#4ade80");
+                setTimeout(() => triggerConfetti(), 300);
+                elements.startButton.style.display = 'block';
+                break;
+            }
+          }
+        } else {
+          elements.gameText.style.visibility = "hidden";
+          elements.scoreText.innerHTML = `${gameState.stateScoreL} : ${gameState.stateScoreR}`;
+        }
+      } catch (e: unknown) {
+        console.error("Error parsing game state:", e);
+      }
+  }
+};
