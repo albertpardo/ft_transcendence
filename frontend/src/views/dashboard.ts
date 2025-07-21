@@ -9,6 +9,10 @@ import confetti from 'canvas-confetti';
 
 // Import VITE_API_BASE_URL from environment variables
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+let socket: WebSocket | null = null;
+let gameState: State = nullState;
+let playerSide: string = "tbd";
+let started: boolean = false;
 
 function movePaddleWrapper(d: number) {
   movePaddle(d, function (error, response) {
@@ -21,6 +25,86 @@ function movePaddleWrapper(d: number) {
       });
     }
   });
+}
+
+const cleanupGameArea = () => {
+  const gameWindow = document.getElementById('game-window');
+  if (gameWindow) {
+    gameWindow.innerHTML = `
+      <div id="rain-overlay" class="absolute inset-0 z-50 pointer-events-none hidden"></div>
+      <!-- Left Controls -->
+      <div class="absolute left-0 top-1/2 transform -translate-y-1/2 flex flex-col space-y-4 z-10">
+        <button id="left-up" class="bg-white text-black p-3 rounded shadow" hidden>^</button>
+        <button id="left-down" class="bg-white text-black p-3 rounded shadow" hidden>v</button>
+      </div>
+      <!-- SVG Field -->
+      <svg width="1280" height="720">
+        <defs>
+          <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+           <feDropShadow dx="0" dy="0" stdDeviation="10" flood-color="#00ff00" />
+          </filter>
+        </defs>
+        <rect width="100%" height="100%" fill="black" />
+        <g id="lpad-group">
+          <rect id="lpad" x="40" y="310" width="10" height="100" class="fill-white" />
+        </g>
+        <g id="rpad-group">
+          <rect id="rpad" x="1230" y="310" width="10" height="100" class="fill-white" />
+        </g>
+        <circle id="ball" cx="640" cy="360" r="3" class="fill-white" />
+        <text id="score-text" x="640" y="60" font-family="Monospace" font-size="40" class="fill-white" text-anchor="middle">
+          0 : 0
+        </text>
+        <text id="game-text" x="640" y="200" font-family="Sans-serif" font-size="60" text-anchor="middle" class="opacity-0 transition-all duration-300 fill-current">
+          Welcome to Pong!
+        </text>
+      </svg>
+      <!-- Right Controls -->
+      <div class="absolute right-0 top-1/2 transform -translate-y-1/2 flex flex-col space-y-4 z-10">
+        <button id="right-up" class="bg-white text-black p-3 rounded shadow" hidden>^</button>
+        <button id="right-down" class="bg-white text-black p-3 rounded shadow" hidden>v</button>
+      </div>
+    `;
+  }
+}
+
+const resetGameText = () => {
+  const gameText = document.getElementById("game-text") as HTMLElement | null;
+  if (!gameText) return;
+
+  gameText.style.visibility = "hidden";
+  gameText.innerHTML = "Welcome to Pong!";
+ 
+  gameText.classList.remove(
+    "fill-white",
+    'fill-red-400', 'fill-green-400',
+    'fill-red-500', 'fill-green-500',
+    'animate-win-pulse', 'animate-lose-pulse', 'animate-text-glow'
+  );
+  gameText.classList.add("fill-white");
+}
+
+const resetGameUi = () => {
+  const gameText = document.getElementById("game-text") as HTMLElement | null;
+  const scoreText = document.getElementById("score-text") as HTMLElement | null;
+
+  if (gameText) {
+    gameText.style.visibility = "hidden";
+    gameText.innerHTML = "Welcome to Pong!";
+    // gameText.setAttribute("fill", "white");
+    gameText.classList.remove(
+      'fill-red-400', 'fill-green-400',
+      'fill-red-500', 'fill-green-500',
+      'animate-win-pulse', 'animate-lose-pulse', 'animate-text-glow'
+    );
+  }
+  if (scoreText) {
+    scoreText.innerHTML = "0 : 0";
+    scoreText.classList.add('opacity-0');
+    setTimeout(() => {
+      scoreText.classList.remove('opacity-0');
+    }, 150);
+  } 
 }
 
 function triggerConfetti() {
