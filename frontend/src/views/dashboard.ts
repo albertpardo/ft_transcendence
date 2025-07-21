@@ -272,7 +272,6 @@ const resetGameState = () => {
   started = false;
 }
 
-
 const bindDashboardEvents = () => {
   // Logout functionality
   document.getElementById('logout-btn')?.addEventListener('click', () => {
@@ -284,9 +283,7 @@ const bindDashboardEvents = () => {
     window.location.hash = 'login';
     route();
   });
-} 
-
-
+}
 
 const applyGameResult = (message: string, colorClass: string, animationClass: string) => {
   const gameText = document.getElementById("game-text") as HTMLElement | null;
@@ -653,6 +650,8 @@ export async function initDashboard() {
   const hash = window.location.hash.replace('#', '') || 'home';
   const app = document.getElementById('app')!;
 
+  
+
   app.innerHTML = `
     <!-- Mobile Header -->
     <header class="md:hidden fixed top-0 left-0 right-0 bg-gray-900 z-50 p-4 flex items-center justify-between">
@@ -743,7 +742,21 @@ export async function initDashboard() {
     </div>
   `;
 
+  const contentArea = document.getElementById('content-area')!;
+  const startButton = document.getElementById('start-button')!;
+  const gameArea = document.getElementById('game-area')!;
+  const gameWindow = document.getElementById('game-window')!;
+
+  switch (hash) {
+    case 'profile':     renderProfileContent(contentArea, startButton, gameArea, gameWindow);     break;
+    case 'play':        renderPlayContent(contentArea, startButton, gameArea, gameWindow);        break;
+    case 'history':     renderHistoryContent(contentArea, startButton, gameArea, gameWindow);     break;
+    case 'tournament':  renderTournamentContent(contentArea, startButton, gameArea, gameWindow);  break;
+    case 'stats':       renderStatsContent(contentArea, startButton, gameArea, gameWindow);       break;
+    default:            renderHomeContent(contentArea, startButton, gameArea, gameWindow);
+  }
+
   if (localStorage)
   startGameLogic(localStorage.getItem("authToken")!);
-
+  gameArea.style.display = (hash === 'play') ? 'flex' : 'none';
 }
