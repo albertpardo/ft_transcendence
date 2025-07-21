@@ -25,9 +25,9 @@ export default async function (opts: any) {
 		});
       } catch (err: unknown ) {
 	     if (err instanceof Error) {
-           console.error('file-transport error:', err.message);
+           console.error('Logstash transport error: ', err.message);
          } else {
-          console.error('Error desconocido', err);
+           console.error('Unknown Logstash Error: ', err);
          }
       }
     }
