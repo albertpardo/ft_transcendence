@@ -20,7 +20,11 @@ const fileTransport = async (opts) => {
 
         stream.write(JSON.stringify(logObj) + '\n');
       } catch (err) {
-        console.error('Logstash transport error:', err);
+	     if (err instanceof Error) {
+           console.error('file-transport error:', err.message);
+         } else {
+           console.error('Unknown file-transport Error: ', err);
+         }
       }
     }
   };

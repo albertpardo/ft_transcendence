@@ -18,7 +18,10 @@ const getLogTransportConfig = () => {
       },
       {
         target: 'pino-pretty',
-        options: { colorize: true }
+        options: {
+	      colorize: true,
+		  ignore : 'time'
+		}
       },
       {
         target: resolve(__dirname, 'logstash-transport.js'),

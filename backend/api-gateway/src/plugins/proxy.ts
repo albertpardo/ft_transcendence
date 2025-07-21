@@ -8,6 +8,7 @@ import { Readable } from 'stream';
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { Buffer } from 'buffer';
 
+import { logFormat } from '../pino_utils/log_format'; //by apardo-m
 
 const userManagementUrl = process.env.USER_MANAGEMENT_URL || 'http://user_management:9001';
 console.log('🚀 USER_MANAGEMENT_URL:', userManagementUrl);
@@ -30,6 +31,8 @@ interface OnRequestFastifyRequest extends FastifyRequest {
 
 
 export default fp(async function (fastify: FastifyInstance): Promise<void> {
+    let source = '/api/login';
+
     fastify.register(fastifyCookie, {
         secret: process.env.COOKIE_SECRET || 'supersecret', // optional for signed cookies
     });
@@ -48,13 +51,13 @@ export default fp(async function (fastify: FastifyInstance): Promise<void> {
         }
     });
 
-    
     fastify.get('/health', async (req: FastifyRequest, reply: FastifyReply): Promise<{ status: string }> => {
         return { status: 'ok' };
     });
     
 
 fastify.post('/api/login', async (req: FastifyRequest<{ Body: { username: string; password: string } }>, reply: FastifyReply) => {
+
   try {
     const res = await fetch(`${userManagementUrl}/api/user/login`, {
       method: 'POST',
@@ -72,10 +75,12 @@ fastify.post('/api/login', async (req: FastifyRequest<{ Body: { username: string
 
     if (!contentType?.includes('application/json')) {
       const text = rawBuf.toString('utf-8');
-      console.error('🔥 Upstream error response (non-JSON):', text.slice(0, 300));
+      //console.error('🔥 Upstream error response (non-JSON):', text.slice(0, 300));
+      fastify.log.error(logFormat(source, '🔥 Upstream error response (non-JSON):', text.slice(0, 300)));
       return reply.code(502).send({ error: 'Invalid response from upstream service' });
     }
     let payload: string;
+/*
     try {
       if (encoding === 'br') {
         console.log('🧊 Brotli decompressing login response...');
@@ -91,14 +96,32 @@ fastify.post('/api/login', async (req: FastifyRequest<{ Body: { username: string
       console.warn('⚠️ Failed to decompress:', err);
       payload = rawBuf.toString('utf-8'); // fallback to rawBuf
     }
+*/
+    try {
+      if (encoding === 'br') {
+        fastify.log.info(logFormat(source, '🧊 Brotli decompressing login response...'));
+        payload = brotliDecompressSync(rawBuf).toString('utf-8');
+      } else if (encoding === 'gzip') {
+        fastify.log.info(logFormat(source, '🔄 Gzip decompressing login response...'));
+        payload = gunzipSync(rawBuf).toString('utf-8');
+      } else {
+        fastify.log.info(logFormat(source, '📦 No compression detected or decoding not needed.'));
+        payload = rawBuf.toString('utf-8');
+      }
+    } catch (err) {
+      //console.warn('⚠️ Failed to decompress:', err);
+      fastify.log.warn(logFormat(source, '⚠️ Failed to decompress: ' + err));
+      payload = rawBuf.toString('utf-8'); // fallback to rawBuf
+    }
 
     // const raw = rawBuf.toString('utf-8');
     let json;
     try {
       json = JSON.parse(payload);
     } catch (err) {
-      console.error('❌ Failed to parse JSON from upstream:', err);
-      return reply.code(502).send({ error: 'Invalid JSON response from upstr eam' });
+      //console.error('❌ Failed to parse JSON from upstream:', err);
+      fastify.log.error(logFormat(source, '❌ Failed to parse JSON from upstream: ' + err));
+      return reply.code(502).send({ error: 'Invalid JSON response from upstream' });
     }
 
     const token = fastify.jwt.sign({ userId: json.id });
@@ -114,12 +137,13 @@ fastify.post('/api/login', async (req: FastifyRequest<{ Body: { username: string
       .send({ ...json, token });
 
   } catch (err) {
-    console.error('❌ Login handler crashed:', err);
+    //console.error('❌ Login handler crashed:', err);
+    fastify.log.error(logFormat(source, '❌ Login handler crashed:' + err));
     reply.code(500).send({ error: 'Internal Server Error during login' });
   }
 });
 
-    fastify.post('/api/signup', async (req: FastifyRequest<{ Body: { username: string; password: string } }>, reply: FastifyReply) => {
+fastify.post('/api/signup', async (req: FastifyRequest<{ Body: { username: string; password: string } }>, reply: FastifyReply) => {
 
   try {
     const res = await fetch(`${userManagementUrl}/api/user/signup`, {
@@ -143,6 +167,7 @@ fastify.post('/api/login', async (req: FastifyRequest<{ Body: { username: string
     }
 
     let payload: string;
+/*
     try {
       const encoding = res.headers.get('content-encoding');
       if (encoding === 'br') {
@@ -167,6 +192,31 @@ fastify.post('/api/login', async (req: FastifyRequest<{ Body: { username: string
       console.error('❌ Failed to parse JSON from upstream:', err);
       return reply.code(502).send({ error: 'Invalid JSON response from upstream' });
     }
+*/
+    try {
+      const encoding = res.headers.get('content-encoding');
+      if (encoding === 'br') {
+        fastify.log.info(logFormat(source, '🧊 Brotli decompressing signup response...'));
+        payload = brotliDecompressSync(rawBuf).toString('utf-8');
+      } else if (encoding === 'gzip') {
+        fastify.log.info(logFormat(source, '🔄 Gzip decompressing signup response...'));
+        payload = gunzipSync(rawBuf).toString('utf-8');
+      } else {
+        fastify.log.info(logFormat(source, '📦 No compression detected or decoding not needed.'));
+        payload = rawBuf.toString('utf-8');
+      }
+    } catch (err) {
+      fastify.log.warn(logFormat('⚠️ Failed to decompress:', err));
+      return reply.code(502).send({ error: 'Decompression error from upstream' });
+    }
+  
+    let json;
+    try {
+      json = JSON.parse(payload);
+    } catch (err) {
+      fastify.log.warn(logFormat(source, '❌ Failed to parse JSON from upstream:', err));
+      return reply.code(502).send({ error: 'Invalid JSON response from upstream' });
+    }
 
     const token = fastify.jwt.sign({ userId: json.id });
 
@@ -181,7 +231,8 @@ fastify.post('/api/login', async (req: FastifyRequest<{ Body: { username: string
       .send({ ...json, token });
 
   } catch (err) {
-    console.error('❌ Signup handler crashed:', err);
+    // console.error('❌ Signup handler crashed:', err);
+    fastify.log.warn(logFormat(source, '❌ Signup handler crashed:', err));
     reply.code(500).send({ error: 'Internal Server Error during signup' });
   }
 });
@@ -214,36 +265,51 @@ fastify.post('/api/login', async (req: FastifyRequest<{ Body: { username: string
                     .send();
                 return;
             }
+/*
             console.log('🧪 req.url:', req.url);
             console.log('🧪 req.raw.url:', req.raw.url);
-
+*/
+            fastify.log.info(logFormat(source, '🧪 req.url:', req.url));
+			fastify.log.info(logFormat(source, '🧪 req.raw.url:', req.raw.url));
 
             const auth = req.headers['authorization'];
 
             if (!auth && req.cookies?.authToken) {
                 req.headers.authorization = `Bearer ${req.cookies.authToken}`;
-                console.log('🍪 Injected Authorization header from authToken cookie')
+                //console.log('🍪 Injected Authorization header from authToken cookie')
+				fastify.log.info(logFormat(source, '🍪 Injected Authorization header from authToken cookie'));
             }
-            console.log('🚀 rewriteRequestHeaders - forwarded auth:', req.headers.authorization);
-            console.log('🔐🔐 Authorization Header:', req.headers['authorization']);
+            //console.log('🚀 rewriteRequestHeaders - forwarded auth:', req.headers.authorization);
+            //console.log('🔐🔐 Authorization Header:', req.headers['authorization']);
+            fastify.log.info(logFormat(source, '🚀 rewriteRequestHeaders - forwarded auth:', req.headers.authorization));
+            fastify.log.info(logFormat(source, '🔐🔐 Authorization Header:', req.headers['authorization']));
             if (!req.headers['authorization']) {
-                console.warn('❌ No Authorization header found in request');
+                //console.warn('❌ No Authorization header found in request');
+                fastify.log.warn(logFormat(source, '❌ No Authorization header found in request'));
                 return reply.code(401).send({ error: 'Missing Authorization header' });
             }
 
             try {
+			/*
                 console.log('🔍🔐 JWT Secret in use:', process.env.JWT_SECRET);
                 console.log(`🔍🔐 Authorization header: ${auth}`);
                 console.log(`🔍🔐 cookie 🍪🍪 Authorization header: ${req.headers.authorization} 🍪🍪`);
+			 */
+			    fastify.log.info(logFormat(source, '🔍🔐 JWT Secret in use:', process.env.JWT_SECRET));
+                fastify.log.info(logFormat(source, `🔍🔐 Authorization header: ${auth}`));
+                fastify.log.info(logFormat(source, `🔍🔐 cookie 🍪🍪 Authorization header: ${req.headers.authorization} 🍪🍪`));
                 await req.jwtVerify();
-                console.log("🔐 Verified JWT in proxy preHandler");
+                //console.log("🔐 Verified JWT in proxy preHandler");
+                fastify.log.info(logFormat(source, "🔐 Verified JWT in proxy preHandler"));
                 const userId = (req as FastifyRequest).user?.userId;
                 if (userId) {
                     req.headers['x-user-id'] = String(userId);
-                    console.log(`📦 Injected x-user-id = ${userId} into headers`);
+                    //console.log(`📦 Injected x-user-id = ${userId} into headers`);
+                    fastify.log.info(logFormat(source, `📦 Injected x-user-id = ${userId} into headers`));
                 }
             } catch (err: any) {
-                console.error('❌ Proxy-level JWT verification failed:', err.message);
+               // console.error('❌ Proxy-level JWT verification failed:', err.message);
+				fastify.log.error(logFormat(source, '❌ Proxy-level JWT verification failed:', err.message));
                 reply.code(401).send({ error: 'Unauthorized in proxy' });
                 return;
             }
@@ -292,12 +358,14 @@ fastify.post('/api/login', async (req: FastifyRequest<{ Body: { username: string
         reply: FastifyReply,
         payload: string | Buffer | Readable
     ): Promise<string | Buffer | Readable> => {
-        console.log(`📡 [onSend] URL: ${req.url}, statusCode: ${reply.statusCode}`);//debug log
+       // console.log(`📡 [onSend] URL: ${req.url}, statusCode: ${reply.statusCode}`);//debug log
+		fastify.log.info(logFormat(source, `📡 [onSend] URL: ${req.url}, statusCode: ${reply.statusCode}`));
         if ((req.url.startsWith('/api/login') || req.url.startsWith('/api/signup') || req.url.startsWith('/api/profile')) && reply.statusCode === 200) {
             try {
               // Only decode in dev if payload is a string
               if (typeof payload === 'string') {
-                console.log('📝 Payload is string');
+               // console.log('📝 Payload is string');
+                fastify.log.info(logFormat(source, '📝 Payload is string'));
                 const body: LoginSignupResponseBody = JSON.parse(payload);
                 if (!body.id || !body.username) return payload;
                 const token = fastify.jwt.sign({ userId: body.id });
@@ -311,7 +379,8 @@ fastify.post('/api/login', async (req: FastifyRequest<{ Body: { username: string
                   typeof contentType === 'string' &&
                   contentType.includes('application/json')
                 ) {
-                console.log('📦 Payload is Readable stream');
+                //console.log('📦 Payload is Readable stream');
+                fastify.log.info(logFormat(source, '📦 Payload is Readable stream'));
 
                 const rawBuffer: Buffer = await getRawBody(payload as Readable);
                 
@@ -321,22 +390,26 @@ fastify.post('/api/login', async (req: FastifyRequest<{ Body: { username: string
                 if (typeof encoding === 'string') {
                     if (encoding.includes('gzip')) {
                         try {
-                            console.log('🔄 Decompressing gzip stream...');
+                            //console.log('🔄 Decompressing gzip stream...');
+                            fastify.log.info(logFormat(source, '🔄 Decompressing gzip stream...'));
                             const decompressed = gunzipSync(rawBuffer);
                             raw = decompressed.toString('utf-8');
-                            console.log('✅ GZIP Decompressed:', raw.slice(0, 200));
+                            //console.log('✅ GZIP Decompressed:', raw.slice(0, 200));
+                            fastify.log.info(logFormat(source, '✅ GZIP Decompressed:', raw.slice(0, 200)));
                         } catch (err) {
                             console.warn('❌ Failed to decompress gzip stream:', err);
                             raw = rawBuffer.toString('utf-8');
                         }
                     } else if (encoding.includes('br')) {
                         try {
-                            console.log('🧊 Decompressing Brotli stream...');
+                            //console.log('🧊 Decompressing Brotli stream...');
+                            fastify.log.info(logFormat(source, '🧊 Decompressing Brotli stream...'));
                             const decompressed = brotliDecompressSync(rawBuffer);
                             raw = decompressed.toString('utf-8');
                             console.log('✅ Brotli Decompressed:', raw.slice(0, 200));
                         } catch (err) {
-                            console.warn('❌ Failed to decompress Brotli stream:', err);
+                            //console.warn('❌ Failed to decompress Brotli stream:', err);
+                            fastify.log.warn(logFormat(source, '❌ Failed to decompress Brotli stream:', err));
                             raw = rawBuffer.toString('utf-8');
                         }
                     } else {
@@ -351,19 +424,22 @@ fastify.post('/api/login', async (req: FastifyRequest<{ Body: { username: string
                   const body: LoginSignupResponseBody = JSON.parse(raw);
                   //console.log('🧾 Parsed JSON from stream:', body);
                   if (req.url.startsWith('/api/profile')) {
-                      console.log('🧾 Profile response, skipping token injection');
+                      //console.log('🧾 Profile response, skipping token injection');
+                      fastify.log.info(logFormat(source, '🧾 Profile response, skipping token injection'));
                       reply
                         .type('application/json')
                         .header('content-encoding', null);
                       return JSON.stringify(body);
                     }
                   if (!body.id || !body.username) {
-                    console.log('⚠️ Missing id or username, returning raw JSON without token');
+                    //console.log('⚠️ Missing id or username, returning raw JSON without token');
+                    fastify.log.warn(logFormat(source, '⚠️ Missing id or username, returning raw JSON without token'));
                     return typeof raw === 'string' ? raw : JSON.stringify(body);
                   }
 
                   const token = fastify.jwt.sign({ userId: body.id });
-                  console.log('🔑 Token generated:', token);
+                  //console.log('🔑 Token generated:', token);
+                  fastify.log.info(logFormat(source, '🔑 Token generated:', token));
                   reply
                     .type('application/json')
                     .setCookie('authToken', token, {
@@ -374,16 +450,20 @@ fastify.post('/api/login', async (req: FastifyRequest<{ Body: { username: string
                     });
                   return JSON.stringify({ ...body, token });
                 } catch (err) {
-                  console.warn('❌ Not JSON (probably compressed or encrypted), skipping JWT injection.');
-                  console.warn('🔎 Raw body (truncated):', raw?.slice?.(0, 300));
+                  //console.warn('❌ Not JSON (probably compressed or encrypted), skipping JWT injection.');
+                  //console.warn('🔎 Raw body (truncated):', raw?.slice?.(0, 300));
+                  fastify.log.warn(logFormat(source, '❌ Not JSON (probably compressed or encrypted), skipping JWT injection.'));
+                  fastify.log.warn(logFormat(source, '🔎 Raw body (truncated):', raw?.slice?.(0, 300)));
                   reply.type('application/json');
                   return raw;
                 }
               }
-              console.log('ℹ️ Payload is unknown type, returning as is');
+              //console.log('ℹ️ Payload is unknown type, returning as is');
+              fastify.log.info(logFormat(source, 'ℹ️ Payload is unknown type, returning as is'));
               return payload;
             } catch (e) {
-              console.error('🛑 Error in onSend:', e);
+              //console.error('🛑 Error in onSend:', e);
+              fastify.log.error(logFormat(source, '🛑 Error in onSend:', e));
               return payload;
             }
         }

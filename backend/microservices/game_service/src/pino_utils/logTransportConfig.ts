@@ -16,7 +16,8 @@ export const getLogTransportConfig = () => {
       {
         target: 'pino-pretty', // Modo legible en desarrollo
         options: {
-          colorize: true
+          colorize: true,
+		  ignore : 'time'
         }
       },
       {

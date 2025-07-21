@@ -29,7 +29,7 @@ export default async function (opts: any) {
 	     if (err instanceof Error) {
            console.error('file-transport error:', err.message);
          } else {
-          console.error('Error desconocido', err);
+           console.error('Unknown file-transport Error: ', err);
          }
       }
     }

@@ -5,8 +5,10 @@ import cors from '@fastify/cors';
 import { PongResponses, State, addPlayerCompletely, removeTheSock, getPongDoneness, getPongState, moveMyPaddle, gamesReadyLoopCheck, dataStreamer } from './pong';
 import { historyMain, getHistForPlayerFromDb } from './history';
 
+// Start by apardo-m
 import { getLogTransportConfig } from '../dist/pino_utils/logTransportConfig';
 import { logFormat } from './pino_utils/log_format';
+// End by apardo-m
 
 interface PongBodyReq {
   playerId: string,

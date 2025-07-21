@@ -181,7 +181,8 @@ async function registerPlugin() {
 //start service (using HTTPS)
 async function start() {
     if (process.env.NODE_ENV === 'production') {
-        console.log("🚀 Fastify is booting up...");
+        //console.log("🚀 Fastify is booting up...");
+        server.log.info(logFormat(start.name, "🚀 Fastify is booting up..."));
     }
     try {
         await healthServer.listen({
