@@ -13,10 +13,44 @@ const fastify = require('fastify')({
     }
 });
 //end  by apardo-m
+
 const userRoutes = require('./routes/user');
 
 fastify.register(userRoutes);
+/*
+//Start by apardo-m
+// ✅ Hook global para loggear todas las respuestas
+fastify.addHook('onSend', async (request, reply, payload) => {
+  if (request.routeOptions.config?.source) {
+    const log = reply.log || request.log;
+    const statusCode = reply.statusCode;
 
+    // payload es un string, intenta parsearlo si es JSON
+    let responseBody;
+
+    try {
+      responseBody = JSON.parse(payload);
+    } catch {
+      responseBody = payload;
+    }
+  
+    const logData = {
+      statusCode,
+      route: request.routerPath || request.url,
+	  source: request.routeOptions.config.source,
+      payload: responseBody
+    };
+
+    if (statusCode >= 400) {
+      log.error(logData, 'Response error');
+    } else {
+      log.info(logData, 'Response sent');
+    }
+  }
+  return payload;
+});
+//end  by apardo-m
+*/
 const start = async () => {
     try {
 /*
@@ -36,3 +70,28 @@ const start = async () => {
 };
 
 start();
+
+/*
+ 
+ fastify.addHook('onSend', async (request, reply, payload) => {
+  try {
+    const statusCode = reply.statusCode;
+    const logData = {
+      statusCode,
+      route: request.routerPath || request.url,
+      payload: payload ? JSON.parse(payload) : null
+    };
+
+    if (statusCode >= 400) {
+      request.log.error(logData, 'Response error');
+    } else {
+      request.log.info(logData, 'Response sent');
+    }
+  } catch (err) {
+    request.log.error({ err }, 'Error in onSend hook');
+  }
+
+  return payload;
+});
+*/
+
