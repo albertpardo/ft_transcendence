@@ -42,7 +42,7 @@ exports.getProfile = async (request, reply) => {
     const userId = request.headers['x-user-id'];
     if (!userId) return reply.code(401).send({ error: 'Unauthorized' });
     //console.log("📦 userId from header:", userId);
-    request.log.info(logFormat(getProfile, "📦 userId from header:", userId));
+    request.log.info(logFormat("getProfile", "📦 userId from header:", userId));
 
     const userInfo = await userService.getProfile(userId);
     return reply.send(userInfo);    

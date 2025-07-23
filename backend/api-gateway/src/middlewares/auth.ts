@@ -37,10 +37,10 @@ export async function authMiddleware(req: FastifyRequest, reply: FastifyReply) {
         const usp1 = new URLSearchParams(req.url);
         if (req.headers["upgrade"] === "websocket") {
           itwasasocket = true;
-          req.headers["authorization"] = "Bearer ", usp1.get("authorization");
+          req.headers["authorization"] = "Bearer " + usp1.get("authorization");
         
         /* if (req.headers.upgrade === 'websocket' && !req.headers['authorization'] && req?.headers['sec-websocket-protocol']) {
-          req.headers['authorization'] = "Bearer ", req.headers['sec-websocket-protocol'];
+          req.headers['authorization'] = "Bearer " + req.headers['sec-websocket-protocol'];
           delete req.headers['sec-websocket-protocol']; */
         }
        
