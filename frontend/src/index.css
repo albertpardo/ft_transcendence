@@ -90,6 +90,10 @@ rect, circle, text {
   transition: transform 0.2s ease;
 }
 
+#game-window, #left-up, #left-down, #right-up, #right-down {
+  touch-action: manipulation;
+}
+
 @media (max-width: 640px) {
     .touch-btn {
       width: 3rem;

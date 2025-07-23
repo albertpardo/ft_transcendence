@@ -474,7 +474,7 @@ export const startGameLogic = (authToken: string) => {
   });
 
   // Add button and keyboard event listeners
-  leftUpArrow.addEventListener('mousedown', () => movePaddleWrapper(-2));
+  /* leftUpArrow.addEventListener('mousedown', () => movePaddleWrapper(-2));
   leftUpArrow.addEventListener('mouseup', () => movePaddleWrapper(0));
   leftDownArrow.addEventListener('mousedown', () => movePaddleWrapper(2));
   leftDownArrow.addEventListener('mouseup', () => movePaddleWrapper(0));
@@ -482,7 +482,38 @@ export const startGameLogic = (authToken: string) => {
   rightUpArrow.addEventListener('mousedown', () => movePaddleWrapper(-2));
   rightUpArrow.addEventListener('mouseup', () => movePaddleWrapper(0));
   rightDownArrow.addEventListener('mousedown', () => movePaddleWrapper(2));
+  rightDownArrow.addEventListener('mouseup', () => movePaddleWrapper(0)); */
+  // Left Up
+  leftUpArrow.addEventListener('mousedown', () => movePaddleWrapper(-2));
+  leftUpArrow.addEventListener('mouseup', () => movePaddleWrapper(0));
+  leftUpArrow.addEventListener('mouseleave', () => movePaddleWrapper(0)); // Important: when mouse leaves button
+  leftUpArrow.addEventListener('touchstart', (e) => { e.preventDefault(); movePaddleWrapper(-2); });
+  leftUpArrow.addEventListener('touchend', (e) => { e.preventDefault(); movePaddleWrapper(0); });
+  leftUpArrow.addEventListener('touchcancel', () => movePaddleWrapper(0));
+  
+  // Left Down
+  leftDownArrow.addEventListener('mousedown', () => movePaddleWrapper(2));
+  leftDownArrow.addEventListener('mouseup', () => movePaddleWrapper(0));
+  leftDownArrow.addEventListener('mouseleave', () => movePaddleWrapper(0));
+  leftDownArrow.addEventListener('touchstart', (e) => { e.preventDefault(); movePaddleWrapper(2); });
+  leftDownArrow.addEventListener('touchend', (e) => { e.preventDefault(); movePaddleWrapper(0); });
+  leftDownArrow.addEventListener('touchcancel', () => movePaddleWrapper(0));
+  
+  // Right Up
+  rightUpArrow.addEventListener('mousedown', () => movePaddleWrapper(-2));
+  rightUpArrow.addEventListener('mouseup', () => movePaddleWrapper(0));
+  rightUpArrow.addEventListener('mouseleave', () => movePaddleWrapper(0));
+  rightUpArrow.addEventListener('touchstart', (e) => { e.preventDefault(); movePaddleWrapper(-2); });
+  rightUpArrow.addEventListener('touchend', (e) => { e.preventDefault(); movePaddleWrapper(0); });
+  rightUpArrow.addEventListener('touchcancel', () => movePaddleWrapper(0));
+  
+  // Right Down
+  rightDownArrow.addEventListener('mousedown', () => movePaddleWrapper(2));
   rightDownArrow.addEventListener('mouseup', () => movePaddleWrapper(0));
+  rightDownArrow.addEventListener('mouseleave', () => movePaddleWrapper(0));
+  rightDownArrow.addEventListener('touchstart', (e) => { e.preventDefault(); movePaddleWrapper(2); });
+  rightDownArrow.addEventListener('touchend', (e) => { e.preventDefault(); movePaddleWrapper(0); });
+  rightDownArrow.addEventListener('touchcancel', () => movePaddleWrapper(0));
 
   window.addEventListener('keydown', handleKeyDown);
   window.addEventListener('keyup', handleKeyUp);
