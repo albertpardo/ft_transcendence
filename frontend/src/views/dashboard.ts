@@ -484,13 +484,13 @@ export const startGameLogic = (authToken: string) => {
   rightDownArrow.addEventListener('mousedown', () => movePaddleWrapper(2));
   rightDownArrow.addEventListener('mouseup', () => movePaddleWrapper(0)); */
   // Left Up
-  leftUpArrow.addEventListener('mousedown', () => movePaddleWrapper(-2));
+/*   leftUpArrow.addEventListener('mousedown', () => movePaddleWrapper(-2));
   leftUpArrow.addEventListener('mouseup', () => movePaddleWrapper(0));
   leftUpArrow.addEventListener('mouseleave', () => movePaddleWrapper(0)); // Important: when mouse leaves button
   leftUpArrow.addEventListener('touchstart', (e) => { e.preventDefault(); movePaddleWrapper(-2); });
   leftUpArrow.addEventListener('touchend', (e) => { e.preventDefault(); movePaddleWrapper(0); });
   leftUpArrow.addEventListener('touchcancel', () => movePaddleWrapper(0));
-  
+
   // Left Down
   leftDownArrow.addEventListener('mousedown', () => movePaddleWrapper(2));
   leftDownArrow.addEventListener('mouseup', () => movePaddleWrapper(0));
@@ -498,7 +498,7 @@ export const startGameLogic = (authToken: string) => {
   leftDownArrow.addEventListener('touchstart', (e) => { e.preventDefault(); movePaddleWrapper(2); });
   leftDownArrow.addEventListener('touchend', (e) => { e.preventDefault(); movePaddleWrapper(0); });
   leftDownArrow.addEventListener('touchcancel', () => movePaddleWrapper(0));
-  
+
   // Right Up
   rightUpArrow.addEventListener('mousedown', () => movePaddleWrapper(-2));
   rightUpArrow.addEventListener('mouseup', () => movePaddleWrapper(0));
@@ -506,15 +506,43 @@ export const startGameLogic = (authToken: string) => {
   rightUpArrow.addEventListener('touchstart', (e) => { e.preventDefault(); movePaddleWrapper(-2); });
   rightUpArrow.addEventListener('touchend', (e) => { e.preventDefault(); movePaddleWrapper(0); });
   rightUpArrow.addEventListener('touchcancel', () => movePaddleWrapper(0));
-  
+
   // Right Down
   rightDownArrow.addEventListener('mousedown', () => movePaddleWrapper(2));
   rightDownArrow.addEventListener('mouseup', () => movePaddleWrapper(0));
   rightDownArrow.addEventListener('mouseleave', () => movePaddleWrapper(0));
   rightDownArrow.addEventListener('touchstart', (e) => { e.preventDefault(); movePaddleWrapper(2); });
   rightDownArrow.addEventListener('touchend', (e) => { e.preventDefault(); movePaddleWrapper(0); });
-  rightDownArrow.addEventListener('touchcancel', () => movePaddleWrapper(0));
+  rightDownArrow.addEventListener('touchcancel', () => movePaddleWrapper(0)); */
 
+  const controls = [
+    { element: leftUpArrow,    direction: -2 },
+    { element: leftDownArrow,  direction:  2 },
+    { element: rightUpArrow,   direction: -2 },
+    { element: rightDownArrow, direction:  2 }
+  ];
+
+// Reusable handler
+  const bindControl = (button: HTMLElement, direction: number) => {
+    const start = () => movePaddleWrapper(direction);
+    const stop  = () => movePaddleWrapper(0);
+
+    button.addEventListener('mousedown', start);
+    button.addEventListener('touchstart', (e) => { e.preventDefault(); start(); });
+
+    ['mouseup', 'mouseleave'].forEach(event => 
+      button.addEventListener(event, stop)
+    );
+
+    ['touchend', 'touchcancel'].forEach(event => 
+      button.addEventListener(event, (e) => { e.preventDefault(); stop(); })
+    );
+  };
+
+// Apply to all controls
+controls.forEach(({ element, direction }) => {
+  if (element) bindControl(element, direction);
+});
   window.addEventListener('keydown', handleKeyDown);
   window.addEventListener('keyup', handleKeyUp);
 };
