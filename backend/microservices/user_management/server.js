@@ -20,7 +20,7 @@ fastify.register(userRoutes);
 
 
 //Start by apardo-m
-// ✅ Hook global para loggear todas las respuestas
+// ✅ Hook global used for log in request and reply
 fastify.addHook('onSend', async (request, reply, payload) => {
   if (request.routeOptions.config?.source) {
     const log = reply.log || request.log;
@@ -54,11 +54,6 @@ fastify.addHook('onSend', async (request, reply, payload) => {
 
 const start = async () => {
     try {
-/*
-		fastify.log.info({
-			source: start.name,
-		},"---Start () info ----");
-*/
         fastify.log.info(logFormat(start.name,"---Start () info test ----"));
         await fastify.listen({ port: process.env.PORT || 9001, host: '0.0.0.0' });
         //console.log(`User management service running at https://localhost:${process.env.PORT || 9001}`);
@@ -71,28 +66,4 @@ const start = async () => {
 };
 
 start();
-
-/*
- 
- fastify.addHook('onSend', async (request, reply, payload) => {
-  try {
-    const statusCode = reply.statusCode;
-    const logData = {
-      statusCode,
-      route: request.routerPath || request.url,
-      payload: payload ? JSON.parse(payload) : null
-    };
-
-    if (statusCode >= 400) {
-      request.log.error(logData, 'Response error');
-    } else {
-      request.log.info(logData, 'Response sent');
-    }
-  } catch (err) {
-    request.log.error({ err }, 'Error in onSend hook');
-  }
-
-  return payload;
-});
-*/
 
