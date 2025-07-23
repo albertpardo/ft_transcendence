@@ -283,6 +283,26 @@ const bindDashboardEvents = () => {
     window.location.hash = 'login';
     route();
   });
+  const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+  const mobileMenuClose = document.getElementById('mobile-menu-close');
+  const sidebar = document.getElementById('sidebar');
+  const backdrop = document.getElementById('mobile-backdrop');
+
+  const showMobileMenu = () => {
+    sidebar?.classList.remove('-translate-x-full');
+    backdrop?.classList.remove('opacity-0');
+    backdrop?.classList.add('opacity-100', 'pointer-events-auto');
+  };
+
+  const hideMobileMenu = () => {
+    sidebar?.classList.add('-translate-x-full');
+    backdrop?.classList.add('opacity-0');
+    backdrop?.classList.remove('pointer-events-auto');
+  };
+
+  mobileMenuToggle?.addEventListener('click', showMobileMenu);
+  mobileMenuClose?.addEventListener('click', hideMobileMenu);
+  backdrop?.addEventListener('click', hideMobileMenu);
 }
 
 const applyGameResult = (message: string, colorClass: string, animationClass: string) => {
