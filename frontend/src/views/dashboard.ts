@@ -757,10 +757,11 @@ export async function initDashboard() {
   }
 
   if (localStorage)
-  startGameLogic(localStorage.getItem("authToken")!);
-  if (hash === 'play') {
-  gameArea.classList.remove('hidden');
-} else {
-  gameArea.classList.add('hidden');
-}
+    startGameLogic(localStorage.getItem("authToken")!);
+    if (hash === 'play') {
+    gameArea.classList.remove('hidden');
+  } else {
+    gameArea.classList.add('hidden');
+  }
+  bindDashboardEvents();
 }
