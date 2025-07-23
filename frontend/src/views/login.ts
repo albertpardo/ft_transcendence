@@ -1,3 +1,5 @@
+import { GoogleAuth } from '../googleAuth';
+
 export function renderLogin(appElement: HTMLElement) {
   appElement.innerHTML = `
     <div class="w-full min-h-screen bg-gray-900 flex items-center justify-center">
@@ -7,6 +9,16 @@ export function renderLogin(appElement: HTMLElement) {
           <p class="mt-2 text-gray-400">Sign in to your account</p>
         </div>
         
+        <!-- Google Sign-In Button -->
+        <div class="w-full">
+          <div id="google-signin-button" class="flex justify-center mb-4"></div>
+          <div class="flex items-center my-4">
+            <div class="flex-grow border-t border-gray-600"></div>
+            <span class="flex-shrink mx-4 text-gray-400 text-sm">or</span>
+            <div class="flex-grow border-t border-gray-600"></div>
+          </div>
+        </div>
+
         <!-- Login Form -->
         <form class="mt-8 space-y-6" id="login-form">
           <div>
@@ -29,8 +41,6 @@ export function renderLogin(appElement: HTMLElement) {
               </svg>
             </button>
           </div>
-
-
 
           <div id="login-error" class="text-red-500 text-sm hidden"></div>
           <div>
@@ -98,6 +108,15 @@ export function renderLogin(appElement: HTMLElement) {
     </div>
   `;
 
+  // Initialize Google Auth
+  const googleAuth = GoogleAuth.getInstance();
+  googleAuth.initialize().then(() => {
+    // Render Google Sign-In button
+    googleAuth.renderButton('google-signin-button');
+  }).catch(error => {
+    console.error('Failed to initialize Google Auth:', error);
+  });
+
   // Form toggle functionality
   const toggleForm = document.getElementById('toggle-form');
   const toggleFormText = document.getElementById('toggle-form-text');
@@ -106,23 +125,22 @@ export function renderLogin(appElement: HTMLElement) {
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   const togglePasswordVisibility = (fieldId: string, button?: HTMLElement) => {
-  const passwordField = document.getElementById(fieldId) as HTMLInputElement;
-  if (!passwordField) return;
+    const passwordField = document.getElementById(fieldId) as HTMLInputElement;
+    if (!passwordField) return;
 
-  const isPassword = passwordField.type === 'password';
-  passwordField.type = isPassword ? 'text' : 'password';
+    const isPassword = passwordField.type === 'password';
+    passwordField.type = isPassword ? 'text' : 'password';
 
-  // Visual feedback if button is provided
-  if (button) {
-    const svg = button.querySelector('svg');
-    if (svg) {
-      svg.querySelector('.eye-open')?.classList.toggle('hidden', !isPassword);
-      svg.querySelector('.eye-closed')?.classList.toggle('hidden', isPassword);
+    // Visual feedback if button is provided
+    if (button) {
+      const svg = button.querySelector('svg');
+      if (svg) {
+        svg.querySelector('.eye-open')?.classList.toggle('hidden', !isPassword);
+        svg.querySelector('.eye-closed')?.classList.toggle('hidden', isPassword);
+      }
     }
-  }
-};
-(window as any).togglePasswordVisibility = togglePasswordVisibility;
-
+  };
+  (window as any).togglePasswordVisibility = togglePasswordVisibility;
 
   if (toggleForm && loginForm && registerForm && toggleFormText) {
     toggleForm.addEventListener('click', (e) => {
@@ -155,8 +173,7 @@ export function renderLogin(appElement: HTMLElement) {
     }
   }
 
-  // Login form submission
-  //const loginForm = document.getElementById('login-form');
+  // Login form submission (existing code unchanged)
   if (loginForm) {
     loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -189,28 +206,23 @@ export function renderLogin(appElement: HTMLElement) {
         });
 
         const data = await response.json();
-//        console.log("in login, received data:", data);
 
         if (!response.ok || data.error) {
           throw new Error(data.error || 'Login failed');
-//          const errorData = await response.json();
-//          throw new Error(errorData.message || 'Login failed');
         }
        
-       localStorage.setItem('authToken', data.token);
-	     localStorage.setItem('userId', data.id);
+        localStorage.setItem('authToken', data.token);
+        localStorage.setItem('userId', data.id);
 
-       const userAvatar = data.user?.avatar?.trim()
-        ? data.user.avatar
-        : `https://i.pravatar.cc/150?u=${username}`;
-       localStorage.setItem('user', JSON.stringify({ 
-            username: data.user?.username || username,
-            nickname: data.user?.nickname || username,
-            avatar: userAvatar
-//            avatar: data.user?.avatar || `https://i.pravatar.cc/150?u=${username}`
-          }));
-          window.location.hash = 'home';
-    
+        const userAvatar = data.user?.avatar?.trim()
+          ? data.user.avatar
+          : `https://i.pravatar.cc/150?u=${username}`;
+        localStorage.setItem('user', JSON.stringify({ 
+          username: data.user?.username || username,
+          nickname: data.user?.nickname || username,
+          avatar: userAvatar
+        }));
+        window.location.hash = 'home';
         
       } catch (error) {
         errorElement.textContent = error instanceof Error ? error.message : 'Login failed';
@@ -223,8 +235,7 @@ export function renderLogin(appElement: HTMLElement) {
     });
   }
 
-  // Registration form submission
- // const registerForm = document.getElementById('register-form');
+  // Registration form submission (existing code unchanged)
   if (registerForm) {
     registerForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -265,8 +276,6 @@ export function renderLogin(appElement: HTMLElement) {
             mode: 'cors',
         });
 
-
-//        console.log(response);
         if (!response.ok) {
           const errorData = await response.json();
           throw new Error(errorData.message || 'Registration failed');
@@ -295,8 +304,6 @@ export function renderLogin(appElement: HTMLElement) {
         registerButton.disabled = false;
         registerButton.textContent = 'Register';
       }
-
-
     });
   }
 }

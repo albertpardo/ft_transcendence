@@ -1,3 +1,4 @@
+//userService.js
 const bcrypt = require('bcrypt');
 const db = require('../db');
 
@@ -126,4 +127,67 @@ exports.deleteProfile = async (userId) => {
 
     db.deleteUser(userId);
     return { success: true };
+}
+
+// 🆕 NEW: Find user by email (EXPORTED)
+exports.findUserByEmail = async (email) => {
+    try {
+        const user = db.getUserByUsernameOrEmail('', email); // Your existing function
+        return user || null;
+    } catch (error) {
+        console.error('Error finding user by email:', error);
+        throw error;
+    }
+}
+
+// 🆕 NEW: Create Google OAuth user
+exports.createGoogleUser = async (userData) => {
+    const { 
+        nickname, 
+        username, 
+        email, 
+        password, 
+        avatar = '',
+        provider = 'google',
+        providerId 
+    } = userData;
+
+    try {
+        // Check if user already exists
+        const existing = db.getUserByUsernameOrEmail(username, email);
+        if (existing) {
+            return existing; // Return existing user instead of error for OAuth
+        }
+
+        // For Google users, create with placeholder password
+        const hashed = provider === 'local' ? 
+            await bcrypt.hash(password, 10) : 
+            password; // For OAuth, store placeholder
+
+        const localid = makeid(64);
+        console.log("Creating Google user with ID:", localid);
+
+        // Create user (you might need to update your db.createUser to handle provider fields)
+        const user = db.createUser({ 
+            id: localid, 
+            username, 
+            password: hashed, 
+            nickname, 
+            email, 
+            avatar,
+            provider,
+            providerId 
+        });
+
+        return { 
+            id: user.id, 
+            username: user.username, 
+            nickname: user.nickname,
+            email: user.email,
+            avatar: user.avatar 
+        };
+    } catch (error) {
+        console.error('Error creating Google user:', error);
+        return { error: 'Failed to create user' };
+    }
 }
