@@ -1,14 +1,14 @@
 const userController = require('../controllers/userController');
 
 async function userRoutes(fastify, options) {
-
+/*
     fastify.post('/api/user/public/nickname', userController.getPublicNickname);
     fastify.post('/api/user/signup', userController.signup);
     fastify.post('/api/user/login', userController.login);
     fastify.get('/api/user/profile', userController.getProfile);
     fastify.put('/api/user/profile', userController.updateProfile);
     fastify.delete('/api/user/profile', userController.deleteProfile);
-
+*/
 /*    
     fastify.get('/api/user/profile', async (req, reply) => {
         const userId = req.headers['x-user-id'];
@@ -22,7 +22,7 @@ async function userRoutes(fastify, options) {
         };
     });
 */
-/*
+
   const addRouteWithSource = (method, url, handler) => {
     fastify[method](url, {
       handler,
@@ -36,7 +36,7 @@ async function userRoutes(fastify, options) {
   addRouteWithSource('get', '/api/user/profile', userController.getProfile);
   addRouteWithSource('put', '/api/user/profile', userController.updateProfile);
   addRouteWithSource('delete', '/api/user/profile', userController.deleteProfile);
-*/
+
 }
 
 module.exports = userRoutes;

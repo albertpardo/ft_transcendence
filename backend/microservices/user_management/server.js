@@ -17,7 +17,8 @@ const fastify = require('fastify')({
 const userRoutes = require('./routes/user');
 
 fastify.register(userRoutes);
-/*
+
+
 //Start by apardo-m
 // ✅ Hook global para loggear todas las respuestas
 fastify.addHook('onSend', async (request, reply, payload) => {
@@ -50,7 +51,7 @@ fastify.addHook('onSend', async (request, reply, payload) => {
   return payload;
 });
 //end  by apardo-m
-*/
+
 const start = async () => {
     try {
 /*
