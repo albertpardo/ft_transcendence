@@ -698,18 +698,18 @@ export async function initDashboard() {
     <main id="content-area" class="pt-16 md:pt-0 md:ml-64 p-4 md:p-6 lg:p-8 xl:p-12 min-h-screen overflow-auto bg-gray-900"></main>
 
     <!-- Hidden Game Area -->
-    <div id="game-area" class="flex flex-col items-center justify-center hidden">
-      <div id="game-window" class="relative w-[1280px] h-[720px]">
+    <div id="game-area" class="flex flex-col items-center justify-center w-full max-w-7xl mt-4">
+      <div id="game-window" class="relative w-full max-w-md sm:max-w-lg md:max-w-2xl lg:max-w-4xl xl:w-[1280px] aspect-video bg-black mx-auto overflow-hidden min-h-0">
         <div id="rain-overlay" class="absolute inset-0 z-50 pointer-events-none hidden"></div>
 
         <!-- Left Controls -->
         <div class="absolute left-0 top-1/2 transform -translate-y-1/2 flex flex-col space-y-4 z-10">
-          <button id="left-up" class="bg-white text-black p-3 rounded shadow" hidden>^</button>
-          <button id="left-down" class="bg-white text-black p-3 rounded shadow" hidden>v</button>
+          <button id="left-up" class="bg-white text-black p-1 rounded shadow" hidden>^</button>
+          <button id="left-down" class="bg-white text-black p-1 rounded shadow" hidden>v</button>
         </div>
 
         <!-- SVG Field -->
-        <svg width="1280" height="720">
+        <svg viewBox="0 0 1280 720" preserveAspectRatio="xMidYMid meet" class="absolute inset-0 w-full h-full">
         <defs>
           <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
            <feDropShadow dx="0" dy="0" stdDeviation="10" flood-color="#00ff00" />
@@ -733,8 +733,8 @@ export async function initDashboard() {
 
         <!-- Right Controls -->
         <div class="absolute right-0 top-1/2 transform -translate-y-1/2 flex flex-col space-y-4 z-10">
-          <button id="right-up" class="bg-white text-black p-3 rounded shadow" hidden>^</button>
-          <button id="right-down" class="bg-white text-black p-3 rounded shadow" hidden>v</button>
+          <button id="right-up" class="bg-white text-black p-1 rounded shadow" hidden>^</button>
+          <button id="right-down" class="bg-white text-black p-1 rounded shadow" hidden>v</button>
         </div>
 
       </div>
@@ -758,5 +758,9 @@ export async function initDashboard() {
 
   if (localStorage)
   startGameLogic(localStorage.getItem("authToken")!);
-  gameArea.style.display = (hash === 'play') ? 'flex' : 'none';
+  if (hash === 'play') {
+  gameArea.classList.remove('hidden');
+} else {
+  gameArea.classList.add('hidden');
+}
 }
