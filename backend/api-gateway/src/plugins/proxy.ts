@@ -31,7 +31,6 @@ interface OnRequestFastifyRequest extends FastifyRequest {
 
 
 export default fp(async function (fastify: FastifyInstance): Promise<void> {
-    let source = '/api/login';
 
     fastify.register(fastifyCookie, {
         secret: process.env.COOKIE_SECRET || 'supersecret', // optional for signed cookies
@@ -57,7 +56,7 @@ export default fp(async function (fastify: FastifyInstance): Promise<void> {
     
 
 fastify.post('/api/login', async (req: FastifyRequest<{ Body: { username: string; password: string } }>, reply: FastifyReply) => {
-
+    const source = '/api/login';
   try {
     const res = await fetch(`${userManagementUrl}/api/user/login`, {
       method: 'POST',
@@ -144,6 +143,7 @@ fastify.post('/api/login', async (req: FastifyRequest<{ Body: { username: string
 });
 
 fastify.post('/api/signup', async (req: FastifyRequest<{ Body: { username: string; password: string } }>, reply: FastifyReply) => {
+  const source = '/api/signup';
 
   try {
     const res = await fetch(`${userManagementUrl}/api/user/signup`, {
@@ -255,6 +255,7 @@ fastify.post('/api/signup', async (req: FastifyRequest<{ Body: { username: strin
             req: FastifyRequest,
             reply: FastifyReply
         ): Promise<void> => {
+			const source = "fastify.register(fastifyHttpProxy from '/api/profile' to '/api/user/profile'";
             if (req.method === 'OPTIONS') {
                 reply
                     .header('Access-Control-Allow-Origin', req.headers.origin || '*')
@@ -358,6 +359,7 @@ fastify.post('/api/signup', async (req: FastifyRequest<{ Body: { username: strin
         reply: FastifyReply,
         payload: string | Buffer | Readable
     ): Promise<string | Buffer | Readable> => {
+		const source = "fastify.addHook('onSend')";
        // console.log(`📡 [onSend] URL: ${req.url}, statusCode: ${reply.statusCode}`);//debug log
 		fastify.log.info(logFormat(source, `📡 [onSend] URL: ${req.url}, statusCode: ${reply.statusCode}`));
         if ((req.url.startsWith('/api/login') || req.url.startsWith('/api/signup') || req.url.startsWith('/api/profile')) && reply.statusCode === 200) {
