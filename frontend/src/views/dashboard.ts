@@ -184,7 +184,7 @@ const triggerBallEffect = () => {
 }
 
 const cleanupGameArea = () => {
-  const gameWindow = document.getElementById('game-window');
+/*   const gameWindow = document.getElementById('game-window');
   if (gameWindow) {
     gameWindow.innerHTML = `
       <div id="rain-overlay" class="absolute inset-0 z-50 pointer-events-none hidden"></div>
@@ -221,6 +221,26 @@ const cleanupGameArea = () => {
         <button id="right-down" class="bg-white text-black p-3 rounded shadow" hidden>v</button>
       </div>
     `;
+  } */
+ const overlay = document.getElementById('rain-overlay');
+  if (overlay) {
+    overlay.classList.add('hidden');
+    overlay.innerHTML = '';
+  }
+
+  const { ball, lpad, rpad, scoreText, gameText } = getGameElements();
+
+  if (ball) {
+    ball.setAttribute('cx', '640');
+    ball.setAttribute('cy', '360');
+  }
+  if (lpad) lpad.setAttribute('y', '310');
+  if (rpad) rpad.setAttribute('y', '310');
+  if (scoreText) scoreText.innerHTML = '0 : 0';
+  if (gameText) {
+    gameText.style.visibility = 'hidden';
+    gameText.innerHTML = 'Welcome to Pong!';
+    gameText.className = 'opacity-0 transition-all duration-300 fill-current text-[60px]';
   }
 }
 
@@ -317,6 +337,17 @@ const applyGameResult = (message: string, colorClass: string, animationClass: st
   gameText.classList.add(colorClass, animationClass);
 }
 
+function getGameElements() {
+  return {
+    ball: document.getElementById("ball") as SVGElement | null,
+    lpad: document.getElementById("lpad") as SVGElement | null,
+    rpad: document.getElementById("rpad") as SVGElement | null,
+    scoreText: document.getElementById("score-text") as HTMLElement | null,
+    gameText: document.getElementById("game-text") as HTMLElement | null,
+    startButton: document.getElementById("start-button") as HTMLElement | null,
+  };
+}
+
 export const startGameLogic = (authToken: string) => {
   resetGameText();
   resetGameUi();
@@ -332,12 +363,15 @@ export const startGameLogic = (authToken: string) => {
   const leftDownArrow = document.getElementById("left-down")!;
   const rightUpArrow = document.getElementById("right-up")!;
   const rightDownArrow = document.getElementById("right-down")!;
-  const ball: HTMLElement = document.getElementById("ball")!;
+
+  /* const ball: HTMLElement = document.getElementById("ball")!;
   const lpad: HTMLElement = document.getElementById("lpad")!;
   const rpad: HTMLElement = document.getElementById("rpad")!;
   const scoreText : HTMLElement = document.getElementById("score-text")!;
   
-  let gameText: HTMLElement | null = document.getElementById("game-text")!;
+  let gameText: HTMLElement | null = document.getElementById("game-text")!; */
+  
+  const { ball, lpad, rpad, scoreText, gameText } = getGameElements();
   if (gameText) {
     gameText.style.visibility = "hidden";
     gameText.classList.remove('opacity-0');
@@ -345,22 +379,22 @@ export const startGameLogic = (authToken: string) => {
   } 
 
   // Reset game text
-  gameText.style.visibility = "hidden";
-  gameText.innerHTML = "Welcome to Pong!";
+  gameText!.style.visibility = "hidden";
+  gameText!.innerHTML = "Welcome to Pong!";
   // gameText.setAttribute("fill", "white"); // Default fill
-  gameText.classList.remove(
+  gameText!.classList.remove(
     'text-red-400', 'text-green-400', 
     'text-red-500', 'text-green-500', 
     'animate-win-pulse', 'animate-lose-pulse', 'animate-text-glow'
   );
-  
-  scoreText.innerHTML = "0 : 0";
-  scoreText.classList.add('opacity-0');
+
+  scoreText!.innerHTML = "0 : 0";
+  scoreText!.classList.add('opacity-0');
   setTimeout(() => {
-    scoreText.classList.remove('opacity-0');
+    scoreText!.classList.remove('opacity-0');
   }, 150);
-  
-  gameText.classList.remove(
+
+  gameText!.classList.remove(
     'animate-win-pulse', 'animate-lose-pulse', 'animate-text-glow',
     'text-red-400', 'text-green-400', 'text-red-500', 'text-green-500'
   );
@@ -376,11 +410,11 @@ export const startGameLogic = (authToken: string) => {
           leftDownArrow.hidden = false;
           rightUpArrow.hidden = true;
           rightDownArrow.hidden = true;
-          gameText.style.visibility = "hidden";
-          scoreText.classList.add('opacity-0');
+          gameText!.style.visibility = "hidden";
+          scoreText!.classList.add('opacity-0');
           setTimeout(() => {
-            scoreText.innerHTML = `${gameState.stateScoreL} : ${gameState.stateScoreR}`;
-            scoreText.classList.remove('opacity-0');
+            scoreText!.innerHTML = `${gameState.stateScoreL} : ${gameState.stateScoreR}`;
+            scoreText!.classList.remove('opacity-0');
           }, 150);
           break;
           case "added: R":
@@ -390,12 +424,12 @@ export const startGameLogic = (authToken: string) => {
             rightDownArrow.hidden = false;
             leftUpArrow.hidden = true;
             leftDownArrow.hidden = true;
-            gameText.style.visibility = "hidden";
-            scoreText.classList.add('opacity-0');
+            gameText!.style.visibility = "hidden";
+            scoreText!.classList.add('opacity-0');
             setTimeout(() => {
-          scoreText.innerHTML = `${gameState.stateScoreL} : ${gameState.stateScoreR}`;
-          scoreText.classList.remove('opacity-0');
-        }, 150);
+              scoreText!.innerHTML = `${gameState.stateScoreL} : ${gameState.stateScoreR}`;
+              scoreText!.classList.remove('opacity-0');
+            }, 150);
         break;
         case "started":
           started = true;
@@ -405,14 +439,14 @@ export const startGameLogic = (authToken: string) => {
               const newState: State = JSON.parse(event.data);
               gameState = newState;
 
-              ball.setAttribute("cx", "" + newState.stateBall.coords.x);
-              ball.setAttribute("cy", "" + newState.stateBall.coords.y);
-              lpad.setAttribute("y", "" + newState.stateLP.y);
-              rpad.setAttribute("y", "" + newState.stateRP.y);
-              
+              ball!.setAttribute("cx", "" + newState.stateBall.coords.x);
+              ball!.setAttribute("cy", "" + newState.stateBall.coords.y);
+              lpad!.setAttribute("y", "" + newState.stateLP.y);
+              rpad!.setAttribute("y", "" + newState.stateRP.y);
+
               if (gameState.stateWhoL !== "none" && gameState.stateWhoL !== "null state") {
-                gameText.style.visibility = "visible";
-                scoreText.innerHTML = `${newState.stateScoreL} : ${newState.stateScoreR}`;
+                gameText!.style.visibility = "visible";
+                scoreText!.innerHTML = `${newState.stateScoreL} : ${newState.stateScoreR}`;
                 if (playerSide === "l") {
                   switch (gameState.stateWhoL) {
                     case "left":
@@ -457,8 +491,8 @@ export const startGameLogic = (authToken: string) => {
                 }
               }
           } else {
-            gameText.style.visibility = "hidden";
-            scoreText.innerHTML = `${gameState.stateScoreL} : ${gameState.stateScoreR}`;
+            gameText!.style.visibility = "hidden";
+            scoreText!.innerHTML = `${gameState.stateScoreL} : ${gameState.stateScoreR}`;
           }
         } catch (e) {
           console.error("Error parsing game state:", e);
@@ -521,35 +555,42 @@ export const startGameLogic = (authToken: string) => {
     { element: rightUpArrow,   direction: -2 },
     { element: rightDownArrow, direction:  2 }
   ];
-
-// Reusable handler
-  const bindControl = (button: HTMLElement, direction: number) => {
-    const start = () => movePaddleWrapper(direction);
-    const stop  = () => movePaddleWrapper(0);
-
-    button.addEventListener('mousedown', start);
-    button.addEventListener('touchstart', (e) => { e.preventDefault(); start(); });
-
-    ['mouseup', 'mouseleave'].forEach(event => 
-      button.addEventListener(event, stop)
-    );
-
-    ['touchend', 'touchcancel'].forEach(event => 
-      button.addEventListener(event, (e) => { e.preventDefault(); stop(); })
-    );
-  };
-
-// Apply to all controls
-controls.forEach(({ element, direction }) => {
-  if (element) bindControl(element, direction);
-});
+  
+  // Apply to all controls
+  controls.forEach(({ element, direction }) => {
+    if (element) bindControl(element, direction);
+  });
   window.addEventListener('keydown', handleKeyDown);
   window.addEventListener('keyup', handleKeyUp);
 };
 
 
-window.addEventListener('hashchange', () => {
+// Reusable handler
+const bindControl = (button: HTMLElement, direction: number) => {
+  const start = () => movePaddleWrapper(direction);
+  const stop  = () => movePaddleWrapper(0);
+
+  button.addEventListener('mousedown', start);
+  button.addEventListener('touchstart', (e) => { e.preventDefault(); start(); });
+
+  ['mouseup', 'mouseleave'].forEach(event => 
+    button.addEventListener(event, stop)
+  );
+
+  ['touchend', 'touchcancel'].forEach(event => 
+    button.addEventListener(event, (e) => { e.preventDefault(); stop(); })
+  );
+};
+
+const updateElement = (id: string, updater: (el: HTMLElement) => void) => {
+  const el = document.getElementById(id);
+  if (el) updater(el);
+};
+
+ window.addEventListener('hashchange', () => {
   const hash = window.location.hash.replace('#', '') || 'home';
+  initDashboard();
+  bindDashboardEvents();
   if (hash !== 'play') {
     cleanupGameArea();
     removeGameEventListeners();
@@ -557,12 +598,12 @@ window.addEventListener('hashchange', () => {
   } else {
     resetGameText();
     if (localStorage.getItem("authToken")) {
-      startGameLogic(localStorage.getItem("authToken")!);
+    setTimeout(() => {
+        startGameLogic(localStorage.getItem("authToken")!);
+      }, 0);
     }
   }
 
-  initDashboard();
-  bindDashboardEvents();
   console.log("Hash changed to:", window.location.hash);
 });
 
