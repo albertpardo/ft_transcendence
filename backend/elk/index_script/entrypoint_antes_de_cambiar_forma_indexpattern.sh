@@ -21,21 +21,10 @@ patterns="gameservice usermanagement apigateway"
 NDJSON_IN="/root/dashboard_example.ndjson" 
 NDJSON_OUT="/root/dashboard_example_copy.ndjson" 
 
-
-#### Create indexpatterns to use in ELK 
-indexpatterns=""
-templatepatterns=""
-for pattern in $patterns; do
-    indexpatterns+="${pattern}file-* ${pattern}http-* "
-	templatepatterns+="${pattern}file ${pattern}http "
-done
-indexpatterns=$(echo $indexpatterns | sed 's/ $//')
-templatepatterns=$(echo $templatepatterns | sed 's/ $//')
-
-########## INDEX PATTERN IN ELK #####
-echo "================================="
-echo "🔧 CREATING INDEX PATTERNS IN ELK"
-echo "================================="
+########## INDEX PATTERN #####
+echo "============================"
+echo "🔧 CREATING INDEX PATTERNS"
+echo "============================"
 
 declare -A new_ids
 
@@ -61,7 +50,7 @@ create_index_pattern() {
   payload=$(cat <<EOF
 {
   "attributes": {
-    "title": "$index_pattern",
+    "title": "${index_pattern}-*",
     "timeFieldName": "@timestamp"
   }
 }
@@ -90,44 +79,47 @@ EOF
 }
 
 # Iterar sobre los patrones
-for pattern in $indexpatterns; do
-  create_index_pattern "${pattern}" 
+for pattern in $patterns; do
+  create_index_pattern "${pattern}file" 
+  create_index_pattern "${pattern}http" 
 done
 
 echo "🏁 Done: Index patterns created."
 
 # Cambiar los ID's del fichero con los dashboards 
 
-echo "🔍 Import Dashboard example to Kibana..."
-
-cp "$NDJSON_IN" "$NDJSON_OUT"
-for pattern in $indexpatterns; do
-  new_id=${new_ids["$pattern"]}
-  escaped_pattern=$(echo "$pattern" | sed 's/\*/\\*/g')
-  old_id=$(grep "\"title\":\"$escaped_pattern\"" $NDJSON_IN | grep '"id"' | head -n1 | jq -r '.id')
-  echo "     newid=${new_id} , oldid=${old_id}"
-  if [ "$old_id" != "" ]; then
-    sed -i "s/$old_id/$new_id/g" "$NDJSON_OUT"
-  fi
-done
-
-## Importar a Kibana el archivo actualizado
-response=$(curl -s -w "%{http_code}" -X POST "$KIBANA_URL/api/saved_objects/_import?overwrite=true" \
-  -u "$USER:$PASS" \
-  --cacert "$CA_CERT" \
-  -H "kbn-xsrf: true" \
-  -F file=@$NDJSON_OUT)
-
-http_code=$(echo "$response" | tail -c 4)
-body=$(echo "$response" | sed "s/$http_code$//")
-
-if [ "$http_code" -ne 200 ]; then
-  echo " - ❌ Error importing dashboards (HTTP $http_code). EXIT."
-  echo "Response body: $body"
-  exit 1
-else
-  echo " - ✅ Dashboard Imported."
-fi
+#echo "🔍 Import Dashboard example to Kibana..."
+#
+#change_partern_id() {
+#  pattern="$1"
+#  new_id=${new_ids["$pattern"]}
+#  old_id=$(grep "\"title\":\"$pattern\"" $NDJSON_IN | grep '"id"' | head -n1 | jq -r '.id')
+#  sed -i "s/$old_id/$new_id/g" "$NDJSON_OUT"
+#} 
+#
+#cp "$NDJSON_IN" "$NDJSON_OUT"
+#for pattern in $patterns; do
+#	change_partern_id("${pattern}file-*")
+#	change_partern_id("${pattern}http-*")
+#done
+#
+### Importar a Kibana el archivo actualizado
+#response=$(curl -s -w "%{http_code}" -X POST "$KIBANA_URL/api/saved_objects/_import?overwrite=true" \
+#  -u "$USER:$PASS" \
+#  --cacert "$CA_CERT" \
+#  -H "kbn-xsrf: true" \
+#  -F file=@$NDJSON_OUT)
+#
+#http_code=$(echo "$response" | tail -c 4)
+#body=$(echo "$response" | sed "s/$http_code$//")
+#
+#if [ "$http_code" -ne 200 ]; then
+#  echo " - ❌ Error importing dashboards (HTTP $http_code). EXIT."
+#  echo "Response body: $body"
+#  exit 1
+#else
+#  echo " - ✅ Dashboard Imported."
+#fi
 
 ###### ILM POLICY ###########
 echo
@@ -228,8 +220,9 @@ EOF
 }
 
 # Iterar sobre los patrones
-for pattern in $templatepatterns; do
-  create_template "${pattern}" 
+for pattern in $patterns; do
+  create_template "${pattern}file" 
+  create_template "${pattern}http"
 done
 
 echo "🏁 Done: Templates created."
@@ -281,8 +274,9 @@ EOF
 }
 
 # Iterar sobre los patrones
-for pattern in $templatepatterns; do
-  create_initial_index "${pattern}"
+for pattern in $patterns; do
+  create_initial_index "${pattern}file"
+  create_initial_index "${pattern}http"
 done
 
 echo "🏁 Done: Indexes ended with 000001 created."
