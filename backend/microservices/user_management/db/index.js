@@ -8,7 +8,9 @@ const init = db.prepare(`
     password TEXT,
     nickname TEXT,
     email TEXT UNIQUE,
-    avatar TEXT DEFAULT '')` 
+    avatar TEXT DEFAULT '',
+    provider TEXT DEFAULT 'local',
+    provider_id TEXT)`
 );
 init.run();
 
@@ -40,9 +42,9 @@ function getUserById(id) {
     return stmt.get(id);
 }
 
-function createUser({ id, username, password, nickname, email, avatar = '' }) {
-    const stmt = db.prepare('INSERT INTO users (id, username, password, nickname, email, avatar) VALUES (?, ?, ?, ?, ?, ?)');
-    const info = stmt.run(id, username, password, nickname, email, avatar);
+function createUser({ id, username, password, nickname, email, avatar = '', provider = 'local', provider_id = null }) {
+    const stmt = db.prepare('INSERT INTO users (id, username, password, nickname, email, avatar, provider, provider_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
+    const info = stmt.run(id, username, password, nickname, email, avatar, provider, provider_id);
 	const stmt2 = db.prepare('SELECT * FROM users WHERE id = ?');
 	const info2 = stmt2.all(id);
     return { id: info2[0].id, username, avatar:info2[0].avatar };

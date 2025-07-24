@@ -35,7 +35,7 @@ exports.signup = async (username, password, nickname, email, avatar = '') => {
 	const localid = makeid(64);
 	console.log("localid from the backend/microservices/user_management/services/userService.js is...");
 	console.log(localid);
-    const user = db.createUser({ id: localid, username, password: hashed, nickname, email, avatar });
+    const user = db.createUser({ id: localid, username, password: hashed, nickname, email, avatar, provider: 'local' });
     return { id: user.id, username: user.username, avatar: user.avatar };
 }
 
@@ -176,7 +176,7 @@ exports.createGoogleUser = async (userData) => {
             email, 
             avatar,
             provider,
-            providerId 
+            provider_id: providerId
         });
 
         return { 
