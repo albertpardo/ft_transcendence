@@ -15,10 +15,30 @@ delete require.cache[require.resolve('./middlewares/auth')];
 const { rateLimitPlugin } = require('./plugins/rateLimit');
 const exampleRoutes = require('./routes/example');
 
+// Start by apardo-m
+import { getLogTransportConfig } from '../dist/pino_utils/logTransportConfig';
+import { logFormat } from './pino_utils/log_format';
+const appName = "api_gateway"
+// End by apardo-m
+
+/*
 const server = Fastify ({
     logger: true,
     https: tlsConfig,
 })
+*/
+
+// Start by apardo-m
+const server = Fastify({
+    logger: {
+        transport: getLogTransportConfig(),
+        base: {
+            appName: appName
+        },
+    },
+    https: tlsConfig,
+});
+// End by apardo-m
 
 //register plugins
 async function registerPlugin() {
@@ -58,6 +78,8 @@ async function registerPlugin() {
 
 //start service (using HTTPS)
 async function start() {
+	const source = start.name;
+
     try {
         await registerPlugin()
 
@@ -66,17 +88,22 @@ async function start() {
 
         // print all the routes
         await server.ready()
-        console.log(server.printRoutes())
+        //console.log(server.printRoutes())
+        server.log.info(logFormat(source, server.printRoutes()));
+
         server.listen({ port:8443, host: '0.0.0.0' }, (err: Error, address: string) => {
             if (err) {
-                server.log.error(err)
+                //server.log.error(err)
+                server.log.error(logFormat(source, err));
                 process.exit(1)
             }
-            server.log.info(`Server listening on ${address}`)
+            //server.log.info(`Server listening on ${address}`)
+            server.log.info(logFormat(source, `Server listening on ${address}`));
         })
     } catch (err) {
-        server.log.error(err)
-        process.exit(1)
+        //server.log.error(err)
+        server.log.error(logFormat(source, err));
+        process.exit(1);
     }
 }
 

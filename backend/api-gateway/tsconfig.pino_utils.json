@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "include": ["src/pino_utils/**/*.ts"],
+  "compilerOptions": {
+	"allowImportingTsExtensions": false,  
+	"allowJs": true,
+    "noEmit": false,
+    "rootDir": "src/pino_utils",
+    "outDir": "dist/pino_utils"
+  }
+}
+

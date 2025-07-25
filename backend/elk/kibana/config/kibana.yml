@@ -1,0 +1,15 @@
+server.name: "kibana"
+server.host: "kibana"
+server.ssl.enabled: true
+server.ssl.certificate: config/certs/kibana/kibana.crt
+server.ssl.key: config/certs/kibana/kibana.key
+monitoring.ui.container.elasticsearch.enabled: true
+elasticsearch.hosts: ["https://elastic:9200"]
+elasticsearch.username: "${KIBANA_US}"
+elasticsearch.password: "${KIBANA_PASSWORD}"
+elasticsearch.ssl.certificateAuthorities: ["config/certs/ca/ca.crt"]
+xpack.fleet.enabled: false
+xpack.screenshotting.browser.chromium.disableSandbox: true
+xpack.encryptedSavedObjects.encryptionKey: "${XPACK_ENCRYPTED_SAVED_OBJECTS_ENCRYPTION_KEY}"
+xpack.reporting.encryptionKey: "${XPACK_REPORTING_ENCRYPTION_KEY}"
+xpack.security.encryptionKey: "${XPACK_SECURITY_ENCRYPTION_KEY}"

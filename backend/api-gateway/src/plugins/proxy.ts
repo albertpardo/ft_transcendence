@@ -4,6 +4,8 @@ import { FastifyInstance } from 'fastify';
 import getRawBody from 'raw-body';
 import { Readable } from 'stream';
 
+import { logFormat } from '../pino_utils/log_format'; //by apardo-m
+
 export default fp(async function (fastify: FastifyInstance) {
     // register proxy: without onResponse
     fastify.register(fastifyHttpProxy, {
@@ -43,6 +45,8 @@ export default fp(async function (fastify: FastifyInstance) {
             },
         },
         preHandler: async (req, reply) => {
+			const source = "fastify.register(fastifyHttpProxy from '/api/profile' to '/api/user/profile'";
+	
             // Allow preflight CORS manually for OPTIONS
             if (req.method === 'OPTIONS') {
               reply
@@ -54,6 +58,7 @@ export default fp(async function (fastify: FastifyInstance) {
                 .send();
               return;
             }
+/*
             console.log('🚀 rewriteRequestHeaders - forwarded auth:', req.headers.authorization);
             console.log('🔐🔐 Authorization Header:', req.headers['authorization']);
 
@@ -71,6 +76,27 @@ export default fp(async function (fastify: FastifyInstance) {
                 }
             } catch (err: any) {
                 console.error('❌ Proxy-level JWT verification failed:', err.message);
+                reply.code(401).send({ error: 'Unauthorized in proxy' });
+            }
+*/
+
+            req.log.info(logFormat(source, '🚀 rewriteRequestHeaders - forwarded auth:', req.headers.authorization));
+            req.log.info(logFormat(source, '🔐🔐 Authorization Header:', req.headers['authorization']));
+
+            try {
+                req.log.info(logFormat(source, '🔍🔐 Raw Authorization Header:', JSON.stringify(req.headers.authorization)));
+                req.log.info(logFormat(source, '🔍🔐 JWT Secret in use:', process.env.JWT_SECRET));
+
+                await req.jwtVerify();
+                req.log.info(logFormat(source, "🔐 Verified JWT in proxy preHandler"));
+
+                const userId = (req.user as any)?.userId;
+                if (userId) {
+                    req.headers['x-user-id'] = String(userId);
+                    req.log.info(logFormat(source, `📦 Injected x-user-id = ${userId} into headers`));
+                }
+            } catch (err: any) {
+                reply.log.error(logFormat(source, '❌ Proxy-level JWT verification failed:', err.message));
                 reply.code(401).send({ error: 'Unauthorized in proxy' });
             }
         },
@@ -114,6 +140,7 @@ export default fp(async function (fastify: FastifyInstance) {
     // block and modify response
     fastify.addHook('onSend', async (req, reply, payload) => {
         if ((req.url.startsWith('/api/login') || req.url.startsWith('/api/signup')) && reply.statusCode === 200) {
+		    const source = "fastify.addHook('onSend')";
             try {
                 let body;
                 //if payload is Readable, transform it into string with raw-bady
@@ -125,13 +152,15 @@ export default fp(async function (fastify: FastifyInstance) {
                 } else {
                     body = payload;
                 }
-                console.log('📦 Final parsed payload:', body);
+                //console.log('📦 Final parsed payload:', body);
+                req.log.info(logFormat(source, '📦 Final parsed payload:', body));
  
             //    const data = typeof payload === 'string' ? JSON.parse(payload) : payload;
             //    console.log('📦 Login/signup response payload:', data);
 
                 if (!body.id || !body.username) {
-                    console.warn('⚠️ No id or username found in payload!');
+                    //console.warn('⚠️ No id or username found in payload!'));
+                    req.log.info(logFormat(source, '⚠️ No id or username found in payload!'));
                     return payload;
                 }
 
@@ -144,7 +173,8 @@ export default fp(async function (fastify: FastifyInstance) {
                     user: body.username,
                 });
             } catch (err) {
-                console.error('⚠️ Failed to parse payload or generate token:', err);
+                //console.error('⚠️ Failed to parse payload or generate token:', err);
+                req.log.warn(logFormat(source, '⚠️ Failed to parse payload or generate token:', err));
                 return payload; // fallback to original
             }
         }

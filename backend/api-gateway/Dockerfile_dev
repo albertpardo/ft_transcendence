@@ -23,6 +23,9 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s \
 # Copy source code & certs
 COPY . .
 
+#by apardo-m
+RUN chmod +x script.sh
+
 # Expose HTTPS port
 EXPOSE 8443
 EXPOSE 10000
@@ -31,7 +34,10 @@ EXPOSE 10000
 #RUN npm install dotenv
 # Run using ts-node (just like the local command)
 
-CMD ["npm", "run", "dev"]
+#CMD ["npm", "run", "dev"]
 #CMD ["node", "dist/index.js"]
 
 #CMD ["npm", "run", "serve"]
+
+#by apardo-m
+CMD ["sh" , "./script.sh"] 
