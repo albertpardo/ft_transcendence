@@ -1,11 +1,9 @@
 const { LOG_FOLDER, LOG_FILE } = require('./constants.js');
-const { dirname, resolve, join } = require('path');
-//const { fileURLToPath } = require('url');
+
+const { resolve, join } = require('path');
 
 // Función que devuelve la configuración del transporte
 const getLogTransportConfig = () => {
- // const __filename = fileURLToPath(import.meta.url);
-//  const __dirname = dirname(__filename);
  
   return {
     targets: [
