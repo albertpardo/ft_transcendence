@@ -89,6 +89,7 @@ services:
     environment:
       - ES_JAVA_OPTS=-Xms512m -Xmx512m
       - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+    restart: unless-stopped
     networks:
       - backend
     healthcheck:
@@ -121,6 +122,7 @@ services:
       - XPACK_ENCRYPTED_SAVED_OBJECTS_ENCRYPTION_KEY=${XPACK_ENCRYPTED_SAVED_OBJECTS_ENCRYPTION_KEY}
       - XPACK_REPORTING_ENCRYPTION_KEY=${XPACK_REPORTING_ENCRYPTION_KEY}
       - XPACK_SECURITY_ENCRYPTION_KEY=${XPACK_SECURITY_ENCRYPTION_KEY}
+    restart: unless-stopped
     networks:
       - backend
     healthcheck:
@@ -185,6 +187,7 @@ services:
       - ELASTIC_URL=${ELASTIC_URL}
       - ELASTIC_US=${ELASTIC_US}
       - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+    restart: unless-stopped
     networks:
       - backend
       
@@ -200,6 +203,7 @@ services:
     volumes:
       - ${LOGS_ELASTIC_FOLDER}:/backup/logs_elastic:ro
       - ${BACKUP_ELASTIC_LOGS}:/backup/logs_elastic_backup
+    restart: unless-stopped
     networks:
       - backend
 

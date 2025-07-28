@@ -312,9 +312,9 @@ for pattern in $templatepatterns; do
   create_initial_index "${pattern}"
 done
 
-echo "🏁 Done: Indexes ended with 000001 created."
+echo "🏁 Done."
 
-:
+
 ########## snapshot ##########
 echo
 echo "============================"
