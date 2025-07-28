@@ -51,15 +51,8 @@ create_index_pattern() {
 
   total=$(echo "$response" | grep -o '"total":[0-9]*' | cut -d: -f2)
 
-  # get  ID from $index_pattern
   if [ "$total" -ge 1 ]; then
-    existing_id=$(echo "$response" | jq -r --arg pattern "$index_pattern" '
-      .saved_objects[] 
-      | select(.attributes.title == $pattern) 
-      | .id
-    ')
-    new_ids["$index_pattern"]="$existing_id"
-    echo "  ✅ Index pattern '$index_pattern' already exists. ID: ${new_ids[$index_pattern]}"
+    echo "  ✅ Index pattern '$index_pattern' already exists. Skipping."
     return
   fi
 
@@ -105,10 +98,7 @@ echo "🏁 Done: Index patterns created."
 
 # Cambiar los ID's del fichero con los dashboards 
 
-echo
-echo "========================================"
 echo "🔍 Import Dashboard example to Kibana..."
-echo "========================================"
 
 cp "$NDJSON_IN" "$NDJSON_OUT"
 for pattern in $indexpatterns; do
@@ -145,18 +135,9 @@ echo "============================"
 echo "🔧 CREATING $POLICY_NAME"
 echo "============================"
 
-echo "🔍 Checking if ILM policy '$POLICY_NAME' exists..."
+echo "🔍 ILM :$POLICY_NAME..."
 
-check_response=$(curl -s -o /dev/null -w "%{http_code}" -X GET "$ELASTIC_URL/_ilm/policy/$POLICY_NAME" \
-  --cacert "$CA_CERT" \
-  -u $USER:$PASS)
-
-if [ "$check_response" -eq 200 ]; then
-  echo " - ✅ ILM policy '$POLICY_NAME' already exists. Skipping creation."
-else
-  echo " - 🚧 Creating ILM policy '$POLICY_NAME'..."
-
-  payload=$(cat <<EOF
+payload=$(cat <<EOF
 {
   "policy": {
     "phases": {
@@ -181,19 +162,19 @@ else
 EOF
 )
 
-  response=$(curl -s -o /dev/null -w "%{http_code}" -X PUT "$ELASTIC_URL/_ilm/policy/$POLICY_NAME" \
-    --cacert "$CA_CERT" \
-    -H "Content-Type: application/json" \
-   -u $USER:$PASS \
-    -d "$payload")
+response=$(curl -s -o /dev/null -w "%{http_code}" -X PUT "$ELASTIC_URL/_ilm/policy/$POLICY_NAME" \
+  --cacert "$CA_CERT" \
+  -H "Content-Type: application/json" \
+  -u $USER:$PASS \
+  -d "$payload")
 
-  if [ "$response" -ne 200 ] && [ "$response" -ne 201 ]; then
-    echo " - ❌ Error ILM policy (HTTP $response). EXIT."
-    exit 1
-  fi
-
-  echo " - ✅ ILM policy OK!."
+if [ "$response" -ne 200 ] && [ "$response" -ne 201 ]; then
+  echo " - ❌ Error ILM policy (HTTP $response). EXIT."
+  exit 1
 fi
+
+echo " - ✅ ILM policy OK!."
+
 ###### TEMPLATES  ###########
 echo
 echo "============================"
@@ -203,17 +184,9 @@ echo "============================"
 create_template () {
   alias=$1
 
-  echo "🔍 Checking if ${alias}_template exists..."
-  check_response=$(curl -s -o /dev/null -w "%{http_code}" -X GET "$ELASTIC_URL/_index_template/${alias}_template" \
-    --cacert "$CA_CERT" \
-    -u $USER:$PASS)
-
-  if [ "$check_response" -eq 200 ]; then
-    echo " - ✅ ${alias}_template already exists. Skipping creation."
-  else
-    echo " - 🚧 Apply ${alias}_template..."
+  echo "🔍 Apply ${alias}_template..."
   
-    payload=$(cat <<EOF
+  payload=$(cat <<EOF
 {
   "index_patterns": ["${alias}-*"],
   "template": {
@@ -240,19 +213,18 @@ create_template () {
 EOF
 )
 
-    response=$(curl -s -o /dev/null -w "%{http_code}" -X PUT "$ELASTIC_URL/_index_template/${alias}_template" \
-      --cacert "$CA_CERT" \
-      -H "Content-Type: application/json" \
-      -u $USER:$PASS \
-      -d "$payload")
+  response=$(curl -s -o /dev/null -w "%{http_code}" -X PUT "$ELASTIC_URL/_index_template/${alias}_template" \
+    --cacert "$CA_CERT" \
+    -H "Content-Type: application/json" \
+    -u $USER:$PASS \
+    -d "$payload")
 
-    if [ "$response" -ne 200 ] && [ "$response" -ne 201 ]; then
-      echo " - ❌ Error ${alias}_template (HTTP $response). Exit"
-      exit 1
-    fi
-
-    echo " -✅ ${alias}_template OK!."
+  if [ "$response" -ne 200 ] && [ "$response" -ne 201 ]; then
+    echo " - ❌ Error ${alias}_template (HTTP $response). Exit"
+    exit 1
   fi
+
+  echo " -✅ ${alias}_template OK!."
 }
 
 # Iterar sobre los patrones
@@ -261,6 +233,7 @@ for pattern in $templatepatterns; do
 done
 
 echo "🏁 Done: Templates created."
+
 
 ######  Create INDEXES ended with 000001
 echo "============================"
@@ -321,18 +294,9 @@ echo "============================"
 echo "🔧 CONFIGURE SNAPSHOST"
 echo "============================"
 echo
-echo "🔍 Check if '$SNAPSHOT_REPOSITORY_NAME' snapshot exists..."
+echo "🔍 Start snapshot repository $SNAPSHOT_REPOSITORY_NAME..."
 
-check_response=$(curl -s -o /dev/null -w "%{http_code}" -X GET "$ELASTIC_URL/_snapshot/$SNAPSHOT_REPOSITORY_NAME" \
-    --cacert "$CA_CERT" \
-    -u $USER:$PASS)
-
-if [ "$check_response" -eq 200 ]; then
-  echo " - ✅ $SNAPSHOT_REPOSITORY_NAME already exists. Skipping creation."
-else
-  echo " - 🚧 Start snapshot repository $SNAPSHOT_REPOSITORY_NAME..."
-
-  payload=$(cat <<EOF
+payload=$(cat <<EOF
 {
   "type": "fs",
   "settings": {
@@ -342,33 +306,25 @@ else
 }
 EOF
 )
-  
-  response=$(curl -s -o /dev/null -w "%{http_code}" -X PUT "$ELASTIC_URL/_snapshot/$SNAPSHOT_REPOSITORY_NAME" \
-    --cacert "$CA_CERT" \
-    -H "Content-Type: application/json" \
-    -u $USER:$PASS \
-    -d "$payload")
-  
-  if [ "$response" -ne 200 ] && [ "$response" -ne 201 ]; then
-    echo " - ❌ Error in snapshot repository (HTTP $response). EXIT."
-    exit 1
-  fi
-  
-  echo " - ✅ Snapshot repository $SNAPSHOT_REPOSITORY_NAME OK!."
+
+response=$(curl -s -o /dev/null -w "%{http_code}" -X PUT "$ELASTIC_URL/_snapshot/$SNAPSHOT_REPOSITORY_NAME" \
+  --cacert "$CA_CERT" \
+  -H "Content-Type: application/json" \
+  -u $USER:$PASS \
+  -d "$payload")
+
+if [ "$response" -ne 200 ] && [ "$response" -ne 201 ]; then
+  echo " - ❌ Error in snapshot repository (HTTP $response). EXIT."
+  exit 1
 fi
 
+echo " - ✅ Snapshot repository $SNAPSHOT_REPOSITORY_NAME OK!."
+
 # Crear política 
-echo "🔍 Check if '$SNAPSHOT_POLICY_NAME' snapshot policy exists..."
-create_response=$(curl -s -w "\n%{http_code}" -X GET "$ELASTIC_URL/_slm/policy/$SNAPSHOT_POLICY_NAME" \
-    --cacert "$CA_CERT" \
-    -u $USER:$PASS)
 
-if [ "$check_response" -eq 200 ]; then
-  echo " - ✅ $SNAPSHOT_POLICY_NAME already exists. Skipping creation."
-else
-  echo "🔍 Setup snapshot policy: $SNAPSHOT_POLICY_NAME..."
+echo "🔍 Setup snapshot policy: $SNAPSHOT_POLICY_NAME..."
 
-  payload=$(cat <<EOF
+payload=$(cat <<EOF
 {
   "schedule": "0 0/15 * * * ?",
   "name": "<snapshot-{now}>",
@@ -387,23 +343,22 @@ else
 EOF
 )
 
-  create_response=$(curl -s -w "\n%{http_code}" -X PUT "$ELASTIC_URL/_slm/policy/$SNAPSHOT_POLICY_NAME" \
-    --cacert "$CA_CERT" \
-    -H "Content-Type: application/json" \
-    -u $USER:$PASS \
-    -d "$payload")
-  
-  body=$(echo "$create_response" | sed '$d')
-  http_code=$(echo "$create_response" | tail -n1)
-  
-  if [ "$http_code" -ne 200 ] && [ "$http_code" -ne 201 ]; then
-    echo " - ❌ Error snapshot policy (HTTP $http_code)."
-    echo "Body: $body"
-    exit 1
-  fi
-  
-  echo " - ✅ snapshot policy $SNAPSHOT_POLICY_NAME OK!."
+create_response=$(curl -s -w "\n%{http_code}" -X PUT "$ELASTIC_URL/_slm/policy/$SNAPSHOT_POLICY_NAME" \
+  --cacert "$CA_CERT" \
+  -H "Content-Type: application/json" \
+  -u $USER:$PASS \
+  -d "$payload")
+
+body=$(echo "$create_response" | sed '$d')
+http_code=$(echo "$create_response" | tail -n1)
+
+if [ "$http_code" -ne 200 ] && [ "$http_code" -ne 201 ]; then
+  echo " - ❌ Error snapshot policy (HTTP $http_code)."
+  echo "Body: $body"
+  exit 1
 fi
+
+echo " - ✅ snapshot policy $SNAPSHOT_POLICY_NAME OK!."
 
 # EXECUTE SNAPSHOT POLICY  
 
