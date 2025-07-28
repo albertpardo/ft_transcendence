@@ -56,7 +56,7 @@ module.exports = async function exampleRoutes(fastify: FastifyInstance) {
             }
 
             // Check if user exists in database (call user management service)
-            const userServiceUrl = process.env.USER_SERVICE_URL || 'http://user-management:3002';
+            const userServiceUrl = process.env.USER_SERVICE_URL || 'http://user-management:9001';
             
             try {
                 // Try to find existing user by email

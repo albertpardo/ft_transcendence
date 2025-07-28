@@ -17,7 +17,7 @@ export async function authMiddleware(req: FastifyRequest, reply: FastifyReply) {
 
 
     // if requested URL is public, skip auth
-    const publicPaths = ['/api/signup', '/api/login', '/api/public'];
+    const publicPaths = ['/api/signup', '/api/login', '/api/google-login', '/api/public'];
     if (publicPaths.some(path => req.url?.startsWith(path))) return;
 
     try {

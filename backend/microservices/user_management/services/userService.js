@@ -26,7 +26,9 @@ exports.getPublicNickname = async (userId) => {
 
 exports.signup = async (username, password, nickname, email, avatar = '') => {
     const existing = db.getUserByUsernameOrEmail(username, email);
-    if (existing) return { error: 'This user already exists' };
+        if (existing) {
+            return existing; // Return existing user instead of error for OAuth
+        }
 
     const nickexist = db.getNickname(nickname);
     if (nickexist) return { error: 'This nickname already exists' };

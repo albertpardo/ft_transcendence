@@ -188,6 +188,30 @@ export async function renderProfileContent(el: HTMLElement, bu: HTMLElement, gAr
   const openEye = document.getElementById('open-eye');
   const closedEye = document.getElementById('closed-eye');
 
+  function getJwtPayload(token) {
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+      return JSON.parse(jsonPayload);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  const tokenPayload = getJwtPayload(authToken);
+  const isGoogleLogin = tokenPayload && tokenPayload.provider && tokenPayload.provider.startsWith('google');
+
+  if (isGoogleLogin) {
+    editBtn.disabled = true;
+    const message = document.createElement('p');
+    message.className = 'text-center text-gray-400 mt-4';
+    message.textContent = 'To edit your profile, please visit your Google account settings.';
+    editBtn.insertAdjacentElement('afterend', message);
+  }
+
 
   if (passwordInput && passwordToggle && openEye && closedEye) {
     passwordToggle.addEventListener('click', () => {
