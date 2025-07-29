@@ -1,5 +1,5 @@
 // Const for index patern in Kibana
-const MICRO_NAME: string = "api-gateway";
+const MICRO_NAME: string = "api_gateway";
 const PINO_FILE: string = "file";
 const PINO_HTTP: string = "http";
 const APP_LOG: string = MICRO_NAME + "-log";
