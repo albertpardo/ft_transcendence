@@ -41,6 +41,10 @@ export default fp(async function (fastify: FastifyInstance) {
         prefix: '/api/public/nickname',
         rewritePrefix: '/api/user/public/nickname',
         http2: false,
+        preHandler: (req, reply, done) => {
+            // Custom logic before proxying the request
+            done();
+        }
     });
     fastify.register(fastifyHttpProxy, {
         upstream: 'http://user_management:9001',

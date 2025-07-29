@@ -137,6 +137,7 @@ exports.upsertGoogleUser = async (email, name, picture, googleId) => {
     const localid = makeid(64);
     const firstName = name?.split(' ')[0] || 'User';
     const lastName = name?.split(' ').slice(1).join(' ') || 'Anonymous';
+    const nickname = name?.trim() || firstName;
 
     try {
       user = db.createUser({
@@ -148,6 +149,7 @@ exports.upsertGoogleUser = async (email, name, picture, googleId) => {
         avatar: picture,
         googleId,
         status: 'online',
+        nickname: nickname,
       });
       console.log('✅ [userService] Created user:', user);
     } catch (err) {
@@ -160,6 +162,7 @@ exports.upsertGoogleUser = async (email, name, picture, googleId) => {
     const updates = {};
     if (!user.avatar) updates.avatar = picture;
     if (!user.firstName) updates.firstName = name?.split(' ')[0] || 'User';
+    if (!user.nickname && name) updates.nickname = name.trim();
     if (Object.keys(updates).length > 0) {
       try {
         db.updateUser(user.id, updates);
@@ -178,5 +181,6 @@ exports.upsertGoogleUser = async (email, name, picture, googleId) => {
     lastName: user.lastName,
     avatar: user.avatar,
     email: user.email,
+    nickname: user.nickname || user.firstName || 'Player',
   };
 };

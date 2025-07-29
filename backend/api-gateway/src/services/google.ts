@@ -29,6 +29,8 @@ const googleAuthPlugin: FastifyPluginAsync = async (fastify) => {
         return reply.status(400).send({ error: 'Email is required' });
       }
 
+      const nickname = payload.given_name || (payload.name ? payload.name.split(' ')[0] : 'Google User');
+
       let user: any;
       try {
         const fetch = (await import('node-fetch')).default;

@@ -75,6 +75,7 @@ exports.upsertGoogle = async (request, reply) => {
     console.log('❌ [userController] Missing email or googleId:', { email, googleId });
     return reply.code(400).send({ error: 'Email and Google ID are required' });
   }
+ // const nickname = payload.given_name || 'Google User';
 /*   if (!user.nickname) {
     user.nickname = user.username;
   } */
