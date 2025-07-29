@@ -1,3 +1,4 @@
+import { googleInitialized } from "./login";
 export async function renderProfileContent(el: HTMLElement, bu: HTMLElement, gArea: HTMLElement, gWin: HTMLElement) {
   bu.hidden = true;
   gArea.hidden = true;
@@ -45,7 +46,10 @@ export async function renderProfileContent(el: HTMLElement, bu: HTMLElement, gAr
       year: 'numeric'
     })}`;
   }
+  const authProvider = localStorage.getItem('authProvider');
 
+
+  const isGoogleUser = authProvider === 'google';
   const passwordDots = '••••••••';
   el.innerHTML = `
     <div class="w-full max-w-6xl p-10 bg-gray-900 rounded-lg shadow-md mx-auto my-8">
@@ -59,8 +63,13 @@ export async function renderProfileContent(el: HTMLElement, bu: HTMLElement, gAr
             <h2 id="display-username" class="text-3xl font-bold mt-2">${username}</h2>
             <p class="text-gray-400 text-lg mt-2">@${nickname}</p>
             <p class="text-gray-300 mt-4 text-center">${memberSince}</p>
-            <button id="edit-btn"
-                    class="mt-6 px-4 py-2 bg-blue-500 text-white text-base rounded-lg hover:bg-cyan-600 transition-colors">Edit</button>
+            ${isGoogleUser ? `
+              <p class="text-red-500 mt-4 text-center">Signed in with Google. <br>Profile editing is disabled.</p>
+            ` : `
+              <button id="edit-btn" class="mt-6 px-4 py-2 bg-blue-500 text-white text-base rounded-lg hover:bg-cyan-600 transition-colors">
+                Edit
+              </button>
+            `}
           </div>
         </div>
 

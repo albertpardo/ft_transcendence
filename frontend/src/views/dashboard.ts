@@ -5,6 +5,7 @@ import { renderHomeContent, renderPlayContent, renderTournamentContent, renderSt
 import { renderHistoryContent } from './history';
 import { renderProfileContent } from './profile';
 import { State, nullState } from './pongrender';
+import { googleInitialized, resetGoogle, currentGoogleButtonId} from './login';
 import confetti from 'canvas-confetti';
 
 // Import VITE_API_BASE_URL from environment variables
@@ -219,6 +220,15 @@ function triggerBallEffect() {
   
   ball.classList.add('animate-ball-pulse');
   setTimeout(() => ball.classList.remove('animate-ball-pulse'), 300);
+}
+const wrapper = document.getElementById('google-signin-wrapper');
+if (wrapper) {
+  wrapper.hidden = true;
+  if (currentGoogleButtonId) {
+    const old = document.getElementById(currentGoogleButtonId);
+    if (old) old.remove();
+  }
+  // currentGoogleButtonId = null; // Removed because it's a read-only import
 }
 
 export async function initDashboard() {
@@ -608,9 +618,13 @@ export async function initDashboard() {
   document.getElementById('logout-btn')!.addEventListener('click', () => {
     localStorage.removeItem('authToken');
     localStorage.removeItem('userId');
+    localStorage.removeItem('authProvider');
     socket.close();
+    resetGoogle();
     window.location.hash = 'login';
-    route();
+   // if (googleInitialized) resetGoogle();
+   window.location.reload();  
+   //route();
   });
 
   // Render active section

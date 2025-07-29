@@ -1,6 +1,7 @@
 import { route } from "../router";
 
 export function renderLogin(appElement: HTMLElement) {
+  const googleId = `google-signin-${performance.now().toFixed(0)}`;
   appElement.innerHTML = `
     <div class="w-full min-h-screen bg-gray-900 flex items-center justify-center">
       <div class="w-full max-w-md p-8 space-y-8 bg-gray-800 rounded-lg shadow-md">
@@ -95,20 +96,23 @@ export function renderLogin(appElement: HTMLElement) {
               <a href="#" id="toggle-form" class="text-blue-400 hover:text-blue-300">Register now</a>
               </p>
               </div>
-              <button id="google-signin" class="flex items-center justify-center gap-3 bg-white text-gray-700 px-6 py-3 rounded-lg shadow hover:bg-gray-100 transition w-full max-w-xs mx-auto">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/150px-Google_%22G%22_logo.svg.png" alt="Google" class="w-5 h-5" />
-                <span>Sign in with Google</span>
-              </button>
+              <div id="${googleId}, google-signin-wrapper">
+                <button id="google-signin" class="flex items-center justify-center gap-3 bg-white text-gray-700 px-6 py-3 rounded-lg shadow hover:bg-gray-100 transition w-full max-w-xs mx-auto">
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/150px-Google_%22G%22_logo.svg.png" alt="Google" class="w-5 h-5" />
+                  <span>Sign in with Google</span>
+                </button>
+              </div>
       </div>
     </div>
   `;
 
-  // Form toggle functionality
   const toggleForm = document.getElementById('toggle-form');
   const toggleFormText = document.getElementById('toggle-form-text');
   const loginForm = document.getElementById('login-form') as HTMLFormElement;
   const registerForm = document.getElementById('register-form') as HTMLFormElement;
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+  const googleButton = document.getElementById('google-signin')!;
+  const wrapper = document.getElementById('google-signin-wrapper')!;
 
   const togglePasswordVisibility = (fieldId: string, button?: HTMLElement) => {
   const passwordField = document.getElementById(fieldId) as HTMLInputElement;
@@ -117,7 +121,6 @@ export function renderLogin(appElement: HTMLElement) {
   const isPassword = passwordField.type === 'password';
   passwordField.type = isPassword ? 'text' : 'password';
 
-  // Visual feedback if button is provided
   if (button) {
     const svg = button.querySelector('svg');
     if (svg) {
@@ -132,22 +135,40 @@ export function renderLogin(appElement: HTMLElement) {
   if (toggleForm && loginForm && registerForm && toggleFormText) {
     toggleForm.addEventListener('click', (e) => {
       e.preventDefault();
+   /*    if (googleButton) {
+        googleButton.innerHTML = ''; // ✅ Clear any previous button
+        waitForGoogle(); // ✅ Wait for DOM + script, then render
+      } */
+
       if (loginForm.classList.contains('hidden')) {
-        // Show login, hide register
         loginForm.classList.remove('hidden');
         registerForm.classList.add('hidden');
+       /*  googleButton.removeAttribute('hidden');
+        googleButton.innerHTML = ''; // ✅ Clear old button
+        const newId = `google-signin-${Date.now()}`;
+        wrapper.innerHTML = `<div id="${newId}"></div>`; */
+        wrapper.hidden = false;
+        initGoogleSignIn();
         toggleFormText.textContent = 'Don\'t have an account? ';
         toggleForm.textContent = 'Register now';
       } else {
-        // Show register, hide login
         loginForm.classList.add('hidden');
         registerForm.classList.remove('hidden');
         toggleFormText.textContent = 'Already have an account? ';
         toggleForm.textContent = 'Login now';
+        wrapper.hidden = true;
+        wrapper.classList.add('hidden');
+         if (currentGoogleButtonId) {
+          const old = document.getElementById(currentGoogleButtonId);
+          if (old) old.remove();
+        }
+        currentGoogleButtonId = null;
+        googleButton.classList.add('hidden');
+        googleButton.innerHTML = ''; // ✅ Clear old button
+        resetGoogle(); // ✅ Reset Google button
       }
     });
 
-    // Back to login button
     const backToLogin = document.getElementById('back-to-login');
     if (backToLogin) {
       backToLogin.addEventListener('click', (e) => {
@@ -160,8 +181,6 @@ export function renderLogin(appElement: HTMLElement) {
     }
   }
 
-  // Login form submission
-  //const loginForm = document.getElementById('login-form');
   if (loginForm) {
     loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -177,22 +196,14 @@ export function renderLogin(appElement: HTMLElement) {
           window.location.href = 'https://localhost:8443/api/auth/42';
         });
       }
-      console.log('📅 Scheduling initGoogleSignIn in 500ms...');
-      waitForElement('#google-signin', () => {
-        console.log('✅ #google-signin found, initializing...');
-        setTimeout(initGoogleSignIn, 500); // Small delay for safety
-      });
-      
-      // Clear previous errors
+   
       errorElement.classList.add('hidden');
       errorElement.textContent = '';
-      
-      // Disable button during request
+
       submitButton.disabled = true;
       submitButton.textContent = 'Signing in...';
       
       try {
-        // Try real API first
         const response = await fetch(`${API_BASE_URL}/api/login`, {
           method: 'POST',
           headers: {
@@ -206,16 +217,13 @@ export function renderLogin(appElement: HTMLElement) {
         });
 
         const data = await response.json();
-//        console.log("in login, received data:", data);
-
         if (!response.ok || data.error) {
           throw new Error(data.error || 'Login failed');
-//          const errorData = await response.json();
-//          throw new Error(errorData.message || 'Login failed');
         }
        
        localStorage.setItem('authToken', data.token);
 	     localStorage.setItem('userId', data.id);
+       localStorage.setItem('authProvider', '42');
 
        const userAvatar = data.user?.avatar?.trim()
         ? data.user.avatar
@@ -240,8 +248,6 @@ export function renderLogin(appElement: HTMLElement) {
     });
   }
 
-  // Registration form submission
- // const registerForm = document.getElementById('register-form');
   if (registerForm) {
     registerForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -253,17 +259,15 @@ export function renderLogin(appElement: HTMLElement) {
       const errorElement = document.getElementById('register-error') as HTMLElement;
       const registerButton = document.getElementById('register-button') as HTMLButtonElement;
      
-      // Clear previous errors
       errorElement.classList.add('hidden');
       errorElement.textContent = '';
-      // Simple validation
       if (!nickname || !username || !email || !password) {
         errorElement.textContent = 'Please fill all fields';
         errorElement.classList.remove('hidden');
         return;
       }
+      const googleButton = document.getElementById('google-signin')?.classList.add('hidden');
 
-      // Disable button during request
       registerButton.disabled = true;
       registerButton.textContent = 'Registering...';
       
@@ -281,8 +285,6 @@ export function renderLogin(appElement: HTMLElement) {
             mode: 'cors',
         });
 
-
-//        console.log(response);
         if (!response.ok) {
           const errorData = await response.json();
           throw new Error(errorData.message || 'Registration failed');
@@ -313,9 +315,10 @@ export function renderLogin(appElement: HTMLElement) {
       }
     });
   }
-}// login button before here
+}
 
-function waitForGoogle() {
+
+export function waitForGoogle() {
   const googleButton = document.getElementById('google-signin');
   if (googleButton && typeof google !== 'undefined') {
     console.log('✅ #google-signin found and Google script loaded');
@@ -328,13 +331,55 @@ function waitForGoogle() {
 
 waitForGoogle();
 
-const waitForElement = (selector: string, callback: () => void) => {
-  const el = document.querySelector(selector);
-  if (el) {
-    callback();
-  } else {
-    setTimeout(() => waitForElement(selector, callback), 100);
+export let currentGoogleButtonId: string | null = null;
+export let googleInitialized = false;
+
+
+export function createGoogleButton() {
+  /* const wrapper = document.getElementById('google-signin-wrapper');
+  if (!wrapper) return;
+ */
+  // Remove any existing
+  if (currentGoogleButtonId) {
+    const old = document.getElementById(currentGoogleButtonId);
+    if (old) old.remove();
   }
+
+  // Create new
+  currentGoogleButtonId = `google-btn-${Date.now()}`;
+  const container = document.createElement('div');
+  container.id = currentGoogleButtonId;
+  container.style.display = 'inline-block';
+  wrapper.appendChild(container);
+
+  renderGoogleButton(container);
+}
+
+
+function renderGoogleButton(container: HTMLElement) {
+  // @ts-ignore
+  if (typeof google === 'undefined') {
+    console.error('❌ Google script not loaded');
+    return;
+  }
+
+  if (!googleInitialized) {
+    // @ts-ignore
+    google.accounts.id.initialize({
+      client_id: '142914619782-scgrlb1fklqo43g9b2901hemub6hg51h.apps.googleusercontent.com',
+      callback: handleGoogleCredentialResponse,
+    });
+    googleInitialized = true;
+    console.log('✅ Google initialized');
+  }
+
+  // @ts-ignore
+  google.accounts.id.renderButton(container, {
+    theme: 'outline',
+    size: 'large',
+    text: 'signin_with',
+    shape: 'rectangular',
+  });
 }
 
 export function initGoogleSignIn() {
@@ -349,13 +394,18 @@ export function initGoogleSignIn() {
     console.error('❌ Google script not loaded');
     return;
   }
+ if (!googleInitialized) {
+    // @ts-ignore
+    google.accounts.id.initialize({
+      client_id: '142914619782-scgrlb1fklqo43g9b2901hemub6hg51h.apps.googleusercontent.com',
+      callback: handleGoogleCredentialResponse,
+    });
+    googleInitialized = true;
+    console.log('✅ Google initialized');
+  }
 
-  // @ts-ignore
-  google.accounts.id.initialize({
-    client_id: '142914619782-scgrlb1fklqo43g9b2901hemub6hg51h.apps.googleusercontent.com',
-    callback: handleGoogleCredentialResponse,
-  });
-
+  // ✅ Always clear and re-render
+  googleButton.innerHTML = '';
   // @ts-ignore
   google.accounts.id.renderButton(googleButton, {
     theme: 'outline',
@@ -385,7 +435,8 @@ async function handleGoogleCredentialResponse(response: { credential: string }) 
 
     localStorage.setItem('authToken', data.token);
     localStorage.setItem('userId', data.id);
-    window.location.hash = 'play';
+    localStorage.setItem('authProvider', 'google');
+    window.location.hash = 'home';
     route();
   } catch (error) {
     console.error('❌ Google sign-in failed:', error);
@@ -393,68 +444,14 @@ async function handleGoogleCredentialResponse(response: { credential: string }) 
   }
 }
 
-/* export async function handleGoogleCredentialResponse(response: { credential: string }) {
-  try {
-    const idToken = response.credential;
-
-    // Send token to your backend
-    const res = await fetch('https://localhost:8443/api/auth/google', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ token: idToken }),
-      credentials: 'include', // Important for cookies
-    });
-    console.log('📡 Response status:', res.status);
-    console.log('📡 Response headers:', [...res.headers.entries()]);
-
-    if (!res.ok) {
-      throw new Error(`Google login failed: ${res.statusText}`);
-    }
-
-    const data = await res.json();
-
-    // Store your app's tokens
-    localStorage.setItem('authToken', data.authToken);
-    localStorage.setItem('userId', data.userId);
-
-    // Redirect to dashboard
-    window.location.hash = 'play';
-    route(); // Your routing function
-  } catch (error) {
-    console.error('Google sign-in error:', error);
-    alert('Google sign-in failed. Please try again.');
-  }
-}
-
-export function initGoogleSignIn() {
+export const resetGoogle = () => {
   const googleButton = document.getElementById('google-signin');
-  if (!googleButton) {
-    console.error('❌ #google-signin not found in DOM');
-    return;
+  if (googleButton) {
+    googleButton.innerHTML = ''; // Clear any existing button
   }
-
-  // @ts-ignore - Google API is loaded globally
-  if (typeof google === 'undefined') {
-    console.error("Google Identity Services not loaded");
-    return;
+  const wrapper = document.getElementById('google-signin-wrapper');
+  if (wrapper) {
+    wrapper.innerHTML = '';
   }
-
-  // @ts-ignore
-  google.accounts.id.initialize({
-    client_id: '142914619782-scgrlb1fklqo43g9b2901hemub6hg51h.apps.googleusercontent.com', // ← Replace with your client ID
-    callback: handleGoogleCredentialResponse,
-    // auto_select: false,
-  });
-
-  // @ts-ignore
-  google.accounts.id.renderButton(googleButton, {
-    theme: 'outline',
-    size: 'large',
-    text: 'signin_with',
-    shape: 'rectangular',
-  });
-  console.log('✅ Google Sign-In button rendered');
-} */
-
+  googleInitialized = false;
+}
