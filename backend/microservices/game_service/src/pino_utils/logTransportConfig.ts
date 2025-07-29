@@ -9,7 +9,7 @@ export const getLogTransportConfig = () => {
       {
         target: resolve(__dirname, 'file-transport.js'),
         options: {
-          destination: join('/shared_logs', 'app.log'),
+          destination: join(LOG_FOLDER, LOG_FILE),
           mkdir: true
         }
       },
