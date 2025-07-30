@@ -10,7 +10,7 @@ ifeq ($(LOGS_ELASTIC_FOLDER),)
     $(error "LOGS_ELASTIC_FOLDER no defined. Check LOGS_ELASTIC_FOLDER  in .env .")
 endif
 ifeq ($(BACKUP_ELASTIC_LOGS),)
-    $(error "BACKUP_ELASTIC_LOGSno defined. Check BACKUP_ELASTIC_LOGS in .env.")
+    $(error "BACKUP_ELASTIC_LOGS no defined. Check BACKUP_ELASTIC_LOGS in .env.")
 endif
 ifeq ($(BACKUP_ELASTIC_LOGS),)
     $(error "BACKUP_ELASTIC_LOGS no defined. Check BACKUP_ELASTIC_LOGS  in .env .")
