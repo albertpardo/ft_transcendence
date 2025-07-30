@@ -15,6 +15,7 @@ async function userRoutes(fastify, options) {
     fastify.get('/profile', userController.getProfile);
     fastify.put('/profile', userController.updateProfile);
     fastify.delete('/profile', userController.deleteProfile);
+    fastify.post("/api/user/upsert-google", userController.upsertGoogle);
     fastify.get('/health', async (req, reply) => {
         return { status: 'ok', time: new Date().toISOString() };
     });

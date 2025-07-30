@@ -7,7 +7,13 @@ import getRawBody from 'raw-body';
 import { Readable } from 'stream';
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { Buffer } from 'buffer';
+import { OAuth2Client } from "google-auth-library";
+import fetch from "node-fetch";
+import jwt from "jsonwebtoken";
+require('dotenv').config(); // load environment variable
 
+// const CLIENT_ID = "142914619782-scgrlb1fklqo43g9b2901hemub6hg51h.apps.googleusercontent.com";
+const client = new OAuth2Client(process.env.CLIENT_ID);
 
 const userManagementUrl = process.env.USER_MANAGEMENT_URL || 'http://user_management:9001';
 console.log('🚀 USER_MANAGEMENT_URL:', userManagementUrl);
@@ -15,10 +21,9 @@ if (!userManagementUrl) {
     throw new Error('USER_MANAGEMENT_URL environment variable is not set');
 }
 
-
-
 interface OnRequestFastifyRequest extends FastifyRequest {
     method: string;
+    url: string;
     headers: { 
         origin?: string;
         [key: string]: any;
@@ -26,35 +31,55 @@ interface OnRequestFastifyRequest extends FastifyRequest {
 }
 
 
-// Register cookie plugin 
-
-
 export default fp(async function (fastify: FastifyInstance): Promise<void> {
-    fastify.register(fastifyCookie, {
+/*     fastify.register(fastifyCookie, {
         secret: process.env.COOKIE_SECRET || 'supersecret', // optional for signed cookies
-    });
-    fastify.addHook('onRequest', async (req: OnRequestFastifyRequest, reply: FastifyReply) => {
-        const allowedOrigin = process.env.API_FRONTEND_URL || 'https://frontend-7nt4.onrender.com';
-        if (req.headers.origin === allowedOrigin) {
+    }); */
+
+    fastify.addHook('onRequest', async (request: OnRequestFastifyRequest, reply: FastifyReply) => {
+      fastify.log.info(`🌐 onRequest: ${request.method} ${request.url}`);
+
+      reply.header(
+        "Content-Security-Policy",
+        `
+          default-src 'self';
+          script-src 'self' https://accounts.google.com https://cdnjs.cloudflare.com;
+          frame-src 'self' https://accounts.google.com;
+          img-src 'self' https://lh3.googleusercontent.com https://i.pravatar.cc;
+          connect-src 'self' https://localhost:8443 https://play.google.com;
+        `
+          .replace(/\s+/g, " ")
+          .trim()
+      );
+      const allowedOrigin = process.env.API_FRONTEND_URL || 'https://frontend-7nt4.onrender.com';
+        if (request.headers.origin === allowedOrigin) {
             reply.header('Access-Control-Allow-Origin', allowedOrigin);
             reply.header('Access-Control-Allow-Credentials', 'true');
             reply.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
             reply.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
               //  reply.header('Access-Control-Allow-Origin', req.headers.origin || '*');
         }
-        if (req.method === 'OPTIONS') {
-            reply.code(200).send();
+        if (request.method === 'OPTIONS') {
+          fastify.log.info(`🔥 CORS Preflight: ${request.headers.origin} → ${request.url}`);
+          reply
+            .header('Access-Control-Allow-Origin', request.headers.origin || '*')
+            .header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS')
+            .header('Access-Control-Allow-Headers', 'Content-Type, Authorization, use-me-to-authorize')
+            .header('Access-Control-Allow-Credentials', 'true')
+            .code(204)
+            .send();
             return;
-        }
-    });
-
+          }
+      }),
     
-    fastify.get('/health', async (req: FastifyRequest, reply: FastifyReply): Promise<{ status: string }> => {
+
+
+    fastify.get('/health', async (request: FastifyRequest, reply: FastifyReply): Promise<{ status: string }> => {
         return { status: 'ok' };
     });
     
 
-fastify.post('/api/login', async (req: FastifyRequest<{ Body: { username: string; password: string } }>, reply: FastifyReply) => {
+fastify.post('/api/login', async (request: FastifyRequest<{ Body: { username: string; password: string } }>, reply: FastifyReply) => {
   try {
     const res = await fetch(`${userManagementUrl}/api/user/login`, {
       method: 'POST',
@@ -62,7 +87,7 @@ fastify.post('/api/login', async (req: FastifyRequest<{ Body: { username: string
         'content-type': 'application/json',
         'Accept-Encoding': 'identity',
       },
-      body: JSON.stringify(req.body),
+      body: JSON.stringify(request.body),
     });
 
     const encoding = res.headers.get('content-encoding');
@@ -186,11 +211,22 @@ fastify.post('/api/login', async (req: FastifyRequest<{ Body: { username: string
   }
 });
     
+    interface PublicNicknameRequest extends FastifyRequest {}
+    interface PublicNicknameReply extends FastifyReply {}
+
     fastify.register(fastifyHttpProxy, {
-        upstream: userManagementUrl,
-        prefix: '/api/public/nickname',
-        rewritePrefix: '/api/user/public/nickname',
-        http2: false,
+      upstream: userManagementUrl,
+      prefix: '/api/public/nickname',
+      rewritePrefix: '/api/user/public/nickname',
+      http2: false,
+      preHandler: (
+        req: PublicNicknameRequest,
+        reply: PublicNicknameReply,
+        done: (err?: Error) => void
+      ): void => {
+        // Custom logic before proxying the request
+        done();
+      }
     });
 
 
@@ -205,13 +241,6 @@ fastify.post('/api/login', async (req: FastifyRequest<{ Body: { username: string
             reply: FastifyReply
         ): Promise<void> => {
             if (req.method === 'OPTIONS') {
-                reply
-                    .header('Access-Control-Allow-Origin', req.headers.origin || '*')
-                    .header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS')
-                    .header('Access-Control-Allow-Headers', 'Content-Type, Authorization, use-me-to-authorize')
-                    .header('Access-Control-Allow-Credentials', 'true')
-                    .code(204)
-                    .send();
                 return;
             }
             console.log('🧪 req.url:', req.url);
@@ -382,9 +411,20 @@ fastify.post('/api/login', async (req: FastifyRequest<{ Body: { username: string
               }
               console.log('ℹ️ Payload is unknown type, returning as is');
               return payload;
-            } catch (e) {
-              console.error('🛑 Error in onSend:', e);
-              return payload;
+            } catch (err) {
+              fastify.log.error('Google auth error:', err);
+                if (err && typeof err === 'object' && 'stack' in err) {
+                    fastify.log.error('Full error stack:', (err as { stack?: string }).stack);
+                }
+                if (err && typeof err === 'object' && 'message' in err && typeof (err as any).message === 'string' && (err as any).message.includes('Invalid ID token')) {
+                  return reply.status(400).send({ error: 'Invalid Google token' });
+                }
+                return reply.status(500).send({
+                 error: 'Authentication failed',
+                 detail: typeof err === 'object' && err !== null && 'message' in err && typeof (err as any).message === 'string'
+                   ? (err as any).message
+                   : 'Unknown error',
+               });
             }
         }
 

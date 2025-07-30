@@ -3,21 +3,30 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 require('dotenv').config({ path: __dirname + '/../.env' }); 
 const Fastify = require('fastify');
+import googleAuthPlugin from "./services/google";
 const http = require('http');
-
 const fastifyJWT = require('@fastify/jwt');
-
 const { jwt, authHook } = require('./plugins/jwt');
 const fastifyRateLimit = require('@fastify/rate-limit');
 const fastifyCors = require('@fastify/cors');
 const { tlsConfig } = require('./config/tls')
 // const proxyPlugin = require('@fastify/http-proxy');
 const proxyPlugin = require('./plugins/proxy');
-
+import * as fs from "fs";
+import * as path from "path";
+import fastifyCookie from "@fastify/cookie";
+delete require.cache[require.resolve("./middlewares/auth")];
 const { rateLimitPlugin } = require('./plugins/rateLimit');
 const exampleRoutes = require('./routes/example');
-
 const isDev = process.env.NODE_ENV === 'development';
+
+if (!tlsConfig.key || !tlsConfig.cert) {
+  console.error("❌ TLS config is missing key or cert");
+}
+
+if (typeof tlsConfig.key !== "string" || typeof tlsConfig.cert !== "string") {
+  console.error("❌ TLS key or cert is not a string");
+}
 
 const server = isDev
     ? Fastify({
@@ -124,12 +133,13 @@ async function registerPlugin() {
             if (!origin) return cb(null, true);
 
             const allowedOrigins = new Set([
-                'https://frontend-7nt4.onrender.com',
-                'https://localhost:3000',
-                'http://localhost:3000',
-                'https://127.0.0.1:3000',
-                'http://127.0.0.1:3000',
-                '*',
+              "https://frontend-7nt4.onrender.com",
+              "https://localhost:3000",
+              "http://localhost:3000",
+              "https://127.0.0.1:3000",
+              "http://127.0.0.1:3000",
+              "*",
+              "https://frontend-7nt4.onrender.com",
             ]);
             if (allowedOrigins.has(origin)) {
                 cb(null, true);
@@ -152,8 +162,14 @@ async function registerPlugin() {
     })
     //JWT middleware 
     await server.register(jwt)
+    await server.register(fastifyCookie, {
+      secret:
+        process.env.COOKIE_SECRET || "super-secret-key-for-signing-cookies",
+      parseOptions: {},
+    });
     await server.register(rateLimitPlugin)
     await server.register(authHook)
+    await server.register(googleAuthPlugin);
     await server.register(proxyPlugin)
 }
 

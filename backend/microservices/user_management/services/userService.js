@@ -148,3 +148,69 @@ exports.deleteProfile = async (userId) => {
     await db.deleteUser(userId);
     return { success: true };
 }
+
+exports.upsertGoogleUser = async (email, name, picture, googleId) => {
+  console.log("🔍 [userService] upsertGoogleUser called with:", {
+    email,
+    googleId,
+    name,
+    picture,
+  });
+
+  let user = db.getUserByEmail(email) || db.getUserByGoogleId(googleId);
+
+  if (!user) {
+    console.log("🆕 [userService] Creating new user");
+    const username =
+      email.split("@")[0].replace(/[^a-zA-Z0-9]/g, "") +
+      Math.floor(Math.random() * 1000);
+    const localid = makeid(64);
+    const firstName = name?.split(" ")[0] || "User";
+    const lastName = name?.split(" ").slice(1).join(" ") || "Anonymous";
+    const nickname = name?.trim() || firstName;
+
+    try {
+      user = db.createUser({
+        id: localid,
+        email,
+        username,
+        firstName,
+        lastName,
+        avatar: picture,
+        googleId,
+        status: "online",
+        nickname: nickname,
+      });
+      console.log("✅ [userService] Created user:", user);
+    } catch (err) {
+      console.error("❌ [userService] createUser failed:", err.message);
+      console.error("❌ [userService] Full error:", err.stack);
+      throw err;
+    }
+  } else {
+    console.log("🔄 [userService] User found:", user.username);
+    const updates = {};
+    if (!user.avatar) updates.avatar = picture;
+    if (!user.firstName) updates.firstName = name?.split(" ")[0] || "User";
+    if (!user.nickname && name) updates.nickname = name.trim();
+    if (Object.keys(updates).length > 0) {
+      try {
+        db.updateUser(user.id, updates);
+        console.log("✅ [userService] Updated user:", user.username);
+      } catch (err) {
+        console.error("❌ [userService] updateUser failed:", err.message);
+        throw err;
+      }
+    }
+  }
+
+  return {
+    id: user.id,
+    username: user.username,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    avatar: user.avatar,
+    email: user.email,
+    nickname: user.nickname || user.firstName || "Player",
+  };
+};

@@ -10,8 +10,6 @@ COPY package*.json ./
 
 RUN npm install
 
-# RUN npm install canvas-confetti
-
 COPY . .
 
 

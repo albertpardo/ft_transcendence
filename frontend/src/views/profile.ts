@@ -1,14 +1,21 @@
-export async function renderProfileContent(el: HTMLElement, bu: HTMLElement, gArea: HTMLElement, gWin: HTMLElement) {
-  /* bu.hidden = true;
-  gArea.hidden = true;
-  gWin.hidden = true; */
-  bu.classList.add('hidden');
-  gArea.classList.add('hidden');
-  gWin.classList.add('hidden');
-  const userId = localStorage.getItem('userId') || sessionStorage.getItem('userId');
+import { googleInitialized } from "./login";
 
-  const authToken: string = localStorage.getItem('authToken') || sessionStorage.getItem('authToken') || "";
+export async function renderProfileContent(
+  el: HTMLElement,
+  bu: HTMLElement,
+  gArea: HTMLElement,
+  gWin: HTMLElement
+) {
+  bu.classList.add("hidden");
+  gArea.classList.add("hidden");
+  gWin.classList.add("hidden");
+  const userId =
+    localStorage.getItem("userId") || sessionStorage.getItem("userId");
 
+  const authToken: string =
+    localStorage.getItem("authToken") ||
+    sessionStorage.getItem("authToken") ||
+    "";
 
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -16,53 +23,54 @@ export async function renderProfileContent(el: HTMLElement, bu: HTMLElement, gAr
     el.innerHTML = `<p class="text-red-500">You're not logged in. Please log in again.</p>`;
     return;
   }
-//debugg block  start
-function simpleJwtDecode(token: string) {
-  try {
-    const base64Url = token.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const jsonPayload = decodeURIComponent(atob(base64).split('').map(c =>
-      '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
-    ).join(''));
-    return JSON.parse(jsonPayload);
-  } catch {
-    return null;
+  //debugg block  start
+  function simpleJwtDecode(token: string) {
+    try {
+      const base64Url = token.split(".")[1];
+      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+      const jsonPayload = decodeURIComponent(
+        atob(base64)
+          .split("")
+          .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+          .join("")
+      );
+      return JSON.parse(jsonPayload);
+    } catch {
+      return null;
+    }
   }
-}
 
-// Usage:
-const decoded = simpleJwtDecode(authToken);
-if (!decoded) {
-  el.innerHTML = `<p class="text-red-500">Invalid token. Please log in again.</p>`;
-  return;
-}
-console.log("✅ Decoded token:", decoded);
-//debugg block end
+  // Usage:
+  const decoded = simpleJwtDecode(authToken);
+  if (!decoded) {
+    el.innerHTML = `<p class="text-red-500">Invalid token. Please log in again.</p>`;
+    return;
+  }
+  console.log("✅ Decoded token:", decoded);
+  //debugg block end
   let userData;
-  const authstringheader : string = "Bearer " + authToken;
+  const authstringheader: string = "Bearer " + authToken;
   try {
     const res = await fetch(`${API_BASE_URL}/api/profile`, {
-      method: 'GET',
+      method: "GET",
       headers: {
-        "Authorization": authstringheader,
+        Authorization: authstringheader,
         "use-me-to-authorize": authstringheader,
         "Content-Type": "application/json",
       },
-      credentials: 'include',
-      mode: 'cors',
+      credentials: "include",
+      mode: "cors",
     });
-
 
     if (!res.ok) {
       const text = await res.text();
       throw new Error(`Failed to fetch user data: ${res.status} ${text}`);
     }
-    console.log('Profile fetch status:', res.status);
-    console.log('Profile fetch headers:', [...res.headers.entries()]);
+    console.log("Profile fetch status:", res.status);
+    console.log("Profile fetch headers:", [...res.headers.entries()]);
     userData = await res.json();
 
-    console.log('🎸🎸🎸Received user on login:', userData);
-
+    console.log("🎸🎸🎸Received user on login:", userData);
   } catch (err) {
     console.error(err);
     el.innerHTML = `<p class="text-red-500">Error loading profile. Please try again later.</p>`;
@@ -74,14 +82,18 @@ console.log("✅ Decoded token:", decoded);
   let memberSince = "Member since: ";
   if (createAt) {
     const dateOfRegister = new Date(createAt);
-    memberSince = `Member since: ${dateOfRegister.toLocaleDateString('en-US', {
-      month: 'long',
-      day: 'numeric',
-      year: 'numeric'
+    memberSince = `Member since: ${dateOfRegister.toLocaleDateString("en-US", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
     })}`;
   }
 
-  const passwordDots = '••••••••';
+  const authProvider = localStorage.getItem("authProvider");
+
+  const isGoogleUser = authProvider === "google";
+
+  const passwordDots = "••••••••";
   el.innerHTML = `
     <div class="w-full max-w-6xl p-10 bg-gray-900 rounded-lg shadow-md mx-auto my-8">
       <h1 class="text-4xl font-bold mb-10 text-center">Your Profile</h1>
@@ -89,13 +101,24 @@ console.log("✅ Decoded token:", decoded);
       <div class="flex flex-col md:flex-row gap-12">
         <div class="md:w-1/3 flex flex-col items-center space-y-6">
           <div class="bg-gray-800 p-6 rounded-lg w-full flex flex-col items-center">
-            <img id="avatar-preview" src="${avatar || '/assets/images/default-avatar.png'}"
+            <img id="avatar-preview" src="${
+              avatar || "/assets/images/default-avatar.png"
+            }"
                  alt="Profile Avatar" class="w-40 h-40 rounded-full border-4 border-blue-600 mb-6">
             <h2 id="display-username" class="text-3xl font-bold mt-2">${username}</h2>
             <p class="text-gray-400 text-lg mt-2">@${nickname}</p>
             <p class="text-gray-300 mt-4 text-center">${memberSince}</p>
-            <button id="edit-btn"
-                    class="mt-6 px-4 py-2 bg-blue-500 text-white text-base rounded-lg hover:bg-cyan-600 transition-colors">Edit</button>
+            ${
+              isGoogleUser
+                ? `
+              <p class="text-red-500 mt-4 text-center">Signed in with Google. <br>Profile editing is disabled.</p>
+            `
+                : `
+              <button id="edit-btn" class="mt-6 px-4 py-2 bg-blue-500 text-white text-base rounded-lg hover:bg-cyan-600 transition-colors">
+                Edit
+              </button>
+            `
+            }
           </div>
         </div>
 
@@ -208,49 +231,78 @@ console.log("✅ Decoded token:", decoded);
     return;
   }
   const editBtn = document.getElementById("edit-btn");
-  
+
   const inputs = form.querySelectorAll("input");
   const saveBtn = document.getElementById("save-btn") as HTMLButtonElement;
   const deleteBtn = document.getElementById("delete-btn") as HTMLButtonElement;
-  const avatarInput = document.getElementById("form-avatar") as HTMLInputElement;
-  const avatarPreview = document.getElementById("avatar-preview") as HTMLImageElement;
-  const displayUsername = document.getElementById("display-username") as HTMLHeadingElement;
+  const avatarInput = document.getElementById(
+    "form-avatar"
+  ) as HTMLInputElement;
+  const avatarPreview = document.getElementById(
+    "avatar-preview"
+  ) as HTMLImageElement;
+  const displayUsername = document.getElementById(
+    "display-username"
+  ) as HTMLHeadingElement;
 
   const deleteModal = document.getElementById("delete-modal") as HTMLDivElement;
-  const cancelDeleteBtn = document.getElementById("cancel-delete") as HTMLButtonElement;
-  const confirmDeleteBtn = document.getElementById("confirm-delete") as HTMLButtonElement;
+  const cancelDeleteBtn = document.getElementById(
+    "cancel-delete"
+  ) as HTMLButtonElement;
+  const confirmDeleteBtn = document.getElementById(
+    "confirm-delete"
+  ) as HTMLButtonElement;
 
   const saveModal = document.getElementById("save-modal") as HTMLDivElement;
-  const cancelSaveBtn = document.getElementById("cancel-save") as HTMLButtonElement;
-  const confirmSaveBtn = document.getElementById("confirm-save") as HTMLButtonElement;
-  const passwordToggle = document.getElementById('password-toggle') as HTMLButtonElement;
-  const passwordInput = document.getElementById('form-password') as HTMLInputElement;
-  const openEye = document.getElementById('open-eye') as HTMLImageElement;
-  const closedEye = document.getElementById('closed-eye') as HTMLImageElement;
+  const cancelSaveBtn = document.getElementById(
+    "cancel-save"
+  ) as HTMLButtonElement;
+  const confirmSaveBtn = document.getElementById(
+    "confirm-save"
+  ) as HTMLButtonElement;
+  const passwordToggle = document.getElementById(
+    "password-toggle"
+  ) as HTMLButtonElement;
+  const passwordInput = document.getElementById(
+    "form-password"
+  ) as HTMLInputElement;
+  const openEye = document.getElementById("open-eye") as HTMLImageElement;
+  const closedEye = document.getElementById("closed-eye") as HTMLImageElement;
 
   if (
-    !editBtn || !saveBtn || !deleteBtn || !avatarInput || !avatarPreview || !displayUsername ||
-    !deleteModal || !cancelDeleteBtn || !confirmDeleteBtn ||
-    !saveModal || !cancelSaveBtn || !confirmSaveBtn ||
-    !passwordInput || !passwordToggle || !openEye || !closedEye
+    !editBtn ||
+    !saveBtn ||
+    !deleteBtn ||
+    !avatarInput ||
+    !avatarPreview ||
+    !displayUsername ||
+    !deleteModal ||
+    !cancelDeleteBtn ||
+    !confirmDeleteBtn ||
+    !saveModal ||
+    !cancelSaveBtn ||
+    !confirmSaveBtn ||
+    !passwordInput ||
+    !passwordToggle ||
+    !openEye ||
+    !closedEye
   ) {
     console.error("❌ Missing DOM element(s) in profile page.");
     return; // corrected
   }
 
-
   if (passwordInput && passwordToggle && openEye && closedEye) {
-    passwordToggle.addEventListener('click', () => {
-      const isPassword = passwordInput.type === 'password';
-      passwordInput.type = isPassword ? 'text' : 'password';
-      
+    passwordToggle.addEventListener("click", () => {
+      const isPassword = passwordInput.type === "password";
+      passwordInput.type = isPassword ? "text" : "password";
+
       // Toggle eye icons
       if (isPassword) {
-        openEye.classList.add('hidden');
-        closedEye.classList.remove('hidden');
+        openEye.classList.add("hidden");
+        closedEye.classList.remove("hidden");
       } else {
-        openEye.classList.remove('hidden');
-        closedEye.classList.add('hidden');
+        openEye.classList.remove("hidden");
+        closedEye.classList.add("hidden");
       }
     });
   }
@@ -258,25 +310,25 @@ console.log("✅ Decoded token:", decoded);
   editBtn.addEventListener("click", () => {
     inputs.forEach((input) => {
       input.disabled = false;
-      
+
       // Special handling for password field
-      if (input.id === 'form-password') {
-        const isDummy = input.getAttribute('data-is-dummy') === 'true';
-        
+      if (input.id === "form-password") {
+        const isDummy = input.getAttribute("data-is-dummy") === "true";
+
         if (isDummy) {
           // Clear the dummy  s when editing
-          input.value = '';
-          input.removeAttribute('readonly');
-          input.setAttribute('placeholder', 'Enter new password');
-          input.removeAttribute('data-is-dummy');
+          input.value = "";
+          input.removeAttribute("readonly");
+          input.setAttribute("placeholder", "Enter new password");
+          input.removeAttribute("data-is-dummy");
         }
-        
+
         if (input.type !== "file") input.select();
       } else {
         if (input.type !== "file") input.select();
       }
     });
-    
+
     saveBtn.disabled = false;
     deleteBtn.disabled = false;
   });
@@ -304,67 +356,78 @@ console.log("✅ Decoded token:", decoded);
   });
 
   confirmSaveBtn.addEventListener("click", async () => {
-    const usernameInput = document.getElementById("form-username") as HTMLInputElement;
-    const nicknameInput = document.getElementById("form-nickname") as HTMLInputElement;
-    const emailInput = document.getElementById("form-email") as HTMLInputElement;
-    const passwordInput = document.getElementById("form-password") as HTMLInputElement;
+    const usernameInput = document.getElementById(
+      "form-username"
+    ) as HTMLInputElement;
+    const nicknameInput = document.getElementById(
+      "form-nickname"
+    ) as HTMLInputElement;
+    const emailInput = document.getElementById(
+      "form-email"
+    ) as HTMLInputElement;
+    const passwordInput = document.getElementById(
+      "form-password"
+    ) as HTMLInputElement;
 
     const updatedData: {
       username: string;
       nickname: string;
       email: string;
       avatar: string;
-      password?: string; 
-     } = {
+      password?: string;
+    } = {
       username: usernameInput.value,
       nickname: nicknameInput.value,
       email: emailInput.value,
-      avatar: avatarPreview.src
+      avatar: avatarPreview.src,
     };
 
-    if (passwordInput.value.trim() !== "" && !passwordInput.hasAttribute('data-is-dummy')) {
+    if (
+      passwordInput.value.trim() !== "" &&
+      !passwordInput.hasAttribute("data-is-dummy")
+    ) {
       updatedData.password = passwordInput.value;
     }
 
     try {
       const response = await fetch(`${API_BASE_URL}/api/profile`, {
         method: "PUT",
-        headers: { 
-          "Authorization": `Bearer ${authToken}`,
+        headers: {
+          Authorization: `Bearer ${authToken}`,
           "Content-Type": "application/json",
-         
         },
-        credentials: 'include',
-        body: JSON.stringify(updatedData)
+        credentials: "include",
+        body: JSON.stringify(updatedData),
       });
 
       if (response.ok) {
         displayUsername.textContent = usernameInput.value;
         const nicknameDisplay = displayUsername.nextElementSibling;
-        if (nicknameDisplay) nicknameDisplay.textContent = `@${nicknameInput.value}`;
+        if (nicknameDisplay)
+          nicknameDisplay.textContent = `@${nicknameInput.value}`;
         const successAlert = document.getElementById("success-alert")!;
         successAlert.classList.remove("hidden");
         setTimeout(() => {
           successAlert.classList.remove("opacity-0");
         }, 10); // Slight delay to allow transition
-        
+
         // Auto-hide after 4 seconds
         setTimeout(() => {
           successAlert.classList.add("opacity-0");
           setTimeout(() => successAlert.classList.add("hidden"), 500); // Wait for fade-out
         }, 4000);
-        
+
         //not sure:
-        passwordInput.type = 'password';
+        passwordInput.type = "password";
         passwordInput.value = passwordDots;
-        passwordInput.setAttribute('readonly', 'true');
-        passwordInput.setAttribute('data-is-dummy', 'true');
-        passwordInput.removeAttribute('placeholder');
-        
+        passwordInput.setAttribute("readonly", "true");
+        passwordInput.setAttribute("data-is-dummy", "true");
+        passwordInput.removeAttribute("placeholder");
+
         // Reset eye icons to open state
         if (openEye && closedEye) {
-          openEye.classList.remove('hidden');
-          closedEye.classList.add('hidden');
+          openEye.classList.remove("hidden");
+          closedEye.classList.add("hidden");
         }
 
         inputs.forEach((input) => (input.disabled = true));
@@ -396,11 +459,11 @@ console.log("✅ Decoded token:", decoded);
     try {
       const response = await fetch(`${API_BASE_URL}/api/profile`, {
         headers: {
-          "Authorization": `Bearer ${authToken}`,
-          'Accept-Encoding': 'identity',
+          Authorization: `Bearer ${authToken}`,
+          "Accept-Encoding": "identity",
         },
         method: "DELETE",
-        credentials: 'include'
+        credentials: "include",
       });
 
       if (response.ok) {
@@ -416,10 +479,10 @@ console.log("✅ Decoded token:", decoded);
           setTimeout(() => successDelete.classList.add("hidden"), 500); // Wait for fade-out
         }, 4000);
         deleteModal.classList.add("hidden");
-        localStorage.removeItem('userId');
-        localStorage.removeItem('authToken');
-        sessionStorage.removeItem('userId');
-        sessionStorage.removeItem('authToken');
+        localStorage.removeItem("userId");
+        localStorage.removeItem("authToken");
+        sessionStorage.removeItem("userId");
+        sessionStorage.removeItem("authToken");
         setTimeout(() => {
           window.location.replace("/");
         }, 2000); // 2 segundos de espera antes de redirigir

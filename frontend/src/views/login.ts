@@ -1,4 +1,7 @@
+import { route } from "../router";
+
 export function renderLogin(appElement: HTMLElement) {
+  const googleId = `google-signin-${performance.now().toFixed(0)}`;
   appElement.innerHTML = `
     <div class="w-full min-h-screen bg-gray-900 flex items-center justify-center">
       <div class="w-full max-w-md p-8 space-y-8 bg-gray-800 rounded-lg shadow-md">
@@ -94,223 +97,435 @@ export function renderLogin(appElement: HTMLElement) {
             <a href="#" id="toggle-form" class="text-blue-400 hover:text-blue-300">Register now</a>
           </p>
         </div>
+          <div id="${googleId}, google-signin-wrapper">
+              <button id="google-signin" class="flex items-center justify-center gap-3 bg-white text-gray-700 px-6 py-3 rounded-lg shadow hover:bg-gray-100 transition w-full max-w-xs mx-auto">
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/150px-Google_%22G%22_logo.svg.png" alt="Google" class="w-5 h-5" />
+                  <span>Sign in with Google</span>
+              </button>
+          </div>
       </div>
     </div>
   `;
 
   // Form toggle functionality
-  const toggleForm = document.getElementById('toggle-form');
-  const toggleFormText = document.getElementById('toggle-form-text');
-  const loginForm = document.getElementById('login-form') as HTMLFormElement;
-  const registerForm = document.getElementById('register-form') as HTMLFormElement;
+  const toggleForm = document.getElementById("toggle-form");
+  const toggleFormText = document.getElementById("toggle-form-text");
+  const loginForm = document.getElementById("login-form") as HTMLFormElement;
+  const registerForm = document.getElementById(
+    "register-form"
+  ) as HTMLFormElement;
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+  const googleButton = document.getElementById("google-signin")!;
+  const wrapper = document.getElementById("google-signin-wrapper")!;
+
 
   const togglePasswordVisibility = (fieldId: string, button?: HTMLElement) => {
-  const passwordField = document.getElementById(fieldId) as HTMLInputElement;
-  if (!passwordField) return;
+    const passwordField = document.getElementById(fieldId) as HTMLInputElement;
+    if (!passwordField) return;
 
-  const isPassword = passwordField.type === 'password';
-  passwordField.type = isPassword ? 'text' : 'password';
+    const isPassword = passwordField.type === "password";
+    passwordField.type = isPassword ? "text" : "password";
 
-  // Visual feedback if button is provided
-  if (button) {
-    const svg = button.querySelector('svg');
-    if (svg) {
-      svg.querySelector('.eye-open')?.classList.toggle('hidden', !isPassword);
-      svg.querySelector('.eye-closed')?.classList.toggle('hidden', isPassword);
+    // Visual feedback if button is provided
+    if (button) {
+      const svg = button.querySelector("svg");
+      if (svg) {
+        svg.querySelector(".eye-open")?.classList.toggle("hidden", !isPassword);
+        svg
+          .querySelector(".eye-closed")
+          ?.classList.toggle("hidden", isPassword);
+      }
     }
-  }
-};
-(window as any).togglePasswordVisibility = togglePasswordVisibility;
-
+  };
+  (window as any).togglePasswordVisibility = togglePasswordVisibility;
 
   if (toggleForm && loginForm && registerForm && toggleFormText) {
-    toggleForm.addEventListener('click', (e) => {
+    toggleForm.addEventListener("click", (e) => {
       e.preventDefault();
-      if (loginForm.classList.contains('hidden')) {
+      if (loginForm.classList.contains("hidden")) {
         // Show login, hide register
-        loginForm.classList.remove('hidden');
-        registerForm.classList.add('hidden');
-        toggleFormText.textContent = 'Don\'t have an account? ';
-        toggleForm.textContent = 'Register now';
+        loginForm.classList.remove("hidden");
+        registerForm.classList.add("hidden");
+       
+        wrapper.hidden = false;
+        initGoogleSignIn();
+        toggleFormText.textContent = "Don't have an account? ";
+        toggleForm.textContent = "Register now";
       } else {
         // Show register, hide login
-        loginForm.classList.add('hidden');
-        registerForm.classList.remove('hidden');
-        toggleFormText.textContent = 'Already have an account? ';
-        toggleForm.textContent = 'Login now';
+        loginForm.classList.add("hidden");
+        registerForm.classList.remove("hidden");
+        toggleFormText.textContent = "Already have an account? ";
+        toggleForm.textContent = "Login now";
+        wrapper.hidden = true;
+        wrapper.classList.add("hidden");
+        if (currentGoogleButtonId) {
+          const old = document.getElementById(currentGoogleButtonId);
+          if (old) old.remove();
+        }
+        currentGoogleButtonId = null;
+        googleButton.classList.add("hidden");
+        googleButton.innerHTML = ""; // ✅ Clear old button
+        resetGoogle(); // ✅ Reset Google button
       }
     });
 
     // Back to login button
-    const backToLogin = document.getElementById('back-to-login');
+    const backToLogin = document.getElementById("back-to-login");
     if (backToLogin) {
-      backToLogin.addEventListener('click', (e) => {
+      backToLogin.addEventListener("click", (e) => {
         e.preventDefault();
-        loginForm.classList.remove('hidden');
-        registerForm.classList.add('hidden');
-        toggleFormText.textContent = 'Don\'t have an account? ';
-        toggleForm.textContent = 'Register now';
+        loginForm.classList.remove("hidden");
+        registerForm.classList.add("hidden");
+        toggleFormText.textContent = "Don't have an account? ";
+        toggleForm.textContent = "Register now";
       });
     }
   }
 
   // Login form submission
   if (loginForm) {
-    loginForm.addEventListener('submit', async (e) => {
+    loginForm.addEventListener("submit", async (e) => {
       e.preventDefault();
-      
-      const username = (document.getElementById('username') as HTMLInputElement).value;
-      const password = (document.getElementById('login-password') as HTMLInputElement).value;
-      const errorElement = document.getElementById('login-error') as HTMLElement;
-      const submitButton = document.getElementById('submit-button') as HTMLButtonElement;
-      console.log("okay, so we're trying to send username and passowrd:", username, password);
-      console.log("the object:", {username: username, password: password});
+
+      const username = (document.getElementById("username") as HTMLInputElement)
+        .value;
+      const password = (
+        document.getElementById("login-password") as HTMLInputElement
+      ).value;
+      const errorElement = document.getElementById(
+        "login-error"
+      ) as HTMLElement;
+      const submitButton = document.getElementById(
+        "submit-button"
+      ) as HTMLButtonElement;
+      console.log(
+        "okay, so we're trying to send username and passowrd:",
+        username,
+        password
+      );const loginBtn = document.getElementById("login-btn");
+
+      if (loginBtn) {
+        loginBtn.addEventListener("click", () => {
+          window.location.href = "https://localhost:8443/api/auth/42";
+        });
+      }
+      console.log("the object:", { username: username, password: password });
       // Clear previous errors
-      errorElement.classList.add('hidden');
-      errorElement.textContent = '';
-      
+      errorElement.classList.add("hidden");
+      errorElement.textContent = "";
+
       // Disable button during request
       submitButton.disabled = true;
-      submitButton.textContent = 'Signing in...';
-      
+      submitButton.textContent = "Signing in...";
+
       try {
         // Try real API first
         if (!API_BASE_URL) {
-          throw new Error('API base URL is not defined. Please set VITE_API_BASE_URL in your environment variables.');
+          throw new Error(
+            "API base URL is not defined. Please set VITE_API_BASE_URL in your environment variables."
+          );
         }
-        console.log('Sending login fetch to:', `${API_BASE_URL}/api/login`);
-       
+        console.log("Sending login fetch to:", `${API_BASE_URL}/api/login`);
+
         const response = await fetch(`${API_BASE_URL}/api/login`, {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json,application/html,text/html,*/*',
-            
+            "Content-Type": "application/json",
+            Accept: "application/json,application/html,text/html,*/*",
           },
           body: JSON.stringify({ username: username, password: password }),
-          credentials: 'include',
-          mode: 'cors',
+          credentials: "include",
+          mode: "cors",
         });
-        console.log('Login fetch response status:', response.status);
-        console.log('Login fetch response headers:', [...response.headers.entries()]);
+        console.log("Login fetch response status:", response.status);
+        console.log("Login fetch response headers:", [
+          ...response.headers.entries(),
+        ]);
 
         const contentType = response.headers.get("Content-Type") || "";
         if (!contentType.includes("application/json")) {
           const fallback = await response.text(); // .text() is safe now
           console.error("Received unexpected content type:", contentType);
-          throw new Error(`Expected JSON, got: ${contentType}, body: ${fallback}`);
+          throw new Error(
+            `Expected JSON, got: ${contentType}, body: ${fallback}`
+          );
         }
         let data = await response.json();
 
-       // console.log('**********Login response data:', data);
+        // console.log('**********Login response data:', data);
 
         if (!response.ok || data.error) {
-          throw new Error(data.error || 'Login failed');
+          throw new Error(data.error || "Login failed");
         }
-       // console.log('**********Storing auth token and user info');
-       localStorage.setItem('authToken', data.token);
-	     localStorage.setItem('userId', data.id);
+        // console.log('**********Storing auth token and user info');
+        localStorage.setItem("authToken", data.token);
+        localStorage.setItem("userId", data.id);
+        localStorage.setItem("authProvider", "42");
 
-       const userAvatar = data.user?.avatar?.trim()
-        ? data.user.avatar
-        : `https://i.pravatar.cc/150?u=${username}`;
-       localStorage.setItem('user', JSON.stringify({ 
+        const userAvatar = data.user?.avatar?.trim()
+          ? data.user.avatar
+          : `https://i.pravatar.cc/150?u=${username}`;
+        localStorage.setItem(
+          "user",
+          JSON.stringify({
             username: data.user?.username || username,
             nickname: data.user?.nickname || username,
 
-            avatar: data.user?.avatar || `https://i.pravatar.cc/150?u=${username}`
-        }));
-        window.location.hash = 'home';
-
-
+            avatar:
+              data.user?.avatar || `https://i.pravatar.cc/150?u=${username}`,
+          })
+        );
+        window.location.hash = "home";
       } catch (error) {
-        console.error('**********Login error caught:', error);
-        errorElement.textContent = error instanceof Error ? error.message : 'Login failed';
-        errorElement.classList.remove('hidden');
-       
+        console.error("**********Login error caught:", error);
+        errorElement.textContent =
+          error instanceof Error ? error.message : "Login failed";
+        errorElement.classList.remove("hidden");
       } finally {
         submitButton.disabled = false;
-        submitButton.textContent = 'Sign in';
+        submitButton.textContent = "Sign in";
       }
     });
   }
 
   // Registration form submission
   if (registerForm) {
-    registerForm.addEventListener('submit', async (e) => {
+    registerForm.addEventListener("submit", async (e) => {
       e.preventDefault();
-      
-      const nickname = (document.getElementById('reg-nickname') as HTMLInputElement).value;
-      const username = (document.getElementById('reg-username') as HTMLInputElement).value;
-      const email = (document.getElementById('reg-email') as HTMLInputElement).value;
-      const password = (document.getElementById('reg-password') as HTMLInputElement).value;
-      const errorElement = document.getElementById('register-error') as HTMLElement;
-      const registerButton = document.getElementById('register-button') as HTMLButtonElement;
-      
+
+      const nickname = (
+        document.getElementById("reg-nickname") as HTMLInputElement
+      ).value;
+      const username = (
+        document.getElementById("reg-username") as HTMLInputElement
+      ).value;
+      const email = (document.getElementById("reg-email") as HTMLInputElement)
+        .value;
+      const password = (
+        document.getElementById("reg-password") as HTMLInputElement
+      ).value;
+      const errorElement = document.getElementById(
+        "register-error"
+      ) as HTMLElement;
+      const registerButton = document.getElementById(
+        "register-button"
+      ) as HTMLButtonElement;
+
       // Clear previous errors
-      errorElement.classList.add('hidden');
-      errorElement.textContent = '';
-      
+      errorElement.classList.add("hidden");
+      errorElement.textContent = "";
+
       // Simple validation
       if (!nickname || !username || !email || !password) {
-        errorElement.textContent = 'Please fill all fields';
-        errorElement.classList.remove('hidden');
+        errorElement.textContent = "Please fill all fields";
+        errorElement.classList.remove("hidden");
         return;
       }
-
+      const googleButton = document
+        .getElementById("google-signin")
+        ?.classList.add("hidden");
       // Disable button during request
       registerButton.disabled = true;
-      registerButton.textContent = 'Registering...';
-      
+      registerButton.textContent = "Registering...";
+
       try {
         if (!API_BASE_URL) {
-          throw new Error('API base URL is not defined. Please set VITE_API_BASE_URL in your environment variables.');
+          throw new Error(
+            "API base URL is not defined. Please set VITE_API_BASE_URL in your environment variables."
+          );
         }
-        const response = await fetch(`${API_BASE_URL}/api/signup`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json,application/html,text/html,*/*',
-              
-             // 'Origin': 'https://127.0.0.1:3000/',
-            },
-            body: JSON.stringify({ nickname: nickname, username: username, email: email , password: password }), 
-            credentials: 'include',
-            mode: 'cors',
+        const response = await fetch(`${API_BASE_URL}/api/signup`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json,application/html,text/html,*/*",
+
+            // 'Origin': 'https://127.0.0.1:3000/',
+          },
+          body: JSON.stringify({
+            nickname: nickname,
+            username: username,
+            email: email,
+            password: password,
+          }),
+          credentials: "include",
+          mode: "cors",
         });
 
         if (!response.ok) {
           const errorData = await response.json();
-          throw new Error(errorData.message || 'Registration failed');
+          throw new Error(errorData.message || "Registration failed");
         }
         const data = await response.json();
 
-        errorElement.textContent = 'Registration successful! Please login.';
-        errorElement.classList.remove('hidden');
-        errorElement.classList.add('text-green-500');
+        errorElement.classList.add("text-green-500");
+        errorElement.textContent = "Registration successful! Please login.";
+        errorElement.classList.remove("hidden");
         // Switch back to login form
         if (loginForm && registerForm && toggleForm && toggleFormText) {
-          loginForm.classList.remove('hidden');
-          registerForm.classList.add('hidden');
-          toggleFormText.textContent = 'Already have an account? ';
-          toggleForm.textContent = 'Login now';
+          loginForm.classList.remove("hidden");
+          registerForm.classList.add("hidden");
+          toggleFormText.textContent = "Already have an account? ";
+          toggleForm.textContent = "Login now";
         }
         // Clear form
-        (document.getElementById('reg-nickname') as HTMLInputElement).value = '';
-        (document.getElementById('reg-username') as HTMLInputElement).value = '';
-        (document.getElementById('reg-email') as HTMLInputElement).value = '';
-        (document.getElementById('reg-password') as HTMLInputElement).value = '';
+        (document.getElementById("reg-nickname") as HTMLInputElement).value =
+          "";
+        (document.getElementById("reg-username") as HTMLInputElement).value =
+          "";
+        (document.getElementById("reg-email") as HTMLInputElement).value = "";
+        (document.getElementById("reg-password") as HTMLInputElement).value =
+          "";
       } catch (error) {
-        errorElement.textContent = error instanceof Error ? error.message : 'Registration failed';
-        errorElement.classList.remove('hidden');
+        errorElement.textContent =
+          error instanceof Error ? error.message : "Registration failed";
+        errorElement.classList.remove("hidden");
       } finally {
         registerButton.disabled = false;
-        registerButton.textContent = 'Register';
+        registerButton.textContent = "Register";
       }
-
-
     });
   }
 }
+
+export function waitForGoogle() {
+  const googleButton = document.getElementById("google-signin");
+  if (googleButton && typeof google !== "undefined") {
+    console.log("✅ #google-signin found and Google script loaded");
+    initGoogleSignIn();
+  } else {
+    console.log("⏳ Waiting for Google script or DOM...");
+    setTimeout(waitForGoogle, 100);
+  }
+}
+
+waitForGoogle();
+
+export let currentGoogleButtonId: string | null = null;
+export let googleInitialized = false;
+
+export function createGoogleButton() {
+   const wrapper = document.getElementById('google-signin-wrapper');
+  if (!wrapper) return;
+ 
+  // Remove any existing
+  if (currentGoogleButtonId) {
+    const old = document.getElementById(currentGoogleButtonId);
+    if (old) old.remove();
+  }
+
+  // Create new
+  currentGoogleButtonId = `google-btn-${Date.now()}`;
+  const container = document.createElement("div");
+  container.id = currentGoogleButtonId;
+  container.style.display = "inline-block";
+  wrapper.appendChild(container);
+
+  renderGoogleButton(container);
+}
+
+function renderGoogleButton(container: HTMLElement) {
+  // @ts-ignore
+  if (typeof google === "undefined") {
+    console.error("❌ Google script not loaded");
+    return;
+  }
+
+  if (!googleInitialized) {
+    // @ts-ignore
+    google.accounts.id.initialize({
+      client_id:
+        "142914619782-scgrlb1fklqo43g9b2901hemub6hg51h.apps.googleusercontent.com",
+      callback: handleGoogleCredentialResponse,
+    });
+    googleInitialized = true;
+    console.log("✅ Google initialized");
+  }
+
+  // @ts-ignore
+  google.accounts.id.renderButton(container, {
+    theme: "outline",
+    size: "large",
+    text: "signin_with",
+    shape: "rectangular",
+  });
+}
+
+export function initGoogleSignIn() {
+  const googleButton = document.getElementById("google-signin");
+  if (!googleButton) {
+    console.error("❌ #google-signin not found in DOM");
+    return;
+  }
+
+  // @ts-ignore - Google API is global
+  if (typeof google === "undefined") {
+    console.error("❌ Google script not loaded");
+    return;
+  }
+  if (!googleInitialized) {
+    // @ts-ignore
+    google.accounts.id.initialize({
+      client_id:
+        "142914619782-scgrlb1fklqo43g9b2901hemub6hg51h.apps.googleusercontent.com",
+      callback: handleGoogleCredentialResponse,
+    });
+    googleInitialized = true;
+    console.log("✅ Google initialized");
+  }
+
+  // ✅ Always clear and re-render
+  googleButton.innerHTML = "";
+  // @ts-ignore
+  google.accounts.id.renderButton(googleButton, {
+    theme: "outline",
+    size: "large",
+    text: "signin_with",
+    shape: "rectangular",
+  });
+
+  console.log("✅ Google Sign-In button rendered");
+}
+
+
+async function handleGoogleCredentialResponse(response: {
+  credential: string;
+}) {
+  console.log("🔐 Google token received:", response.credential);
+
+  try {
+    const res = await fetch("https://localhost:8443/api/auth/google", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token: response.credential }),
+      credentials: "include",
+    });
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    const data = await res.json();
+    console.log("✅ Login success:", data);
+
+    localStorage.setItem("authToken", data.token);
+    localStorage.setItem("userId", data.id);
+    localStorage.setItem("authProvider", "google");
+    window.location.hash = "home";
+    route();
+  } catch (error) {
+    console.error("❌ Google sign-in failed:", error);
+    alert("Google sign-in failed. Please try again.");
+  }
+}
+
+export const resetGoogle = () => {
+  const googleButton = document.getElementById("google-signin");
+  if (googleButton) {
+    googleButton.innerHTML = ""; // Clear any existing button
+  }
+  const wrapper = document.getElementById("google-signin-wrapper");
+  if (wrapper) {
+    wrapper.innerHTML = "";
+  }
+  googleInitialized = false;
+};

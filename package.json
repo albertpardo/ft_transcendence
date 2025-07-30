@@ -1,0 +1,6 @@
+{
+  "devDependencies": {
+    "@types/google.accounts": "^0.0.17",
+    "@types/node": "^24.1.0"
+  }
+}

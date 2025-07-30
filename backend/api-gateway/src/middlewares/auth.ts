@@ -19,9 +19,11 @@ export async function authMiddleware(req: FastifyRequest, reply: FastifyReply) {
     }
 
     // if requested URL is public, skip auth
-    const publicPaths = ['/api/signup', '/api/login', '/api/public', '/api/health'];
-    if (publicPaths.some(path => req.url?.startsWith(path))) return;
-    // if (publicPaths.some(path => req.url?.startsWitth('/health'))) return; // allow health check without auth
+    const publicPaths = ['/api/signup', '/api/login', '/api/public', '/api/health', '/api/auth/google', '/api/user/upsert-google'];
+    if (req.url && publicPaths.some((path) => req.url?.startsWith(path))) {
+      console.log(`🔓 Public path skipped: ${req.url}`);
+      return;
+    }
     if (req.url?.startsWith('/health')) return; // allow health check without auth
 
     try {

@@ -17,7 +17,7 @@ exports.signup = async (request, reply) => {
 
 
      if (result.error) {
-        return reply.code(400).type('application/json').send(result); // corrected
+        return reply.code(400).type('application/json').send(result);
     }
     reply.code(200).type('application/json').send(result);
 };
@@ -62,11 +62,7 @@ exports.updateProfile = async (request, reply) => {
     console.log('🌎 request.body:', request.body);
 
     const { username, nickname, email, password, avatar } = request.body;
-/*
-    if (username) {
-        return reply.code(400).send({ error: "Username cannot be modified." });
-    }
-*/
+
     const result = await userService.updateProfile(userId, {
         username,
         nickname,
@@ -76,10 +72,8 @@ exports.updateProfile = async (request, reply) => {
     });
 
 
-    // if (result.error) reply.code(400).send(result);
      if (result.error) return reply.code(400).type('application/json').send(result);
 
-    // reply.send({ message: "🏄 Profile updated successfully" });
     reply.type('application/json').send({ message: "🏄 Profile updated successfully" });
 
 }
@@ -90,10 +84,35 @@ exports.deleteProfile = async (request, reply) => {
 
     const result = await userService.deleteProfile(userId);
 
-
-    // if (result.error) reply.code(400).send(result);
     if (result.error) return reply.code(400).type('application/json').send(result);
 
-    // reply.send({ message: "🏊 Profile deleted successfully" });
     reply.type('application/json').send({ message: "🏊 Profile deleted successfully" });
 }
+
+exports.upsertGoogle = async (request, reply) => {
+  console.log("🔥 [userController] Received upsert request:", request.body);
+
+  const { email, name, picture, googleId } = request.body;
+
+  if (!email || !googleId) {
+    console.log("❌ [userController] Missing email or googleId:", {
+      email,
+      googleId,
+    });
+    return reply.code(400).send({ error: "Email and Google ID are required" });
+  }
+
+  try {
+    const result = await userService.upsertGoogleUser(
+      email,
+      name,
+      picture,
+      googleId
+    );
+    console.log("✅ [userController] Success:", result);
+    return reply.send(result);
+  } catch (err) {
+    console.error("💥 [userController] Failed to upsert user:", err);
+    return reply.code(500).send({ error: "User creation failed" });
+  }
+};
