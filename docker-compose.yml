@@ -116,6 +116,7 @@ services:
     ports:
       - "5601:5601"
     environment:
+      - ELASTIC_URL=${ELASTIC_URL}
       - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
       - KIBANA_US=${KIBANA_US}
       - KIBANA_PASSWORD=${KIBANA_PASSWORD}

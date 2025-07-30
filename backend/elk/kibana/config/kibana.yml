@@ -4,7 +4,7 @@ server.ssl.enabled: true
 server.ssl.certificate: config/certs/kibana/kibana.crt
 server.ssl.key: config/certs/kibana/kibana.key
 monitoring.ui.container.elasticsearch.enabled: true
-elasticsearch.hosts: ["https://elastic:9200"]
+elasticsearch.hosts: ["${ELASTIC_URL}"]
 elasticsearch.username: "${KIBANA_US}"
 elasticsearch.password: "${KIBANA_PASSWORD}"
 elasticsearch.ssl.certificateAuthorities: ["config/certs/ca/ca.crt"]
