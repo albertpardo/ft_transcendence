@@ -1,34 +1,69 @@
 import { googleInitialized } from "./login";
 export async function renderProfileContent(el: HTMLElement, bu: HTMLElement, gArea: HTMLElement, gWin: HTMLElement) {
-  bu.hidden = true;
+  /* bu.hidden = true;
   gArea.hidden = true;
-  gWin.hidden = true;
+  gWin.hidden = true; */
+  bu.classList.add('hidden');
+  gArea.classList.add('hidden');
+  gWin.classList.add('hidden');
   const userId = localStorage.getItem('userId') || sessionStorage.getItem('userId');
-  const authToken : string = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+
+  const authToken: string = localStorage.getItem('authToken') || sessionStorage.getItem('authToken') || "";
+
+
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   if (!authToken) {
     el.innerHTML = `<p class="text-red-500">You're not logged in. Please log in again.</p>`;
     return;
   }
+//debugg block  start
+function simpleJwtDecode(token: string) {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(atob(base64).split('').map(c =>
+      '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
+    ).join(''));
+    return JSON.parse(jsonPayload);
+  } catch {
+    return null;
+  }
+}
 
+// Usage:
+const decoded = simpleJwtDecode(authToken);
+if (!decoded) {
+  el.innerHTML = `<p class="text-red-500">Invalid token. Please log in again.</p>`;
+  return;
+}
+console.log("✅ Decoded token:", decoded);
+//debugg block end
   let userData;
   const authstringheader : string = "Bearer " + authToken;
   try {
     const res = await fetch(`${API_BASE_URL}/api/profile`, {
       method: 'GET',
       headers: {
-        "Use-me-to-authorize": authstringheader,
+        "Authorization": authstringheader,
+        "use-me-to-authorize": authstringheader,
         "Content-Type": "application/json",
       },
       credentials: 'include',
       mode: 'cors',
     });
 
-    if (!res.ok) throw new Error("Failed to fetch user data");
 
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`Failed to fetch user data: ${res.status} ${text}`);
+    }
+    console.log('Profile fetch status:', res.status);
+    console.log('Profile fetch headers:', [...res.headers.entries()]);
     userData = await res.json();
+
     console.log('🎸🎸🎸Received user on login:', userData);
+
   } catch (err) {
     console.error(err);
     el.innerHTML = `<p class="text-red-500">Error loading profile. Please try again later.</p>`;
@@ -58,7 +93,7 @@ export async function renderProfileContent(el: HTMLElement, bu: HTMLElement, gAr
       <div class="flex flex-col md:flex-row gap-12">
         <div class="md:w-1/3 flex flex-col items-center space-y-6">
           <div class="bg-gray-800 p-6 rounded-lg w-full flex flex-col items-center">
-            <img id="avatar-preview" src="${avatar || '/public/assets/images/default-avatar.png'}"
+            <img id="avatar-preview" src="${avatar || '/assets/images/default-avatar.png'}"
                  alt="Profile Avatar" class="w-40 h-40 rounded-full border-4 border-blue-600 mb-6">
             <h2 id="display-username" class="text-3xl font-bold mt-2">${username}</h2>
             <p class="text-gray-400 text-lg mt-2">@${nickname}</p>
@@ -135,7 +170,7 @@ export async function renderProfileContent(el: HTMLElement, bu: HTMLElement, gAr
     </div>
 
     <!-- Modal: Confirm Delete -->
-    <div id="delete-modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 hidden">
+    <div id="delete-modal" class="fixed inset-0 bg-black bg-opacity-75 items-center justify-center z-50 hidden">
       <div class="bg-gray-800 p-8 rounded-lg max-w-md w-full">
         <h3 class="text-xl font-bold text-white mb-4">Delete Account</h3>
         <p class="text-gray-300 mb-6">Are you sure you want to delete your account? This action cannot be undone.</p>
@@ -151,7 +186,7 @@ export async function renderProfileContent(el: HTMLElement, bu: HTMLElement, gAr
     </div>
 
     <!-- Modal: Confirm Save -->
-    <div id="save-modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 hidden">
+    <div id="save-modal" class="fixed inset-0 bg-black bg-opacity-75 items-center justify-center z-50 hidden">
       <div class="bg-gray-800 p-8 rounded-lg max-w-md w-full">
         <h3 class="text-xl font-bold text-white mb-4">Confirm Save</h3>
         <p class="text-gray-300 mb-6">Are you sure you want to save these changes?</p>
@@ -177,7 +212,12 @@ export async function renderProfileContent(el: HTMLElement, bu: HTMLElement, gAr
   `;
 
   const form = document.getElementById("profile-form") as HTMLFormElement;
-  const editBtn = document.getElementById("edit-btn")!;
+  if (!form) {
+    console.error("Profile form not found");
+    return;
+  }
+  const editBtn = document.getElementById("edit-btn");
+  
   const inputs = form.querySelectorAll("input");
   const saveBtn = document.getElementById("save-btn") as HTMLButtonElement;
   const deleteBtn = document.getElementById("delete-btn") as HTMLButtonElement;
@@ -192,10 +232,20 @@ export async function renderProfileContent(el: HTMLElement, bu: HTMLElement, gAr
   const saveModal = document.getElementById("save-modal") as HTMLDivElement;
   const cancelSaveBtn = document.getElementById("cancel-save") as HTMLButtonElement;
   const confirmSaveBtn = document.getElementById("confirm-save") as HTMLButtonElement;
-  const passwordToggle = document.getElementById('password-toggle');
+  const passwordToggle = document.getElementById('password-toggle') as HTMLButtonElement;
   const passwordInput = document.getElementById('form-password') as HTMLInputElement;
-  const openEye = document.getElementById('open-eye');
-  const closedEye = document.getElementById('closed-eye');
+  const openEye = document.getElementById('open-eye') as HTMLImageElement;
+  const closedEye = document.getElementById('closed-eye') as HTMLImageElement;
+
+  if (
+    !editBtn || !saveBtn || !deleteBtn || !avatarInput || !avatarPreview || !displayUsername ||
+    !deleteModal || !cancelDeleteBtn || !confirmDeleteBtn ||
+    !saveModal || !cancelSaveBtn || !confirmSaveBtn ||
+    !passwordInput || !passwordToggle || !openEye || !closedEye
+  ) {
+    console.error("❌ Missing DOM element(s) in profile page.");
+    return; // corrected
+  }
 
 
   if (passwordInput && passwordToggle && openEye && closedEye) {
@@ -254,10 +304,12 @@ export async function renderProfileContent(el: HTMLElement, bu: HTMLElement, gAr
   form.addEventListener("submit", (e) => {
     e.preventDefault();
     saveModal.classList.remove("hidden");
+    saveModal.classList.add("flex");
   });
 
   cancelSaveBtn.addEventListener("click", () => {
     saveModal.classList.add("hidden");
+    saveModal.classList.remove("flex");
   });
 
   confirmSaveBtn.addEventListener("click", async () => {
@@ -288,7 +340,8 @@ export async function renderProfileContent(el: HTMLElement, bu: HTMLElement, gAr
         method: "PUT",
         headers: { 
           "Authorization": `Bearer ${authToken}`,
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
+         
         },
         credentials: 'include',
         body: JSON.stringify(updatedData)
@@ -340,17 +393,20 @@ export async function renderProfileContent(el: HTMLElement, bu: HTMLElement, gAr
 
   deleteBtn.addEventListener("click", () => {
     deleteModal.classList.remove("hidden");
+    deleteModal.classList.add("flex");
   });
 
   cancelDeleteBtn.addEventListener("click", () => {
     deleteModal.classList.add("hidden");
+    deleteModal.classList.remove("flex");
   });
 
   confirmDeleteBtn.addEventListener("click", async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/profile`, {
         headers: {
-          "Authorization": `Bearer ${authToken}`
+          "Authorization": `Bearer ${authToken}`,
+          'Accept-Encoding': 'identity',
         },
         method: "DELETE",
         credentials: 'include'

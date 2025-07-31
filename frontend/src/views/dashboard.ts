@@ -5,130 +5,55 @@ import { renderHomeContent, renderPlayContent, renderTournamentContent, renderSt
 import { renderHistoryContent } from './history';
 import { renderProfileContent } from './profile';
 import { State, nullState } from './pongrender';
-import { googleInitialized, resetGoogle, currentGoogleButtonId} from './login';
+import { googleInitialized, resetGoogle, currentGoogleButtonId } from './login';
 import confetti from 'canvas-confetti';
 
 // Import VITE_API_BASE_URL from environment variables
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+// Declare socket at the module level
 let socket: WebSocket | null = null;
-let gameState: State = nullState;
-let playerSide: string = "tbd";
+let playerSide: string = 'l';
 let started: boolean = false;
+let gameState: State = { ...nullState };
 
-function movePaddleWrapper(d: number) {
-  movePaddle(d, function (error, response) {
-    if (error) {
-      console.error(error);
-    }
-    else {
-      response?.text().then((result) => {
-//        console.log(result);
-      });
-    }
-  });
+// Game elements interface
+interface GameElements {
+  ball: SVGElement | null;
+  lpad: SVGElement | null;
+  rpad: SVGElement | null;
+  scoreText: HTMLElement | null;
+  gameText: HTMLElement | null;
+  startButton: HTMLElement | null;
 }
 
-const cleanupGameArea = () => {
-  const gameWindow = document.getElementById('game-window');
-  if (gameWindow) {
-    gameWindow.innerHTML = `
-      <div id="rain-overlay" class="absolute inset-0 z-50 pointer-events-none hidden"></div>
-      <!-- Left Controls -->
-      <div class="absolute left-0 top-1/2 transform -translate-y-1/2 flex flex-col space-y-4 z-10">
-        <button id="left-up" class="bg-white text-black p-3 rounded shadow" hidden>^</button>
-        <button id="left-down" class="bg-white text-black p-3 rounded shadow" hidden>v</button>
-      </div>
-      <!-- SVG Field -->
-      <svg width="1280" height="720">
-        <defs>
-          <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-           <feDropShadow dx="0" dy="0" stdDeviation="10" flood-color="#00ff00" />
-          </filter>
-        </defs>
-        <rect width="100%" height="100%" fill="black" />
-        <g id="lpad-group">
-          <rect id="lpad" x="40" y="310" width="10" height="100" class="fill-white" />
-        </g>
-        <g id="rpad-group">
-          <rect id="rpad" x="1230" y="310" width="10" height="100" class="fill-white" />
-        </g>
-        <circle id="ball" cx="640" cy="360" r="3" class="fill-white" />
-        <text id="score-text" x="640" y="60" font-family="Monospace" font-size="40" class="fill-white" text-anchor="middle">
-          0 : 0
-        </text>
-        <text id="game-text" x="640" y="200" font-family="Sans-serif" font-size="60" text-anchor="middle" class="opacity-0 transition-all duration-300 fill-current">
-          Welcome to Pong!
-        </text>
-      </svg>
-      <!-- Right Controls -->
-      <div class="absolute right-0 top-1/2 transform -translate-y-1/2 flex flex-col space-y-4 z-10">
-        <button id="right-up" class="bg-white text-black p-3 rounded shadow" hidden>^</button>
-        <button id="right-down" class="bg-white text-black p-3 rounded shadow" hidden>v</button>
-      </div>
-    `;
-  }
-}
-
-const resetGameText = () => {
-  const gameText = document.getElementById("game-text") as HTMLElement | null;
+// Helper to apply game result with visual feedback
+const applyGameResult = (message: string, colorClass: string, pulseClass: string) => {
+  const gameText = document.getElementById('game-text');
   if (!gameText) return;
+  gameText.innerHTML = message;
+  gameText.className = gameText.className.replace(/text-(red|green)-\d{3}/g, '');
+  gameText.className = gameText.className.replace(/animate-(win|lose)-pulse/g, '');
+  gameText.classList.add(colorClass, pulseClass);
+};
 
-  gameText.style.visibility = "hidden";
-  gameText.innerHTML = "Welcome to Pong!";
- 
-  gameText.classList.remove(
-    "fill-white",
-    'fill-red-400', 'fill-green-400',
-    'fill-red-500', 'fill-green-500',
-    'animate-win-pulse', 'animate-lose-pulse', 'animate-text-glow'
-  );
-  gameText.classList.add("fill-white");
-}
-
-const resetGameUi = () => {
-  const gameText = document.getElementById("game-text") as HTMLElement | null;
-  const scoreText = document.getElementById("score-text") as HTMLElement | null;
-
-  if (gameText) {
-    gameText.style.visibility = "hidden";
-    gameText.innerHTML = "Welcome to Pong!";
-    // gameText.setAttribute("fill", "white");
-    gameText.classList.remove(
-      'fill-red-400', 'fill-green-400',
-      'fill-red-500', 'fill-green-500',
-      'animate-win-pulse', 'animate-lose-pulse', 'animate-text-glow'
-    );
-  }
-  if (scoreText) {
-    scoreText.innerHTML = "0 : 0";
-    scoreText.classList.add('opacity-0');
-    setTimeout(() => {
-      scoreText.classList.remove('opacity-0');
-    }, 150);
-  } 
-}
-
-function triggerConfetti() {
+// Trigger confetti effect
+const triggerConfetti = () => {
   const gameWindow = document.getElementById('game-window');
   if (!gameWindow) return;
-
   const rect = gameWindow.getBoundingClientRect();
   const x = (rect.left + rect.width / 2) / window.innerWidth;
   const y = (rect.top + rect.height / 4) / window.innerHeight;
-
   const colors = ['#4ade80', '#f87171', '#fbbf24', '#60a5fa'];
 
-  // 💥 Main burst
   confetti({
     particleCount: 150,
-    spread: 90,
-    startVelocity: 50,
+    spread: 180,
     origin: { x, y },
     colors,
     scalar: 1.3
   });
 
-  // 🎇 Streamers burst
   confetti({
     particleCount: 100,
     angle: 60,
@@ -151,90 +76,287 @@ function triggerConfetti() {
     colors
   });
 
-  // ✨ Follow-up bursts
-  setTimeout(() => confetti({
-    particleCount: 80,
-    spread: 120,
-    startVelocity: 40,
-    origin: { x, y },
-    scalar: 1.1,
-    colors
-  }), 300);
+  setTimeout(() => confetti({ particleCount: 80, spread: 120, startVelocity: 40, origin: { x, y }, scalar: 1.1, colors }), 300);
+  setTimeout(() => confetti({ particleCount: 60, spread: 100, startVelocity: 35, origin: { x, y }, scalar: 1.2, colors }), 600);
+};
 
-  setTimeout(() => confetti({
-    particleCount: 60,
-    spread: 100,
-    startVelocity: 35,
-    origin: { x, y },
-    scalar: 1.2,
-    colors
-  }), 600);
-}
-
-function triggerRainEffect() {
+// Trigger rain effect
+const triggerRainEffect = () => {
   const overlay = document.getElementById('rain-overlay');
   if (!overlay) return;
-
-  overlay.innerHTML = ''; // Clear old rain
   overlay.classList.remove('hidden');
-
-  for (let i = 0; i < 150; i++) {
+  overlay.innerHTML = '';
+  for (let i = 0; i < 50; i++) {
     const drop = document.createElement('div');
-    drop.classList.add('rain-drop');
-    drop.style.left = `${Math.random() * 100}%`;
-    drop.style.animationDuration = `${0.4 + Math.random() * 0.6}s`;
-    drop.style.animationDelay = `${Math.random()}s`;
+    drop.className = 'absolute bg-gradient-to-b from-blue-200 to-blue-400 rounded-full opacity-70 pointer-events-none';
+    drop.style.width = Math.random() * 2 + 2 + 'px';
+    drop.style.height = Math.random() * 10 + 10 + 'px';
+    drop.style.left = Math.random() * 100 + '%';
+    drop.style.top = '-10px';
+    drop.style.animation = `fall ${Math.random() * 2 + 2}s linear infinite`;
     overlay.appendChild(drop);
   }
+};
 
-  // Optional lightning flash
-  overlay.style.backgroundColor = 'rgba(255,255,255,0.1)';
-  setTimeout(() => overlay.style.backgroundColor = 'transparent', 100);
-
-  setTimeout(() => {
+// Reset game UI
+const resetGameUi = () => {
+  const overlay = document.getElementById('rain-overlay');
+  if (overlay) {
     overlay.classList.add('hidden');
     overlay.innerHTML = '';
-  }, 2000);
-}
-
-function triggerPaddleEffect(paddleId: string) {
-  const group = document.getElementById(`${paddleId}-group`);
-  if (!group) return;
-
-  const pivotX = paddleId === 'lpad' ? 45 : 1235; // x + width/2
-  const pivotY = 360;
-  group.setAttribute(
-    'transform',
-    `translate(${pivotX},${pivotY}) scale(1.2) translate(${-pivotX},${-pivotY})`
-  ); 
-
-  setTimeout(() => {
-    group.removeAttribute('filter'); // corrected
-    group.removeAttribute('transform'); // corrected
-  }, 300);
-}
-
-function triggerBallEffect() {
-  const ball = document.getElementById('ball');
-  if (!ball) return;
-  
-  ball.classList.add('animate-ball-pulse');
-  setTimeout(() => ball.classList.remove('animate-ball-pulse'), 300);
-}
-const wrapper = document.getElementById('google-signin-wrapper');
-if (wrapper) {
-  wrapper.hidden = true;
-  if (currentGoogleButtonId) {
-    const old = document.getElementById(currentGoogleButtonId);
-    if (old) old.remove();
   }
-  // currentGoogleButtonId = null; // Removed because it's a read-only import
+  const gameElements = {
+    ball: document.getElementById("ball") as SVGElement | null,
+    lpad: document.getElementById("lpad") as SVGElement | null,
+    rpad: document.getElementById("rpad") as SVGElement | null,
+    scoreText: document.getElementById("score-text") as HTMLElement | null,
+    gameText: document.getElementById("game-text") as HTMLElement | null,
+  };
+
+  if (gameElements.ball) {
+    gameElements.ball.setAttribute('cx', '640');
+    gameElements.ball.setAttribute('cy', '360');
+  }
+  if (gameElements.lpad) gameElements.lpad.setAttribute('y', '310');
+  if (gameElements.rpad) gameElements.rpad.setAttribute('y', '310');
+  if (gameElements.scoreText) gameElements.scoreText.innerHTML = '0 : 0';
+  if (gameElements.gameText) {
+    gameElements.gameText.style.visibility = 'hidden';
+    gameElements.gameText.innerHTML = 'Welcome to Pong!';
+    gameElements.gameText.classList.remove(
+      'text-red-400', 'text-green-400',
+      'text-red-500', 'text-green-500',
+      'animate-win-pulse', 'animate-lose-pulse'
+    );
+  }
+};
+
+// Cleanup game area
+const cleanupGameArea = () => {
+  if (socket) {
+    socket.close();
+    socket = null;
+  }
+  resetGameUi();
+  document.getElementById('game-area')?.classList.add('hidden');
+};
+
+// Remove game event listeners
+const removeGameEventListeners = () => {
+  window.removeEventListener('keydown', handleKeyDown);
+  window.removeEventListener('keyup', handleKeyUp);
+};
+
+// Reset game state
+const resetGameState = () => {
+  gameState = { ...nullState };
+  started = false;
+};
+
+// Reset game text
+const resetGameText = () => {
+  const gameText = document.getElementById('game-text');
+  if (gameText) {
+    gameText.style.visibility = 'hidden';
+    gameText.innerHTML = 'Game started!';
+  }
+};
+
+// Move paddle wrapper
+const movePaddleWrapper = (direction: number) => {
+  movePaddle(direction, (error, response) => {
+    if (error) console.error(error);
+  });
+};
+
+// Keydown handler
+const handleKeyDown = (e: KeyboardEvent) => {
+  if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') {
+    movePaddleWrapper(-2);
+  } else if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') {
+    movePaddleWrapper(2);
+  }
+};
+
+// Keyup handler
+const handleKeyUp = (e: KeyboardEvent) => {
+  if (['ArrowUp', 'ArrowDown', 'w', 'W', 's', 'S'].includes(e.key)) {
+    movePaddleWrapper(0);
+  }
+};
+
+// Bind mobile controls
+const bindMobileControls = () => {
+  const leftUpArrow = document.getElementById('left-up');
+  const leftDownArrow = document.getElementById('left-down');
+  const rightUpArrow = document.getElementById('right-up');
+  const rightDownArrow = document.getElementById('right-down');
+
+  const bindControl = (button: HTMLElement | null, direction: number) => {
+    if (!button) return;
+    const start = () => movePaddleWrapper(direction);
+    const stop = () => movePaddleWrapper(0);
+    button.addEventListener('mousedown', start);
+    button.addEventListener('touchstart', (e) => { e.preventDefault(); start(); });
+    ['mouseup', 'mouseleave', 'touchend'].forEach(evt =>
+      button.addEventListener(evt, stop)
+    );
+  };
+
+  bindControl(leftUpArrow, -2);
+  bindControl(leftDownArrow, 2);
+  bindControl(rightUpArrow, -2);
+  bindControl(rightDownArrow, 2);
+};
+
+// Start game logic
+export function startGameLogic(token: string) {
+  if (started) return;
+  started = true;
+
+  socket = new WebSocket(`${API_BASE_URL}/api/pong/game-ws?uuid=${localStorage.getItem("userId")}&authorization=${token}`);
+
+  const gameElements: GameElements = {
+    ball: document.getElementById("ball"),
+    lpad: document.getElementById("lpad"),
+    rpad: document.getElementById("rpad"),
+    scoreText: document.getElementById("score-text"),
+    gameText: document.getElementById("game-text"),
+    startButton: document.getElementById("start-button")
+  };
+
+  socket.addEventListener("message", (event) => {
+    try {
+      const newState = JSON.parse(event.data);
+      gameState = newState;
+
+      if (gameElements.ball) {
+        gameElements.ball.setAttribute('cx', String(newState.stateBall.x));
+        gameElements.ball.setAttribute('cy', String(newState.stateBall.y));
+      }
+      if (gameElements.lpad) {
+        gameElements.lpad.setAttribute('y', String(newState.stateLP.y));
+      }
+      if (gameElements.rpad) {
+        gameElements.rpad.setAttribute('y', String(newState.stateRP.y));
+      }
+
+      if (gameElements.scoreText) {
+        gameElements.scoreText.innerHTML = `${newState.stateScoreL} : ${newState.stateScoreR}`;
+      }
+
+      if (newState.stateWhoL !== "none" && newState.stateWhoL !== "null state") {
+        if (gameElements.gameText) {
+          gameElements.gameText.style.visibility = "visible";
+        }
+
+        if (playerSide === "l") {
+          switch (newState.stateWhoL) {
+            case "left":
+              applyGameResult("You lost the round.", "text-red-400", "animate-lose-pulse");
+              break;
+            case "right":
+              applyGameResult("You won the round!", "text-green-400", "animate-win-pulse");
+              break;
+            case "left fully":
+              started = false;
+              applyGameResult("You lost the game.", "text-red-500", "animate-lose-pulse");
+              if (gameElements.startButton) gameElements.startButton.style.display = "block";
+              setTimeout(() => triggerRainEffect(), 300);
+              break;
+            case "right fully":
+              started = false;
+              applyGameResult("You won the game!", "text-green-500", "animate-win-pulse");
+              if (gameElements.startButton) gameElements.startButton.style.display = "block";
+              setTimeout(() => triggerConfetti(), 300);
+              break;
+          }
+        } else if (playerSide === "r") {
+          switch (newState.stateWhoL) {
+            case "right":
+              applyGameResult("You lost the round.", "text-red-400", "animate-lose-pulse");
+              break;
+            case "left":
+              applyGameResult("You won the round!", "text-green-400", "animate-win-pulse");
+              break;
+            case "right fully":
+              started = false;
+              applyGameResult("You lost the game.", "text-red-500", "animate-lose-pulse");
+              if (gameElements.startButton) gameElements.startButton.style.display = "block";
+              setTimeout(() => triggerRainEffect(), 300);
+              break;
+            case "left fully":
+              started = false;
+              applyGameResult("You won the game!", "text-green-500", "animate-win-pulse");
+              if (gameElements.startButton) gameElements.startButton.style.display = "block";
+              setTimeout(() => triggerConfetti(), 300);
+              break;
+          }
+        }
+      } else {
+        if (gameElements.gameText) {
+          gameElements.gameText.style.visibility = "hidden";
+        }
+      }
+    } catch (e) {
+      console.error("Error parsing game state:", e);
+    }
+  });
+
+  socket.addEventListener("close", () => {
+    console.log("WebSocket closed");
+    if (gameElements.startButton) {
+      gameElements.startButton.style.display = "block";
+    }
+  });
+
+  socket.addEventListener("error", (err) => {
+    console.error("WebSocket error:", err);
+  });
 }
 
+// Bind dashboard UI events
+function bindDashboardEvents() {
+  const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+  const mobileMenuClose = document.getElementById('mobile-menu-close');
+  const sidebar = document.getElementById('sidebar');
+  const backdrop = document.getElementById('mobile-backdrop');
+
+  const showMenu = () => {
+    sidebar?.classList.remove('-translate-x-full');
+    backdrop?.classList.remove('opacity-0');
+    backdrop?.classList.add('pointer-events-auto', 'opacity-100');
+  };
+
+  const hideMenu = () => {
+    sidebar?.classList.add('-translate-x-full');
+    backdrop?.classList.add('opacity-0');
+    backdrop?.classList.remove('pointer-events-auto');
+  };
+
+  mobileMenuToggle?.addEventListener('click', showMenu);
+  mobileMenuClose?.addEventListener('click', hideMenu);
+  backdrop?.addEventListener('click', hideMenu);
+
+  document.getElementById('logout-btn')?.addEventListener('click', () => {
+    if (socket) {
+      socket.close();
+    }
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('userId');
+    localStorage.removeItem('authProvider');
+    resetGoogle();
+    window.location.hash = '#login';
+    window.location.reload();
+  });
+}
+
+// Initialize the dashboard
 export async function initDashboard() {
   const hash = window.location.hash.replace('#', '') || 'home';
   const app = document.getElementById('app')!;
 
+  // Set the full HTML structure
   app.innerHTML = `
     <!-- Mobile Header -->
     <header class="md:hidden fixed top-0 left-0 right-0 bg-gray-900 z-50 p-4 flex items-center justify-between">
@@ -246,7 +368,7 @@ export async function initDashboard() {
       </button>
     </header>
 
-    <!-- Sidebar/Navigation -->
+    <!-- Sidebar -->
     <aside id="sidebar" class="
       fixed top-0 left-0 bottom-0 z-40
       w-full md:w-64
@@ -281,366 +403,100 @@ export async function initDashboard() {
     <main id="content-area" class="pt-16 md:pt-0 md:ml-64 p-4 md:p-6 lg:p-8 xl:p-12 min-h-screen overflow-auto bg-gray-900"></main>
 
     <!-- Hidden Game Area -->
-    <div id="game-area" class="flex flex-col items-center justify-center" hidden>
-      <div id="game-window" class="relative w-[1280px] h-[720px]">
+    <div id="game-area" class="flex flex-col items-center justify-center w-full max-w-7xl mt-4 hidden">
+      <div id="game-window" class="relative w-full max-w-md sm:max-w-lg md:max-w-2xl lg:max-w-4xl xl:w-[1280px] aspect-video bg-black mx-auto overflow-hidden min-h-0">
         <div id="rain-overlay" class="absolute inset-0 z-50 pointer-events-none hidden"></div>
-
         <!-- Left Controls -->
         <div class="absolute left-0 top-1/2 transform -translate-y-1/2 flex flex-col space-y-4 z-10">
-          <button id="left-up" class="bg-white text-black p-3 rounded shadow" hidden>^</button>
-          <button id="left-down" class="bg-white text-black p-3 rounded shadow" hidden>v</button>
+          <button id="left-up" class="bg-white text-black p-1 rounded shadow" hidden>^</button>
+          <button id="left-down" class="bg-white text-black p-1 rounded shadow" hidden>v</button>
         </div>
-
         <!-- SVG Field -->
-        <svg width="1280" height="720">
-        <defs>
-          <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-           <feDropShadow dx="0" dy="0" stdDeviation="10" flood-color="#00ff00" />
-          </filter>
-        </defs>
-        <rect width="100%" height="100%" fill="black" />
-        <g id="lpad-group">
-          <rect id="lpad" x="40" y="310" width="10" height="100" class="fill-white" />
-        </g>
-        <g id="rpad-group">
-          <rect id="rpad" x="1230" y="310" width="10" height="100" class="fill-white" />
-        </g>
-        <circle id="ball" cx="640" cy="360" r="3" class="fill-white" />
-        <text id="score-text" x="640" y="60" font-family="Monospace" font-size="40" class="fill-white" text-anchor="middle">
-          0 : 0
-        </text>
-        <text id="game-text" x="640" y="200" font-family="Sans-serif" font-size="60" text-anchor="middle" class="opacity-0 transition-all duration-300 fill-white">
-          Welcome to Pong!
-        </text>
+        <svg viewBox="0 0 1280 720" preserveAspectRatio="xMidYMid meet" class="absolute inset-0 w-full h-full">
+          <defs>
+            <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+              <feDropShadow dx="0" dy="0" stdDeviation="10" flood-color="#00ff00" />
+            </filter>
+          </defs>
+          <rect width="100%" height="100%" fill="black" />
+          <g id="lpad-group">
+            <rect id="lpad" x="40" y="310" width="10" height="100" class="fill-white" />
+          </g>
+          <g id="rpad-group">
+            <rect id="rpad" x="1230" y="310" width="10" height="100" class="fill-white" />
+          </g>
+          <circle id="ball" cx="640" cy="360" r="3" class="fill-white" />
+          <text id="score-text" x="640" y="60" font-family="Monospace" font-size="40" class="fill-white" text-anchor="middle">
+            0 : 0
+          </text>
+          <text id="game-text" x="640" y="200" font-family="Sans-serif" font-size="60" text-anchor="middle" class="opacity-0 transition-all duration-300 fill-current">
+            Welcome to Pong!
+          </text>
         </svg>
-
         <!-- Right Controls -->
         <div class="absolute right-0 top-1/2 transform -translate-y-1/2 flex flex-col space-y-4 z-10">
-          <button id="right-up" class="bg-white text-black p-3 rounded shadow" hidden>^</button>
-          <button id="right-down" class="bg-white text-black p-3 rounded shadow" hidden>v</button>
+          <button id="right-up" class="bg-white text-black p-1 rounded shadow" hidden>^</button>
+          <button id="right-down" class="bg-white text-black p-1 rounded shadow" hidden>v</button>
         </div>
-
       </div>
-      <button id="start-button" class="mt-6 p-3 bg-red-600 rounded-lg hover:bg-red-700 transition text-white font-medium">click to join or reconnect</button>
+      <button id="start-button" class="mt-6 p-3 bg-red-600 rounded-lg hover:bg-red-700 transition text-white font-medium">Click to join or reconnect</button>
     </div>
   `;
 
-  const leftUpArrow: HTMLElement = document.getElementById("left-up");
-  const leftDownArrow : HTMLElement = document.getElementById("left-down");
-  const rightUpArrow : HTMLElement = document.getElementById("right-up");
-  const rightDownArrow : HTMLElement = document.getElementById("right-down");
-  const ball : HTMLElement = document.getElementById("ball");
-  const lpad : HTMLElement = document.getElementById("lpad");
-  const rpad : HTMLElement = document.getElementById("rpad");
-  
-  let gameText : HTMLElement | null = document.getElementById("game-text");
-  if (gameText) {
-    gameText.style.visibility = "hidden";
-    gameText.classList.remove('opacity-0');
-    gameText.classList.remove('animate-win-pulse', 'animate-lose-pulse', 'animate-text-glow');
-  } 
+  // Bind UI events
+  bindDashboardEvents();
 
+  // Bind mobile controls
+  bindMobileControls();
 
-  // gameText.classList.remove('animate-win-pulse', 'animate-lose-pulse', 'animate-text-glow');
+  // Keyboard controls
+  window.addEventListener('keydown', handleKeyDown);
+  window.addEventListener('keyup', handleKeyUp);
 
-
-  // for some reason, doing a .hidden = false or true on this doesn't work.
-  const scoreText : HTMLElement = document.getElementById("score-text");
-//  console.log(ball);
-//  console.log(lpad);
-//  console.log(rpad);
-  //WEBSOCKET TIME!
-  let socket : WebSocket;
-  let gameState : State = nullState;
-  let playerSide : string = "tbd";
-  // FIXME unused. remove or use.
-  let started : boolean = false;
-  if (localStorage.getItem("authToken")) {
-    socket = new WebSocket(`${API_BASE_URL}/api/pong/game-ws?uuid=${localStorage.getItem("userId")}&authorization=${localStorage.getItem("authToken")}`);
-    gameText.classList.remove(
-      'animate-win-pulse', 'animate-lose-pulse', 'animate-text-glow',
-      'fill-red-400', 'fill-green-400', 'fill-red-500', 'fill-green-500'
-    );
-    socket.addEventListener("message", (event) => {
-//      console.log("I, a tokened player, receive:", event.data);
-      // XXX maybe a try catch? idk if it'd crash or something on a wrong input
-      switch (event.data) {
-        case "connected":
-//          console.log("Welcome to pong.");
-          break;
-        case "added: L":
-          started = false;
-          playerSide = "l";
-          leftUpArrow.hidden = false;
-          leftDownArrow.hidden = false;
-          rightUpArrow.hidden = true;
-          rightDownArrow.hidden = true;
-          gameText.style.visibility = "hidden";
-          scoreText.classList.add('opacity-0');
-            setTimeout(() => {
-              scoreText.innerHTML = `${gameState.stateScoreL} : ${gameState.stateScoreR}`;
-
-             scoreText.classList.remove('opacity-0');
-            }, 150);
-    
-          break;
-        case "added: R":
-          started = false;
-          playerSide = "r";
-          rightUpArrow.hidden = false;
-          rightDownArrow.hidden = false;
-          leftUpArrow.hidden = true;
-          leftDownArrow.hidden = true;
-          gameText.style.visibility = "hidden";
-          scoreText.classList.add('opacity-0');
-            setTimeout(() => {
-              scoreText.innerHTML = `${gameState.stateScoreL} : ${gameState.stateScoreR}`;
-
-              scoreText.classList.remove('opacity-0');
-            }, 150);
-
-          break;
-        case "started":
-          started = true;
-          break;
-        case "error":
-          break;
-        default:
-          const newState: State =JSON.parse(event.data);
-
-           ball.setAttribute("cx", newState.stateBall.coords.x);
-           ball.setAttribute("cy", newState.stateBall.coords.y);
-           lpad.setAttribute("y", newState.stateLP.y);
-           rpad.setAttribute("y", newState.stateRP.y);
-           try {
-             if (newState.stateBall.hitLPaddle) triggerPaddleEffect('lpad');
-             if (newState.stateBall.hitRPaddle) triggerPaddleEffect('rpad');
-             if (newState.stateBall.hitWall) triggerBallEffect();
-
-           } catch (e) {
-            console.error("Error updating game state:", e);
-            }
-           scoreText.innerHTML = `${newState.stateScoreL} : ${newState.stateScoreR}`;
-           scoreText.classList.remove('opacity-0');
-
-          gameState = newState;
-          
-
-
-
-          if (gameState.stateWhoL !== "none" && gameState.stateWhoL !== "null state") {
-            gameText.style.visibility = "visible";
-            gameText.classList.remove('opacity-0');
-            // gameText.classList.remove('animate-win-pulse', 'animate-lose-pulse', 'animate-text-glow');
-            
-            scoreText.innerHTML = "" + gameState.stateScoreL + " : " + gameState.stateScoreR;
-            scoreText.classList.remove('opacity-0');
-            if (playerSide === "l") {
-              switch (gameState.stateWhoL) {
-                case "left":
-                  gameText.innerHTML = "You lost the round.";
-                  gameText.classList.remove('fill-white'); 
-                  gameText.setAttribute("fill", "#f87171");
-                  break;
-                case "right":
-                  gameText.innerHTML = "You won the round!";
-                  gameText.classList.remove('fill-white');
-                  gameText.setAttribute("fill", "#4ade80");
-                  break;
-                case "left fully":
-                  started = false;
-                  gameText.innerHTML = "You lost the game.";
-                  gameText.classList.remove('fill-white');
-                  gameText.setAttribute("fill", "#f87171");
-                  setTimeout(() => triggerRainEffect(), 300);
-                  break;
-                case "right fully":
-                  started = false;
-                  gameText.innerHTML = "You won the game!";
-                  gameText.classList.remove('fill-white');
-                  gameText.setAttribute("fill", "#4ade80");
-                  setTimeout(() => triggerConfetti(), 300);
-                  break;
-              }
-            } else if (playerSide === "r") {
-              switch (gameState.stateWhoL) {
-                case "right":
-                  gameText.innerHTML = "You lost the round.";
-                  gameText.classList.remove('fill-white');  
-                  gameText.setAttribute("fill", "#f87171");
-                  break;
-                case "left":
-                  gameText.innerHTML = "You won the round!";
-                  gameText.classList.remove('fill-white');
-                  gameText.setAttribute("fill", "#4ade80");
-                  break;
-                case "right fully":
-                  started = false; 
-                  gameText.innerHTML = "You lost the game.";
-                  gameText.setAttribute("fill", "#f87171");
-                  setTimeout(() => triggerRainEffect(), 300);
-                  break;
-                case "left fully":
-                  started = false;
-                  gameText.innerHTML = "You won the game!";
-                  gameText.setAttribute("fill", "#4ade80");
-                  setTimeout(() => triggerConfetti(), 300);
-                  break;
-              }
-            }
-          }
-          else {
-            gameText.style.visibility = "hidden";
-            
-            scoreText.innerHTML = "" + gameState.stateScoreL + " : " + gameState.stateScoreR;
-            scoreText.classList.remove('opacity-0');
-          }
-      }
-    });
-
-    document.getElementById('start-button')!.addEventListener('click', () => {
-      registerPlayer(function (error, response) {
-        if (error) {
-          console.error(error);
-        }
-        else {
-          response?.text().then((result) => {
-//            console.log(result);
-          });
-        }
-      });
-    });
-
-    leftUpArrow.addEventListener('mousedown', () => {
-      movePaddleWrapper(-2);
-    });
-
-    leftUpArrow.addEventListener('mouseup', () => {
-      movePaddleWrapper(0);
-    });
-
-    leftUpArrow.addEventListener('mouseleave', () => {
-      movePaddleWrapper(0);
-    });
-
-    leftDownArrow.addEventListener('mousedown', () => {
-      movePaddleWrapper(2);
-    });
-
-    leftDownArrow.addEventListener('mouseup', () => {
-      movePaddleWrapper(0);
-    });
-
-    leftDownArrow.addEventListener('mouseleave', () => {
-      movePaddleWrapper(0);
-    });
-
-    rightUpArrow.addEventListener('mousedown', () => {
-      movePaddleWrapper(-2);
-    });
-
-    rightUpArrow.addEventListener('mouseup', () => {
-      movePaddleWrapper(0);
-    });
-
-    rightUpArrow.addEventListener('mouseleave', () => {
-      movePaddleWrapper(0);
-    });
-
-    rightDownArrow.addEventListener('mousedown', () => {
-      movePaddleWrapper(2);
-    });
-
-    rightDownArrow.addEventListener('mouseup', () => {
-      movePaddleWrapper(0);
-    });
-
-    rightDownArrow.addEventListener('mouseleave', () => {
-      movePaddleWrapper(0);
-    });
-
-    window.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowUp' || e.key === 'w'|| e.key === 'W') {
-        movePaddleWrapper(-2); // move up
-      } else if (e.key === 'ArrowDown' || e.key === 's'|| e.key === 'S') {
-        movePaddleWrapper(2); // move down
-      }
-    });
-
-    window.addEventListener('keyup', (e) => {
-      if (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'w' || e.key === 'W' || e.key === 's' || e.key === 'S') {
-        movePaddleWrapper(0); // stop moving
-      }
-    });
-  }
-  // Mobile menu functionality
-  const mobileMenuToggle = document.getElementById('mobile-menu-toggle')!;
-  const mobileMenuClose = document.getElementById('mobile-menu-close')!;
-  const sidebar = document.getElementById('sidebar')!;
-  const backdrop = document.getElementById('mobile-backdrop')!;
-
-  function openMobileMenu() {
-    sidebar.classList.remove('-translate-x-full');
-    backdrop.classList.remove('opacity-0', 'pointer-events-none');
-    backdrop.classList.add('opacity-100');
-    document.body.classList.add('overflow-hidden');
-  }
-
-  function closeMobileMenu() {
-    sidebar.classList.add('-translate-x-full');
-    backdrop.classList.add('opacity-0', 'pointer-events-none');
-    backdrop.classList.remove('opacity-100');
-    document.body.classList.remove('overflow-hidden');
-  }
-
-  mobileMenuToggle.addEventListener('click', openMobileMenu);
-  mobileMenuClose.addEventListener('click', closeMobileMenu);
-  backdrop.addEventListener('click', closeMobileMenu);
-
-  // Close mobile menu when navigation link is clicked
-  const navLinks = document.querySelectorAll('.nav-link');
-  navLinks.forEach(link => {
-    link.addEventListener('click', () => {
-      if (window.innerWidth < 768) { // md breakpoint
-        closeMobileMenu();
-      }
+  // Start button
+  document.getElementById('start-button')?.addEventListener('click', () => {
+    const btn = document.getElementById('start-button');
+    if (btn) btn.style.display = 'none';
+    registerPlayer((error: any) => {
+      if (error) console.error('Register failed:', error);
     });
   });
 
-  // Close mobile menu on window resize to desktop
-  window.addEventListener('resize', () => {
-    if (window.innerWidth >= 768) {
-      closeMobileMenu();
+  // Render content based on hash
+  const contentArea = document.getElementById('content-area')!;
+  const gameArea = document.getElementById('game-area')!;
+  const startButton = document.getElementById('start-button')!;
+
+  switch (hash) {
+    case 'profile':     renderProfileContent(contentArea, startButton, gameArea); break;
+    case 'play':        renderPlayContent(contentArea, startButton, gameArea); break;
+    case 'history':     renderHistoryContent(contentArea, startButton, gameArea); break;
+    case 'tournament':  renderTournamentContent(contentArea, startButton, gameArea); break;
+    case 'stats':       renderStatsContent(contentArea, startButton, gameArea); break;
+    default:            renderHomeContent(contentArea, startButton, gameArea);
+  }
+
+  // Handle hash change
+  window.addEventListener('hashchange', () => {
+    const newHash = window.location.hash.replace('#', '') || 'home';
+    if (newHash !== 'play') {
+      cleanupGameArea();
+      removeGameEventListeners();
+      resetGameState();
+    } else {
+      resetGameText();
+      if (localStorage.getItem("authToken")) {
+        startGameLogic(localStorage.getItem("authToken")!);
+      }
+    }
+    // Re-render content
+    switch (newHash) {
+      case 'profile':     renderProfileContent(contentArea, startButton, gameArea); break;
+      case 'play':        renderPlayContent(contentArea, startButton, gameArea); break;
+      case 'history':     renderHistoryContent(contentArea, startButton, gameArea); break;
+      case 'tournament':  renderTournamentContent(contentArea, startButton, gameArea); break;
+      case 'stats':       renderStatsContent(contentArea, startButton, gameArea); break;
+      default:            renderHomeContent(contentArea, startButton, gameArea);
     }
   });
-
-  // Logout functionality
-  document.getElementById('logout-btn')!.addEventListener('click', () => {
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('userId');
-    localStorage.removeItem('authProvider');
-    socket.close();
-    resetGoogle();
-    window.location.hash = 'login';
-   // if (googleInitialized) resetGoogle();
-   window.location.reload();  
-   //route();
-  });
-
-  // Render active section
-  const contentArea = document.getElementById('content-area')!;
-  const startButton = document.getElementById('start-button')!;
-  const gameArea = document.getElementById('game-area')!;
-  const gameWindow = document.getElementById('game-window')!;
-  switch (hash) {
-    case 'profile':     renderProfileContent(contentArea, startButton, gameArea, gameWindow);     break;
-    case 'play':        renderPlayContent(contentArea, startButton, gameArea, gameWindow);        break;
-    case 'history':     renderHistoryContent(contentArea, startButton, gameArea, gameWindow);     break;
-    case 'tournament':  renderTournamentContent(contentArea, startButton, gameArea, gameWindow);  break;
-    case 'stats':       renderStatsContent(contentArea, startButton, gameArea, gameWindow);       break;
-    default:            renderHomeContent(contentArea, startButton, gameArea, gameWindow);
-  }
 }
-
-// Initialize dashboard only once when starting the app
-initDashboard();

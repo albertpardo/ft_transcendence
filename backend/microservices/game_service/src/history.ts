@@ -1,6 +1,15 @@
 // src/history.ts
 import Database from 'better-sqlite3';
-const db = Database('/app/dbs/history.db');
+import fs from 'fs';
+import path from 'path';
+
+const dbFolder = '/app/dbs';
+if (!fs.existsSync(dbFolder)) {
+	fs.mkdirSync(dbFolder, { recursive: true });
+}
+const dbPath = path.join(__dirname, 'history.db');
+const db = Database(dbPath);
+// const db = Database('/app/dbs/history.db');
 
 export const historyMain = async () => {
   const init = db.prepare(`

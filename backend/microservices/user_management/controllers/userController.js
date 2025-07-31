@@ -1,4 +1,5 @@
 const userService = require('../services/userService');
+const jwt = require('jsonwebtoken');
 
 exports.getPublicNickname = async (request, reply) => {
 	const { userId } = request.body;
@@ -13,18 +14,37 @@ exports.getPublicNickname = async (request, reply) => {
 exports.signup = async (request, reply) => {
     const { username, password, nickname, email } = request.body;
     const result = await userService.signup(username, password, nickname, email);
-    if (result.error) return reply.code(400).send(result);
-    return reply.send(result);
+
+
+     if (result.error) {
+        return reply.code(400).type('application/json').send(result); // corrected
+    }
+    reply.code(200).type('application/json').send(result);
 };
 
 exports.login = async (request, reply) => {
     const { username, password } = request.body;
+
+    console.log('🟡 Login Request:', request.body);
+
     const result = await userService.login(username, password);
+    console.log("result of the final login func:", result);
+
+  
     if (result.error) {
-        return reply.code(401).send({ error: '🧸 Invalid credentials' });
+        return reply.code(401).type('application/json').send({ error: '🧸 Invalid credentials' });
     }
+
+
+    const token = jwt.sign(
+        { userId: result.id },
+        process.env.JWT_SECRET,
+        { expiresIn: '1h' }
+    );
+    
     console.log('🎏 username and password are correct!');
-    return reply.send(result);
+    return reply.code(200).type('application/json').send({ ...result, token });
+
 };
 
 exports.getProfile = async (request, reply) => {
@@ -33,7 +53,8 @@ exports.getProfile = async (request, reply) => {
     console.log("📦 userId from header:", userId);
 
     const userInfo = await userService.getProfile(userId);
-    return reply.send(userInfo);    
+    console.log("🛠️ Sending response:", userInfo);
+    reply.send(userInfo);
 }
 
 exports.updateProfile = async (request, reply) => {
@@ -52,9 +73,14 @@ exports.updateProfile = async (request, reply) => {
         password,
         avatar
     });
-    console.log('🌎 updatedResult:', result);
-    if (result.error) return reply.code(400).send(result);
-    return reply.send({ message: "🏄 Profile updated successfully" });
+
+
+    // if (result.error) reply.code(400).send(result);
+     if (result.error) return reply.code(400).type('application/json').send(result);
+
+    // reply.send({ message: "🏄 Profile updated successfully" });
+    reply.type('application/json').send({ message: "🏄 Profile updated successfully" });
+
 }
 
 exports.deleteProfile = async (request, reply) => {
@@ -62,8 +88,13 @@ exports.deleteProfile = async (request, reply) => {
     if (!userId) return reply.code(401).send({ error: 'Unauthorized' });
 
     const result = await userService.deleteProfile(userId);
-    if (result.error) return reply.code(400).send(result);
-    return reply.send({ message: "🏊 Profile deleted successfully" });
+
+
+    // if (result.error) reply.code(400).send(result);
+    if (result.error) return reply.code(400).type('application/json').send(result);
+
+    // reply.send({ message: "🏊 Profile deleted successfully" });
+    reply.type('application/json').send({ message: "🏊 Profile deleted successfully" });
 }
 
 exports.upsertGoogle = async (request, reply) => {
@@ -75,10 +106,7 @@ exports.upsertGoogle = async (request, reply) => {
     console.log('❌ [userController] Missing email or googleId:', { email, googleId });
     return reply.code(400).send({ error: 'Email and Google ID are required' });
   }
- // const nickname = payload.given_name || 'Google User';
-/*   if (!user.nickname) {
-    user.nickname = user.username;
-  } */
+
   try {
     const result = await userService.upsertGoogleUser(email, name, picture, googleId);
     console.log('✅ [userController] Success:', result);

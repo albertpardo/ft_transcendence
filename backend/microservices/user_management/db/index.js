@@ -48,8 +48,11 @@ function getNickname(nickname) {
 
 function getUserById(id) {
     const stmt = db.prepare('SELECT * FROM users WHERE id = ?');
-    return stmt.get(id);
+    const resp = stmt.get(id);
+    console.log("resp is", resp);
+    return resp;
 }
+
 
 function getUserByGoogleId(googleId) {
   const stmt = db.prepare('SELECT * FROM users WHERE googleId = ?');
@@ -72,23 +75,25 @@ function createUser({ id, username, password, nickname, email, avatar = '', goog
         lastName: info2[0].lastName,
         status: info2[0].status
     };
+
 }
 
 function updateUser(userId, updates) {
-/*
-    const stmt = db.prepare(`
-        UPDATE users SET
-        username = ?,
-        nickname = ?,
-        email = ?,
-        password = ?,
-        avatar = ?
-        WHERE id = ?
-    `);
-    stmt.run(username, nickname, email, password, avatar || '', userId);
-*/
-    const fields = [];
-    const values = [];
+   
+   const fields = [];
+   const values = [];
+   
+   for (const [key, value] of Object.entries(updates)) {
+        if (typeof value !== 'undefined') {
+           fields.push(`${key} = ?`);
+           values.push(value);
+       }
+   }
+   if (fields.length === 0) {
+        console.warn("⚠️ No fields to update in updateUser");
+        return;
+   }
+
 
     for (const [key, value] of Object.entries(updates)) {
          if (['username', 'nickname', 'email', 'password', 'avatar', 'googleId', 'firstName', 'lastName', 'status'].includes(key)) {
@@ -97,6 +102,7 @@ function updateUser(userId, updates) {
          }
     } 
     if (fields.length === 0) return;
+
     const sql = `UPDATE users SET ${fields.join(', ')} WHERE id = ?`;
     const stmt = db.prepare(sql);
     stmt.run(...values, userId);

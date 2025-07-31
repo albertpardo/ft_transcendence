@@ -1,8 +1,10 @@
 services:
   frontend:
+    # environment:
+    #  - VITE_API_BASE_URL=https://backend:8443
     build:
       context: ./frontend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile_dev
     container_name: transcendence_frontend
     volumes:
       - ./frontend:/app
@@ -17,10 +19,16 @@ services:
     command: npm run dev
 
   api-gateway:
-    build: ./backend/api-gateway
+    environment:
+      - USER_SERVICE_URL=http://user_management:9001
+      - GAME_SERVICE_URL=http://game_service:9002
+    build:
+      context: ./backend/api-gateway
+      dockerfile: Dockerfile_dev
     container_name: trans_api-gateway
     ports:
       - "8443:8443"     # TLS port exposed to host
+      - "10000:10000" # HTTP port for internal communication
     depends_on:
       - user_management
       - game_service
@@ -35,7 +43,9 @@ services:
       - backend
 
   user_management:
-    build: ./backend/microservices/user_management
+    build: 
+      context: ./backend/microservices/user_management
+      dockerfile: Dockerfile
     container_name: trans_user_management
     expose:
       - "9001"
@@ -49,7 +59,9 @@ services:
       - backend
 
   game_service:
-    build: ./backend/microservices/game_service
+    build:
+      context: ./backend/microservices/game_service
+      dockerfile: Dockerfile_dev
     container_name: trans_game_service
     expose:
       - "9002"

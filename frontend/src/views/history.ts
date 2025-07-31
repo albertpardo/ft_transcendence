@@ -65,7 +65,6 @@ async function getHistoryForPlayerId(userId: string) {
 
   let tempInnerHTML : string = `
   <h1 class="text-3xl font-bold mb-6 text-white">Match History</h1>
-  <p class="mb-4 text-white">History of matches</p>
   <div class="flex justify-center">
     <table class="table-fixed border-separate border-spacing-x-6 bg-gray-900 text-white w-auto">
       <thead>
@@ -79,7 +78,11 @@ async function getHistoryForPlayerId(userId: string) {
       <tbody>
 `;
   // TODO FIXME spam protection? cache the thing maybe? make it independently get downloaded in the background once every something minutes.
-  const rawHist = await getHistoryForPlayerId(localStorage.getItem('userId'));
+  const userId = localStorage.getItem('userId');
+  if (!userId) {
+    throw new Error("User ID not found in localStorage.");
+  }
+  const rawHist = await getHistoryForPlayerId(userId);
   const rawHistBody = await rawHist.text();
   const parsedHist = JSON.parse(rawHistBody);
   for (const entry of parsedHist) {
