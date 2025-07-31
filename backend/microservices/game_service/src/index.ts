@@ -8,6 +8,7 @@ import { historyMain, getHistForPlayerFromDb } from './history';
 // Start by apardo-m
 import { getLogTransportConfig } from '../dist/pino_utils/logTransportConfig';
 import { logFormat } from './pino_utils/log_format';
+import { MICRO_NAME } from './pino_utils/constants';
 // End by apardo-m
 
 interface PongBodyReq {
@@ -35,13 +36,12 @@ const startServer = async () => {
   });
 */
 
-  const appName = "game_service"
 
   const fastify = Fastify({
     logger: {
       transport: getLogTransportConfig(),
       base: {
-        appName: appName
+        appName: MICRO_NAME
       },
     },
 //    querystringParser: str => qs.parse(str),

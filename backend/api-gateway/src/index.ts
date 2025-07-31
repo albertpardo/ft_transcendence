@@ -18,7 +18,7 @@ const exampleRoutes = require('./routes/example');
 // Start by apardo-m
 import { getLogTransportConfig } from '../dist/pino_utils/logTransportConfig';
 import { logFormat } from './pino_utils/log_format';
-const appName = "api_gateway"
+import { MICRO_NAME } from './pino_utils/constants';
 // End by apardo-m
 
 /*
@@ -33,7 +33,7 @@ const server = Fastify({
     logger: {
         transport: getLogTransportConfig(),
         base: {
-            appName: appName
+            appName: MICRO_NAME
         },
     },
     https: tlsConfig,

@@ -2,14 +2,14 @@ require('dotenv').config();
 //const fastify = require('fastify')({ logger: true });
 
 //Start by apardo-m
-const appName = "user_management";
+const { MICRO_NAME } = require('./pino_utils/constants.js');
 const getLogTransportConfig = require('./pino_utils/logTransportConfig.js');
 const logFormat = require('./pino_utils/log_format.js');
 const fastify = require('fastify')({
     logger: {
       transport: getLogTransportConfig(),
       base: {
-        appName: appName
+        appName: MICRO_NAME
       },
     }
 });
@@ -33,7 +33,7 @@ fastify.addHook('onSend', async (request, reply, payload) => {
     } catch {
       responseBody = payload;
     }
-  
+
     const logData = {
       statusCode,
       route: request.routerPath || request.url,
@@ -42,9 +42,11 @@ fastify.addHook('onSend', async (request, reply, payload) => {
     };
 
     if (statusCode >= 400) {
-      log.error(logData, 'Response error');
+	  logData.message = "Response error";
+      log.error(logData);
     } else {
-      log.info(logData, 'Response sent');
+	  logData.message = "Response sent";
+      log.info(logData);
     }
   }
   return payload;

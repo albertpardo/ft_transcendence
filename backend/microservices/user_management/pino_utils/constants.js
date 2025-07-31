@@ -13,4 +13,4 @@ const LOG_FOLDER = "/shared_logs";
 const LOG_FILE = MICRO_NAME + ".log";
 
 
-module.exports = { PINO_FILE, PINO_HTTP, APP_LOG, APP_LOG_AUTH, APP_ERR, APP_REQ, LOG_FOLDER, LOG_FILE };
+module.exports = { MICRO_NAME, PINO_FILE, PINO_HTTP, APP_LOG, APP_LOG_AUTH, APP_ERR, APP_REQ, LOG_FOLDER, LOG_FILE };
