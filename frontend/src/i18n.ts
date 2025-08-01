@@ -17,7 +17,7 @@ export async function initI18n(): Promise<void> {
                languages.includes(browserLang) ? browserLang : 'en';
 
   try {
-    const res = await fetch(`/src/locales/${lang}/translation.json`);
+    const res = await fetch(`/locales/${lang}/translation.json`);
     if (!res.ok) throw new Error(`Failed to load ${lang}`);
     const translation = await res.json();
 
