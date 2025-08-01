@@ -10,11 +10,18 @@ export function renderHomeContent(el: HTMLElement, bu: HTMLElement, gArea: HTMLE
     <div id="lang-switcher" class="mt-8 p-4 bg-gray-800 rounded-lg text-white text-sm max-w-md mx-auto">
       <p class="text-center text-sm mb-3 font-medium">${t('select.language')}:</p>
       <div class="grid grid-cols-3 gap-2">
-        <button data-lang="en" class="px-3 py-2 rounded hover:bg-blue-600 flex flex-col items-center justify-center gap-1 transition">
-          🇬🇧 <span class="text-xs font-semibold">English</span>
+        <button data-lang="ca" class="px-3 py-2 rounded hover:bg-blue-600 flex flex-col items-center justify-center gap-1 transition">
+          🏴 <span class="text-xs font-semibold">Català</span>
         </button>
+        <button data-lang="zh" class="px-3 py-2 rounded hover:bg-blue-600 flex flex-col items-center justify-center gap-1 transition">
+          🇨🇳 <span class="text-xs font-semibold">中文</span>
+        </button>
+
         <button data-lang="de" class="px-3 py-2 rounded hover:bg-blue-600 flex flex-col items-center justify-center gap-1 transition">
           🇩🇪 <span class="text-xs font-semibold">Deutsch</span>
+        </button>
+        <button data-lang="en" class="px-3 py-2 rounded hover:bg-blue-600 flex flex-col items-center justify-center gap-1 transition">
+          🇬🇧 <span class="text-xs font-semibold">English</span>
         </button>
         <button data-lang="es" class="px-3 py-2 rounded hover:bg-blue-600 flex flex-col items-center justify-center gap-1 transition">
           🇪🇸 <span class="text-xs font-semibold">Español</span>
@@ -22,11 +29,14 @@ export function renderHomeContent(el: HTMLElement, bu: HTMLElement, gArea: HTMLE
         <button data-lang="fr" class="px-3 py-2 rounded hover:bg-blue-600 flex flex-col items-center justify-center gap-1 transition">
           🇫🇷 <span class="text-xs font-semibold">Français</span>
         </button>
+        <button data-lang="it" class="px-3 py-2 rounded hover:bg-blue-600 flex flex-col items-center justify-center gap-1 transition">
+          🇮🇹 <span class="text-xs font-semibold">Italiano</span>
+        </button>
+        <button data-lang="qu" class="px-3 py-2 rounded hover:bg-blue-600 flex flex-col items-center justify-center gap-1 transition">
+          🇵🇪 <span class="text-xs font-semibold">Runa Simi</span>
+        </button>
         <button data-lang="ru" class="px-3 py-2 rounded hover:bg-blue-600 flex flex-col items-center justify-center gap-1 transition">
           🇷🇺 <span class="text-xs font-semibold">Русский</span>
-        </button>
-        <button data-lang="zh" class="px-3 py-2 rounded hover:bg-blue-600 flex flex-col items-center justify-center gap-1 transition">
-          🇨🇳 <span class="text-xs font-semibold">中文</span>
         </button>
       </div>
     </div>

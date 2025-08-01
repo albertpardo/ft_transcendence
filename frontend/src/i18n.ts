@@ -1,7 +1,7 @@
 // src/i18n.ts
 import i18n from 'i18next';
 
-const languages = ['en', 'de', 'es', 'fr', 'ru', 'zh'] as const;
+const languages = ['en', 'de', 'es', 'fr', 'ru', 'zh', 'ca', 'qu', 'it'] as const;
 type Lang = typeof languages[number];
 
 let initialized = false;
