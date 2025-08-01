@@ -6,6 +6,7 @@ import { renderHistoryContent } from './history';
 import { renderProfileContent } from './profile';
 import { State, nullState } from './pongrender';
 import confetti from 'canvas-confetti';
+import { t, i18nReady } from '../i18n';
 
 // Import VITE_API_BASE_URL from environment variables
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -364,12 +365,7 @@ export const startGameLogic = (authToken: string) => {
   const rightUpArrow = document.getElementById("right-up")!;
   const rightDownArrow = document.getElementById("right-down")!;
 
-  /* const ball: HTMLElement = document.getElementById("ball")!;
-  const lpad: HTMLElement = document.getElementById("lpad")!;
-  const rpad: HTMLElement = document.getElementById("rpad")!;
-  const scoreText : HTMLElement = document.getElementById("score-text")!;
-  
-  let gameText: HTMLElement | null = document.getElementById("game-text")!; */
+
   
   const { ball, lpad, rpad, scoreText, gameText } = getGameElements();
   if (gameText) {
@@ -705,14 +701,14 @@ const handleGameMessage = (event: MessageEvent<string>): void => {
             if (playerSide === "l") {
               switch (newState.stateWhoL) {
                 case "left":
-                  applyGameResult("You lost the round.", "text-red-400", "animate-lose-pulse");
+                  applyGameResult(`${t("lostRound")}`, "text-red-400", "animate-lose-pulse");
                   break;
                 case "right":
-                  applyGameResult("You won the round!", "text-green-400", "animate-win-pulse");
+                  applyGameResult(`${t("wonRound")}`, "text-green-400", "animate-win-pulse");
                   break;
                 case "left fully":
                   started = false;
-                  applyGameResult("You lost the game.", "text-red-500", "animate-lose-pulse");
+                  applyGameResult(`${t("lostGame")}`, "text-red-500", "animate-lose-pulse");
                   if (gameElements.startButton) {
                     gameElements.startButton.style.display = "block";
                   }
@@ -720,7 +716,7 @@ const handleGameMessage = (event: MessageEvent<string>): void => {
                   break;
                 case "right fully":
                   started = false;
-                  applyGameResult("You won the game!", "text-green-500", "animate-win-pulse");
+                  applyGameResult(`${t("wonGame")}`, "text-green-500", "animate-win-pulse");
                   if (gameElements.startButton) {
                     gameElements.startButton.style.display = "block";
                   }
@@ -730,15 +726,14 @@ const handleGameMessage = (event: MessageEvent<string>): void => {
             } else if (playerSide === "r") {
               switch (newState.stateWhoL) {
                 case "right":
-                  applyGameResult("You lost the round.",  "text-red-400", "animate-lose-pulse");
+                  applyGameResult(`${t("lostRound")}`, "text-red-400", "animate-lose-pulse");
                   break;
                 case "left":
-               
-                  applyGameResult("You won the round!", "text-green-400", "animate-win-pulse");
+                  applyGameResult(`${t("wonRound")}`, "text-green-400", "animate-win-pulse");
                   break;
                 case "right fully":
                   started = false;
-                  applyGameResult("You lost the game.", "text-red-500", "animate-lose-pulse");
+                  applyGameResult(`${t("lostGame")}`, "text-red-500", "animate-lose-pulse");
                   if (gameElements.startButton) {
                     gameElements.startButton.style.display = "block";
                   }
@@ -746,7 +741,7 @@ const handleGameMessage = (event: MessageEvent<string>): void => {
                   break;
                 case "left fully":
                   started = false;
-                  applyGameResult("You won the game!", "text-green-500", "animate-win-pulse");
+                  applyGameResult(`${t("wonGame")}`, "text-green-500", "animate-win-pulse");
                   if (gameElements.startButton) {
                     gameElements.startButton.style.display = "block";
                   }
@@ -801,14 +796,14 @@ export async function initDashboard() {
       </div>
       <h2 class="text-xl md:text-2xl font-bold mb-6 md:mb-8 text-center text-white">Transcendence</h2>
       <nav class="flex-grow space-y-2 md:space-y-3">
-        <a href="#home" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='home'?'bg-blue-600':'bg-gray-700'}">Dashboard</a>
-        <a href="#profile" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='profile'?'bg-blue-600':'bg-gray-700'}">Profile</a>
-        <a href="#play" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='play'?'bg-blue-600':'bg-gray-700'}">Play Pong</a>
-        <a href="#history" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='history'?'bg-blue-600':'bg-gray-700'}">Match History</a>
-        <a href="#tournament" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='tournament'?'bg-blue-600':'bg-gray-700'}">Tournament</a>
-        <a href="#stats" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='stats'?'bg-blue-600':'bg-gray-700'}">Stats</a>
+        <a href="#home" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='home'?'bg-blue-600':'bg-gray-700'}">${t('nav.dashboard')}</a>
+        <a href="#profile" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='profile'?'bg-blue-600':'bg-gray-700'}">${t('nav.profile')}</a>
+        <a href="#play" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='play'?'bg-blue-600':'bg-gray-700'}">${t('nav.play')}</a>
+        <a href="#history" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='history'?'bg-blue-600':'bg-gray-700'}">${t('nav.history')}</a>
+        <a href="#tournament" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='tournament'?'bg-blue-600':'bg-gray-700'}">${t('nav.tournament')}</a>
+        <a href="#stats" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='stats'?'bg-blue-600':'bg-gray-700'}">${t('nav.stats')}</a>
       </nav>
-      <button id="logout-btn" class="mt-auto w-full p-3 bg-red-600 rounded-lg hover:bg-red-700 transition text-white font-medium">Logout</button>
+      <button id="logout-btn" class="mt-auto w-full p-3 bg-red-600 rounded-lg hover:bg-red-700 transition text-white font-medium">${t('nav.logout')}</button>
     </aside>
 
     <!-- Mobile Backdrop -->
@@ -858,7 +853,7 @@ export async function initDashboard() {
         </div>
 
       </div>
-      <button id="start-button" class="mt-6 p-3 bg-red-600 rounded-lg hover:bg-red-700 transition text-white font-medium">click to join or reconnect</button>
+      <button id="start-button" class="mt-6 p-3 bg-red-600 rounded-lg hover:bg-red-700 transition text-white font-medium">${t('rejoin')}</button>
     </div>
   `;
 

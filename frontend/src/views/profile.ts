@@ -1,7 +1,7 @@
+import { t } from "../i18n";
+
 export async function renderProfileContent(el: HTMLElement, bu: HTMLElement, gArea: HTMLElement, gWin: HTMLElement) {
-  /* bu.hidden = true;
-  gArea.hidden = true;
-  gWin.hidden = true; */
+
   bu.classList.add('hidden');
   gArea.classList.add('hidden');
   gWin.classList.add('hidden');
@@ -13,7 +13,7 @@ export async function renderProfileContent(el: HTMLElement, bu: HTMLElement, gAr
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   if (!authToken) {
-    el.innerHTML = `<p class="text-red-500">You're not logged in. Please log in again.</p>`;
+    el.innerHTML = `<p class="text-red-500">${t("profiles.not_logged_in")}</p>`;
     return;
   }
 //debugg block  start
@@ -33,7 +33,7 @@ function simpleJwtDecode(token: string) {
 // Usage:
 const decoded = simpleJwtDecode(authToken);
 if (!decoded) {
-  el.innerHTML = `<p class="text-red-500">Invalid token. Please log in again.</p>`;
+  el.innerHTML = `<p class="text-red-500">${t("profiles.invalid_token")}</p>`;
   return;
 }
 console.log("✅ Decoded token:", decoded);
@@ -65,16 +65,16 @@ console.log("✅ Decoded token:", decoded);
 
   } catch (err) {
     console.error(err);
-    el.innerHTML = `<p class="text-red-500">Error loading profile. Please try again later.</p>`;
+    el.innerHTML = `<p class="text-red-500">${t("profiles.error_loading")}</p>`;
     return;
   }
 
   const { username, nickname, email, avatar, createAt } = userData;
 
-  let memberSince = "Member since: ";
+  let memberSince = `${t("profiles.member.since")} `;
   if (createAt) {
     const dateOfRegister = new Date(createAt);
-    memberSince = `Member since: ${dateOfRegister.toLocaleDateString('en-US', {
+    memberSince = `${t("profiles.member.since")}: ${dateOfRegister.toLocaleDateString('en-US', {
       month: 'long',
       day: 'numeric',
       year: 'numeric'
@@ -84,7 +84,7 @@ console.log("✅ Decoded token:", decoded);
   const passwordDots = '••••••••';
   el.innerHTML = `
     <div class="w-full max-w-6xl p-10 bg-gray-900 rounded-lg shadow-md mx-auto my-8">
-      <h1 class="text-4xl font-bold mb-10 text-center">Your Profile</h1>
+      <h1 class="text-4xl font-bold mb-10 text-center">${t("profiles.title")}</h1>
 
       <div class="flex flex-col md:flex-row gap-12">
         <div class="md:w-1/3 flex flex-col items-center space-y-6">
@@ -95,7 +95,7 @@ console.log("✅ Decoded token:", decoded);
             <p class="text-gray-400 text-lg mt-2">@${nickname}</p>
             <p class="text-gray-300 mt-4 text-center">${memberSince}</p>
             <button id="edit-btn"
-                    class="mt-6 px-4 py-2 bg-blue-500 text-white text-base rounded-lg hover:bg-cyan-600 transition-colors">Edit</button>
+                    class="mt-6 px-4 py-2 bg-blue-500 text-white text-base rounded-lg hover:bg-cyan-600 transition-colors">${t("profiles.edit")}</button>
           </div>
         </div>
 
@@ -103,22 +103,22 @@ console.log("✅ Decoded token:", decoded);
 
           <form id="profile-form" class="space-y-6">
             <div>
-              <label class="block text-white mb-1" for="form-username">UserName</label>
+              <label class="block text-white mb-1" for="form-username">${t("profiles.username")}</label>
               <input id="form-username" type="text" value="${username}"
                      class="w-full p-3 rounded-lg bg-gray-700 text-gray-400 disabled:bg-gray-700 disabled:text-gray-400 enabled:bg-gray-600 enabled:text-white transition-colors" disabled />
             </div>
             <div>
-              <label class="block text-white mb-1" for="form-nickname">Nickname</label>
+              <label class="block text-white mb-1" for="form-nickname">${t("profiles.nickname")}</label>
               <input id="form-nickname" type="text" value="${nickname}"
                      class="w-full p-3 rounded-lg bg-gray-700 text-gray-400 disabled:bg-gray-700 disabled:text-gray-400 enabled:bg-gray-600 enabled:text-white transition-colors" disabled />
             </div>
             <div>
-              <label class="block text-white mb-1" for="form-email">Email</label>
+              <label class="block text-white mb-1" for="form-email">${t("profiles.email")}</label>
               <input id="form-email" type="email" value="${email}"
                      class="w-full p-3 rounded-lg bg-gray-700 text-gray-400 disabled:bg-gray-700 disabled:text-gray-400 enabled:bg-gray-600 enabled:text-white transition-colors" disabled />
             </div>
                 <div class="relative">
-                  <label class="block text-white mb-1" for="form-password">Password</label>
+                  <label class="block text-white mb-1" for="form-password">${t("profiles.password")}</label>
                   <div class="relative">
                     <input id="form-password" type="password" value="${passwordDots}"
                            class="w-full p-3 rounded-lg bg-gray-700 text-gray-400 disabled:bg-gray-700 disabled:text-gray-400 enabled:bg-gray-600 enabled:text-white transition-colors" disabled readonly data-is-dummy="true" />
@@ -141,18 +141,18 @@ console.log("✅ Decoded token:", decoded);
                   </div>
                 </div>
               <div>
-              <label class="block text-white mb-1" for="form-avatar">Avatar Image</label>
+              <label class="block text-white mb-1" for="form-avatar">${t("profiles.avatar_image")}</label>
               <input id="form-avatar" type="file" accept="image/*"
                      class="w-full p-3 rounded-lg bg-gray-700 text-gray-400 disabled:bg-gray-700 disabled:text-gray-400 enabled:bg-gray-600 enabled:text-white transition-colors" disabled />
             </div>
             <div class="flex flex-col md:flex-row gap-4 justify-between">
               <button type="submit" id="save-btn"
                       class="px-6 py-3 bg-green-700 text-white rounded-lg hover:bg-green-600 transition disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                Save Changes
+                ${t("profiles.save.changes")}
               </button>
               <button type="button" id="delete-btn"
                       class="px-6 py-3 bg-red-800 text-white rounded-lg hover:bg-red-600 transition disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                Delete Account
+                ${t("profiles.delete.account")}
               </button>
             </div>
           </form>
@@ -163,14 +163,14 @@ console.log("✅ Decoded token:", decoded);
     <!-- Modal: Confirm Delete -->
     <div id="delete-modal" class="fixed inset-0 bg-black bg-opacity-75 items-center justify-center z-50 hidden">
       <div class="bg-gray-800 p-8 rounded-lg max-w-md w-full">
-        <h3 class="text-xl font-bold text-white mb-4">Delete Account</h3>
-        <p class="text-gray-300 mb-6">Are you sure you want to delete your account? This action cannot be undone.</p>
+        <h3 class="text-xl font-bold text-white mb-4">${t("profiles.delete_account")}</h3>
+        <p class="text-gray-300 mb-6">${t("profiles.delete_account_confirmation")}</p>
         <div class="flex justify-end space-x-4">
           <button id="cancel-delete" class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-500 transition">
-            Cancel
+            ${t("profiles.cancel")}
           </button>
           <button id="confirm-delete" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-500 transition">
-            Delete
+            ${t("profiles.delete")}
           </button>
         </div>
       </div>
@@ -179,14 +179,14 @@ console.log("✅ Decoded token:", decoded);
     <!-- Modal: Confirm Save -->
     <div id="save-modal" class="fixed inset-0 bg-black bg-opacity-75 items-center justify-center z-50 hidden">
       <div class="bg-gray-800 p-8 rounded-lg max-w-md w-full">
-        <h3 class="text-xl font-bold text-white mb-4">Confirm Save</h3>
-        <p class="text-gray-300 mb-6">Are you sure you want to save these changes?</p>
+        <h3 class="text-xl font-bold text-white mb-4">${t("profiles.confirm_save")}</h3>
+        <p class="text-gray-300 mb-6">${t("profiles.confirm_save_message")}</p>
         <div class="flex justify-end space-x-4">
           <button id="cancel-save" class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-500 transition">
-            Cancel
+            ${t("profiles.cancel")}
           </button>
           <button id="confirm-save" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-500 transition">
-            Save
+            ${t("profiles.save")}
           </button>
         </div>
       </div>
@@ -194,11 +194,11 @@ console.log("✅ Decoded token:", decoded);
 
 <!-- Success Save alert -->
 <div id="success-alert" class="fixed bottom-6 right-6 z-50 hidden opacity-0 px-6 py-4 bg-green-600 text-white rounded-lg shadow-lg font-medium transition-opacity duration-500">
-  Profile updated successfully!
+  ${t("profiles.profile_updated_successfully")}
 </div>
 <!-- Success Delete alert-->
 <div id="success-delete" class="fixed bottom-6 right-6 z-50 hidden opacity-0 px-6 py-4 bg-green-600 text-white rounded-lg shadow-lg font-medium transition-opacity duration-500">
-  Account deleted successfully!
+  ${t("profiles.account_deleted_successfully")}
 </div>
   `;
 
