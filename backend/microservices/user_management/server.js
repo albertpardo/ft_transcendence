@@ -13,45 +13,14 @@ const fastify = require('fastify')({
       },
     }
 });
+const responseLogger = require('./pino_utils/plugings/response-logger.js');
 //end  by apardo-m
+
 const userRoutes = require('./routes/user');
 
+fastify.register(responseLogger); // apardo-m 
+
 fastify.register(userRoutes);
-
-//Start by apardo-m
-// ✅ Hook global used for log in request and reply
-fastify.addHook('onSend', async (request, reply, payload) => {
-  if (request.routeOptions.config?.source) {
-    const log = reply.log || request.log;
-    const statusCode = reply.statusCode;
-
-    // payload es un string, intenta parsearlo si es JSON
-    let responseBody;
-
-    try {
-      responseBody = JSON.parse(payload);
-    } catch {
-      responseBody = payload;
-    }
-
-    const logData = {
-      statusCode,
-      route: request.routerPath || request.url,
-	  source: request.routeOptions.config.source,
-      payload: responseBody
-    };
-
-    if (statusCode >= 400) {
-	  logData.message = "Response error";
-      log.error(logData);
-    } else {
-	  logData.message = "Response sent";
-      log.info(logData);
-    }
-  }
-  return payload;
-});
-//end  by apardo-m
 
 /*
 const start = async () => {
