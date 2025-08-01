@@ -1,4 +1,5 @@
 // src/views/dashboard.ts
+
 import { registerPlayer, movePaddle } from './buttonClicking';
 import { route } from '../router';
 import { renderHomeContent, renderPlayContent, renderTournamentContent, renderStatsContent } from './sections';
@@ -7,7 +8,7 @@ import { renderProfileContent } from './profile';
 import { State, nullState } from './pongrender';
 import { googleInitialized, resetGoogle, currentGoogleButtonId} from './login';
 import confetti from 'canvas-confetti';
-import { t } from '../i18n';
+import { t, i18nReady } from '../i18n';
 
 
 // Import VITE_API_BASE_URL from environment variables
@@ -327,15 +328,19 @@ export async function initDashboard() {
     </div>
   `;
 
-  const leftUpArrow: HTMLElement = document.getElementById("left-up");
-  const leftDownArrow : HTMLElement = document.getElementById("left-down");
-  const rightUpArrow : HTMLElement = document.getElementById("right-up");
-  const rightDownArrow : HTMLElement = document.getElementById("right-down");
-  const ball : HTMLElement = document.getElementById("ball");
-  const lpad : HTMLElement = document.getElementById("lpad");
-  const rpad : HTMLElement = document.getElementById("rpad");
+  const leftUpArrow: HTMLElement = document.getElementById("left-up")!;
+  const leftDownArrow : HTMLElement = document.getElementById("left-down")!;
+  const rightUpArrow : HTMLElement = document.getElementById("right-up")!;
+  const rightDownArrow : HTMLElement = document.getElementById("right-down")!;
+  const ball : HTMLElement = document.getElementById("ball")!;
+  const lpad : HTMLElement = document.getElementById("lpad")!;
+  const rpad : HTMLElement = document.getElementById("rpad")!;
+  const contentArea = document.getElementById('content-area')!;
+  const startButton = document.getElementById('start-button')!;
+  const gameArea = document.getElementById('game-area')!;
+  const gameWindow = document.getElementById('game-window')!;
   
-  let gameText : HTMLElement | null = document.getElementById("game-text");
+  let gameText : HTMLElement | null = document.getElementById("game-text")!;
   if (gameText) {
     gameText.style.visibility = "hidden";
     gameText.classList.remove('opacity-0');
@@ -347,11 +352,8 @@ export async function initDashboard() {
 
 
   // for some reason, doing a .hidden = false or true on this doesn't work.
-  const scoreText : HTMLElement = document.getElementById("score-text");
-//  console.log(ball);
-//  console.log(lpad);
-//  console.log(rpad);
-  //WEBSOCKET TIME!
+  const scoreText : HTMLElement = document.getElementById("score-text")!;
+
   let socket : WebSocket;
   let gameState : State = nullState;
   let playerSide : string = "tbd";
@@ -363,7 +365,9 @@ export async function initDashboard() {
       'animate-win-pulse', 'animate-lose-pulse', 'animate-text-glow',
       'fill-red-400', 'fill-green-400', 'fill-red-500', 'fill-green-500'
     );
-    socket.addEventListener("message", (event) => {
+    socket.addEventListener("message", async (event) => {
+        await i18nReady;
+
 //      console.log("I, a tokened player, receive:", event.data);
       // XXX maybe a try catch? idk if it'd crash or something on a wrong input
       switch (event.data) {
@@ -404,17 +408,17 @@ export async function initDashboard() {
           break;
         case "started":
           started = true;
-          break;
+          break; 
         case "error":
           break;
         default:
           const newState: State =JSON.parse(event.data);
 
-           ball.setAttribute("cx", newState.stateBall.coords.x);
-           ball.setAttribute("cy", newState.stateBall.coords.y);
-           lpad.setAttribute("y", newState.stateLP.y);
-           rpad.setAttribute("y", newState.stateRP.y);
-           try {
+           ball.setAttribute("cx", "" + newState.stateBall.coords.x);
+           ball.setAttribute("cy", "" + newState.stateBall.coords.y);
+           lpad.setAttribute("y", "" + newState.stateLP.y);
+           rpad.setAttribute("y", "" + newState.stateRP.y);
+           try { 
              if (newState.stateBall.hitLPaddle) triggerPaddleEffect('lpad');
              if (newState.stateBall.hitRPaddle) triggerPaddleEffect('rpad');
              if (newState.stateBall.hitWall) triggerBallEffect();
@@ -425,7 +429,7 @@ export async function initDashboard() {
            scoreText.innerHTML = `${newState.stateScoreL} : ${newState.stateScoreR}`;
            scoreText.classList.remove('opacity-0');
 
-          gameState = newState;
+          gameState = newState; 
           
 
 
@@ -437,6 +441,7 @@ export async function initDashboard() {
             
             scoreText.innerHTML = "" + gameState.stateScoreL + " : " + gameState.stateScoreR;
             scoreText.classList.remove('opacity-0');
+            const playButton = document.getElementById('start-button');
             if (playerSide === "l") {
               switch (gameState.stateWhoL) {
                 case "left":
@@ -454,6 +459,9 @@ export async function initDashboard() {
                   gameText.innerHTML = `${t("lostgame")}`;
                   gameText.classList.remove('fill-white');
                   gameText.setAttribute("fill", "#f87171");
+                  if (playButton) {
+                    playButton.style.display = 'block';
+                  }
                   setTimeout(() => triggerRainEffect(), 300);
                   break;
                 case "right fully":
@@ -461,6 +469,10 @@ export async function initDashboard() {
                   gameText.innerHTML = `${t("wongame")}`;
                   gameText.classList.remove('fill-white');
                   gameText.setAttribute("fill", "#4ade80");
+
+                  if (playButton) {
+                    playButton.style.display = 'block';
+                  }
                   setTimeout(() => triggerConfetti(), 300);
                   break;
               }
@@ -480,12 +492,18 @@ export async function initDashboard() {
                   started = false;
                   gameText.innerHTML = `${t("lostGame")}`;
                   gameText.setAttribute("fill", "#f87171");
+                  if (playButton) {
+                    playButton.style.display = 'block';
+                  }
                   setTimeout(() => triggerRainEffect(), 300);
                   break;
                 case "left fully":
                   started = false;
                   gameText.innerHTML = `${t("wonGame")}`;
                   gameText.setAttribute("fill", "#4ade80");
+                  if (playButton) {
+                    playButton.style.display = 'block';
+                  }
                   setTimeout(() => triggerConfetti(), 300);
                   break;
               }
@@ -631,10 +649,10 @@ export async function initDashboard() {
   });
 
   // Render active section
-  const contentArea = document.getElementById('content-area')!;
+/*   const contentArea = document.getElementById('content-area')!;
   const startButton = document.getElementById('start-button')!;
   const gameArea = document.getElementById('game-area')!;
-  const gameWindow = document.getElementById('game-window')!;
+  const gameWindow = document.getElementById('game-window')!; */
   switch (hash) {
     case 'profile':     renderProfileContent(contentArea, startButton, gameArea, gameWindow);     break;
     case 'play':        renderPlayContent(contentArea, startButton, gameArea, gameWindow);        break;
