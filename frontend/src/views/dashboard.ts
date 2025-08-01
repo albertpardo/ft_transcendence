@@ -440,25 +440,25 @@ export async function initDashboard() {
             if (playerSide === "l") {
               switch (gameState.stateWhoL) {
                 case "left":
-                  gameText.innerHTML = "You lost the round.";
-                  gameText.classList.remove('fill-white'); 
+                  gameText.innerHTML = `${t("lostRound")}`;
+                  gameText.classList.remove('fill-white');
                   gameText.setAttribute("fill", "#f87171");
                   break;
                 case "right":
-                  gameText.innerHTML = "You won the round!";
+                  gameText.innerHTML = `${t("wonRound")}`;
                   gameText.classList.remove('fill-white');
                   gameText.setAttribute("fill", "#4ade80");
                   break;
                 case "left fully":
                   started = false;
-                  gameText.innerHTML = "You lost the game.";
+                  gameText.innerHTML = `${t("lostgame")}`;
                   gameText.classList.remove('fill-white');
                   gameText.setAttribute("fill", "#f87171");
                   setTimeout(() => triggerRainEffect(), 300);
                   break;
                 case "right fully":
                   started = false;
-                  gameText.innerHTML = "You won the game!";
+                  gameText.innerHTML = `${t("wongame")}`;
                   gameText.classList.remove('fill-white');
                   gameText.setAttribute("fill", "#4ade80");
                   setTimeout(() => triggerConfetti(), 300);
@@ -467,24 +467,24 @@ export async function initDashboard() {
             } else if (playerSide === "r") {
               switch (gameState.stateWhoL) {
                 case "right":
-                  gameText.innerHTML = "You lost the round.";
-                  gameText.classList.remove('fill-white');  
+                  gameText.innerHTML = `${t("lostRound")}`;
+                  gameText.classList.remove('fill-white');
                   gameText.setAttribute("fill", "#f87171");
                   break;
                 case "left":
-                  gameText.innerHTML = "You won the round!";
+                  gameText.innerHTML = `${t("wonRound")}`;
                   gameText.classList.remove('fill-white');
                   gameText.setAttribute("fill", "#4ade80");
                   break;
                 case "right fully":
-                  started = false; 
-                  gameText.innerHTML = "You lost the game.";
+                  started = false;
+                  gameText.innerHTML = `${t("lostGame")}`;
                   gameText.setAttribute("fill", "#f87171");
                   setTimeout(() => triggerRainEffect(), 300);
                   break;
                 case "left fully":
                   started = false;
-                  gameText.innerHTML = "You won the game!";
+                  gameText.innerHTML = `${t("wonGame")}`;
                   gameText.setAttribute("fill", "#4ade80");
                   setTimeout(() => triggerConfetti(), 300);
                   break;
@@ -501,6 +501,7 @@ export async function initDashboard() {
     });
 
     document.getElementById('start-button')!.addEventListener('click', () => {
+      document.getElementById('start-button')!.style.display = 'none';
       registerPlayer(function (error, response) {
         if (error) {
           console.error(error);

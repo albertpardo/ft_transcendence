@@ -16,7 +16,7 @@
     "join": "Tritt dem Turnier bei",
     "create": "Turnier erstellen",
     "noTournaments": "Derzeit sind keine Turniere verfügbar.",
-    "tournamentName": "Turniername",
+    "tournamentName": "Turniername", 
     "startDate": "Startdatum",
     "endDate": "Enddatum",
     "maxPlayers": "Maximale Spieleranzahl",
@@ -26,17 +26,17 @@
     "errorJoining": "Fehler beim Beitreten zum Turnier."
   },
   "historic": {
-  "title": "Spielverlauf",
-  "description": "Zeigt Ihre vergangenen Pong-Spiele.",
-  "result": "Ergebnis",
-  "score": "Punktzahl",
-  "opponent": "Gegner",
-  "date": "Datum",
-  "victory": "Sieg",
-  "loss": "Niederlage",
-  "notLoggedIn": "Sie sind nicht angemeldet.",
-  "noAuthToken": "Authentifizierungstoken fehlt.",
-  "failedToLoad": "Spielverlauf konnte nicht geladen werden."
+    "title": "Spielverlauf",
+    "description": "Zeigt Ihre vergangenen Pong-Spiele.",
+    "result": "Ergebnis",
+    "score": "Punktzahl",
+    "opponent": "Gegner",
+    "date": "Datum",
+    "victory": "Sieg",
+    "loss": "Niederlage",
+    "notLoggedIn": "Sie sind nicht angemeldet.",
+    "noAuthToken": "Authentifizierungstoken fehlt.",
+    "failedToLoad": "Spielverlauf konnte nicht geladen werden."
 },
   "profiles": {
     "title": "Ihr Profil",
@@ -83,5 +83,9 @@
   "select.language": "Sprache auswählen",
   "login": "Anmelden",
   "signup": "Registrieren",
-  "rejoin": "Klicken Sie zum Beitreten oder Wiederverbinden"
+  "rejoin": "Klicken Sie zum Beitreten oder Wiederverbinden",
+  "wonGame": "Sie haben das Spiel gewonnen!",
+  "lostGame": "Sie haben das Spiel verloren.",
+  "wonRound": "Sie haben die Runde gewonnen!",
+  "lostRound": "Sie haben die Runde verloren."
 }

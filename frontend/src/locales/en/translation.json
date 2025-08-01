@@ -27,17 +27,17 @@
     "errorJoining": "Error joining tournament."
   },
   "historic": {
-  "title": "Match History",
-  "description": "View your past Pong matches.",
-  "result": "Result",
-  "score": "Score",
-  "opponent": "Opponent",
-  "date": "Date",
-  "victory": "Victory",
-  "loss": "Defeat",
-  "notLoggedIn": "You're not logged in.",
-  "noAuthToken": "Authentication token missing.",
-  "failedToLoad": "Failed to load match history."
+    "title": "Match History",
+    "description": "View your past Pong matches.",
+    "result": "Result",
+    "score": "Score",
+    "opponent": "Opponent",
+    "date": "Date",
+    "victory": "Victory",
+    "loss": "Defeat",
+    "notLoggedIn": "You're not logged in.",
+    "noAuthToken": "Authentication token missing.",
+    "failedToLoad": "Failed to load match history."
 },
   "profiles": {
     "title": "Your Profile",
@@ -84,5 +84,9 @@
   "signup": "Sign Up",
   "home.intro": "Welcome to Transcendence!",
   "select.language": "Select Language",
-  "rejoin": "Click to join or reconnect"
+  "rejoin": "Click to join or reconnect",
+  "wonGame": "You won the game!",
+  "lostGame": "You lost the game.",
+  "wonRound": "You won the round!",
+  "lostRound": "You lost the round."
 }

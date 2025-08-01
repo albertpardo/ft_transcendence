@@ -77,5 +77,9 @@
   "signup": "Inscription",
 	"home.intro": "Bienvenue sur Transcendence!",
   "select.language": "Sélectionner la langue",
-  "rejoin": "Cliquez pour rejoindre ou vous reconnecter"
+  "rejoin": "Cliquez pour rejoindre ou vous reconnecter",
+  "wonGame": "Vous avez gagné le jeu !",
+  "lostGame": "Vous avez perdu le jeu.",
+  "wonRound": "Vous avez gagné la manche !",
+  "lostRound": "Vous avez perdu la manche."
 }

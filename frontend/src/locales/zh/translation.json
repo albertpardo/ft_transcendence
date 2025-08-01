@@ -78,5 +78,9 @@
   "signup": "注册",
   "home.intro": "欢迎来到Transcendence！",
   "select.language": "选择语言",
-  "rejoin": "点击以加入或重新连接"
+  "rejoin": "点击以加入或重新连接",
+  "wonGame": "您赢得了比赛！",
+  "lostGame": "您输了比赛。",
+  "wonRound": "您赢得了这一轮！",
+  "lostRound": "您输了这一轮。"
 }
