@@ -58,8 +58,8 @@ export function renderPlayContent(el: HTMLElement, bu: HTMLElement, gArea: HTMLE
 
 export function renderTournamentContent(el: HTMLElement, bu: HTMLElement, gArea: HTMLElement, gWin: HTMLElement) {
   el.innerHTML = `
-    <h1 class="text-3xl font-bold mb-6">Tournaments</h1>
-    <p class="mb-4">Tournaments (texto de ejemplo).</p>
+    <h1 class="text-3xl font-bold mb-6">${t("tournaments.title")}</h1>
+    <p class="mb-4">${t("tournaments.description")}</p>
     <img src="https://placehold.co/1000x400/444444/ffffff?text=Demo" class="w-full rounded-lg" alt="Tournament">
   `;
   bu.hidden = true;
@@ -69,8 +69,8 @@ export function renderTournamentContent(el: HTMLElement, bu: HTMLElement, gArea:
 
 export function renderStatsContent(el: HTMLElement, bu: HTMLElement, gArea: HTMLElement, gWin: HTMLElement) {
   el.innerHTML = `
-    <h1 class="text-3xl font-bold mb-6">Stats</h1>
-    <p class="mb-4">Stats (texto de ejemplo).</p>
+    <h1 class="text-3xl font-bold mb-6">${t("statistics.title")}</h1>
+    <p class="mb-4">${t("statistics.description")}</p>
     <img src="https://placehold.co/1000x400/444444/ffffff?text=Demo" class="w-full rounded-lg" alt="Stats">
   `;
   bu.hidden = true;

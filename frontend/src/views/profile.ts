@@ -38,10 +38,10 @@ export async function renderProfileContent(el: HTMLElement, bu: HTMLElement, gAr
 
   const { username, nickname, email, avatar, createAt } = userData;
 
-  let memberSince = "Member since: ";
+  let memberSince = `${t("profiles.member.since")} `;
   if (createAt) {
     const dateOfRegister = new Date(createAt);
-    memberSince = `Member since: ${dateOfRegister.toLocaleDateString('en-US', {
+    memberSince = `${t("profiles.member.since")} ${dateOfRegister.toLocaleDateString('en-US', {
       month: 'long',
       day: 'numeric',
       year: 'numeric'

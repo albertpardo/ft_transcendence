@@ -1,4 +1,38 @@
 {
+  "statistics": {
+    "title": "统计",
+    "description": "查看您的Pong游戏统计数据。",
+    "gamesPlayed": "已玩游戏",
+    "wins": "胜利",
+    "losses": "失败",
+    "winRate": "胜率",
+    "averageScore": "平均得分",
+    "highestScore": "最高得分",
+    "noStats": "没有可用的统计数据。",
+    "error": "加载统计数据时出错。"
+  },
+  "tournaments": {
+    "title": "锦标赛",
+    "description": "参加Pong锦标赛以赢取奖励。",
+    "join": "加入锦标赛",
+    "create": "创建锦标赛",
+    "view": "查看锦标赛",
+    "noTournaments": "目前没有可用的锦标赛。",
+    "error": "加载锦标赛时出错。"
+  },
+  "historic": {
+    "title": "比赛历史",
+    "description": "查看您过去的Pong比赛记录。",
+    "result": "结果",
+    "score": "得分",
+    "opponent": "对手",
+    "date": "日期",
+    "victory": "胜利",
+    "loss": "失败",
+    "notLoggedIn": "您尚未登录。",
+    "noAuthToken": "缺少认证令牌。",
+    "failedToLoad": "无法加载比赛历史。"
+  },
   "profiles": {
     "title": "您的个人资料",
     "avatar": "个人头像",
@@ -43,5 +77,6 @@
   "login": "登录",
   "signup": "注册",
   "home.intro": "欢迎来到Transcendence！",
-  "select.language": "选择语言"
+  "select.language": "选择语言",
+  "rejoin": "点击以加入或重新连接"
 }

@@ -1,4 +1,37 @@
 {
+  "statistics": {
+    "title": "Statistiques",
+    "description": "Consultez vos statistiques de jeu, y compris les victoires, les défaites et les scores.",
+    "totalGames": "Total des parties",
+    "wins": "Victoires",
+    "losses": "Défaites",
+    "winRate": "Taux de victoire",
+    "averageScore": "Score moyen",
+    "noStats": "Aucune statistique disponible pour le moment.",
+    "error": "Erreur lors du chargement des statistiques."
+  },
+  "tournaments": {
+    "title": "Tournois",
+    "description": "Participez à des tournois de Pong pour gagner des récompenses.",
+    "join": "Rejoindre le tournoi",
+    "create": "Créer un tournoi",
+    "view": "Voir les tournois",
+    "noTournaments": "Aucun tournoi disponible pour le moment.",
+    "error": "Erreur lors du chargement des tournois."
+  },
+  "historic": {
+  "title": "Historique des matchs",
+  "description": "Consultez vos parties de Pong précédentes.",
+  "result": "Résultat",
+  "score": "Score",
+  "opponent": "Adversaire",
+  "date": "Date",
+  "victory": "Victoire",
+  "loss": "Défaite",
+  "notLoggedIn": "Vous n'êtes pas connecté.",
+  "noAuthToken": "Jeton d'authentification manquant.",
+  "failedToLoad": "Échec du chargement de l'historique."
+},
   "profiles": {
      "title": "Votre profil",
     "avatar": "Photo de profil",
@@ -43,5 +76,6 @@
   "login": "Connexion",
   "signup": "Inscription",
 	"home.intro": "Bienvenue sur Transcendence!",
-  "select.language": "Sélectionner la langue"
+  "select.language": "Sélectionner la langue",
+  "rejoin": "Cliquez pour rejoindre ou vous reconnecter"
 }

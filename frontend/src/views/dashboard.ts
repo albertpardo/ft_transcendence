@@ -323,7 +323,7 @@ export async function initDashboard() {
         </div>
 
       </div>
-      <button id="start-button" class="mt-6 p-3 bg-red-600 rounded-lg hover:bg-red-700 transition text-white font-medium">click to join or reconnect</button>
+      <button id="start-button" class="mt-6 p-3 bg-red-600 rounded-lg hover:bg-red-700 transition text-white font-medium">${t('rejoin')}</button>
     </div>
   `;
 
