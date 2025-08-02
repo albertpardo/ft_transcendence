@@ -16,7 +16,7 @@ async function jwtPlugin(app: FastifyInstance) {
         secret: process.env.JWT_SECRET, // 🚨 To get secret from .env file
     });
     //console.log('✅ JWT_SECRET:', process.env.JWT_SECRET);
-   	app.log.info(logFormat(jwtPlugin.name, '✅ JWT_SECRET:' + process.env.JWT_SECRET));
+   	app.log.info(logFormat(jwtPlugin.name, '✅ JWT_SECRET:', process.env.JWT_SECRET));
 };
 
 async function authHookPlugin(app: FastifyInstance) {
