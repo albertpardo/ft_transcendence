@@ -8,10 +8,15 @@ async function responseLogger(fastify, opts) {
 
       let responseBody;
 
-      try {
-        responseBody = JSON.parse(payload);
-      } catch {
+      if ( typeof payload ===  "string") {
         responseBody = payload;
+      } else {
+        try {
+          responseBody = JSON.parse(payload);
+        } catch (error) {
+          responseBody = payload;
+          log.error({ error, payload }, "Failed to parse response payload");
+        }
       }
 
       const logData = {

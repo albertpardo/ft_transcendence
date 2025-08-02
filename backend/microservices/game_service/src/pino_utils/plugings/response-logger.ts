@@ -8,14 +8,24 @@ async function responseLogger(fastify, opts) {
 
       let responseBody;
 
-      try {
-        responseBody = JSON.parse(payload);
-      } catch (error) {
+      if ( typeof payload ===  "string") {
         responseBody = payload;
-        log.error({ error }, "Failed to parse response payload");
+      } else {
+        try {
+          responseBody = JSON.parse(payload);
+        } catch (error) {
+          responseBody = payload;
+          log.error({ error, payload }, "Failed to parse response payload");
+        }
       }
 
-      const logData = {
+      const logData: {
+        statusCode: number;
+        route: string;
+        source: string;
+        payload: any;
+        message?: string;   
+      } = {
         statusCode,
         route: request.routerPath || request.url,
         source: request.routeOptions.config.source,
