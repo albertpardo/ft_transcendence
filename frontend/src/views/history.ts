@@ -1,4 +1,5 @@
 // src/views/history.ts
+import { t } from '../i18n'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -44,15 +45,15 @@ async function getNicknameForPlayerId(userId: string) {
 export async function renderHistoryContent(el: HTMLElement, bu: HTMLElement, gArea: HTMLElement, gWin: HTMLElement) {
 
   let tempInnerHTML : string = `
-  <h1 class="text-3xl font-bold mb-6 text-white">Match History</h1>
+  <h1 class="text-3xl font-bold mb-6 text-white">${t("historic.title")}</h1>
   <div class="flex justify-center">
     <table class="table-fixed border-separate border-spacing-x-6 bg-gray-900 text-white w-auto">
       <thead>
         <tr>
-          <th class="px-6 py-3 text-center">Result</th>
-          <th class="px-6 py-3 text-center">Score</th>
-          <th class="px-6 py-3 text-center">Opponent</th>
-          <th class="px-6 py-3 text-center">Date</th>
+          <th class="px-6 py-3 text-center">${t("historic.result")}</th>
+          <th class="px-6 py-3 text-center">${t("historic.score")}</th>
+          <th class="px-6 py-3 text-center">${t("historic.opponent")}</th>
+          <th class="px-6 py-3 text-center">${t("historic.date")}</th>
         </tr>
       </thead>
       <tbody>
@@ -83,7 +84,7 @@ export async function renderHistoryContent(el: HTMLElement, bu: HTMLElement, gAr
     const oppScore = isLocalLeft ? entry.scoreR : entry.scoreL;
     const opponent = isLocalLeft ? nicknameR : nicknameL;
     const didWin = localScore > oppScore;
-    const resultText = didWin ? 'Victory' : 'Loss';
+    const resultText = didWin ? `${t("historic.victory")}` : `${t("historic.loss")}`;
     const resultColorClass = didWin ? 'text-green-400 font-semibold' : 'text-red-500 font-semibold';
 
     const thisdate = new Date(entry.date);
