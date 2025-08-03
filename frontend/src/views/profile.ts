@@ -179,8 +179,8 @@ console.log("✅ Decoded token:", decoded);
     <!-- Modal: Confirm Save -->
     <div id="save-modal" class="fixed inset-0 bg-black bg-opacity-75 items-center justify-center z-50 hidden">
       <div class="bg-gray-800 p-8 rounded-lg max-w-md w-full">
-        <h3 class="text-xl font-bold text-white mb-4">${t("profiles.confirm_save")}</h3>
-        <p class="text-gray-300 mb-6">${t("profiles.confirm_save_message")}</p>
+        <h3 class="text-xl font-bold text-white mb-4">${t("profiles.confirm.save")}</h3>
+        <p class="text-gray-300 mb-6">${t("profiles.confirm.save.text")}</p>
         <div class="flex justify-end space-x-4">
           <button id="cancel-save" class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-500 transition">
             ${t("profiles.cancel")}
@@ -194,11 +194,11 @@ console.log("✅ Decoded token:", decoded);
 
 <!-- Success Save alert -->
 <div id="success-alert" class="fixed bottom-6 right-6 z-50 hidden opacity-0 px-6 py-4 bg-green-600 text-white rounded-lg shadow-lg font-medium transition-opacity duration-500">
-  ${t("profiles.profile_updated_successfully")}
+  ${t("profiles.success.update")}
 </div>
 <!-- Success Delete alert-->
 <div id="success-delete" class="fixed bottom-6 right-6 z-50 hidden opacity-0 px-6 py-4 bg-green-600 text-white rounded-lg shadow-lg font-medium transition-opacity duration-500">
-  ${t("profiles.account_deleted_successfully")}
+  ${t("profiles.success.delete")}
 </div>
   `;
 
