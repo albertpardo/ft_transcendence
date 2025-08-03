@@ -164,7 +164,7 @@ console.log("✅ Decoded token:", decoded);
     <div id="delete-modal" class="fixed inset-0 bg-black bg-opacity-75 items-center justify-center z-50 hidden">
       <div class="bg-gray-800 p-8 rounded-lg max-w-md w-full">
         <h3 class="text-xl font-bold text-white mb-4">${t("profiles.delete_account")}</h3>
-        <p class="text-gray-300 mb-6">${t("profiles.delete_account_confirmation")}</p>
+        <p class="text-gray-300 mb-6">${t("profiles.success.delete")}</p>
         <div class="flex justify-end space-x-4">
           <button id="cancel-delete" class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-500 transition">
             ${t("profiles.cancel")}
