@@ -141,7 +141,7 @@ console.log("✅ Decoded token:", decoded);
                   </div>
                 </div>
               <div>
-              <label class="block text-white mb-1" for="form-avatar">${t("profiles.avatar_image")}</label>
+              <label class="block text-white mb-1" for="form-avatar">${t("profiles.avatar.image")}</label>
               <input id="form-avatar" type="file" accept="image/*"
                      class="w-full p-3 rounded-lg bg-gray-700 text-gray-400 disabled:bg-gray-700 disabled:text-gray-400 enabled:bg-gray-600 enabled:text-white transition-colors" disabled />
             </div>
@@ -163,8 +163,8 @@ console.log("✅ Decoded token:", decoded);
     <!-- Modal: Confirm Delete -->
     <div id="delete-modal" class="fixed inset-0 bg-black bg-opacity-75 items-center justify-center z-50 hidden">
       <div class="bg-gray-800 p-8 rounded-lg max-w-md w-full">
-        <h3 class="text-xl font-bold text-white mb-4">${t("profiles.delete_account")}</h3>
-        <p class="text-gray-300 mb-6">${t("profiles.success.delete")}</p>
+        <h3 class="text-xl font-bold text-white mb-4">${t("profiles.delete.account")}</h3>
+        <p class="text-gray-300 mb-6">${t("profiles.confirm.delete")}</p>
         <div class="flex justify-end space-x-4">
           <button id="cancel-delete" class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-500 transition">
             ${t("profiles.cancel")}
