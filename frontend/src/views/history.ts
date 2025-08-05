@@ -1,4 +1,5 @@
 // src/views/history.ts
+import { t } from '../i18n'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -23,25 +24,8 @@ async function getHistoryForPlayerId(userId: string) {
   return (response);
 }
 
-/* async function getNicknameForPlayerId(userId: string) {
-  const response = await fetch(
-    `${API_BASE_URL}/api/public/nickname`,
-    {
-      method: 'POST',
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: 'include',
-      mode: 'cors',
-      body: JSON.stringify({
-        userId: userId,
-      }),
-    }
-  );
-  return (response);
-} */
 
-  async function getNicknameForPlayerId(userId: string): Promise<string> {
+    async function getNicknameForPlayerId(userId: string): Promise<string> {
   try {
     const response = await fetch(`${API_BASE_URL}/api/public/nickname`, {
       method: 'POST',
@@ -61,73 +45,6 @@ async function getHistoryForPlayerId(userId: string) {
   }
 }
 
-/* export async function renderHistoryContent(el: HTMLElement, bu: HTMLElement, gArea: HTMLElement, gWin: HTMLElement) {
-
-  let tempInnerHTML : string = `
-  <h1 class="text-3xl font-bold mb-6 text-white">Match History</h1>
-  <p class="mb-4 text-white">History of matches</p>
-  <div class="flex justify-center">
-    <table class="table-fixed border-separate border-spacing-x-6 bg-gray-900 text-white w-auto">
-      <thead>
-        <tr>
-          <th class="px-6 py-3 text-center">Result</th>
-          <th class="px-6 py-3 text-center">Score</th>
-          <th class="px-6 py-3 text-center">Opponent</th>
-          <th class="px-6 py-3 text-center">Date</th>
-        </tr>
-      </thead>
-      <tbody>
-`;
-  // TODO FIXME spam protection? cache the thing maybe? make it independently get downloaded in the background once every something minutes.
-  const rawHist = await getHistoryForPlayerId(localStorage.getItem('userId'));
-  const rawHistBody = await rawHist.text();
-  const parsedHist = JSON.parse(rawHistBody);
-  for (const entry of parsedHist) {
-    const idL : string = entry.leftId;
-    const idR : string = entry.rightId;
-    // fallbacks for if getNickname fails I guess
-    let nicknameL : string = idL;
-    let nicknameR : string = idR;
-    const respNickL = await getNicknameForPlayerId(idL);
-    const respNickLBody = await respNickL.text();
-    nicknameL = JSON.parse(respNickLBody)?.nickname;
-    const respNickR = await getNicknameForPlayerId(idR);
-    const respNickRBody = await respNickR.text();
-    nicknameR = JSON.parse(respNickRBody)?.nickname;
-
-    const isLocalLeft = localStorage.getItem('userId') === idL;
-    const localScore = isLocalLeft ? entry.scoreL : entry.scoreR;
-    const oppScore = isLocalLeft ? entry.scoreR : entry.scoreL;
-    const opponent = isLocalLeft ? nicknameR : nicknameL;
-    const didWin = localScore > oppScore;
-    const resultText = didWin ? 'Victory' : 'Loss';
-    const resultColorClass = didWin ? 'text-green-400 font-semibold' : 'text-red-500 font-semibold';
-
-    const thisdate = new Date(entry.date);
-    const formattedDate = thisdate.toLocaleString('en-GB', {
-      year: 'numeric',
-      month: 'numeric',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-    }).replace(',', '').replace(',', ''); 
-    // const rowClass = entry.win ? 'text-green-400' : 'text-red-500';
-    const rowClass = ''; 
-    tempInnerHTML += `<tr class="${rowClass}">
-      <td class="${resultColorClass} text-center">${resultText}</td>
-      <td class="text-center">${localScore} : ${oppScore}</td>
-      <td class="text-red-500 text-center">${opponent}</td>
-      <td class="text-center">${formattedDate}</td>
-    </tr>`;
-
-
-  }
-  el.innerHTML = tempInnerHTML;
-  bu.hidden = true;
-  gArea.hidden = true;
-  gWin.hidden = true;
-} */
-
 
 export async function renderHistoryContent(el: HTMLElement, bu: HTMLElement, gArea: HTMLElement, gWin: HTMLElement) {
   // ✅ Clear and hide game elements
@@ -135,33 +52,31 @@ export async function renderHistoryContent(el: HTMLElement, bu: HTMLElement, gAr
   gArea.hidden = true;
   gWin.hidden = true;
 
-  // ✅ Reset innerHTML early
   el.innerHTML = '';
 
-  // ✅ Get userId safely
   const userId = localStorage.getItem('userId');
   if (!userId) {
-    el.innerHTML = `<p class="text-red-500">Not logged in</p>`;
+    el.innerHTML = `<p class="text-red-500">${t('historic.notLoggedIn')}</p>`;
     return;
   }
 
   const authToken = localStorage.getItem('authToken');
   if (!authToken) {
-    el.innerHTML = `<p class="text-red-500">No auth token</p>`;
+    el.innerHTML = `<p class="text-red-500">${t('historic.noAuthToken')}</p>`;
     return;
   }
 
   let tempInnerHTML = `
-    <h1 class="text-3xl font-bold mb-6 text-white">Match History</h1>
-    <p class="mb-4 text-white">History of matches</p>
+    <h1 class="text-3xl font-bold mb-6 text-white">${t('historic.title')}</h1>
+    <p class="mb-4 text-white">${t('historic.description')}</p>
     <div class="flex justify-center">
       <table class="table-fixed border-separate border-spacing-x-6 bg-gray-900 text-white w-auto">
         <thead>
           <tr>
-            <th class="px-6 py-3 text-center">Result</th>
-            <th class="px-6 py-3 text-center">Score</th>
-            <th class="px-6 py-3 text-center">Opponent</th>
-            <th class="px-6 py-3 text-center">Date</th>
+            <th class="px-6 py-3 text-center">${t('historic.result')}</th>
+            <th class="px-6 py-3 text-center">${t('historic.score')}</th>
+            <th class="px-6 py-3 text-center">${t('historic.opponent')}</th>
+            <th class="px-6 py-3 text-center">${t('historic.date')}</th>
           </tr>
         </thead>
         <tbody>
@@ -186,40 +101,15 @@ export async function renderHistoryContent(el: HTMLElement, bu: HTMLElement, gAr
 
       if (!idL || !idR) continue;
 
-      /* let nicknameL = 'Unknown';
-      let nicknameR = 'Unknown'; */
       let nicknameL = await getNicknameForPlayerId(idL);
       let nicknameR = await getNicknameForPlayerId(idR);
-
-  /*     try {
-        const respNickL = await getNicknameForPlayerId(idL);
-        if (respNickL.ok) {
-          const bodyL = await respNickL.text();
-          const dataL = JSON.parse(bodyL);
-          nicknameL = dataL?.nickname || dataL?.username || 'Player';
-        }
-      } catch (err) {
-        console.warn(`Failed to fetch nickname for ${idL}`, err);
-      }
-
-      try {
-        const respNickR = await getNicknameForPlayerId(idR);
-        if (respNickR.ok) {
-          const bodyR = await respNickR.text();
-          const dataR = JSON.parse(bodyR);
-          nicknameR = dataR?.nickname || dataR?.username || 'Player';
-        }
-      } catch (err) {
-        console.warn(`Failed to fetch nickname for ${idR}`, err);
-      }
-    */
 
       const isLocalLeft = userId === idL;
       const localScore = isLocalLeft ? entry.scoreL : entry.scoreR;
       const oppScore = isLocalLeft ? entry.scoreR : entry.scoreL;
       const opponent = isLocalLeft ? nicknameR : nicknameL;
       const didWin = localScore > oppScore;
-      const resultText = didWin ? 'Victory' : 'Loss';
+      const resultText = didWin ? `${t('historic.victory')}` : `${t('historic.loss')}`;
       const resultColorClass = didWin ? 'text-green-400 font-semibold' : 'text-red-500 font-semibold';
 
       const thisdate = new Date(entry.date);
@@ -245,19 +135,17 @@ export async function renderHistoryContent(el: HTMLElement, bu: HTMLElement, gAr
     tempInnerHTML += `
       <tr>
         <td colspan="4" class="text-red-400 text-center p-4">
-          Failed to load match history.
+          ${t('historic.failedToLoad')}
         </td>
       </tr>
     `;
   }
 
-  // ✅ Close table
   tempInnerHTML += `
         </tbody>
       </table>
     </div>
   `;
 
-  // ✅ Render final HTML
   el.innerHTML = tempInnerHTML;
 }

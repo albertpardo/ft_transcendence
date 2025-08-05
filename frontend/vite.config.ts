@@ -12,20 +12,22 @@ export default defineConfig({
       cert: fs.readFileSync('certs/front.cert'),
     },
     root: './', 
-    build: {
+   /*  build: {
     outDir: 'dist',
     emptyOutDir: true,
-  },
+  }, */
     proxy: {
       '/api': {
         target: 'https://backend:8443',
         changeOrigin: true,
+        secure: false, // Desactivar verificación de certificado para desarrollo
         // rewrite: (path) => path.replace(/^\/api/, '')
       }
     }
   },
   build: {
     outDir: 'dist',
+    emptyOutDir: true,
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'index.html'),
@@ -36,5 +38,6 @@ export default defineConfig({
     alias: {
       '@': resolve(__dirname, 'src')
     }
-  }
+  },
+  assetsInclude: ['**/*.json']
 });

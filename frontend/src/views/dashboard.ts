@@ -1,4 +1,5 @@
 // src/views/dashboard.ts
+
 import { registerPlayer, movePaddle } from './buttonClicking';
 import { route } from '../router';
 import { renderHomeContent, renderPlayContent, renderTournamentContent, renderStatsContent } from './sections';
@@ -7,6 +8,8 @@ import { renderProfileContent } from './profile';
 import { State, nullState } from './pongrender';
 import { googleInitialized, resetGoogle, currentGoogleButtonId} from './login';
 import confetti from 'canvas-confetti';
+import { t, i18nReady } from '../i18n';
+
 
 // Import VITE_API_BASE_URL from environment variables
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -264,14 +267,14 @@ export async function initDashboard() {
       </div>
       <h2 class="text-xl md:text-2xl font-bold mb-6 md:mb-8 text-center text-white">Transcendence</h2>
       <nav class="flex-grow space-y-2 md:space-y-3">
-        <a href="#home" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='home'?'bg-blue-600':'bg-gray-700'}">Dashboard</a>
-        <a href="#profile" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='profile'?'bg-blue-600':'bg-gray-700'}">Profile</a>
-        <a href="#play" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='play'?'bg-blue-600':'bg-gray-700'}">Play Pong</a>
-        <a href="#history" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='history'?'bg-blue-600':'bg-gray-700'}">Match History</a>
-        <a href="#tournament" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='tournament'?'bg-blue-600':'bg-gray-700'}">Tournament</a>
-        <a href="#stats" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='stats'?'bg-blue-600':'bg-gray-700'}">Stats</a>
+        <a href="#home" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='home'?'bg-blue-600':'bg-gray-700'}">${t('nav.dashboard')}</a>
+        <a href="#profile" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='profile'?'bg-blue-600':'bg-gray-700'}">${t('nav.profile')}</a>
+        <a href="#play" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='play'?'bg-blue-600':'bg-gray-700'}">${t('nav.play')}</a>
+        <a href="#history" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='history'?'bg-blue-600':'bg-gray-700'}">${t('nav.history')}</a>
+        <a href="#tournament" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='tournament'?'bg-blue-600':'bg-gray-700'}">${t('nav.tournament')}</a>
+        <a href="#stats" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='stats'?'bg-blue-600':'bg-gray-700'}">${t('nav.stats')}</a>
       </nav>
-      <button id="logout-btn" class="mt-auto w-full p-3 bg-red-600 rounded-lg hover:bg-red-700 transition text-white font-medium">Logout</button>
+      <button id="logout-btn" class="mt-auto w-full p-3 bg-red-600 rounded-lg hover:bg-red-700 transition text-white font-medium">${t('nav.logout')}</button>
     </aside>
 
     <!-- Mobile Backdrop -->
@@ -321,19 +324,23 @@ export async function initDashboard() {
         </div>
 
       </div>
-      <button id="start-button" class="mt-6 p-3 bg-red-600 rounded-lg hover:bg-red-700 transition text-white font-medium">click to join or reconnect</button>
+      <button id="start-button" class="mt-6 p-3 bg-red-600 rounded-lg hover:bg-red-700 transition text-white font-medium">${t('rejoin')}</button>
     </div>
   `;
 
-  const leftUpArrow: HTMLElement = document.getElementById("left-up");
-  const leftDownArrow : HTMLElement = document.getElementById("left-down");
-  const rightUpArrow : HTMLElement = document.getElementById("right-up");
-  const rightDownArrow : HTMLElement = document.getElementById("right-down");
-  const ball : HTMLElement = document.getElementById("ball");
-  const lpad : HTMLElement = document.getElementById("lpad");
-  const rpad : HTMLElement = document.getElementById("rpad");
+  const leftUpArrow: HTMLElement = document.getElementById("left-up")!;
+  const leftDownArrow : HTMLElement = document.getElementById("left-down")!;
+  const rightUpArrow : HTMLElement = document.getElementById("right-up")!;
+  const rightDownArrow : HTMLElement = document.getElementById("right-down")!;
+  const ball : HTMLElement = document.getElementById("ball")!;
+  const lpad : HTMLElement = document.getElementById("lpad")!;
+  const rpad : HTMLElement = document.getElementById("rpad")!;
+  const contentArea = document.getElementById('content-area')!;
+  const startButton = document.getElementById('start-button')!;
+  const gameArea = document.getElementById('game-area')!;
+  const gameWindow = document.getElementById('game-window')!;
   
-  let gameText : HTMLElement | null = document.getElementById("game-text");
+  let gameText : HTMLElement | null = document.getElementById("game-text")!;
   if (gameText) {
     gameText.style.visibility = "hidden";
     gameText.classList.remove('opacity-0');
@@ -345,11 +352,8 @@ export async function initDashboard() {
 
 
   // for some reason, doing a .hidden = false or true on this doesn't work.
-  const scoreText : HTMLElement = document.getElementById("score-text");
-//  console.log(ball);
-//  console.log(lpad);
-//  console.log(rpad);
-  //WEBSOCKET TIME!
+  const scoreText : HTMLElement = document.getElementById("score-text")!;
+
   let socket : WebSocket;
   let gameState : State = nullState;
   let playerSide : string = "tbd";
@@ -361,7 +365,9 @@ export async function initDashboard() {
       'animate-win-pulse', 'animate-lose-pulse', 'animate-text-glow',
       'fill-red-400', 'fill-green-400', 'fill-red-500', 'fill-green-500'
     );
-    socket.addEventListener("message", (event) => {
+    socket.addEventListener("message", async (event) => {
+        await i18nReady;
+
 //      console.log("I, a tokened player, receive:", event.data);
       // XXX maybe a try catch? idk if it'd crash or something on a wrong input
       switch (event.data) {
@@ -402,17 +408,17 @@ export async function initDashboard() {
           break;
         case "started":
           started = true;
-          break;
+          break; 
         case "error":
           break;
         default:
           const newState: State =JSON.parse(event.data);
 
-           ball.setAttribute("cx", newState.stateBall.coords.x);
-           ball.setAttribute("cy", newState.stateBall.coords.y);
-           lpad.setAttribute("y", newState.stateLP.y);
-           rpad.setAttribute("y", newState.stateRP.y);
-           try {
+           ball.setAttribute("cx", "" + newState.stateBall.coords.x);
+           ball.setAttribute("cy", "" + newState.stateBall.coords.y);
+           lpad.setAttribute("y", "" + newState.stateLP.y);
+           rpad.setAttribute("y", "" + newState.stateRP.y);
+           try { 
              if (newState.stateBall.hitLPaddle) triggerPaddleEffect('lpad');
              if (newState.stateBall.hitRPaddle) triggerPaddleEffect('rpad');
              if (newState.stateBall.hitWall) triggerBallEffect();
@@ -423,7 +429,7 @@ export async function initDashboard() {
            scoreText.innerHTML = `${newState.stateScoreL} : ${newState.stateScoreR}`;
            scoreText.classList.remove('opacity-0');
 
-          gameState = newState;
+          gameState = newState; 
           
 
 
@@ -435,55 +441,69 @@ export async function initDashboard() {
             
             scoreText.innerHTML = "" + gameState.stateScoreL + " : " + gameState.stateScoreR;
             scoreText.classList.remove('opacity-0');
+            const playButton = document.getElementById('start-button');
             if (playerSide === "l") {
               switch (gameState.stateWhoL) {
                 case "left":
-                  gameText.innerHTML = "You lost the round.";
-                  gameText.classList.remove('fill-white'); 
+                  gameText.innerHTML = `${t("lostRound")}`;
+                  gameText.classList.remove('fill-white');
                   gameText.setAttribute("fill", "#f87171");
                   break;
                 case "right":
-                  gameText.innerHTML = "You won the round!";
+                  gameText.innerHTML = `${t("wonRound")}`;
                   gameText.classList.remove('fill-white');
                   gameText.setAttribute("fill", "#4ade80");
                   break;
                 case "left fully":
                   started = false;
-                  gameText.innerHTML = "You lost the game.";
+                  gameText.innerHTML = `${t("lostgame")}`;
                   gameText.classList.remove('fill-white');
                   gameText.setAttribute("fill", "#f87171");
+                  if (playButton) {
+                    playButton.style.display = 'block';
+                  }
                   setTimeout(() => triggerRainEffect(), 300);
                   break;
                 case "right fully":
                   started = false;
-                  gameText.innerHTML = "You won the game!";
+                  gameText.innerHTML = `${t("wongame")}`;
                   gameText.classList.remove('fill-white');
                   gameText.setAttribute("fill", "#4ade80");
+
+                  if (playButton) {
+                    playButton.style.display = 'block';
+                  }
                   setTimeout(() => triggerConfetti(), 300);
                   break;
               }
             } else if (playerSide === "r") {
               switch (gameState.stateWhoL) {
                 case "right":
-                  gameText.innerHTML = "You lost the round.";
-                  gameText.classList.remove('fill-white');  
+                  gameText.innerHTML = `${t("lostRound")}`;
+                  gameText.classList.remove('fill-white');
                   gameText.setAttribute("fill", "#f87171");
                   break;
                 case "left":
-                  gameText.innerHTML = "You won the round!";
+                  gameText.innerHTML = `${t("wonRound")}`;
                   gameText.classList.remove('fill-white');
                   gameText.setAttribute("fill", "#4ade80");
                   break;
                 case "right fully":
-                  started = false; 
-                  gameText.innerHTML = "You lost the game.";
+                  started = false;
+                  gameText.innerHTML = `${t("lostGame")}`;
                   gameText.setAttribute("fill", "#f87171");
+                  if (playButton) {
+                    playButton.style.display = 'block';
+                  }
                   setTimeout(() => triggerRainEffect(), 300);
                   break;
                 case "left fully":
                   started = false;
-                  gameText.innerHTML = "You won the game!";
+                  gameText.innerHTML = `${t("wonGame")}`;
                   gameText.setAttribute("fill", "#4ade80");
+                  if (playButton) {
+                    playButton.style.display = 'block';
+                  }
                   setTimeout(() => triggerConfetti(), 300);
                   break;
               }
@@ -499,6 +519,7 @@ export async function initDashboard() {
     });
 
     document.getElementById('start-button')!.addEventListener('click', () => {
+      document.getElementById('start-button')!.style.display = 'none';
       registerPlayer(function (error, response) {
         if (error) {
           console.error(error);
@@ -628,10 +649,10 @@ export async function initDashboard() {
   });
 
   // Render active section
-  const contentArea = document.getElementById('content-area')!;
+/*   const contentArea = document.getElementById('content-area')!;
   const startButton = document.getElementById('start-button')!;
   const gameArea = document.getElementById('game-area')!;
-  const gameWindow = document.getElementById('game-window')!;
+  const gameWindow = document.getElementById('game-window')!; */
   switch (hash) {
     case 'profile':     renderProfileContent(contentArea, startButton, gameArea, gameWindow);     break;
     case 'play':        renderPlayContent(contentArea, startButton, gameArea, gameWindow);        break;
