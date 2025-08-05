@@ -19,18 +19,11 @@ exports.signup = async (request, reply) => {
 
 exports.login = async (request, reply) => {
     const { username, password } = request.body;
-
-//    const isValid = await userService.verifyUser(username, password);
-//    if (!isValid) {
     const result = await userService.login(username, password);
     if (result.error) {
         return reply.code(401).send({ error: '🧸 Invalid credentials' });
     }
-
     console.log('🎏 username and password are correct!');
-    //only return data here, without generating token which is created in API Gateway
-//    return reply.send({ username });
-    //return an object containing id and username
     return reply.send(result);
 };
 
@@ -52,11 +45,6 @@ exports.updateProfile = async (request, reply) => {
     console.log('🌎 request.body:', request.body);
 
     const { username, nickname, email, password, avatar } = request.body;
-/*
-    if (username) {
-        return reply.code(400).send({ error: "Username cannot be modified." });
-    }
-*/
     const result = await userService.updateProfile(userId, {
         username,
         nickname,
@@ -77,3 +65,26 @@ exports.deleteProfile = async (request, reply) => {
     if (result.error) return reply.code(400).send(result);
     return reply.send({ message: "🏊 Profile deleted successfully" });
 }
+
+exports.upsertGoogle = async (request, reply) => {
+  console.log('🔥 [userController] Received upsert request:', request.body);
+
+  const { email, name, picture, googleId } = request.body;
+
+  if (!email || !googleId) {
+    console.log('❌ [userController] Missing email or googleId:', { email, googleId });
+    return reply.code(400).send({ error: 'Email and Google ID are required' });
+  }
+ // const nickname = payload.given_name || 'Google User';
+/*   if (!user.nickname) {
+    user.nickname = user.username;
+  } */
+  try {
+    const result = await userService.upsertGoogleUser(email, name, picture, googleId);
+    console.log('✅ [userController] Success:', result);
+    return reply.send(result);
+  } catch (err) {
+    console.error('💥 [userController] Failed to upsert user:', err);
+    return reply.code(500).send({ error: 'User creation failed' });
+  }
+};

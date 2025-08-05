@@ -27,6 +27,7 @@ services:
     volumes:
       - ./backend/api-gateway:/app
       - /app/node_modules      # use container-installed deps
+      - ./backend/api-gateway/certs:/app/certs
     env_file:
       - ./backend/api-gateway/.env
     restart: always
