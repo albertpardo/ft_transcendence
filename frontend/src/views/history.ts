@@ -62,7 +62,7 @@ export async function renderHistoryContent(hideableElements) {
     const idL : string = entry.leftId;
     const idR : string = entry.rightId;
     let side : string = "";
-    let nicnknameVs : string = "unknown";
+    let nicknameVs : string = "unknown";
     let res : string = "";
     if (localStorage.getItem('userId') === idL) {
       if (entry.winner === "L") {
@@ -90,7 +90,11 @@ export async function renderHistoryContent(hideableElements) {
       side = "Left";
       if (entry.finish !== "absence") {
         let respNn = await getNicknameForPlayerId(idR);
-        nicnknameVs = JSON.parse(await respNn.text())?.nickname;
+        let nnJson = JSON.parse(await respNn.text());
+        nicknameVs = "<i>unknown</i>";
+        if (nnJson.err === "nil") {
+          nicknameVs = nnJson.nick;
+        }
       }
     }
     else {
@@ -119,13 +123,17 @@ export async function renderHistoryContent(hideableElements) {
       side = "Right";
       if (entry.finish !== "absence") {
         let respNn = await getNicknameForPlayerId(idL);
-        nicnknameVs = JSON.parse(await respNn.text())?.nickname;
+        let nnJson = JSON.parse(await respNn.text());
+        nicknameVs = "<i>unknown</i>";
+        if (nnJson.err === "nil") {
+          nicknameVs = nnJson.nick;
+        }
       }
     }
     const thisdate = new Date(entry.date);
     tempInnerHTML += `<tr>
       <td>${thisdate.toDateString()}, ${thisdate.toTimeString()}</td>
-      <td>${nicnknameVs}</td>
+      <td>${nicknameVs}</td>
       <td>${side}</td>
       <td>${entry.gameType}</td>
       <td>${entry.scoreL} : ${entry.scoreR}</td>

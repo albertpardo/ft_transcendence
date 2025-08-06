@@ -9,6 +9,19 @@ import { State, nullState } from './pongrender';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
+enum MetaGameState {
+  nothing,
+  waitmmopp,
+  waitmmstart,
+  inmmgame,
+  waittouropp,
+  waittourstart,
+  waittourrdy,
+  waittouropprdy,
+  intourgame,
+  misc,
+}
+
 async function movePaddleWrapper(d: number) {
   const movePaddleRawResp = await movePaddle(d);
   const movePaddleResp = await movePaddleRawResp.text();
@@ -44,7 +57,12 @@ async function getGameMetaInfo() {
       const oppNameRaw = await getNicknameForPlayerId(oppId);
       const oppNameText = await oppNameRaw.text();
       const oppNameJson = JSON.parse(oppNameText);
-      oppName = oppNameJson.nickname;
+      if (oppNameJson.err !== "nil") {
+        oppName = "<i>unknown</i>";
+      }
+      else {
+        oppName = oppNameJson.nickname;
+      }
     }
     const ret = {
       gType: parsedFresp.gType,
@@ -81,6 +99,70 @@ async function checkIsInTourWrapper() {
   const checkIsInTourRes = await checkIsInTourRaw.text();
   const checkIsInTourObj = JSON.parse(checkIsInTourRes);
   return (checkIsInTourObj?.res);
+}
+
+async function buttonSetter(state : MetaGameState) {
+  switch (state) {
+    case MetaGameState.nothing: {
+      // 1
+      document.getElementById("start-button").disabled = false;
+      document.getElementById("ready-button").disabled = true;
+      document.getElementById("giveup-button").disabled = true;
+      break;
+    }
+    case MetaGameState.waitmmopp: {
+      // 2
+      //no break
+    }
+    case MetaGameState.waitmmstart: {
+      // 3
+      //no break
+    }
+    case MetaGameState.inmmgame: {
+      // 4
+      document.getElementById("start-button").disabled = true;
+      document.getElementById("ready-button").disabled = true;
+      document.getElementById("giveup-button").disabled = false;
+      break;
+    }
+    case MetaGameState.waittouropp: {
+      // 5
+      //no break
+    }
+    case MetaGameState.waittourstart: {
+      // 6
+      document.getElementById("start-button").disabled = true;
+      document.getElementById("ready-button").disabled = true;
+      document.getElementById("giveup-button").disabled = true;
+      break;
+    }
+    case MetaGameState.waittourrdy: {
+      // 7
+      document.getElementById("start-button").disabled = true;
+      document.getElementById("ready-button").disabled = false;
+      document.getElementById("giveup-button").disabled = true;
+      break;
+    }
+    case MetaGameState.waittouropprdy: {
+      // 8
+      document.getElementById("start-button").disabled = true;
+      document.getElementById("ready-button").disabled = true;
+      document.getElementById("giveup-button").disabled = true;
+      break;
+    }
+    case MetaGameState.intourgame: {
+      // 9
+      document.getElementById("start-button").disabled = true;
+      document.getElementById("ready-button").disabled = true;
+      document.getElementById("giveup-button").disabled = false;
+      break;
+    }
+    default: {
+      // 9
+      //basically "misc"
+      break;
+    }
+  }
 }
 
 export async function initDashboard() {

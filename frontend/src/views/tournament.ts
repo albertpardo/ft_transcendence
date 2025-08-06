@@ -172,7 +172,11 @@ async function fillInTheTournTable() {
         for (let j = 0; j < currMaxPN; j++) {
           if (tourn?.Ids[i][j] !== "" && tourn?.Ids[i][j] !== "failed") {
             let respNn = await getNicknameForPlayerId(tourn?.Ids[i][j]);
-            let nicnknameVs = JSON.parse(await respNn.text())?.nickname;
+            let nnJson = JSON.parse(await respNn.text());
+            let nicknameVs = "<i>unknown</i>";
+            if (nnJson.err === "nil") {
+              nicnknameVs = nnJson.nickname;
+            }
             document.getElementById(`${currentTitle}${j + 1}`).innerHTML = "<b>" + nicnknameVs + "</b>";
           }
           else {
@@ -189,7 +193,11 @@ async function fillInTheTournTable() {
           const finId = finObj.res;
           // looks familiar?
           let respNn = await getNicknameForPlayerId(finId);
-          let nicnknameVs = JSON.parse(await respNn.text())?.nickname;
+          let nnJson = JSON.parse(await respNn.text());
+          let nicknameVs = "<i>unknown</i>";
+          if (nnJson.err === "nil") {
+            nicnknameVs = nnJson.nickname;
+          }
           document.getElementById('table-finalist').innerHTML = "<b>" + nicnknameVs + "</b>";
         }
         else {

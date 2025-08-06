@@ -15,11 +15,17 @@ function makeid(length) {
 }
 
 exports.getPublicNickname = async (userId) => {
-	const nick = db.getNicknameById(userId);
-	if (!nick) {
-		return { error: "couldn't get nickname; user might be non-existent" };
+	const nickRes = db.getNicknameById(userId);
+	if (!nickRes) {
+		return { 
+			nick: "",
+			err: "couldn't get nickname; user might be non-existent",
+		};
 	}
-	return nick;
+	return { 
+		nick: nickRes.nickname,
+		err: "nil",
+	};
 }
 
 exports.signup = async (username, password, nickname, email, avatar = '') => {
