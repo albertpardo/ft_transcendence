@@ -72,6 +72,13 @@ async function getGameMetaInfo() {
   }
   else {
     console.error("suffered an error trying to get game info:", parsedFresp.err);
+    if (parsedFresp.err === "Player not found in playersMap") {
+      const ret = {
+        gType: "none",
+        oppName: "unknown",
+      };
+      return (ret);
+    }
     const ret = {
       gType: "unknown",
       oppName: "unknown",
@@ -160,6 +167,10 @@ async function buttonSetter(state : MetaGameState) {
     default: {
       // 9
       //basically "misc"
+      //idk if that's a good idea
+      document.getElementById("start-button").disabled = false;
+      document.getElementById("ready-button").disabled = false;
+      document.getElementById("giveup-button").disabled = false;
       break;
     }
   }
@@ -301,16 +312,42 @@ export async function initDashboard() {
   let metaInfo = await getGameMetaInfo();
   let reconn : boolean = false;
   if (localStorage.getItem("authToken")) {
-    if (metaInfo.gType === "unknown") {
+    if (metaInfo.gType === "none") {
       gameInfo.innerHTML = "";
-      document.getElementById("start-button").disabled = false;
-      document.getElementById("ready-button").disabled = await checkReadyWrapper();
-      document.getElementById("giveup-button").disabled = true;
+      if (await checkIsInTourWrapper()) {
+        // no game, but we're in a tournament
+        buttonSetter(MetaGameState.waittourstart);
+      }
+      else {
+        // no game. allow mm search
+        buttonSetter(MetaGameState.nothing);
+      }
+    }
+    else if (metaInfo.gType === "unknown") {
+      // some bs happened. must investigate
+      buttonSetter(MetaGameState.misc);
+    }
+    else if (metaInfo.gType === "normal") {
+      // we don't check for anything since basically once you get into a game with whatever state it's got, you
+      // can only forefit/escape, unlike the tournament stuff which has some various conditions for getting ready/forefitting.
+      buttonSetter(MetaGameState.inmmgame);
+      console.log("oh snap! maybe reconnect the socket?");
+      reconn = true;
+      gameInfo.innerHTML = "Game type: " + metaInfo.gType + "; versus: " + metaInfo.oppName;
     }
     else {
-      document.getElementById("start-button").disabled = true;
-      document.getElementById("ready-button").disabled = await checkReadyWrapper();
-      document.getElementById("giveup-button").disabled = false;
+      // ok, it's a tournament
+      // there's only ONE situation which requires us to press the ready key.
+      // we're in a game of type tournament and we're not ready.
+      //
+      // if it's a game and we're ready, just give the forefit button ? TODO to think
+      const isready : bool = await checkReadyWrapper();
+      if (!isready) {
+        buttonSetter(MetaGameState.waittourrdy);
+      }
+      else {
+        buttonSetter(MetaGameState.misc);
+      }
       console.log("oh snap! maybe reconnect the socket?");
       reconn = true;
       gameInfo.innerHTML = "Game type: " + metaInfo.gType + "; versus: " + metaInfo.oppName;
