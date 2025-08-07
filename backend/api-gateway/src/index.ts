@@ -147,6 +147,7 @@ async function registerPlugin() {
         "Access-Control-Allow-Origin",
         "Content-Type",
         "Authorization",
+        "Cookie",
         "Upgrade",
         "use-me-to-authorize",
       ],

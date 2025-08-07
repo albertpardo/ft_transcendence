@@ -294,7 +294,7 @@ const resetGameState = () => {
   started = false;
 }
 
-const bindDashboardEvents = () => {
+export const bindDashboardEvents = () => {
   // Logout functionality
   document.getElementById('logout-btn')?.addEventListener('click', () => {
     localStorage.removeItem('authToken');

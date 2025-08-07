@@ -9,6 +9,8 @@ const FORTYTWO_CLIENT_SECRET = process.env.FORTYTWO_CLIENT_SECRET || "";
 const FORTYTWO_REDIRECT_URI =
   process.env.FORTYTWO_REDIRECT_URI ||
   "https://localhost:8443/api/auth/42/callback";
+const FRONTEND_URL = process.env.API_FRONTEND_URL || "https://localhost:3000";
+const DOMAIN = process.env.DOMAIN || "localhost";
 
 const fortyTwoAuthPlugin: FastifyPluginAsync = async (fastify) => {
   // Redirect to 42 OAuth
@@ -124,11 +126,11 @@ const fortyTwoAuthPlugin: FastifyPluginAsync = async (fastify) => {
         secure: true,
         sameSite: "none", // Required for cross-origin requests
         path: "/",
-        domain: "localhost", // Works for local development
+        domain: DOMAIN,
       });
 
       // 6. Redirect to frontend
-      return reply.redirect("https://localhost:3000/#home");
+      return reply.redirect(`${FRONTEND_URL}/#home`);
     } catch (err: any) {
       fastify.log.error("42 auth error:", err);
       return reply.status(500).send({

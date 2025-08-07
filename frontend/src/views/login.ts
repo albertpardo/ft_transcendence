@@ -88,8 +88,8 @@ export function renderLogin(appElement: HTMLElement) {
           </div>
         </form>
         <button id="login-42-btn" class="w-full mt-4 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition flex items-center justify-center">
-          <img src="https://cdn.intra.42.fr/42logo/white/42.svg" alt="42" class="w-5 h-5 mr-2" />
-          Sign in with 42 *
+        Sign in with&nbsp;&nbsp;
+          <img src="../../public/assets/images/descarga.png" alt="42" class="w-5 h-5 mr-2" />
         </button>
         <div class="text-center mt-4">
           <p class="text-sm text-gray-400">
