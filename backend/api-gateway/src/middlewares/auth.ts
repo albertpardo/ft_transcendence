@@ -4,9 +4,51 @@ import { FastifyRequest, FastifyReply } from 'fastify';
 console.log("🛡️ Auth middleware loaded!");
 let itwasasocket : boolean = false;
 
+export async function rewriteRequestHeaders(
+  req: FastifyRequest,
+  reply: FastifyReply
+) {
+  // Handle WebSocket connections
+  if (req.headers["upgrade"] === "websocket") {
+    const usp = new URLSearchParams(req.url);
+    const authToken = usp.get("authorization");
+    if (authToken) {
+      req.headers["authorization"] = `Bearer ${authToken}`;
+    }
+  }
+
+  // CRITICAL FIX: Handle authToken cookie for regular requests
+  if (!req.headers.authorization && req.cookies?.authToken) {
+    req.headers.authorization = `Bearer ${req.cookies.authToken}`;
+    console.log("🍪 Injected Authorization header from authToken cookie");
+  }
+
+  return;
+}
+/* export async function rewriteRequestHeaders(req: FastifyRequest, reply: FastifyReply) {
+  // Handle WebSocket connections
+  if (req.headers["upgrade"] === "websocket") {
+    const usp = new URLSearchParams(req.url);
+    const authToken = usp.get("authorization");
+    if (authToken) {
+      req.headers["authorization"] = `Bearer ${authToken}`;
+    }
+  }
+  
+  // CRITICAL FIX: Handle authToken cookie for regular requests
+  if (!req.headers.authorization && req.cookies?.authToken) {
+    req.headers.authorization = `Bearer ${req.cookies.authToken}`;
+    console.log('🍪 Injected Authorization header from authToken cookie');
+  }
+  
+  return;
+}
+ */
+
 // JWT verification using authMiddleware
 export async function authMiddleware(req: FastifyRequest, reply: FastifyReply) {
 
+  await rewriteRequestHeaders(req, reply);
 
     itwasasocket = false;
 
@@ -19,28 +61,33 @@ export async function authMiddleware(req: FastifyRequest, reply: FastifyReply) {
     }
 
     // if requested URL is public, skip auth
-    const publicPaths = ['/api/signup', '/api/login', '/api/public', '/api/health'];
+    const publicPaths = [
+      "/api/signup",
+      "/api/login",
+      "/api/public",
+      "/api/health",
+      "/api/auth/42",
+    ];
+    if (req.headers["x-internal-request"] === "true") {
+      return;
+    }
     if (publicPaths.some(path => req.url?.startsWith(path))) return;
-    // if (publicPaths.some(path => req.url?.startsWitth('/health'))) return; // allow health check without auth
+    
     if (req.url?.startsWith('/health')) return; // allow health check without auth
 
     try {
-//        if (req?.headers['sec-websocket-protocol'] !== null) {
+
         const usp1 = new URLSearchParams(req.url);
         if (req.headers["upgrade"] === "websocket") {
           itwasasocket = true;
           req.headers["authorization"] = "Bearer " + usp1.get("authorization");
-        
-        /* if (req.headers.upgrade === 'websocket' && !req.headers['authorization'] && req?.headers['sec-websocket-protocol']) {
-          req.headers['authorization'] = "Bearer " + req.headers['sec-websocket-protocol'];
-          delete req.headers['sec-websocket-protocol']; */
+
         }
        
         console.log('🔍 Raw Authorization Header inside try00:', String(req.headers['authorization']));
         if (!req.headers['authorization'] || 
             (req.headers['authorization'] === "Bearer undefined" && req.headers['use-me-to-authorize'])) {
-//            req.headers['authorization'] = req.headers['use-me-to-authorize'];
-//            delete req.headers['use-me-to-authorize'];
+
             if (req.headers['use-me-to-authorize']) {
                     const useMeToAuthorize = req.headers['use-me-to-authorize'];
                     req.headers['authorization'] = `Bearer ${

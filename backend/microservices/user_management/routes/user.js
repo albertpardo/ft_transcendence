@@ -12,6 +12,7 @@ async function userRoutes(fastify, options) {
     fastify.post('/signup', userController.signup);
     fastify.post('/login', userController.login);
     fastify.post('/public/nickname', userController.getPublicNickname);
+    fastify.post('/upsert-42', userController.upsert42User);
     fastify.get('/profile', userController.getProfile);
     fastify.put('/profile', userController.updateProfile);
     fastify.delete('/profile', userController.deleteProfile);

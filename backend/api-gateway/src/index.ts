@@ -4,20 +4,18 @@ import { FastifyRequest, FastifyReply } from 'fastify';
 require('dotenv').config({ path: __dirname + '/../.env' }); 
 const Fastify = require('fastify');
 const http = require('http');
-
 const fastifyJWT = require('@fastify/jwt');
-
 const { jwt, authHook } = require('./plugins/jwt');
 const fastifyRateLimit = require('@fastify/rate-limit');
 const fastifyCors = require('@fastify/cors');
 const { tlsConfig } = require('./config/tls')
 // const proxyPlugin = require('@fastify/http-proxy');
 const proxyPlugin = require('./plugins/proxy');
-
 const { rateLimitPlugin } = require('./plugins/rateLimit');
 const exampleRoutes = require('./routes/example');
-
 const isDev = process.env.NODE_ENV === 'development';
+import fortyTwoAuthPlugin from './plugins/fortytwo';
+import { rewriteRequestHeaders } from './middlewares/auth';
 
 const server = isDev
     ? Fastify({
@@ -118,43 +116,50 @@ async function registerPlugin() {
 
     
     await server.register(fastifyCors, {
-        //origin: '*',
-          origin: (origin: string | undefined, cb: CorsOriginCallback) => {
+      //origin: '*',
+      origin: (origin: string | undefined, cb: CorsOriginCallback) => {
+        try {
+          if (!origin) return cb(null, true);
+          
+          const allowedOrigins = new Set([
+            "https://frontend-7nt4.onrender.com",
+            "https://localhost:3000",
+            "http://localhost:3000",
+            "https://127.0.0.1:3000",
+            "http://127.0.0.1:3000"
+          ]);
+          
+          if (allowedOrigins.has(origin)) {
+            cb(null, true);
+          } else {
+            console.error(`CORS blocked request from origin: ${origin}`);
+            cb(new Error("Not allowed by CORS"), false);
+          }
+        } catch (err) {
+          console.error("CORS error:", err);
+          cb(new Error("CORS processing error"), false);
+        }
+      },
 
-            if (!origin) return cb(null, true);
-
-            const allowedOrigins = new Set([
-                'https://frontend-7nt4.onrender.com',
-                'https://localhost:3000',
-                'http://localhost:3000',
-                'https://127.0.0.1:3000',
-                'http://127.0.0.1:3000',
-                '*',
-            ]);
-            if (allowedOrigins.has(origin)) {
-                cb(null, true);
-            } else {
-                cb(new Error("Not allowed by CORS"), false);
-            }
-        }, 
-
-        credentials: true,
-        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-        allowedHeaders: [
-            'Access-Content-Allow-Origin',
-            'Content-Type',
-            'Authorization',
-            'Upgrade',
-            'use-me-to-authorize',
-        ],
-        preflightContinue: false,
-        optionsSuccessStatus: 204
-    })
+      credentials: true,
+      methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+      allowedHeaders: [
+        "Access-Control-Allow-Origin",
+        "Content-Type",
+        "Authorization",
+        "Upgrade",
+        "use-me-to-authorize",
+      ],
+      preflightContinue: false,
+      optionsSuccessStatus: 204,
+    });
     //JWT middleware 
+    server.addHook("onRequest", rewriteRequestHeaders);
     await server.register(jwt)
     await server.register(rateLimitPlugin)
     await server.register(authHook)
     await server.register(proxyPlugin)
+    await server.register(fortyTwoAuthPlugin);
 }
 
 //start service (using HTTPS)
@@ -183,14 +188,7 @@ async function start() {
         const address = await server.listen({ port: Number(process.env.PORT), host: '0.0.0.0' });
         server.log.info(`Server listening on ${address}`)
 
-        /* server.listen({ port:8443, host: '0.0.0.0' }, (err: Error, address: string) => {
-            if (err) {
-                server.log.error(err)
-                process.exit(1)
-            }
-            server.log.info(`Server listening on ${address}`)
-        })
- */        console.log(`HTTP health check server listening on ${process.env.HEALTH_PORT}`);
+        console.log(`HTTP health check server listening on ${process.env.HEALTH_PORT}`);
         console.log(server.printRoutes());
     } catch (err) {
         server.log.error(err)

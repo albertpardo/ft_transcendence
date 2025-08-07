@@ -87,7 +87,10 @@ export function renderLogin(appElement: HTMLElement) {
             </button>
           </div>
         </form>
-        
+        <button id="login-42-btn" class="w-full mt-4 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition flex items-center justify-center">
+          <img src="https://cdn.intra.42.fr/42logo/white/42.svg" alt="42" class="w-5 h-5 mr-2" />
+          Sign in with 42 *
+        </button>
         <div class="text-center mt-4">
           <p class="text-sm text-gray-400">
             <span id="toggle-form-text">Don't have an account? </span>
@@ -97,7 +100,15 @@ export function renderLogin(appElement: HTMLElement) {
       </div>
     </div>
   `;
-
+  const login42Btn = document.getElementById("login-42-btn");
+  if (login42Btn) {
+    login42Btn.addEventListener("click", () => {
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("userId");
+      localStorage.removeItem("authProvider");
+      window.location.href = "/api/auth/42";
+    });
+  }
   // Form toggle functionality
   const toggleForm = document.getElementById('toggle-form');
   const toggleFormText = document.getElementById('toggle-form-text');
@@ -111,6 +122,8 @@ export function renderLogin(appElement: HTMLElement) {
 
   const isPassword = passwordField.type === 'password';
   passwordField.type = isPassword ? 'text' : 'password';
+
+  
 
   // Visual feedback if button is provided
   if (button) {
@@ -157,6 +170,7 @@ export function renderLogin(appElement: HTMLElement) {
 
   // Login form submission
   if (loginForm) {
+    
     loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       
@@ -313,4 +327,45 @@ export function renderLogin(appElement: HTMLElement) {
 
     });
   }
+}
+
+export function checkAuthStatus() {
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+  const authToken =
+    localStorage.getItem("authToken") ||
+    (document.cookie.match("authToken=([^;]+)")?.[1] ?? "");
+
+  if (!authToken) {
+    // No auth token found - redirect to login
+    window.location.hash = "login";
+    return false;
+  }
+
+  // Token exists - try to validate it
+  return fetch(`${API_BASE_URL}/api/profile`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${authToken}`,
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+  })
+    .then((response) => {
+      if (!response.ok) {
+        // Token is invalid - clear it and redirect to login
+        localStorage.removeItem("authToken");
+        document.cookie =
+          "authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        window.location.hash = "login";
+        return false;
+      }
+      return true;
+    })
+    .catch(() => {
+      localStorage.removeItem("authToken");
+      document.cookie =
+        "authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+      window.location.hash = "login";
+      return false;
+    });
 }

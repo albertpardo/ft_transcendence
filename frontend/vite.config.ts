@@ -1,46 +1,42 @@
-import { defineConfig } from 'vite';
-import { resolve } from 'path';
-import fs from 'fs';
+import { defineConfig } from "vite";
+import { resolve } from "path";
+import fs from "fs";
 
-const isProduction = process.env.NODE_ENV === 'production';
+const isProduction = process.env.NODE_ENV === "production";
 
 export default defineConfig({
   server: {
     port: 3000,
-    open: false, // Desactivamos la apertura automática del navegador
-    host: '0.0.0.0', // Importante para que funcione en Docker
-/*HEAD
-    root: './', 
-    build: {
-    outDir: 'dist',
-    emptyOutDir: true,
-  }, */
-
-    ...(isProduction ? {} : {
-      https: {
-        key: fs.readFileSync('certs/front.key'),
-        cert: fs.readFileSync('certs/front.cert'),
-      },
-    }),
+    open: false,
+    host: "0.0.0.0",
+    ...(isProduction
+      ? {}
+      : {
+          https: {
+            key: fs.readFileSync("certs/front.key"),
+            cert: fs.readFileSync("certs/front.cert"),
+          },
+        }),
     proxy: {
-      '/api': {
-        target: 'https://backend:8443',
+      "/api": {
+        target: 'https://api-gateway:8443',
         changeOrigin: true,
-        // rewrite: (path) => path.replace(/^\/api/, '')
-      }
-    }
+        secure: false,
+        rewrite: (path) => path, // ✅ Keep this
+      },
+    },
   },
   build: {
-    outDir: 'dist',
+    outDir: "dist",
     rollupOptions: {
       input: {
-        main: resolve(__dirname, 'index.html'),
-      }
-    }
+        main: resolve(__dirname, "index.html"),
+      },
+    },
   },
   resolve: {
     alias: {
-      '@': resolve(__dirname, 'src')
-    }
-  }
+      "@": resolve(__dirname, "src"),
+    },
+  },
 });

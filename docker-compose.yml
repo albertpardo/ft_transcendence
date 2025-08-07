@@ -1,7 +1,5 @@
 services:
   frontend:
-    # environment:
-    #  - VITE_API_BASE_URL=https://backend:8443
     build:
       context: ./frontend
       dockerfile: Dockerfile_dev
@@ -27,14 +25,14 @@ services:
       dockerfile: Dockerfile_dev
     container_name: trans_api-gateway
     ports:
-      - "8443:8443"     # TLS port exposed to host
-      - "10000:10000" # HTTP port for internal communication
+      - "8443:8443"
+      - "10000:10000"
     depends_on:
       - user_management
       - game_service
     volumes:
       - ./backend/api-gateway:/app
-      - /app/node_modules      # use container-installed deps 
+      - /app/node_modules
     env_file:
       - ./backend/api-gateway/.env
     restart: always
@@ -50,7 +48,7 @@ services:
       - "9001"
     volumes:
       - ./backend/microservices/user_management:/app
-      - /app/node_modules      # use container-installed deps
+      - /app/node_modules
     environment:
       - ./backend/microservices/user_management/.env
     restart: always
@@ -65,7 +63,7 @@ services:
     expose:
       - "9002"
     volumes:
-      - /app/node_modules      # use container-installed deps
+      - /app/node_modules
       - ./backend/microservices/game_service/vol:/app/dbs
     restart: always
     networks:

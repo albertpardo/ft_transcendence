@@ -1,7 +1,10 @@
 const bcrypt = require('bcrypt');
 const db = require('../db');
+const transaction = require("../db");
+// const transaction = require("../db").transaction;
+/* const dbModule = require("../db");
+const { db, transaction } = dbModule; */
 
-// copypaste from game service but it's js not ts
 function makeid(length) {
    let result = '';
    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -13,17 +16,15 @@ function makeid(length) {
    }
    return result;
 }
-
-
     
 exports.getPublicNickname = async (userId) => {
-        const nick = db.getNicknameById(userId);
-        if (!nick) {
-            return { error: "couldn't get nickname; user might be non-existent" };
-        }
-        console.log("hit from backend/microservices/user_management/services/userService.js", nick);
-        return nick;
+    const nick = db.getNicknameById(userId);
+    if (!nick) {
+        return { error: "couldn't get nickname; user might be non-existent" };
     }
+    console.log("hit from backend/microservices/user_management/services/userService.js", nick);
+    return nick;
+}
 
 exports.signup = async (username, password, nickname, email, avatar = '') => {
    try {
@@ -130,8 +131,7 @@ exports.updateProfile = async (userId, { username, nickname, email, password, av
             return { error: "Email already in use" };
         }
     }
-    
-    
+        
     if (typeof avatar === 'string' && avatar !== user.avatar) {
       updateFields.avatar = avatar;
     }
@@ -148,3 +148,288 @@ exports.deleteProfile = async (userId) => {
     await db.deleteUser(userId);
     return { success: true };
 }
+
+exports.upsert42User = async (email, fortyTwoId, username, picture) => {
+  fortyTwoId = String(fortyTwoId);
+  console.log("🔍 [userService] upsert42User called with:", {
+    email,
+    fortyTwoId,
+    username,
+  });
+
+  try {
+    // SIMPLE IMPLEMENTATION - NO TRANSACTIONS
+    let user =
+      db.getUserBy42Id(fortyTwoId) || (email ? db.getUserByEmail(email) : null);
+
+    if (!user) {
+      console.log("🆕 [userService] Creating new 42 user");
+      const localid = makeid(64);
+      const firstName = username.split(" ")[0] || "User";
+      const lastName = username.split(" ").slice(1).join(" ") || "Anonymous";
+
+      user = db.createUser({
+        id: localid,
+        email,
+        username,
+        firstName,
+        lastName,
+        avatar: picture,
+        fortyTwoId,
+        status: "online",
+        nickname: username,
+      });
+      console.log("✅ [userService] Created 42 user:", user.username);
+    } else {
+      console.log("🔄 [userService] User found:", user.username);
+      const updates = {};
+      if (!user.avatar && picture) updates.avatar = picture;
+      if (user.username !== username) updates.username = username;
+      if (user.nickname !== username) updates.nickname = user;
+      updates.status = "online";
+
+      if (Object.keys(updates).length > 0) {
+        db.updateUser(user.id, updates);
+      }
+    }
+
+    return {
+      id: user.id,
+      username: user.username,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      avatar: user.avatar,
+      email: user.email,
+      nickname: user.nickname,
+    };
+  } catch (err) {
+    console.error("❌ Failed to upsert 42 user:", err);
+    throw err;
+  }
+};
+/* 
+exports.upsert42User = async (email, fortyTwoId, username, picture) => {
+  fortyTwoId = String(fortyTwoId);
+  console.log("🔍 [userService] upsert42User called with:", {
+    email,
+    fortyTwoId,
+    username,
+  });
+
+  try {
+    // ATOMIC UPSERT - This is the only pattern that works reliably
+    const upsertUser = transaction((email, fortyTwoId, username, picture) => {
+      // First check if user exists
+      let user = db
+        .prepare("SELECT * FROM users WHERE fortyTwoId = ?")
+        .get(fortyTwoId);
+
+      if (!user && email) {
+        user = db.prepare("SELECT * FROM users WHERE email = ?").get(email);
+      }
+
+      if (!user) {
+        console.log("🆕 [userService] Creating new 42 user");
+        const localid = makeid(64);
+        const firstName = username.split(" ")[0] || "User";
+        const lastName = username.split(" ").slice(1).join(" ") || "Anonymous";
+
+        // Create user
+        const insert = db.prepare(`
+          INSERT INTO users (
+            id, username, password, nickname, email, avatar, 
+            fortyTwoId, firstName, lastName, status
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `);
+
+        insert.run(
+          localid,
+          username,
+          null,
+          username,
+          email,
+          picture,
+          fortyTwoId,
+          firstName,
+          lastName,
+          "online"
+        );
+
+        // Get the created user
+        user = db.prepare("SELECT * FROM users WHERE id = ?").get(localid);
+      } else {
+        console.log("🔄 [userService] User found:", user.username);
+        const updates = {};
+        if (!user.avatar && picture) updates.avatar = picture;
+        if (user.username !== username) updates.username = username;
+        if (user.nickname !== username) updates.nickname = user;
+        updates.status = "online";
+
+        if (Object.keys(updates).length > 0) {
+          const setClause = Object.keys(updates)
+            .map((key) => `${key} = ?`)
+            .join(", ");
+          const values = Object.values(updates);
+          values.push(user.id);
+
+          const update = db.prepare(
+            `UPDATE users SET ${setClause} WHERE id = ?`
+          );
+          update.run(...values);
+        }
+      }
+
+      return {
+        id: user.id,
+        username: user.username,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        avatar: user.avatar,
+        email: user.email,
+        nickname: user.nickname,
+      };
+    });
+
+    // Execute the transaction
+    return upsertUser(email, fortyTwoId, username, picture);
+  } catch (err) {
+    console.error("❌ Failed to upsert 42 user:", err);
+    throw err;
+  }
+}; */
+/* exports.upsert42User = async (email, fortyTwoId, username, picture) => {
+  fortyTwoId = String(fortyTwoId);
+  console.log("🔍 [userService] upsert42User called with:", {
+    email,
+    fortyTwoId,
+    username,
+  });
+
+  try {
+    return db.transaction(() => {
+      // ATOMIC UPSERT - This is the only pattern that works reliably
+      const upsert = db.prepare(`
+        INSERT INTO users (
+          id, username, password, nickname, email, avatar, 
+          fortyTwoId, firstName, lastName, status
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(fortyTwoId) DO UPDATE SET
+          username = excluded.username,
+          email = excluded.email,
+          avatar = COALESCE(excluded.avatar, users.avatar),
+          firstName = excluded.firstName,
+          lastName = excluded.lastName,
+          status = 'online'
+      `);
+
+      const localid = makeid(64);
+      const firstName = username.split(" ")[0] || "User";
+      const lastName = username.split(" ").slice(1).join(" ") || "Anonymous";
+
+      // Execute the upsert (insert or update in one atomic operation)
+      const result = upsert.run(
+        localid,
+        username,
+        null,
+        username,
+        email,
+        picture,
+        fortyTwoId,
+        firstName,
+        lastName,
+        "online"
+      );
+
+      // Get the user (whether inserted or updated)
+      const user = db
+        .prepare("SELECT * FROM users WHERE fortyTwoId = ?")
+        .get(fortyTwoId);
+
+      if (!user) {
+        throw new Error("User should exist but doesn't after upsert");
+      }
+
+      // Determine if this was a new user or update
+      if (result.changes === 1 && result.lastInsertRowid) {
+        console.log("✅ [userService] Created 42 user:", user.username);
+      } else {
+        console.log(
+          "🔄 [userService] Updated existing 42 user:",
+          user.username
+        );
+      }
+
+      return {
+        id: user.id,
+        username: user.username,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        avatar: user.avatar,
+        email: user.email,
+        nickname: user.nickname,
+      };
+    })();
+  } catch (err) {
+    console.error("❌ Failed to upsert 42 user:", err);
+    throw err;
+  }
+}; */
+
+/*  exports.upsert42User = async (email, fortyTwoId, username, picture) => {
+  fortyTwoId = String(fortyTwoId);
+  console.log("🔍 [userService] upsert42User called with:", {
+    email,
+    fortyTwoId,
+    username,
+  });
+
+  try {
+
+    let user =
+      db.getUserBy42Id(fortyTwoId) || (email ? db.getUserByEmail(email) : null);
+
+    if (!user) {
+      console.log("🆕 [userService] Creating new 42 user");
+      const localid = makeid(64);
+      const firstName = username.split(" ")[0] || "User";
+      const lastName = username.split(" ").slice(1).join(" ") || "Anonymous";
+
+      user = db.createUser({
+        id: localid,
+        email,
+        username,
+        firstName,
+        lastName,
+        avatar: picture,
+        fortyTwoId,
+        status: "online",
+        nickname: username,
+      });
+      console.log("✅ [userService] Created 42 user:", user.username);
+    } else {
+      console.log("🔄 [userService] User found:", user.username);
+      const updates = {};
+      if (!user.avatar && picture) updates.avatar = picture;
+      if (user.username !== username) updates.username = username;
+      if (user.nickname !== username) updates.nickname = username;
+      updates.status = "online";
+
+      if (Object.keys(updates).length > 0) {
+        db.updateUser(user.id, updates);
+      }
+    }
+
+    return {
+      id: user.id,
+      username: user.username,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      avatar: user.avatar,
+      email: user.email,
+      nickname: user.nickname,
+    };
+  } catch (err) {
+    console.error("❌ Failed to upsert 42 user:", err);
+    throw err;
+  }
+};  */

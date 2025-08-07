@@ -7,6 +7,7 @@ import { renderProfileContent } from './profile';
 import { State, nullState } from './pongrender';
 import confetti from 'canvas-confetti';
 import { t, i18nReady } from '../i18n';
+import { checkAuthStatus } from './login';
 
 // Import VITE_API_BASE_URL from environment variables
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -762,10 +763,8 @@ const handleGameMessage = (event: MessageEvent<string>): void => {
 };
 
 export async function initDashboard() {
-  const hash = window.location.hash.replace('#', '') || 'home';
-  const app = document.getElementById('app')!;
-
-  
+  const hash = window.location.hash.replace("#", "") || "home";
+  const app = document.getElementById("app")!;
 
   app.innerHTML = `
     <!-- Mobile Header -->
@@ -796,14 +795,28 @@ export async function initDashboard() {
       </div>
       <h2 class="text-xl md:text-2xl font-bold mb-6 md:mb-8 text-center text-white">Transcendence</h2>
       <nav class="flex-grow space-y-2 md:space-y-3">
-        <a href="#home" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='home'?'bg-blue-600':'bg-gray-700'}">${t('nav.dashboard')}</a>
-        <a href="#profile" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='profile'?'bg-blue-600':'bg-gray-700'}">${t('nav.profile')}</a>
-        <a href="#play" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='play'?'bg-blue-600':'bg-gray-700'}">${t('nav.play')}</a>
-        <a href="#history" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='history'?'bg-blue-600':'bg-gray-700'}">${t('nav.history')}</a>
-        <a href="#tournament" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='tournament'?'bg-blue-600':'bg-gray-700'}">${t('nav.tournament')}</a>
-        <a href="#stats" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='stats'?'bg-blue-600':'bg-gray-700'}">${t('nav.stats')}</a>
+        <a href="#home" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${
+          hash === "home" ? "bg-blue-600" : "bg-gray-700"
+        }">${t("nav.dashboard")}</a>
+        <a href="#profile" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${
+          hash === "profile" ? "bg-blue-600" : "bg-gray-700"
+        }">${t("nav.profile")}</a>
+        <a href="#play" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${
+          hash === "play" ? "bg-blue-600" : "bg-gray-700"
+        }">${t("nav.play")}</a>
+        <a href="#history" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${
+          hash === "history" ? "bg-blue-600" : "bg-gray-700"
+        }">${t("nav.history")}</a>
+        <a href="#tournament" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${
+          hash === "tournament" ? "bg-blue-600" : "bg-gray-700"
+        }">${t("nav.tournament")}</a>
+        <a href="#stats" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${
+          hash === "stats" ? "bg-blue-600" : "bg-gray-700"
+        }">${t("nav.stats")}</a>
       </nav>
-      <button id="logout-btn" class="mt-auto w-full p-3 bg-red-600 rounded-lg hover:bg-red-700 transition text-white font-medium">${t('nav.logout')}</button>
+      <button id="logout-btn" class="mt-auto w-full p-3 bg-red-600 rounded-lg hover:bg-red-700 transition text-white font-medium">${t(
+        "nav.logout"
+      )}</button>
     </aside>
 
     <!-- Mobile Backdrop -->
@@ -853,30 +866,44 @@ export async function initDashboard() {
         </div>
 
       </div>
-      <button id="start-button" class="mt-6 p-3 bg-red-600 rounded-lg hover:bg-red-700 transition text-white font-medium">${t('rejoin')}</button>
+      <button id="start-button" class="mt-6 p-3 bg-red-600 rounded-lg hover:bg-red-700 transition text-white font-medium">${t(
+        "rejoin"
+      )}</button>
     </div>
   `;
 
-  const contentArea = document.getElementById('content-area')!;
-  const startButton = document.getElementById('start-button')!;
-  const gameArea = document.getElementById('game-area')!;
-  const gameWindow = document.getElementById('game-window')!;
+  const contentArea = document.getElementById("content-area")!;
+  const startButton = document.getElementById("start-button")!;
+  const gameArea = document.getElementById("game-area")!;
+  const gameWindow = document.getElementById("game-window")!;
 
   switch (hash) {
-    case 'profile':     renderProfileContent(contentArea, startButton, gameArea, gameWindow);     break;
-    case 'play':        renderPlayContent(contentArea, startButton, gameArea, gameWindow);        break;
-    case 'history':     renderHistoryContent(contentArea, startButton, gameArea, gameWindow);     break;
-    case 'tournament':  renderTournamentContent(contentArea, startButton, gameArea, gameWindow);  break;
-    case 'stats':       renderStatsContent(contentArea, startButton, gameArea, gameWindow);       break;
-    default:            renderHomeContent(contentArea, startButton, gameArea, gameWindow);
+    case "profile":
+      renderProfileContent(contentArea, startButton, gameArea, gameWindow);
+      break;
+    case "play":
+      renderPlayContent(contentArea, startButton, gameArea, gameWindow);
+      break;
+    case "history":
+      renderHistoryContent(contentArea, startButton, gameArea, gameWindow);
+      break;
+    case "tournament":
+      renderTournamentContent(contentArea, startButton, gameArea, gameWindow);
+      break;
+    case "stats":
+      renderStatsContent(contentArea, startButton, gameArea, gameWindow);
+      break;
+    default:
+      renderHomeContent(contentArea, startButton, gameArea, gameWindow);
   }
 
-  if (localStorage)
-    startGameLogic(localStorage.getItem("authToken")!);
-    if (hash === 'play') {
-    gameArea.classList.remove('hidden');
+  if (localStorage) startGameLogic(localStorage.getItem("authToken")!);
+  if (hash === "play") {
+    gameArea.classList.remove("hidden");
   } else {
-    gameArea.classList.add('hidden');
+    gameArea.classList.add("hidden");
   }
+  // Call this on app initialization
+  // checkAuthStatus();
   bindDashboardEvents();
 }

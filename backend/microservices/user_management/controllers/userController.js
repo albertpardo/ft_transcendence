@@ -97,3 +97,65 @@ exports.deleteProfile = async (request, reply) => {
     // reply.send({ message: "🏊 Profile deleted successfully" });
     reply.type('application/json').send({ message: "🏊 Profile deleted successfully" });
 }
+
+exports.upsert42User = async (request, reply) => {
+  console.log("🔥 [userController] Received 42 upsert request:", request.body);
+
+  const { email, fortyTwoId, username, picture } = request.body;
+  const fortyTwoIdStr = String(fortyTwoId); 
+
+  if (!email || !fortyTwoIdStr || !username) {
+    console.log("❌ [userController] Missing required fields:", {
+      email,
+      fortyTwoId: fortyTwoIdStr,
+      username,
+    });
+    return reply
+      .code(400)
+      .send({ error: "Email, username, and 42 ID are required" });
+  }
+
+  try {
+    const result = await userService.upsert42User(
+      email,
+      fortyTwoIdStr,
+      username,
+      picture
+    );
+    console.log("✅ [userController] Success:", result);
+    return reply.send(result);
+  } catch (err) {
+    console.error("💥 [userController] Failed to upsert 42 user:", err);
+    return reply.code(500).send({ error: "User creation failed" });
+  }
+};
+
+/* exports.upsert42User = async (request, reply) => {
+  console.log("🔥 [userController] Received 42 upsert request:", request.body);
+
+  const { email, fortyTwoId, username, picture } = request.body;
+
+  fortyTwoId = String(fortyTwoId);
+  if (!email || !fortyTwoId || !username) {
+    console.log("❌ [userController] Missing required fields:", {
+      email,
+      fortyTwoId,
+      username,
+    });
+    return reply.code(400).send({ error: "Email, username, and 42 ID are required" });
+  }
+
+  try {
+    const result = await userService.upsert42User(
+      email,
+      fortyTwoId,
+      username,
+      picture
+    );
+    console.log("✅ [userController] Success:", result);
+    return reply.send(result);
+  } catch (err) {
+    console.error("💥 [userController] Failed to upsert 42 user:", err);
+    return reply.code(500).send({ error: "User creation failed" });
+  }
+}; */
