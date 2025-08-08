@@ -6,14 +6,21 @@ import { renderProfileContent } from './views/profile';
 import { renderHistoryContent } from './views/history';
 import { initDashboard } from './views/dashboard';
 
+
+const isAuthenticated = () => {
+  return (
+    !!localStorage.getItem("authToken") ||
+    !!document.cookie.match("authToken=([^;]+)")
+  );
+};
+
 export function route() {
   const hash = window.location.hash.replace('#', '') || 'home';
-  const app = document.getElementById('app')!;
-  const isAuthenticated = !!localStorage.getItem('authToken');
-
+  const app = document.getElementById("app") || document.body;
+  const isAuthed = isAuthenticated();
   // Si NO está autenticado y no está en login, lo redirige al login
-  if (!isAuthenticated && hash !== 'login') {
-    window.location.hash = 'login';
+  if (!isAuthed && hash !== "login") {
+    window.location.hash = "login";
     return;
   }
 
@@ -29,10 +36,14 @@ export function route() {
   }
 
   // Renderiza el contenido según la sección
-  const contentArea = document.getElementById('content-area')!;
-  const startButton = document.getElementById('start-button')!;
-  const gameArea = document.getElementById('game-area')!;
-  const gameWindow = document.getElementById('game-window')!;
+  const contentArea =
+    document.getElementById("content-area") || document.createElement("div");
+  const startButton =
+    document.getElementById("start-button") || document.createElement("div");
+  const gameArea =
+    document.getElementById("game-area") || document.createElement("div");
+  const gameWindow =
+    document.getElementById("game-window") || document.createElement("div");
   switch (hash) {
     case 'profile':     renderProfileContent(contentArea, startButton, gameArea, gameWindow);     break;
     case 'play':        renderPlayContent(contentArea, startButton, gameArea, gameWindow);        break;

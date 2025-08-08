@@ -9,6 +9,69 @@ import confetti from 'canvas-confetti';
 import { t, i18nReady } from '../i18n';
 import { checkAuthStatus } from './login';
 
+
+
+export function clearAuthTokens() {
+  // Clear localStorage
+  localStorage.removeItem("authToken");
+  localStorage.removeItem("userId");
+
+  // Clear cookie - CRITICAL FIX: Use proper cookie clearing for localhost
+  document.cookie =
+    "authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=localhost; secure; sameSite=none";
+  document.cookie =
+    "authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"; // Fallback for when domain doesn't match
+  console.log("✅ Cleared all auth tokens");
+}
+
+
+function setupNavigationFixes() {
+  // Fix logout button - ensures it works on first click
+  const logoutBtn = document.getElementById("logout-btn");
+  if (logoutBtn) {
+    // Remove any existing event listeners
+    const newBtn = logoutBtn.cloneNode(true);
+    logoutBtn.parentNode?.replaceChild(newBtn, logoutBtn);
+
+    // Add the new event listener
+    newBtn.addEventListener("click", () => {
+       clearAuthTokens();
+  /*     localStorage.removeItem("authToken");
+      localStorage.removeItem("userId"); */
+
+      if (socket !== null) {
+        socket.close();
+        socket = null;
+      }
+
+      // Clear game state
+      const gameArea = document.getElementById("game-area");
+      if (gameArea) gameArea.innerHTML = "";
+
+      // Immediately redirect to login
+      window.location.hash = "login";
+      route(); // Force route to handle the change
+    });
+  }
+
+  // Fix navigation links - ensures proper binding
+  document.querySelectorAll('#sidebar a[href^="#"]').forEach((link) => {
+    // Remove any existing event listeners
+    const newLink = link.cloneNode(true);
+    link.parentNode?.replaceChild(newLink, link);
+
+    // Add the new event listener
+    newLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      const href = (e.currentTarget as HTMLAnchorElement).getAttribute("href");
+      if (href) {
+        window.location.hash = href.substring(1);
+        route(); // Force route to handle the change
+      }
+    });
+  });
+}
+
 // Import VITE_API_BASE_URL from environment variables
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -294,17 +357,48 @@ const resetGameState = () => {
   started = false;
 }
 
+function handleNavLinkClick(e: Event) {
+  e.preventDefault();
+  const href = (e.currentTarget as HTMLAnchorElement).getAttribute("href");
+  if (href) {
+    window.location.hash = href.substring(1);
+    // Force route to handle the change
+    setTimeout(route, 0);
+  }
+}
+
 export const bindDashboardEvents = () => {
   // Logout functionality
-  document.getElementById('logout-btn')?.addEventListener('click', () => {
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('userId');
-    if (socket !== null) {
-      socket.close();
-    }
-    window.location.hash = 'login';
-    route();
-  });
+  const logoutBtn = document.getElementById('logout-btn');
+  
+  if (logoutBtn) {
+    const newBtn = logoutBtn.cloneNode(true);
+    logoutBtn.parentNode?.replaceChild(newBtn, logoutBtn);
+
+    // Add the fixed event listener
+    newBtn.addEventListener("click", () => {
+      // Clear localStorage
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("userId");
+
+      // CRITICAL FIX: Also clear the cookie for 42 login
+      document.cookie =
+        "authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=localhost; secure; sameSite=none";
+      document.cookie =
+        "authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"; // Fallback
+
+      if (socket !== null) {
+        socket.close();
+      }
+
+      // Clear game state
+      const gameArea = document.getElementById("game-area");
+      if (gameArea) gameArea.innerHTML = "";
+
+      window.location.hash = "login";
+      route();
+    });
+  }
   const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
   const mobileMenuClose = document.getElementById('mobile-menu-close');
   const sidebar = document.getElementById('sidebar');
@@ -906,4 +1000,25 @@ export async function initDashboard() {
   // Call this on app initialization
   // checkAuthStatus();
   bindDashboardEvents();
+  setupNavigationFixes();
+}
+
+export function reinitializeDashboard() {
+  // Clear existing dashboard
+  const existingSidebar = document.getElementById("sidebar");
+  if (existingSidebar) {
+    existingSidebar.remove();
+  }
+
+  // Reinitialize
+  initDashboard();
+  bindDashboardEvents();
+
+  // Force route to render correct content
+  setTimeout(() => {
+    const hash = window.location.hash.replace("#", "") || "home";
+    if (hash !== "login") {
+      route();
+    }
+  }, 100);
 }

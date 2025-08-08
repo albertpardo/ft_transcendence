@@ -61,7 +61,8 @@
     "confirm.save.text": "Möchten Sie diese Änderungen wirklich speichern?",
     "save": "Speichern",
     "success.update": "Profil erfolgreich aktualisiert!",
-    "success.delete": "Konto erfolgreich gelöscht!"
+    "success.delete": "Konto erfolgreich gelöscht!",
+    "notLogged": "Sie sind nicht angemeldet."
   },
   "nav": {
     "dashboard": "Dashboard",

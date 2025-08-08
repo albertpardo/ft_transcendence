@@ -62,7 +62,8 @@
     "confirm.save.text": "Esteu segur que voleu desar aquests canvis?",
     "save": "Desa",
     "success.update": "Perfil actualitzat amb èxit!",
-    "success.delete": "Compte eliminat amb èxit!"
+    "success.delete": "Compte eliminat amb èxit!",
+    "notLogged": "No has iniciat sessió."
   },
   "nav": {
     "dashboard": "Tauler",

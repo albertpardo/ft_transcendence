@@ -62,7 +62,8 @@
     "confirm.save.text": "Are you sure you want to save these changes?",
     "save": "Save",
     "success.update": "Profile updated successfully!",
-    "success.delete": "Account deleted successfully!"
+    "success.delete": "Account deleted successfully!",
+    "notLogged": "You are not logged in."
 },
   "nav": {
     "dashboard": "Dashboard",

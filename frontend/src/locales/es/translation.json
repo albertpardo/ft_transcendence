@@ -20,17 +20,17 @@
     "error": "Error al cargar los torneos."
   },
   "historic": {
-  "title": "Historial de partidas",
-  "description": "Consulta tus partidas anteriores de Pong.",
-  "result": "Resultado",
-  "score": "Puntuación",
-  "opponent": "Oponente",
-  "date": "Fecha",
-  "victory": "Victoria",
-  "loss": "Derrota",
-  "notLoggedIn": "No has iniciado sesión.",
-  "noAuthToken": "Token de autenticación ausente.",
-  "failedToLoad": "No se pudo cargar el historial de partidas."
+    "title": "Historial de partidas",
+    "description": "Consulta tus partidas anteriores de Pong.",
+    "result": "Resultado",
+    "score": "Puntuación",
+    "opponent": "Oponente",
+    "date": "Fecha",
+    "victory": "Victoria",
+    "loss": "Derrota",
+    "notLoggedIn": "No has iniciado sesión.",
+    "noAuthToken": "Token de autenticación ausente.",
+    "failedToLoad": "No se pudo cargar el historial de partidas."
 },
   "profiles": {
     "title": "Tu perfil",
@@ -55,7 +55,8 @@
     "confirm.save.text": "¿Está seguro de que desea guardar estos cambios?",
     "save": "Guardar",
     "success.update": "¡Perfil actualizado correctamente!",
-    "success.delete": "¡Cuenta eliminada correctamente!"
+    "success.delete": "¡Cuenta eliminada correctamente!",
+    "notLogged": "No has iniciado sesión."
   },
   "nav": {
     "dashboard": "Inicio",

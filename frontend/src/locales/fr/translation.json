@@ -20,17 +20,17 @@
     "error": "Erreur lors du chargement des tournois."
   },
   "historic": {
-  "title": "Historique des matchs",
-  "description": "Consultez vos parties de Pong précédentes.",
-  "result": "Résultat",
-  "score": "Score",
-  "opponent": "Adversaire",
-  "date": "Date",
-  "victory": "Victoire",
-  "loss": "Défaite",
-  "notLoggedIn": "Vous n'êtes pas connecté.",
-  "noAuthToken": "Jeton d'authentification manquant.",
-  "failedToLoad": "Échec du chargement de l'historique."
+    "title": "Historique des matchs",
+    "description": "Consultez vos parties de Pong précédentes.",
+    "result": "Résultat",
+    "score": "Score",
+    "opponent": "Adversaire",
+    "date": "Date",
+    "victory": "Victoire",
+    "loss": "Défaite",
+    "notLoggedIn": "Vous n'êtes pas connecté.",
+    "noAuthToken": "Jeton d'authentification manquant.",
+    "failedToLoad": "Échec du chargement de l'historique."
 },
   "profiles": {
      "title": "Votre profil",
@@ -55,7 +55,8 @@
     "confirm.save.text": "Voulez-vous vraiment enregistrer ces modifications ?",
     "save": "Enregistrer",
     "success.update": "Profil mis à jour avec succès !",
-    "success.delete": "Compte supprimé avec succès !"
+    "success.delete": "Compte supprimé avec succès !",
+    "notLogged": "Vous n'êtes pas connecté."
   },
   "nav": {
     "dashboard": "Tableau de bord",

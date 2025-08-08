@@ -1,19 +1,25 @@
 import { t } from "../i18n";
+import { syncAuthTokens } from "./login";
 
 export async function renderProfileContent(el: HTMLElement, bu: HTMLElement, gArea: HTMLElement, gWin: HTMLElement) {
 
   bu.classList.add('hidden');
   gArea.classList.add('hidden');
   gWin.classList.add('hidden');
+
+  syncAuthTokens();
   const userId = localStorage.getItem('userId') || sessionStorage.getItem('userId');
-
   const authToken: string = localStorage.getItem('authToken') || sessionStorage.getItem('authToken') || "";
-
-
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   if (!authToken) {
-    el.innerHTML = `<p class="text-red-500">${t("profiles.not_logged_in")}</p>`;
+    const cookieToken = document.cookie.match("authToken=([^;]+)")?.[1];
+    if (cookieToken) {
+      localStorage.setItem("authToken", cookieToken);
+      window.location.reload(); // Reload to ensure proper state
+      return;
+    }
+    el.innerHTML = `<p class="text-red-500">${t("profiles.notLogged")}</p>`;
     return;
   }
 //debugg block  start

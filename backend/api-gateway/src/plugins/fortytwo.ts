@@ -126,10 +126,11 @@ const fortyTwoAuthPlugin: FastifyPluginAsync = async (fastify) => {
         secure: true,
         sameSite: "none", // Required for cross-origin requests
         path: "/",
-        domain: DOMAIN,
+        domain: "localhost", // DOMAIN
       });
 
       // 6. Redirect to frontend
+      reply.header("X-Set-LocalStorage", `authToken=${authToken}`);
       return reply.redirect(`${FRONTEND_URL}/#home`);
     } catch (err: any) {
       fastify.log.error("42 auth error:", err);
