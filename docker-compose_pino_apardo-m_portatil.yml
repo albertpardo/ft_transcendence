@@ -1,0 +1,86 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: transcendence_frontend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - shared_logs:/shared_logs   # add by apardo-m
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api-gateway
+    networks:
+      - backend
+    restart: unless-stopped
+    command: npm run dev
+
+  api-gateway:
+    build: ./backend/api-gateway
+    container_name: trans_api-gateway
+    ports:
+      - "8443:8443"     # TLS port exposed to host
+    depends_on:
+      - user_management
+      - game_service
+    volumes:
+      - ./backend/api-gateway:/app
+      - /app/node_modules      # use container-installed deps
+      - shared_logs:/shared_logs  # add by apardo-m 
+    env_file:
+      - ./backend/api-gateway/.env
+    restart: always
+    networks:
+      - backend
+    user: 1000:1000     # Usar el UID y GID del usuario actual  para portatil ELIMINAR 42Barcelona
+
+  user_management:
+    build: ./backend/microservices/user_management
+    container_name: trans_user_management
+    expose:
+      - "9001"
+    volumes:
+      - ./backend/microservices/user_management:/app
+      - /app/node_modules      # use container-installed deps
+      - shared_logs:/shared_logs   # add by apardo-m 
+    environment:
+      - ./backend/microservices/user_management/.env
+    restart: always
+    networks:
+      - backend
+    user: 1000:1000     # Usar el UID y GID del usuario actual  para portatil ELIMINAR 42Barcelona
+
+  game_service:
+    build: ./backend/microservices/game_service
+    container_name: trans_game_service
+    expose:
+      - "9002"
+    volumes:
+      - ./backend/microservices/game_service:/app   # add by apardo-m
+      - /app/node_modules      # use container-installed deps
+      - ./backend/microservices/game_service/vol:/app/dbs
+      - shared_logs:/shared_logs  # add by apardo-m 
+    restart: always
+    networks:
+      - backend
+    user: 1000:1000     # Usar el UID y GID del usuario actual  para portatil ELIMINAR 42Barcelona
+
+#  chat_service:
+#    build: ./chat_service
+#    expose:
+#      - "9003"
+#    networks:
+#      - backend
+
+
+# volume to share logs with ELK 
+volumes:
+  shared_logs:
+    driver: local
+
+networks:
+  backend:
+    name: backend
+    driver: bridge

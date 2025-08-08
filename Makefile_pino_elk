@@ -19,16 +19,15 @@ endif
 all: create_folders
 	@echo > /dev/null
 #	docker compose -f docker-compose.yml up --build
-#	@docker compose -f docker-compose.yml up -d --build
-	@docker compose -f docker-compose_pino.yml up -d --build
+	@docker compose -f docker-compose.yml up -d --build
 	
 	@echo "\n▉▉▉▉▉▉▉▉▉▉ WELCOME TO TRASCENDENCE PROJECT! ▉▉▉▉▉▉▉▉▉▉\n"
 	@echo "To check the system status run: make status\n"
-	@echo "Access to user API(back) at: https://localhost:8443"
-	@echo "Access to profile view(front) at: https://localhost:3000"
+	@echo "Access to user API(back) at: https://127.0.0.1:8443/api"
+	@echo "Access to profile view(front) at: http://127.0.0.1:3000"
 
 create_folders:
-	@for dir in "$(ELK_FOLDER)" "$(LOGS_ELASTIC_FOLDER)" "$(BACKUP_ELASTIC_LOGS)"; do \
+	@for dir in "$(LOGS_ELASTIC_FOLDER)" "$(BACKUP_ELASTIC_LOGS)"; do \
 		if [ ! -d "$$dir" ]; then \
 			mkdir -p "$$dir"; \
 			chmod 777 "$$dir"; \
@@ -43,7 +42,7 @@ down:
 
 # Docker down deleting docker volumes
 downvol:
-	@docker compose -f docker-compose_pino.yml down -v
+	@docker compose -f docker-compose.yml down -v
 
 # Delete ELK folder (and subfolders) used for logs and backups
 cleanfolders:
