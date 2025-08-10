@@ -56,12 +56,13 @@ async function getGameMetaInfo() {
     else {
       const oppNameRaw = await getNicknameForPlayerId(oppId);
       const oppNameText = await oppNameRaw.text();
+      console.log("oppname from metainfo:", oppNameText);
       const oppNameJson = JSON.parse(oppNameText);
       if (oppNameJson.err !== "nil") {
         oppName = "<i>unknown</i>";
       }
       else {
-        oppName = oppNameJson.nickname;
+        oppName = oppNameJson.nick;
       }
     }
     const ret = {
@@ -173,6 +174,52 @@ async function buttonSetter(state : MetaGameState) {
       document.getElementById("giveup-button").disabled = false;
       break;
     }
+  }
+}
+
+async function setterUponMetaInfo(gameInfo : HTMLElement, metaInfo : {gType: string, oppName: string}) {
+  console.log("ENTERED setterUponMetaInfo");
+  console.log("metainfo is:", metaInfo);
+  if (metaInfo.gType === "none") {
+    gameInfo.innerHTML = "";
+    let isintour : bool = await checkIsInTourWrapper();
+    console.log("isintour:", isintour);
+    if (isintour) {
+      // no game, but we're in a tournament
+      buttonSetter(MetaGameState.waittourstart);
+    }
+    else {
+      // no game. allow mm search
+      buttonSetter(MetaGameState.nothing);
+    }
+  }
+  else if (metaInfo.gType === "unknown") {
+    // some bs happened. must investigate
+    console.error("unknown game type");
+    buttonSetter(MetaGameState.misc);
+  }
+  else if (metaInfo.gType === "normal") {
+    // we don't check for anything since basically once you get into a game with whatever state it's got, you
+    // can only forefit/escape, unlike the tournament stuff which has some various conditions for getting ready/forefitting.
+    buttonSetter(MetaGameState.inmmgame);
+    console.log("ginfo setter 1");
+    gameInfo.innerHTML = "Game type: " + metaInfo.gType + "; versus: " + metaInfo.oppName;
+  }
+  else {
+    // ok, it's a tournament
+    // there's only ONE situation which requires us to press the ready key.
+    // we're in a game of type tournament and we're not ready.
+    //
+    // if it's a game and we're ready, just give the forefit button ? TODO to think
+    const isready : bool = await checkReadyWrapper();
+    if (!isready) {
+      buttonSetter(MetaGameState.waittourrdy);
+    }
+    else {
+      buttonSetter(MetaGameState.misc);
+    }
+    console.log("ginfo setter 2");
+    gameInfo.innerHTML = "Game type: " + metaInfo.gType + "; versus: " + metaInfo.oppName;
   }
 }
 
@@ -312,68 +359,13 @@ export async function initDashboard() {
   let metaInfo = await getGameMetaInfo();
   let reconn : boolean = false;
   if (localStorage.getItem("authToken")) {
-    if (metaInfo.gType === "none") {
-      gameInfo.innerHTML = "";
-      if (await checkIsInTourWrapper()) {
-        // no game, but we're in a tournament
-        buttonSetter(MetaGameState.waittourstart);
-      }
-      else {
-        // no game. allow mm search
-        buttonSetter(MetaGameState.nothing);
-      }
-    }
-    else if (metaInfo.gType === "unknown") {
-      // some bs happened. must investigate
-      buttonSetter(MetaGameState.misc);
-    }
-    else if (metaInfo.gType === "normal") {
-      // we don't check for anything since basically once you get into a game with whatever state it's got, you
-      // can only forefit/escape, unlike the tournament stuff which has some various conditions for getting ready/forefitting.
-      buttonSetter(MetaGameState.inmmgame);
-      console.log("oh snap! maybe reconnect the socket?");
+    console.log("before the first setter, have:", metaInfo);
+    await setterUponMetaInfo(gameInfo, metaInfo);
+    if (metaInfo.gType === "tournament" || metaInfo.gType === "normal") {
+      console.log("oh snap! reconnect the socket");
       reconn = true;
-      gameInfo.innerHTML = "Game type: " + metaInfo.gType + "; versus: " + metaInfo.oppName;
-    }
-    else {
-      // ok, it's a tournament
-      // there's only ONE situation which requires us to press the ready key.
-      // we're in a game of type tournament and we're not ready.
-      //
-      // if it's a game and we're ready, just give the forefit button ? TODO to think
-      const isready : bool = await checkReadyWrapper();
-      if (!isready) {
-        buttonSetter(MetaGameState.waittourrdy);
-      }
-      else {
-        buttonSetter(MetaGameState.misc);
-      }
-      console.log("oh snap! maybe reconnect the socket?");
-      reconn = true;
-      gameInfo.innerHTML = "Game type: " + metaInfo.gType + "; versus: " + metaInfo.oppName;
     }
     socket = new WebSocket(`https://127.0.0.1:8443/api/pong/game-ws?uuid=${localStorage.getItem("userId")}&authorization=${localStorage.getItem("authToken")}`);
-    if (reconn) {
-      const regPlRawResp = await registerPlayer();
-      const regPlResp = await regPlRawResp.text();
-      const regPlRespObj = JSON.parse(regPlResp);
-      metaInfo = await getGameMetaInfo();
-      if (metaInfo.gType === "unknown") {
-        gameInfo.innerHTML = "";
-        document.getElementById("start-button").disabled = false;
-        document.getElementById("ready-button").disabled = await checkReadyWrapper();
-        document.getElementById("giveup-button").disabled = true;
-      }
-      else {
-        gameInfo.innerHTML = "Game type: " + metaInfo.gType + "; versus: " + metaInfo.oppName;
-        document.getElementById("start-button").disabled = true;
-        document.getElementById("ready-button").disabled = await checkReadyWrapper();
-        document.getElementById("giveup-button").disabled = false;
-      }
-      if (regPlRespObj.err !== "nil") {
-        console.log(regPlRespObj);
-      }
-    }
     socket.addEventListener("message", async (event) => {
 //      console.log("I, a tokened player, receive:", event.data);
       // XXX maybe a try catch? idk if it'd crash or something on a wrong input
@@ -405,8 +397,7 @@ export async function initDashboard() {
           <tspan x="640" dy="1.2em">The match has been abandoned</tspan>
           <tspan x="640" dy="1.2em">by either of the two players</tspan>`;
           scoreText.innerHTML = "" + 0 + " : " + 0;
-          document.getElementById("giveup-button").disabled = true;
-          document.getElementById("start-button").disabled = false;
+          buttonSetter(MetaGameState.nothing);
           break;
         case "added: L":
           metaInfo = await getGameMetaInfo();
@@ -416,6 +407,7 @@ export async function initDashboard() {
           else {
             gameInfo.innerHTML = "Game type: " + metaInfo.gType + "; versus: " + metaInfo.oppName;
           }
+          await setterUponMetaInfo(gameInfo, metaInfo);
           started = false;
           playerSide = "l";
           leftUpArrow.hidden = false;
@@ -433,6 +425,7 @@ export async function initDashboard() {
           else {
             gameInfo.innerHTML = "Game type: " + metaInfo.gType + "; versus: " + metaInfo.oppName;
           }
+          await setterUponMetaInfo(gameInfo, metaInfo);
           started = false;
           playerSide = "r";
           rightUpArrow.hidden = false;
@@ -467,25 +460,19 @@ export async function initDashboard() {
                   gameText.innerHTML = "You won the round!";
                   break;
                 case "left fully":
-                  document.getElementById("giveup-button").disabled = true;
-                  document.getElementById("ready-button").disabled = true;
-                  document.getElementById("start-button").disabled = false;
                   started = false;
                   gameText.innerHTML = "You lost the game.";
+                  buttonSetter(MetaGameState.misc);
                   break;
                 case "right fully":
-                  document.getElementById("giveup-button").disabled = true;
-                  document.getElementById("ready-button").disabled = true;
-                  document.getElementById("start-button").disabled = false;
                   started = false;
                   gameText.innerHTML = "You won the game!";
+                  buttonSetter(MetaGameState.misc);
                   break;
                 case "both":
-                  document.getElementById("giveup-button").disabled = true;
-                  document.getElementById("ready-button").disabled = true;
-                  document.getElementById("start-button").disabled = false;
                   started = false;
                   gameText.innerHTML = "In a rare dispay of absense, nobody won";
+                  buttonSetter(MetaGameState.misc);
                   break;
               }
             } else if (playerSide === "r") {
@@ -497,25 +484,19 @@ export async function initDashboard() {
                   gameText.innerHTML = "You won the round!";
                   break;
                 case "right fully":
-                  document.getElementById("giveup-button").disabled = true;
-                  document.getElementById("ready-button").disabled = true;
-                  document.getElementById("start-button").disabled = false;
                   started = false;
                   gameText.innerHTML = "You lost the game.";
+                  buttonSetter(MetaGameState.misc);
                   break;
                 case "left fully":
-                  document.getElementById("giveup-button").disabled = true;
-                  document.getElementById("ready-button").disabled = true;
-                  document.getElementById("start-button").disabled = false;
                   started = false;
                   gameText.innerHTML = "You won the game!";
+                  buttonSetter(MetaGameState.misc);
                   break;
                 case "both":
-                  document.getElementById("giveup-button").disabled = true;
-                  document.getElementById("ready-button").disabled = true;
-                  document.getElementById("start-button").disabled = false;
                   started = false;
                   gameText.innerHTML = "In a rare dispay of absense, nobody won";
+                  buttonSetter(MetaGameState.misc);
                   break;
               }
             }
@@ -526,30 +507,33 @@ export async function initDashboard() {
           }
       }
     });
+    if (reconn) {
+      const regPlRawResp = await registerPlayer();
+      const regPlResp = await regPlRawResp.text();
+      const regPlRespObj = JSON.parse(regPlResp);
+      if (regPlRespObj.err !== "nil") {
+        console.log(regPlRespObj);
+      }
+      metaInfo = await getGameMetaInfo();
+      await setterUponMetaInfo(gameInfo, metaInfo);
+    }
 
     document.getElementById('start-button')!.addEventListener('click', async () => {
       console.log("after clicking the start-button,");
       const regPlRawResp = await registerPlayer();
       const regPlResp = await regPlRawResp.text();
       const regPlRespObj = JSON.parse(regPlResp);
+      if (regPlRespObj.err !== "nil") {
+        console.error(regPlRespObj.err);
+      }
       metaInfo = await getGameMetaInfo();
       if (metaInfo.gType === "unknown") {
         gameInfo.innerHTML = "";
       }
-      else if (metaInfo.gType === "tournament") {
-        document.getElementById("start-button").disabled = true;
-        document.getElementById("ready-button").disabled = await checkReadyWrapper();
-        document.getElementById("giveup-button").disabled = false;
-      }
       else {
-        document.getElementById("start-button").disabled = true;
-        document.getElementById("ready-button").disabled = true;
-        document.getElementById("giveup-button").disabled = false;
         gameInfo.innerHTML = "Game type: " + metaInfo.gType + "; versus: " + metaInfo.oppName;
       }
-      if (regPlRespObj.err !== "nil") {
-        console.error(regPlRespObj.err);
-      }
+      await setterUponMetaInfo(gameInfo, metaInfo);
     });
     document.getElementById('ready-button')!.addEventListener('click', async () => {
       console.log("after clicking the ready-button,");
@@ -561,18 +545,27 @@ export async function initDashboard() {
       }
       else {
         document.getElementById('ready-button').disabled = true;
+        // I think it's okay to just do that here instead of the meta way
+        // cuz it's a super simple interaction
       }
     });
     document.getElementById('giveup-button')!.addEventListener('click', async () => {
       console.log("after clicking the giveup-button,");
-      document.getElementById("start-button").disabled = false;
-      document.getElementById("giveup-button").disabled = true;
       const forefitRawResp = await forefit();
       const forefitResp = await forefitRawResp.text();
       const forefitRespObj = JSON.parse(forefitResp);
       if (forefitRespObj.err !== "nil") {
         console.error(forefitRespObj.err);
       }
+      // after giving up we can have various scenarios so
+      metaInfo = await getGameMetaInfo();
+      if (metaInfo.gType === "unknown") {
+        gameInfo.innerHTML = "";
+      }
+      else {
+        gameInfo.innerHTML = "Game type: " + metaInfo.gType + "; versus: " + metaInfo.oppName;
+      }
+      await setterUponMetaInfo(gameInfo, metaInfo);
     });
 
     leftUpArrow.addEventListener('mousedown', () => {
