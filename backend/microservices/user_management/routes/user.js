@@ -1,6 +1,6 @@
 const userController = require('../controllers/userController');
 
-const logFormat = require('./pino_utils/log_format.js');
+const logFormat = require('../pino_utils/log_format.js');
 /*
 async function userRoutes(fastify, options) {
     console.log('✅ Registering user routes...');
