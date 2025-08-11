@@ -28,7 +28,7 @@ all: create_folders
 	@echo "Access to profile view(front) at: https://localhost:3000"
 
 create_folders:
-	@for dir in "$(ELK_FOLDER)" "$(LOGS_ELASTIC_FOLDER)" "$(BACKUP_ELASTIC_LOGS)"; do \
+	@for dir in $(LOGS_ELASTIC_FOLDER) $(BACKUP_ELASTIC_LOGS); do \
 		if [ ! -d "$$dir" ]; then \
 			mkdir -p "$$dir"; \
 			chmod 777 "$$dir"; \
