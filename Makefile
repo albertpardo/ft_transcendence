@@ -23,8 +23,8 @@ all: create_folders
 	
 	@echo "\n▉▉▉▉▉▉▉▉▉▉ WELCOME TO TRASCENDENCE PROJECT! ▉▉▉▉▉▉▉▉▉▉\n"
 	@echo "To check the system status run: make status\n"
-	@echo "Access to user API(back) at: https://127.0.0.1:8443/api"
-	@echo "Access to profile view(front) at: http://127.0.0.1:3000"
+	@echo "Access to user API(back) at: https://localhost:8443/api"
+	@echo "Access to profile view(front) at: https://localhost:3000"
 
 create_folders:
 	@for dir in $(LOGS_ELASTIC_FOLDER) $(BACKUP_ELASTIC_LOGS); do \
@@ -49,6 +49,7 @@ cleanfolders:
 	@rm -rf $(ELK_FOLDER)
 	@rm -rf ./backend/microservices/game_service/dist/
 	@rm -rf ./backend/api-gateway/dist/
+	@rm -f ./backend/api-gateway/tsconfig.pino_utils.tsbuildinfo
 
 
 # For easy clean by apardo-m

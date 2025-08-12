@@ -52,6 +52,7 @@ filter {
     }
   }
 
+
   # Eliminar posibles  "_" de appName
   mutate {
     gsub => ["appName", "_", ""]
@@ -66,18 +67,6 @@ filter {
     mutate {
       add_field => { "[event][dataset]" => "unknown_source" }
     }
-  }
-
-  # Gestionar payload
-  if [payload] {
-    json {
-      source       => "payload"
-      target       => "payload_obj"
-    }
-  }
-  
-  mutate {
-    remove_field => ["payload"]
   }
 }
 
