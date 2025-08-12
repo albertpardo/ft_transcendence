@@ -26,7 +26,7 @@ async function userRoutes(fastify, options) {
   
   const source = userRoutes.name;
   
-  fastify.log.info(logFormat(source, '✅ Registering user routes...'));
+  fastify.log.info(...logFormat(source, '✅ Registering user routes...'));
   addRouteWithSource('post', '/api/user/public/nickname', userController.getPublicNickname);
   addRouteWithSource('post', '/api/user/signup', userController.signup);
   addRouteWithSource('post', '/api/user/login', userController.login);
@@ -35,7 +35,7 @@ async function userRoutes(fastify, options) {
   addRouteWithSource('delete', '/api/user/profile', userController.deleteProfile);
 
   addRouteWithSource('post', '/api/user/upsert-google', userController.upsertGoogle);
-  fastify.log.info(logFormat(source, '/api/user/upsert-google', userController.upsertGoogle));  
+  fastify.log.info(...logFormat(source, '/api/user/upsert-google', userController.upsertGoogle));  
 }
 
 module.exports = userRoutes;

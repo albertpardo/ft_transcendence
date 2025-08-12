@@ -92,7 +92,7 @@ const startServer = async () => {
         if (typeof getIn !== "undefined" && getIn === true) {
           if (upperSocksMap.has(playerId) === false) {
             // console.error("no associated socket found. this must never happen, i think.");
-            req.log.error(logFormat( "/pong", "no associated socket found. this must never happen, i think."));
+            req.log.error(...logFormat( "/pong", "no associated socket found. this must never happen, i think."));
             return "somehow, the socket hasn't been found";
           }
           sock = upperSocksMap.get(playerId) as WebSocket;
@@ -162,7 +162,7 @@ const startServer = async () => {
           if (typeof getIn !== "undefined" && getIn === true) {
             if (upperSocksMap.has(playerId) === false) {
               // console.error("no associated socket found. this must never happen, i think.");
-              req.log.error(logFormat( "/pong", "no associated socket found. this must never happen, i think."));
+              req.log.error(...logFormat( "/pong", "no associated socket found. this must never happen, i think."));
               return "somehow, the socket hasn't been found";
             }
             sock = upperSocksMap.get(playerId) as WebSocket;

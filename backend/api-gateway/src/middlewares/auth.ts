@@ -22,11 +22,11 @@ export async function authMiddleware(req: FastifyRequest, reply: FastifyReply) {
     console.log('🔍 Authorization Header outside try:', String(req.headers['authorization']));
 */
 
-    req.log.info(logFormat(source, "🔍 Incoming request URL:", req.url));
-    req.log.info(logFormat(source, "🔍 jwtVerify type in middleware:", typeof req.jwtVerify));
-    req.log.info(logFormat(source, "🔍🔍🔍 All keys on req:", Object.keys(req)));
-    req.log.info(logFormat(source, '🔍 Full headers before jwtVerify:', JSON.stringify(req.headers)));
-    req.log.info(logFormat(source, '🔍 Authorization Header outside try:', String(req.headers['authorization'])));
+    req.log.info(...logFormat(source, "🔍 Incoming request URL:", req.url));
+    req.log.info(...logFormat(source, "🔍 jwtVerify type in middleware:", typeof req.jwtVerify));
+    req.log.info(...logFormat(source, "🔍🔍🔍 All keys on req:", Object.keys(req)));
+    req.log.info(...logFormat(source, '🔍 Full headers before jwtVerify:', JSON.stringify(req.headers)));
+    req.log.info(...logFormat(source, '🔍 Authorization Header outside try:', String(req.headers['authorization'])));
 
     // if requested URL is public, skip auth
     const publicPaths = ['/api/signup', '/api/login', '/api/public', '/api/auth/google', '/api/user/upsert-google'];
@@ -44,7 +44,7 @@ export async function authMiddleware(req: FastifyRequest, reply: FastifyReply) {
         }
        
         //console.log('🔍 Raw Authorization Header inside try00:', String(req.headers['authorization']));
-        req.log.info(logFormat(source, '🔍 Raw Authorization Header inside try00:', String(req.headers['authorization'])));
+        req.log.info(...logFormat(source, '🔍 Raw Authorization Header inside try00:', String(req.headers['authorization'])));
 		
         if (!req.headers['authorization'] || 
             (req.headers['authorization'] === "Bearer undefined" && req.headers['use-me-to-authorize'])) {
@@ -59,15 +59,15 @@ export async function authMiddleware(req: FastifyRequest, reply: FastifyReply) {
         console.log('🔍 Raw Authorization Header inside try:', String(req.headers['authorization']));
         console.log('🔍 JWT Secret in use:', process.env.JWT_SECRET);
 */
-        req.log.info(logFormat(source, '🔍 Raw Authorization Header inside try:', String(req.headers['authorization'])));
-        req.log.info(logFormat(source, '🔍 JWT Secret in use:', process.env.JWT_SECRET));
+        req.log.info(...logFormat(source, '🔍 Raw Authorization Header inside try:', String(req.headers['authorization'])));
+        req.log.info(...logFormat(source, '🔍 JWT Secret in use:', process.env.JWT_SECRET));
 
         await req.jwtVerify(); //verfication by secret automatically
 /*
         console.log('✅ JWT verified, user:', req.user);
 //        console.log('req.url was:', req.url);
 */
-        req.log.info(logFormat(source, '✅ JWT verified, user:', JSON.stringify(req.user)));
+        req.log.info(...logFormat(source, '✅ JWT verified, user:', JSON.stringify(req.user)));
 
         //inject user ID or username into headers (for downstream services)
         const userId = (req.user as any)?.userId;
@@ -82,7 +82,7 @@ export async function authMiddleware(req: FastifyRequest, reply: FastifyReply) {
             console.log(`📦 Injected x-user-id = ${userId} into headers`);
 //            console.log(req.headers);
 */
-            req.log.info(logFormat(source, `📦 Injected x-user-id = ${userId} into headers`));
+            req.log.info(...logFormat(source, `📦 Injected x-user-id = ${userId} into headers`));
         }
 /*
     } catch (err: any) {
@@ -94,10 +94,10 @@ export async function authMiddleware(req: FastifyRequest, reply: FastifyReply) {
 */
 
 	} catch (err: any) {
-        req.log.error(logFormat(source, "❌ JWT verification failed: ",  err));
-        reply.log.error(logFormat(source, "Unauthorized"));
+        req.log.error(...logFormat(source, "❌ JWT verification failed: ",  err));
+        reply.log.error(...logFormat(source, "Unauthorized"));
         reply.code(401).send({ error: 'Unauthorized' });
         return;
     }
-    req.log.info(logFormat(source, '✅ Auth middleware triggered!'));
+    req.log.info(...logFormat(source, '✅ Auth middleware triggered!'));
 };

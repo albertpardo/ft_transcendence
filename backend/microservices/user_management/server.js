@@ -28,10 +28,10 @@ const start = async () => {
     try {
         await fastify.listen({ port: process.env.PORT || 9001, host: '0.0.0.0' });
         //console.log(`User management service running at https://localhost:${process.env.PORT || 9001}`);
-        fastify.log.info(logFormat(source, `User management service running at https://localhost:${process.env.PORT || 9001}`));
+        fastify.log.info(...logFormat(source, `User management service running at https://localhost:${process.env.PORT || 9001}`));
     } catch (err) {
         //fastify.log.error(err);
-        fastify.log.error(logFormat(source, err));
+        fastify.log.error(...logFormat(source, err));
         process.exit(1);
     }
 };

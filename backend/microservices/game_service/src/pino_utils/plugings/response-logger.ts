@@ -1,8 +1,8 @@
 import fp from 'fastify-plugin';
 import { FastifyRequest, FastifyReply } from 'fastify';
 
-async function responseLogger(fastify, opts) {
-  fastify.addHook('onSend', async (request, reply, payload) => {
+async function responseLogger(fastify: any , opts: any ) {
+  fastify.addHook('onSend', async (request: any, reply: any, payload: any) => {
     if (request.routeOptions.config?.source) {
       const log = reply.log || request.log;
       const statusCode = reply.statusCode;
@@ -20,6 +20,7 @@ async function responseLogger(fastify, opts) {
         }
       }
 
+	  /*
       const logData: {
         statusCode: number;
         route: string;
@@ -39,6 +40,25 @@ async function responseLogger(fastify, opts) {
       } else {
         logData.message = "Response sent";
         log.info(logData);
+      }
+	 */
+
+      const logData: {
+        statusCode: number;
+        route: string;
+        source: string;
+        payload: any;
+      } = {
+        statusCode,
+        route: request.routerPath || request.url,
+        source: request.routeOptions.config.source,
+        payload: responseBody
+      };
+
+      if (statusCode >= 400) {
+        log.error(logData, "Response error" );
+      } else {
+        log.info(logData, "Response sent");
       }
     }
 
