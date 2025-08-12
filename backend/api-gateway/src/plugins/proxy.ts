@@ -16,7 +16,7 @@ export default fp(async function (fastify: FastifyInstance) {
     fastify.addHook('onRequest', async (request, reply) => {
        //fastify.log.info(`🌐 onRequest: ${request.method} ${request.url}`);
 	   const source = "fastify.addHook('onRequest') in proxy.ts";
-       request.log.info(logFormat( source, `🌐 onRequest: ${request.method} ${request.url}`));
+       request.log.info(...logFormat( source, `🌐 onRequest: ${request.method} ${request.url}`));
 
        reply.header("Content-Security-Policy", `
          default-src 'self';
@@ -29,7 +29,7 @@ export default fp(async function (fastify: FastifyInstance) {
         
        if (request.method === 'OPTIONS') {
           //fastify.log.info(`🔥 CORS Preflight: ${request.headers.origin} → ${request.url}`);
-          request.log.info(logFormat(source, `🔥 CORS Preflight: ${request.headers.origin} → ${request.url}`));
+          request.log.info(...logFormat(source, `🔥 CORS Preflight: ${request.headers.origin} → ${request.url}`));
           reply
             .header('Access-Control-Allow-Origin', request.headers.origin || '*')
             .header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS')
@@ -107,23 +107,23 @@ export default fp(async function (fastify: FastifyInstance) {
             }
 */
 
-            req.log.info(logFormat(source, '🚀 rewriteRequestHeaders - forwarded auth:', req.headers.authorization));
-            req.log.info(logFormat(source, '🔐🔐 Authorization Header:', req.headers['authorization']));
+            req.log.info(...logFormat(source, '🚀 rewriteRequestHeaders - forwarded auth:', req.headers.authorization));
+            req.log.info(...logFormat(source, '🔐🔐 Authorization Header:', req.headers['authorization']));
 
             try {
-                req.log.info(logFormat(source, '🔍🔐 Raw Authorization Header:', JSON.stringify(req.headers.authorization)));
-                req.log.info(logFormat(source, '🔍🔐 JWT Secret in use:', process.env.JWT_SECRET));
+                req.log.info(...logFormat(source, '🔍🔐 Raw Authorization Header:', JSON.stringify(req.headers.authorization)));
+                req.log.info(...logFormat(source, '🔍🔐 JWT Secret in use:', process.env.JWT_SECRET));
 
                 await req.jwtVerify();
-                req.log.info(logFormat(source, "🔐 Verified JWT in proxy preHandler"));
+                req.log.info(...logFormat(source, "🔐 Verified JWT in proxy preHandler"));
 
                 const userId = (req.user as any)?.userId;
                 if (userId) {
                     req.headers['x-user-id'] = String(userId);
-                    req.log.info(logFormat(source, `📦 Injected x-user-id = ${userId} into headers`));
+                    req.log.info(...logFormat(source, `📦 Injected x-user-id = ${userId} into headers`));
                 }
             } catch (err: any) {
-                reply.log.error(logFormat(source, '❌ Proxy-level JWT verification failed:', err.message));
+                reply.log.error(...logFormat(source, '❌ Proxy-level JWT verification failed:', err.message));
                 reply.code(401).send({ error: 'Unauthorized in proxy' });
             }
         },
@@ -166,11 +166,11 @@ export default fp(async function (fastify: FastifyInstance) {
                     body = payload;
                 }
                 //console.log('📦 Final parsed payload:', body);
-                req.log.info(logFormat(source, '📦 Final parsed payload:', body));
+                req.log.info(...logFormat(source, '📦 Final parsed payload:', body));
 
                 if (!body.id || !body.username) {
                     //console.warn('⚠️ No id or username found in payload!'));
-                    req.log.info(logFormat(source, '⚠️ No id or username found in payload!'));
+                    req.log.info(...logFormat(source, '⚠️ No id or username found in payload!'));
                     return payload;
                 }
 
@@ -183,10 +183,10 @@ export default fp(async function (fastify: FastifyInstance) {
                 });
             } catch (err) {
               //fastify.log.error('Google auth error:', err);
-                req.log.error(logFormat(source, 'Google auth error:', err));
+                req.log.error(...logFormat(source, 'Google auth error:', err));
                 if (err && typeof err === 'object' && 'stack' in err) {
                     //fastify.log.error('Full error stack:', (err as { stack?: string }).stack);
-                    req.log.error(logFormat(source, 'Full error stack:', (err as { stack?: string }).stack));
+                    req.log.error(...logFormat(source, 'Full error stack:', (err as { stack?: string }).stack));
                 }
                 if (err && typeof err === 'object' && 'message' in err && typeof (err as any).message === 'string' && (err as any).message.includes('Invalid ID token')) {
                   return reply.status(400).send({ error: 'Invalid Google token' });

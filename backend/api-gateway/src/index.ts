@@ -77,10 +77,10 @@ const server = Fastify({
 // Start by apardo-m for LOGS
 const localSource = "index.ts"
 
-server.log.info(logFormat( localSource, '🔐 TLS Key type:', typeof tlsConfig.key));
-server.log.info(logFormat( localSource, '🔐 TLS Cert type:', typeof tlsConfig.cert));
-server.log.info(logFormat( localSource, '🔐 TLS Key length:', tlsConfig.key?.length));
-server.log.info(logFormat( localSource, '🔐 TLS Cert length:', tlsConfig.cert?.length));
+server.log.info(...logFormat( localSource, '🔐 TLS Key type:', typeof tlsConfig.key));
+server.log.info(...logFormat( localSource, '🔐 TLS Cert type:', typeof tlsConfig.cert));
+server.log.info(...logFormat( localSource, '🔐 TLS Key length:', tlsConfig.key?.length));
+server.log.info(...logFormat( localSource, '🔐 TLS Cert length:', tlsConfig.cert?.length));
 // End by apardo-m
 
 //register plugins
@@ -137,18 +137,18 @@ async function start() {
         // print all the routes
         await server.ready()
         //console.log(server.printRoutes())
-        server.log.info(logFormat(source, server.printRoutes()));
+        server.log.info(...logFormat(source, server.printRoutes()));
         server.listen({ port:8443, host: '0.0.0.0' }, (err: Error, address: string) => {
             if (err) {
                 server.log.error(err)
                 process.exit(1)
             }
            // server.log.info(`Server listening on ${address}`)
-           server.log.info(logFormat(source, server.printRoutes()));
+           server.log.info(...logFormat(source, server.printRoutes()));
         })
     } catch (err) {
        // server.log.error(err)
-        server.log.error(logFormat(source, err));
+        server.log.error(...logFormat(source, err));
         process.exit(1)
     }
 }

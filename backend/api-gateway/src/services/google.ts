@@ -52,16 +52,16 @@ const googleAuthPlugin: FastifyPluginAsync = async (fastify) => {
           if (!response.ok) {
             const errorText = await response.text();
             //fastify.log.error('User service error:', errorText);
-            request.log.error(logFormat(source, 'User service error:', errorText));
+            request.log.error(...logFormat(source, 'User service error:', errorText));
             throw new Error(`User service failed: ${response.status}`);
           }
 
           user = await response.json();
           //fastify.log.info('✅ User upsert successful:', user);
-          request.log.info(logFormat(source, '✅ User upsert successful:', user));
+          request.log.info(...logFormat(source, '✅ User upsert successful:', user));
         } catch (err: any) {
           //fastify.log.error('❌ Failed to upsert user:', err);
-          request.log.error(logFormat(source, '❌ Failed to upsert user:', err));
+          request.log.error(...logFormat(source, '❌ Failed to upsert user:', err));
           return reply.status(500).send({ error: 'User creation failed' });
         }
 
@@ -87,8 +87,8 @@ const googleAuthPlugin: FastifyPluginAsync = async (fastify) => {
       } catch (err: any) {
         //fastify.log.error('🚨 Google auth error:', err.message);
         //fastify.log.error('Full error stack:', err.stack);
-        request.log.error(logFormat(source, '🚨 Google auth error:', err.message));
-        request.log.error(logFormat(source, 'Full error stack:', err.stack));
+        request.log.error(...logFormat(source, '🚨 Google auth error:', err.message));
+        request.log.error(...logFormat(source, 'Full error stack:', err.stack));
 
         if (err.message.includes('Invalid ID token')) {
           return reply.status(400).send({ error: 'Invalid Google token' });
@@ -152,16 +152,16 @@ const googleAuthPlugin: FastifyPluginAsync = async (fastify) => {
         if (!response.ok) {
           const errorText = await response.text();
           //fastify.log.error('User service error:', errorText);
-          request.log.error(logFormat(source, 'User service error:', errorText));
+          request.log.error(...logFormat(source, 'User service error:', errorText));
           throw new Error(`User service failed: ${response.status}`);
         }
 
         user = await response.json();
         //fastify.log.info('✅ User upsert successful:', user);
-        request.log.info(logFormat(source, '✅ User upsert successful:', user));
+        request.log.info(...logFormat(source, '✅ User upsert successful:', user));
       } catch (err: any) {
         //fastify.log.error('❌ Failed to upsert user:', err);
-        request.log.error(logFormat(source, '❌ Failed to upsert user:', err));
+        request.log.error(...logFormat(source, '❌ Failed to upsert user:', err));
         return reply.status(500).send({ error: 'User creation failed' });
       }
 
@@ -187,8 +187,8 @@ const googleAuthPlugin: FastifyPluginAsync = async (fastify) => {
     } catch (err: any) {
       //fastify.log.error('🚨 Google auth error:', err.message);
       //fastify.log.error('Full error stack:', err.stack);
-      request.log.error(logFormat(source, '🚨 Google auth error:', err.message));
-      request.log.error(logFormat(source, 'Full error stack:', err.stack));
+      request.log.error(...logFormat(source, '🚨 Google auth error:', err.message));
+      request.log.error(...logFormat(source, 'Full error stack:', err.stack));
 
       if (err.message.includes('Invalid ID token')) {
         return reply.status(400).send({ error: 'Invalid Google token' });

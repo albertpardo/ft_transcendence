@@ -43,10 +43,16 @@ function formatString(msg: unknown, ...rest: unknown[]): string {
 
 }
 
-
+/*
 export const logFormat = (source: string, msg: unknown, ...rest: unknown[]): { source: string; message: string } => {
     return {
         source,
         message: formatString(msg, ...rest)
     };
+};
+*/
+
+
+export const logFormat = (source: string, message: unknown, ...rest: unknown[]): [object, string ] => {
+    return [{ source: source } , formatString(message, ...rest)];
 };

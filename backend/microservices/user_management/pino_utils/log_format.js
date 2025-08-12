@@ -81,12 +81,17 @@ function formatString(msg, ...rest) {
 
 }
 
-
+/*
 const logFormat = (source, msg, ...rest) => {
     return {
         source,
         message: formatString(msg, ...rest)
     };
+};
+*/
+
+const logFormat = (source, message, ...rest) => {
+	  return [{ source: source } , formatString(message, ...rest)];
 };
 
 module.exports = logFormat;

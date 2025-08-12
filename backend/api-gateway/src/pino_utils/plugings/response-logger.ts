@@ -20,6 +20,7 @@ async function responseLogger(fastify: any , opts: any ) {
         }
       }
 
+	  /*
       const logData: {
         statusCode: number;
         route: string;
@@ -39,6 +40,25 @@ async function responseLogger(fastify: any , opts: any ) {
       } else {
         logData.message = "Response sent";
         log.info(logData);
+      }
+	 */
+
+      const logData: {
+        statusCode: number;
+        route: string;
+        source: string;
+        payload: any;
+      } = {
+        statusCode,
+        route: request.routerPath || request.url,
+        source: request.routeOptions.config.source,
+        payload: responseBody
+      };
+
+      if (statusCode >= 400) {
+        log.error(logData, "Response error" );
+      } else {
+        log.info(logData, "Response sent");
       }
     }
 
