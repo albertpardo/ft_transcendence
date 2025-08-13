@@ -79,46 +79,6 @@ filter {
   mutate {
     remove_field => ["payload"]
   }
-
-  # Filtro para  vincular datos de "incoming request" con "request completed"
-  if [msg] == "incoming request" {
-    aggregate {
-      task_id => "%{reqId}"
-      code => "
-        map['req_url'] = event.get('req')['url']
-        map['req_method'] = event.get('req')['method']
-      "
-      map_action => "create"
-      timeout => 30
-    }
-    mutate {
-      add_field => { "event_type" => "request_start" }
-    }
-  }
-
-  if [msg] == "request completed" {
-    aggregate {
-      task_id => "%{reqId}"
-      code => "
-        event.set('req_url', map['req_url'])
-        event.set('req_method', map['req_method'])
-      "
-      map_action => "update"
-    }
-    mutate {
-      add_field => {
-        "event_type" => "request_end"
-        "duration_ms" => "%{[responseTime]}"
-        "status_code" => "%{[res][statusCode]}"
-      }
-    }
-    mutate {
-      convert => {
-        "duration_ms" => "float"
-        "status_code" => "integer"
-      }
-    }
-  }
 }
 
 output {
