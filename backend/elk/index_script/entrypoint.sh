@@ -231,7 +231,6 @@ create_template () {
       "properties": {
         "@timestamp": { "type": "date" },
         "level": { "type": "keyword" },
-        "message": { "type": "text" },
         "source": { "type": "keyword" }
       }
     }
