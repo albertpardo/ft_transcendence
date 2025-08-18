@@ -84,6 +84,8 @@ services:
     volumes:
       - elasticdata:/usr/share/elasticsearch/data
       - ${LOGS_ELASTIC_FOLDER}:/mnt/snapshots
+    ports:
+      - "9200:9200"
     environment:
       - ES_JAVA_OPTS=-Xms512m -Xmx512m
       - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
@@ -180,6 +182,8 @@ services:
     volumes:
       - logstashdata:/usr/share/logstash/data
       - shared_logs:/shared_logs
+    ports:
+      - "5044:5044"
     environment:
       - ELASTIC_URL=${ELASTIC_URL}
       - ELASTIC_US=${ELASTIC_US}
