@@ -175,9 +175,9 @@ async function fillInTheTournTable() {
             let nnJson = JSON.parse(await respNn.text());
             let nicknameVs = "<i>unknown</i>";
             if (nnJson.err === "nil") {
-              nicnknameVs = nnJson.nickname;
+              nicknameVs = nnJson.nickname;
             }
-            document.getElementById(`${currentTitle}${j + 1}`).innerHTML = "<b>" + nicnknameVs + "</b>";
+            document.getElementById(`${currentTitle}${j + 1}`).innerHTML = "<b>" + nicknameVs + "</b>";
           }
           else {
             // TODO this just highlights the importance of protections against injection. TODO TODO TODO FIXME XXX FIXME TODO TODO TODO.
@@ -196,9 +196,9 @@ async function fillInTheTournTable() {
           let nnJson = JSON.parse(await respNn.text());
           let nicknameVs = "<i>unknown</i>";
           if (nnJson.err === "nil") {
-            nicnknameVs = nnJson.nickname;
+            nicknameVs = nnJson.nickname;
           }
-          document.getElementById('table-finalist').innerHTML = "<b>" + nicnknameVs + "</b>";
+          document.getElementById('table-finalist').innerHTML = "<b>" + nicknameVs + "</b>";
         }
         else {
           document.getElementById('table-finalist').innerHTML = "finalist!";

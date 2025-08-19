@@ -19,6 +19,7 @@ enum MetaGameState {
   waittourrdy,
   waittouropprdy,
   intourgame,
+  losttour,
   misc,
 }
 
@@ -165,8 +166,14 @@ async function buttonSetter(state : MetaGameState) {
       document.getElementById("giveup-button").disabled = false;
       break;
     }
+    case MetaGameState.losttour: {
+      // 10
+      document.getElementById("start-button").disabled = true;
+      document.getElementById("ready-button").disabled = true;
+      document.getElementById("giveup-button").disabled = true;
+      break;
+    }
     default: {
-      // 9
       //basically "misc"
       //idk if that's a good idea
       document.getElementById("start-button").disabled = false;
@@ -177,21 +184,26 @@ async function buttonSetter(state : MetaGameState) {
   }
 }
 
+async function tourCheckAndSetIdlingButtons() {
+  let isintour : bool = await checkIsInTourWrapper();
+  console.log("isintour:", isintour);
+  if (isintour) {
+    // no game, but we're in a tournament
+    // we're either waiting for it to start, or we've lost it. but the buttons should be the same so...
+    buttonSetter(MetaGameState.waittourstart);
+  }
+  else {
+    // no game. allow mm search
+    buttonSetter(MetaGameState.nothing);
+  }
+}
+
 async function setterUponMetaInfo(gameInfo : HTMLElement, metaInfo : {gType: string, oppName: string}) {
   console.log("ENTERED setterUponMetaInfo");
   console.log("metainfo is:", metaInfo);
   if (metaInfo.gType === "none") {
     gameInfo.innerHTML = "";
-    let isintour : bool = await checkIsInTourWrapper();
-    console.log("isintour:", isintour);
-    if (isintour) {
-      // no game, but we're in a tournament
-      buttonSetter(MetaGameState.waittourstart);
-    }
-    else {
-      // no game. allow mm search
-      buttonSetter(MetaGameState.nothing);
-    }
+    await tourCheckAndSetIdlingButtons();
   }
   else if (metaInfo.gType === "unknown") {
     // some bs happened. must investigate
@@ -216,7 +228,7 @@ async function setterUponMetaInfo(gameInfo : HTMLElement, metaInfo : {gType: str
       buttonSetter(MetaGameState.waittourrdy);
     }
     else {
-      buttonSetter(MetaGameState.misc);
+      buttonSetter(MetaGameState.intourgame);
     }
     console.log("ginfo setter 2");
     gameInfo.innerHTML = "Game type: " + metaInfo.gType + "; versus: " + metaInfo.oppName;
@@ -462,17 +474,17 @@ export async function initDashboard() {
                 case "left fully":
                   started = false;
                   gameText.innerHTML = "You lost the game.";
-                  buttonSetter(MetaGameState.misc);
+                  await tourCheckAndSetIdlingButtons();
                   break;
                 case "right fully":
                   started = false;
                   gameText.innerHTML = "You won the game!";
-                  buttonSetter(MetaGameState.misc);
+                  await tourCheckAndSetIdlingButtons();
                   break;
                 case "both":
                   started = false;
                   gameText.innerHTML = "In a rare dispay of absense, nobody won";
-                  buttonSetter(MetaGameState.misc);
+                  await tourCheckAndSetIdlingButtons();
                   break;
               }
             } else if (playerSide === "r") {
@@ -486,17 +498,17 @@ export async function initDashboard() {
                 case "right fully":
                   started = false;
                   gameText.innerHTML = "You lost the game.";
-                  buttonSetter(MetaGameState.misc);
+                  await tourCheckAndSetIdlingButtons();
                   break;
                 case "left fully":
                   started = false;
                   gameText.innerHTML = "You won the game!";
-                  buttonSetter(MetaGameState.misc);
+                  await tourCheckAndSetIdlingButtons();
                   break;
                 case "both":
                   started = false;
                   gameText.innerHTML = "In a rare dispay of absense, nobody won";
-                  buttonSetter(MetaGameState.misc);
+                  await tourCheckAndSetIdlingButtons();
                   break;
               }
             }
