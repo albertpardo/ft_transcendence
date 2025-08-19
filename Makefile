@@ -16,14 +16,23 @@ ifeq ($(BACKUP_ELASTIC_LOGS),)
     $(error "BACKUP_ELASTIC_LOGS no defined. Check BACKUP_ELASTIC_LOGS  in .env .")
 endif
 
-all: create_folders
+all: 
 	@echo > /dev/null
 #	docker compose -f docker-compose.yml up --build
-	@docker compose -f docker-compose_pino_elk.yml up -d --build
+	@docker compose -f docker-compose.yml up -d --build
 	
 	@echo "\n▉▉▉▉▉▉▉▉▉▉ WELCOME TO TRASCENDENCE PROJECT! ▉▉▉▉▉▉▉▉▉▉\n"
 	@echo "To check the system status run: make status\n"
-	@echo "Access to user API(back) at: https://localhost:8443/api"
+	@echo "Access to user API(back) at: https://localhost:8443"
+	@echo "Access to profile view(front) at: https://localhost:3000"
+
+elk: create_folders
+	@echo > /dev/null
+	@docker compose -f docker-compose_log_elk.yml up -d --build
+	
+	@echo "\n▉▉▉▉▉▉▉▉▉▉ WELCOME TO TRASCENDENCE PROJECT! ▉▉▉▉▉▉▉▉▉▉\n"
+	@echo "To check the system status run: make status\n"
+	@echo "Access to user API(back) at: https://localhost:8443"
 	@echo "Access to profile view(front) at: https://localhost:3000"
 
 create_folders:
@@ -38,22 +47,27 @@ create_folders:
 	done
 
 down:
-	@docker compose -f docker-compose_pino_elk.yml down
+	@docker compose -f docker-compose.yml down
 
 # Docker down deleting docker volumes
-downvol:
-	@docker compose -f docker-compose_pino_elk.yml down -v
 
-# Delete ELK folder (and subfolders) used for logs and backups
+downapp:
+	@docker compose -f docker-compose.yml down -v
+
+downelk:
+	@docker compose -f docker-compose_log_elk.yml down -v
+
+# Delete ELK folder (and subfolders) used for snapshots and backups
 cleanfolders:
 	@rm -rf $(ELK_FOLDER)
 	@rm -rf ./backend/microservices/game_service/dist/
 	@rm -rf ./backend/api-gateway/dist/
 	@rm -f ./backend/api-gateway/tsconfig.pino_utils.tsbuildinfo
 
-
 # For easy clean by apardo-m
-cleanapardo: downvol cleanfolders
+cleanapp: downapp cleanfolders
+
+cleanelk: downelk cleanfolders
 
 status:
 	@echo "\n▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉ CONTAINERS STATUS ▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉\n"
@@ -86,4 +100,4 @@ fresh:
 	$(MAKE) all
 	@echo "\n All dockers successfully starting up! \n"
 
-.PHONY: all create_folders down downvol clean cleanapardo fclean status re fresh
+.PHONY: all down clean fclean status re fresh create_folders downapp downelk cleanfolders cleanapp cleanelk 

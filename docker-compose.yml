@@ -34,7 +34,6 @@ services:
     restart: always
     networks:
       - backend
-    user: 1000:1000     # Usar el UID y GID del usuario actual  para portatil ELIMINAR 42Barcelona
 
   user_management:
     build: ./backend/microservices/user_management
@@ -50,7 +49,6 @@ services:
     restart: always
     networks:
       - backend
-    user: 1000:1000     # Usar el UID y GID del usuario actual  para portatil ELIMINAR 42Barcelona
 
   game_service:
     build: ./backend/microservices/game_service
@@ -65,7 +63,6 @@ services:
     restart: always
     networks:
       - backend
-    user: 1000:1000     # Usar el UID y GID del usuario actual  para portatil ELIMINAR 42Barcelona
 
 #  chat_service:
 #    build: ./chat_service
@@ -74,8 +71,7 @@ services:
 #    networks:
 #      - backend
 
-
-# volume to share logs with ELK 
+# volumes used in ELK 
 volumes:
   shared_logs:
     driver: local

@@ -19,8 +19,7 @@ endif
 all: create_folders
 	@echo > /dev/null
 #	docker compose -f docker-compose.yml up --build
-#	@docker compose -f docker-compose.yml up -d --build
-	@docker compose -f docker-compose_pino.yml up -d --build
+	@docker compose -f docker-compose_log_elk.yml up -d --build
 	
 	@echo "\n▉▉▉▉▉▉▉▉▉▉ WELCOME TO TRASCENDENCE PROJECT! ▉▉▉▉▉▉▉▉▉▉\n"
 	@echo "To check the system status run: make status\n"
@@ -39,17 +38,18 @@ create_folders:
 	done
 
 down:
-	@docker compose -f docker-compose.yml down
+	@docker compose -f docker-compose_log_elk.yml down
 
 # Docker down deleting docker volumes
 downvol:
-	@docker compose -f docker-compose_pino.yml down -v
+	@docker compose -f docker-compose_log_elk.yml down -v
 
 # Delete ELK folder (and subfolders) used for logs and backups
 cleanfolders:
 	@rm -rf $(ELK_FOLDER)
 	@rm -rf ./backend/microservices/game_service/dist/
-#	@rm -rf ./backend/api-gateway/dist/
+	@rm -rf ./backend/api-gateway/dist/
+	@rm -f ./backend/api-gateway/tsconfig.pino_utils.tsbuildinfo
 
 
 # For easy clean by apardo-m

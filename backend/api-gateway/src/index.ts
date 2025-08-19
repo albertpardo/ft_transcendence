@@ -144,7 +144,7 @@ async function start() {
                 process.exit(1)
             }
            // server.log.info(`Server listening on ${address}`)
-           server.log.info(...logFormat(source, server.printRoutes()));
+           server.log.info(...logFormat(source, `Server listening on ${address}`));
         })
     } catch (err) {
        // server.log.error(err)
