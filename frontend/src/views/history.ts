@@ -1,4 +1,5 @@
 // src/views/history.ts
+import { t } from '../i18n'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -146,4 +147,3 @@ export async function renderHistoryContent(hideableElements) {
   hideableElements.gameArea.classList.add("hidden");
   hideableElements.gameWindow.hidden = true;
 }
-

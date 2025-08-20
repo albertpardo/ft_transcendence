@@ -1,3 +1,77 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@keyframes ping {
+  75%, 100% { 
+    transform: scale(1.1); 
+    opacity: 0;
+  }
+}
+
+.animate-ping {
+  animation: ping 0.5s cubic-bezier(0,0,0.2,1) 1;
+}
+
+rect, circle, text {
+  transform-box: fill-box;
+  transform-origin: center;
+  will-change: transform, filter;
+}
+
+@keyframes paddlePing {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; transform: scale(1.1); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes ballPulse {
+  0%, 100% { r: 3; }
+  50% { r: 6; }
+}
+
+@keyframes paddleGlow {
+  0% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 0px rgba(255, 255, 255, 0));
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.8));
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 0px rgba(255, 255, 255, 0));
+    opacity: 1;
+  }
+}
+
+.animate-paddle-glow {
+  animation: paddleGlow 0.4s ease;
+}
+
+.animate-ball-pulse {
+  animation: ballPulse 0.3s ease;
+}
+
+
+.rain-drop {
+  position: absolute;
+  width: 2px;
+  height: 20px;
+  background: rgba(147, 197, 253, 0.7); /* Tailwind's blue-300 */
+  animation: rain-fall-js 0.6s linear infinite;
+}
+
+@keyframes rain-fall-js {
+  0% { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(100vh); opacity: 0; }
+}
+
+.glow {
+  filter: url(#glow);
+  transform: scale(1.2);
+  transition: transform 0.2s ease;
+}

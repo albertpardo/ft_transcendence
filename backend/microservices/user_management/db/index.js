@@ -1,3 +1,5 @@
+const { get } = require('http');
+
 const db = require('better-sqlite3')('./users.db');
 
 // TODO make the id a "TEXT PRIMARY KEY UNIQUE", make all the corresponding changes in all the api.
@@ -8,7 +10,11 @@ const init = db.prepare(`
     password TEXT,
     nickname TEXT,
     email TEXT UNIQUE,
-    avatar TEXT DEFAULT '')` 
+    avatar TEXT DEFAULT '',
+    googleId TEXT UNIQUE,
+    firstName TEXT,
+    lastName TEXT,
+    status TEXT DEFAULT 'offline')` 
 );
 init.run();
 
@@ -29,6 +35,11 @@ function getUserByUsername(username) {
     return info;
 }
 
+function getUserByEmail(email) {
+  const stmt = db.prepare('SELECT * FROM users WHERE email = ?');
+  return stmt.get(email);
+}
+
 function getNickname(nickname) {
     const stmt = db.prepare('SELECT * FROM users WHERE nickname = ?');
     return stmt.get(nickname);
@@ -39,12 +50,27 @@ function getUserById(id) {
     return stmt.get(id);
 }
 
-function createUser({ id, username, password, nickname, email, avatar = '' }) {
-    const stmt = db.prepare('INSERT INTO users (id, username, password, nickname, email, avatar) VALUES (?, ?, ?, ?, ?, ?)');
-    const info = stmt.run(id, username, password, nickname, email, avatar);
-	const stmt2 = db.prepare('SELECT * FROM users WHERE id = ?');
-	const info2 = stmt2.all(id);
-    return { id: info2[0].id, username, avatar:info2[0].avatar };
+function getUserByGoogleId(googleId) {
+  const stmt = db.prepare('SELECT * FROM users WHERE googleId = ?');
+  return stmt.get(googleId);
+}
+
+function createUser({ id, username, password, nickname, email, avatar = '', googleId = null, firstName = 'User', lastName = 'Anonymous', status = 'offline' }) {
+    const stmt = db.prepare('INSERT INTO users (id, username, password, nickname, email, avatar, googleId, firstName, lastName, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+    const info = stmt.run(id, username, password, nickname, email, avatar, googleId, firstName, lastName, status);
+    const stmt2 = db.prepare('SELECT * FROM users WHERE id = ?');
+    const info2 = stmt2.all(id);
+    return { 
+        id: info2[0].id, 
+        username: info2[0].username, 
+        avatar: info2[0].avatar ,
+        nickname: info2[0].nickname,
+        email: info2[0].email,
+        googleId: info2[0].googleId,
+        firstName: info2[0].firstName,
+        lastName: info2[0].lastName,
+        status: info2[0].status
+    };
 }
 
 function updateUser(userId, updates) {
@@ -64,9 +90,12 @@ function updateUser(userId, updates) {
     const values = [];
 
     for (const [key, value] of Object.entries(updates)) {
-        fields.push(`${key} = ?`);
-        values.push(value);
-    }
+         if (['username', 'nickname', 'email', 'password', 'avatar', 'googleId', 'firstName', 'lastName', 'status'].includes(key)) {
+            fields.push(`${key} = ?`);
+            values.push(value);
+         }
+    } 
+    if (fields.length === 0) return;
     const sql = `UPDATE users SET ${fields.join(', ')} WHERE id = ?`;
     const stmt = db.prepare(sql);
     stmt.run(...values, userId);
@@ -82,6 +111,8 @@ module.exports = {
     getUserByUsernameOrEmail,
     getUserByUsername,
     getUserById,
+    getUserByEmail,
+    getUserByGoogleId,
     getNickname,
     createUser,
     updateUser,
