@@ -1,7 +1,14 @@
 import { route } from '../router';
 import { t } from '../i18n';
 
-export function renderHomeContent(el: HTMLElement, bu: HTMLElement, gArea: HTMLElement, gWin: HTMLElement) {
+export function renderHomeContent(hideableElements) {
+  hideableElements.buttonArea.hidden = true;
+  hideableElements.gameArea.classList.add("hidden");
+  hideableElements.gameWindow.hidden = true;
+  const el = hideableElements.contentArea;
+  const bu = hideableElements.buttonArea;
+  const gArea = hideableElements.gameArea;
+  const gWin = hideableElements.gameWindow;
   el.innerHTML = `
     <h1 class="text-3xl font-bold mb-6 text-center">${t('welcome')} 👋</h1>
     <p class="mb-4 text-center">${t('home.intro')}</p>
@@ -57,34 +64,26 @@ export function renderHomeContent(el: HTMLElement, bu: HTMLElement, gArea: HTMLE
   });
 }
 
-export function renderPlayContent(el: HTMLElement, bu: HTMLElement, gArea: HTMLElement, gWin: HTMLElement) {
-  el.innerHTML = `
+export function renderPlayContent(hideableElements) {
+  hideableElements.contentArea.innerHTML = `
   `;
   // on this view, show the button and the registered games list
-  bu.hidden = false;
-  gArea.hidden = false;
-  gWin.hidden = false;
+  hideableElements.buttonArea.hidden = false;
+  hideableElements.gameArea.classList.remove("hidden");
+  hideableElements.gameWindow.hidden = false;
 }
 
-export function renderTournamentContent(el: HTMLElement, bu: HTMLElement, gArea: HTMLElement, gWin: HTMLElement) {
-  el.innerHTML = `
-    <h1 class="text-3xl font-bold mb-6">${t("tournaments.title")}</h1>
-    <p class="mb-4">${t("tournaments.description")}</p>
-    <img src="https://placehold.co/1000x400/444444/ffffff?text=Demo" class="w-full rounded-lg" alt="Tournament">
-  `;
-  bu.hidden = true;
-  gArea.hidden = true;
-  gWin.hidden = true;
-}
-
-export function renderStatsContent(el: HTMLElement, bu: HTMLElement, gArea: HTMLElement, gWin: HTMLElement) {
+export function renderStatsContent(hideableElements) {
+  const el = hideableElements.contentArea;
+  const bu = hideableElements.buttonArea;
+  const gArea = hideableElements.gameArea;
+  const gWin = hideableElements.gameWindow;
   el.innerHTML = `
     <h1 class="text-3xl font-bold mb-6">${t("statistics.title")}</h1>
     <p class="mb-4">${t("statistics.description")}</p>
     <img src="https://placehold.co/1000x400/444444/ffffff?text=Demo" class="w-full rounded-lg" alt="Stats">
   `;
-  bu.hidden = true;
-  gArea.hidden = true;
-  gWin.hidden = true;
+  hideableElements.buttonArea.hidden = true;
+  hideableElements.gameArea.classList.add("hidden");
+  hideableElements.gameWindow.hidden = true;
 }
-

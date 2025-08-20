@@ -13,11 +13,11 @@ async function jwtPlugin(app: FastifyInstance) {
     app.register(fastifyJWT, {
         secret: process.env.JWT_SECRET, // 🚨 To get secret from .env file
     });
-    console.log('✅ JWT_SECRET:', process.env.JWT_SECRET);
+//    console.log('✅ JWT_SECRET:', process.env.JWT_SECRET);
 };
 
 async function authHookPlugin(app: FastifyInstance) {
-    console.log('🔥 onRequest hook reached');
+//    console.log('🔥 onRequest hook reached');
     app.addHook('onRequest', authMiddleware);
 }
 

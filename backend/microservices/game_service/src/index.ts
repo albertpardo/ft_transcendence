@@ -2,20 +2,45 @@ import Fastify from 'fastify';
 import websocket from '@fastify/websocket';
 import type { FastifyRequest } from 'fastify';
 import cors from '@fastify/cors';
-import { PongResponses, State, addPlayerCompletely, removeTheSock, getPongDoneness, getPongState, moveMyPaddle, gamesReadyLoopCheck, dataStreamer } from './pong';
+import {
+  sleep,
+  State,
+  addPlayerCompletely,
+  removeTheSock,
+  getPongState,
+  forefit,
+  moveMyPaddle,
+  gamesReadyLoopCheck,
+  dataStreamer,
+  JoinError,
+  getGType,
+  getOppId,
+  checkInPong
+} from './pong';
 import { historyMain, getHistForPlayerFromDb } from './history';
+import {
+  tournamentsLoopCheck,
+  checkAdmining,
+  checkParticipating,
+  addTournament,
+  joinTournament,
+  listAllPublicTournaments,
+  deleteTournament,
+  leaveTournament,
+  getFullTournament,
+  confirmParticipation,
+  getFinalist,
+  checkInTour,
+  checkTourReady 
+} from './tournament';
 
-interface PongBodyReq {
-  playerId: string,
-  getIn: boolean,
-  mov: number,
-}
 // id shall come from the req and be per-user unique and persistent (jwt)
 // getIn tells do we wanna move (false) or do we wanna get into a game (true)
 // mov tells us where to move and if we wanna
 
 // TODO extra x-user-id to sock map maybe needs to be literally the same obj
 //as the one in the pong.ts file
+// on the other hand, these two maps perform slightly different functions, so...
 
 const upperSocksMap = new Map<string, WebSocket>();
 //const qs = fastQuerystring();
@@ -23,7 +48,7 @@ const upperSocksMap = new Map<string, WebSocket>();
 const startServer = async () => {
   await historyMain();
   const fastify = Fastify({
-    logger: true,
+//    logger: true,
 //    querystringParser: str => qs.parse(str),
   });
   await fastify.register(websocket);
@@ -36,10 +61,12 @@ const startServer = async () => {
 
   // start the meta loop of checking if any of the games are full enough to be started.
   gamesReadyLoopCheck();
+  // and for the torunaments -- to check on their alive-ness and remove if necessary.
+  tournamentsLoopCheck();
 
   // Registra un plugin para prefijar las rutas API con '/api'
   const apiRoutes = async (fastify) => {
-    fastify.get('/pong/game-ws', { websocket: true }, async (sock, req: FastifyRequest<{ Body: PongBodyReq }>) => {
+    fastify.get('/pong/game-ws', { websocket: true }, async (sock, req) => {
       const usp2 = new URLSearchParams(req.url);
       let playerId : string = usp2.get("/api/pong/game-ws?uuid") as string;
       upperSocksMap.set(playerId, sock);
@@ -58,36 +85,295 @@ const startServer = async () => {
       });
       return "Welcome to an \"html\" return for firefox testing purposes.<br>Enjoy your stay!";
     });
-    fastify.post('/pong', async (req: FastifyRequest<{ Body: PongBodyReq }>, reply) => {
-//      let jsonMsg = JSON.parse(req.body);
-      let jsonMsg = req.body;
-      // this user id should be completely verified by now.
+    fastify.post('/pong/game/add', async (req, reply) => {
       let playerId : string = req.headers['x-user-id'] as string;
-      let getIn = jsonMsg?.getIn;
-      let mov = jsonMsg?.mov;
       let sock : WebSocket;
       if (typeof playerId !== "undefined" && playerId !== "") {
-        if (typeof getIn !== "undefined" && getIn === true) {
-          if (upperSocksMap.has(playerId) === false) {
-            console.error("no associated socket found. this must never happen, i think.");
-            return "somehow, the socket hasn't been found";
+        let retries : number = 5;
+        while (upperSocksMap.has(playerId) === false) {
+          if (retries <= 0) {
+            console.log(playerId, "outta retries.");
+            return JSON.stringify({
+              gType: "",
+              err: "somehow, the socket hasn't been found",
+            });
           }
-          sock = upperSocksMap.get(playerId) as WebSocket;
-          const resp : PongResponses = addPlayerCompletely(playerId, sock);
+          console.error("no associated socket found for", playerId, ", probable sync issue. retrying", retries, "more times...");
+          retries--;
+          await sleep(1e3);
         }
-        else if (typeof mov !== "undefined") {
-          moveMyPaddle(playerId, mov);
+        sock = upperSocksMap.get(playerId) as WebSocket;
+        try {
+          const gtype = addPlayerCompletely(playerId, sock);
+          return JSON.stringify({
+            gType: gtype,
+            err: "nil",
+          });
+        }
+        catch (e) {
+          console.error("whoops on add:", e);
+          if (e instanceof JoinError) {
+            return JSON.stringify({
+              gType: e.gType,
+              err: e.err,
+            });
+          }
+          else {
+            return JSON.stringify({
+              gType: "",
+              err: e,
+            });
+          }
         }
       }
-      else {
-        return "the request is super malformed";
+      return JSON.stringify({
+        gType: "",
+        err: "undefined or empty playerId -- failed to verify?",
+      });
+    });
+    fastify.post('/pong/game/move', async (req, reply) => {
+      let jsonMsg = req.body;
+      let playerId : string = req.headers['x-user-id'] as string;
+      let mov = jsonMsg.mov;
+      if (typeof playerId !== "undefined" && playerId !== "") {
+        if (typeof mov !== "undefined") {
+          try {
+            moveMyPaddle(playerId, mov);
+            return JSON.stringify({
+              err: "nil",
+            });
+          }
+          catch (e) {
+            return JSON.stringify({
+              err: e,
+            });
+          }
+        }
+        return JSON.stringify({
+          err: "undefined mov",
+        })
       }
-      return "done inerfacing via post";
+      return JSON.stringify({
+        err: "undefined or empty playerId -- failed to verify?",
+      });
+    });
+    fastify.post('/pong/game/forefit', async (req, reply) => {
+      let playerId : string = req.headers['x-user-id'] as string;
+      if (typeof playerId !== "undefined" && playerId !== "") {
+        forefit(playerId);
+        return JSON.stringify({
+          err: "nil",
+        });
+      }
+      return JSON.stringify({
+        err: "undefined or empty playerId -- failed to verify?",
+      });
+    });
+    fastify.get('/pong/game/check', async (req, reply) => {
+      const res = checkInPong(req?.headers['x-user-id'] as string);
+      return JSON.stringify({
+        res: res,
+      });
+    });
+    fastify.get('/pong/game/info', async (req, reply) => {
+      let playerId : string = req.headers['x-user-id'] as string;
+      try {
+        if (typeof playerId !== "undefined" && playerId !== "") {
+          const gType = getGType(playerId);
+          const oppId = getOppId(playerId);
+          return JSON.stringify({
+            gType: gType,
+            oppId: oppId,
+            err: "nil",
+          });
+        }
+        throw "undefined or empty playerId -- failed to verify?";
+      }
+      catch (e) {
+        return JSON.stringify({
+          gType: "",
+          oppId: "",
+          err: e,
+        });
+      }
     });
     // TODO XXX add public pong hist by username?
     fastify.post('/pong/hist', async (req: FastifyRequest<{ Body: {userId: string} }>, reply) => {
       const resp = await getHistForPlayerFromDb(req?.body.userId);
       return JSON.stringify(resp);
+    });
+    fastify.post('/pong/tour/admincheck', async (req, reply) => {
+      try {
+        const resp = checkAdmining(req?.headers['x-user-id'] as string);
+        return JSON.stringify({
+          tId: resp,
+          err: "nil",
+        });
+      }
+      catch (e) {
+        return JSON.stringify({
+          res: "",
+          err: e,
+        });
+      }
+    });
+    fastify.post('/pong/tour/participantcheck', async (req, reply) => {
+      try {
+        const resp = checkParticipating(req?.headers['x-user-id'] as string);
+        return JSON.stringify({
+          tId: resp,
+          err: "nil",
+        });
+      }
+      catch (e) {
+        return JSON.stringify({
+          res: "",
+          err: e,
+        });
+      }
+    });
+    fastify.post('/pong/tour/create', async (req: FastifyRequest<{ Body: {tName: string, playersN: number, privacy: boolean} }>, reply) => {
+      try {
+        const uuid = req?.headers['x-user-id'] as string;
+        if (typeof uuid === "undefined") {
+          throw "bad uuid";
+        }
+        const sock = upperSocksMap.get(uuid);
+        if (typeof sock === "undefined") {
+          throw "bad sock";
+        }
+        const resp = addTournament(req?.body.tName, Number(req?.body.playersN), req?.body.privacy, uuid, sock);
+        return JSON.stringify({
+          tId: resp,
+          err: "nil",
+        });
+      }
+      catch (e) {
+        return JSON.stringify({
+          res: "",
+          err: e,
+        });
+      }
+    });
+    fastify.post('/pong/tour/enroll', async (req: FastifyRequest<{ Body: {tId: string} }>, reply) => {
+      try {
+        const uuid = req?.headers['x-user-id'] as string;
+        if (typeof uuid === "undefined") {
+          throw "undefined uuid";
+        }
+        if (!upperSocksMap.has(uuid)) {
+          throw "User has no socker in the upper socks map";
+        }
+        let sock = upperSocksMap.get(uuid);
+        if (typeof sock === "undefined") {
+          throw "Sock undefined in the server stage";
+        }
+        const resp = joinTournament(req?.body.tId, uuid, sock);
+        return JSON.stringify({
+          err: "nil",
+        });
+      }
+      catch (e) {
+        return JSON.stringify({
+          err: e,
+        });
+      }
+    });
+    fastify.get('/pong/tour/all', async (req, reply) => {
+      try {
+        const resp = listAllPublicTournaments();
+        return JSON.stringify({
+          res: resp,
+        });
+      }
+      catch {
+        console.log("how the hell did this fail");
+        return JSON.stringify({
+          res: [],
+        });
+      }
+    });
+    fastify.get('/pong/tour/delete', async (req, reply) => {
+      try {
+        deleteTournament(req?.headers['x-user-id'] as string);
+        return JSON.stringify({
+          err: "nil",
+        });
+      }
+      catch (e) {
+        return JSON.stringify({
+          err: e,
+        });
+      }
+    });
+    fastify.get('/pong/tour/leave', async (req, reply) => {
+      try {
+        leaveTournament(req?.headers['x-user-id'] as string);
+        return JSON.stringify({
+          err: "nil",
+        });
+      }
+      catch (e) {
+        console.log("an error on leaving caught. an error which is", e);
+        return JSON.stringify({
+          err: e,
+        });
+      }
+    });
+    fastify.get('/pong/tour/check', async (req, reply) => {
+      const res = checkInTour(req?.headers['x-user-id'] as string);
+      return JSON.stringify({
+        res: res,
+      });
+    });
+    fastify.get('/pong/tour/checkready', async (req, reply) => {
+      const res = checkTourReady(req?.headers['x-user-id'] as string);
+      return JSON.stringify({
+        res: res,
+      });
+    });
+    fastify.get('/pong/tour/peridinfo', async (req, reply) => {
+      try {
+        const res = getFullTournament(req?.headers['x-user-id'] as string);
+        return JSON.stringify({
+          res: res,
+          err: "nil",
+        });
+      }
+      catch (e) {
+        return JSON.stringify({
+          res: {},
+          err: e,
+        });
+      }
+    });
+    fastify.get('/pong/tour/finalist', async (req, reply) => {
+      try {
+        const res = getFinalist(req?.headers['x-user-id'] as string);
+        return JSON.stringify({
+          res: res,
+          err: "nil",
+        });
+      }
+      catch (e) {
+        return JSON.stringify({
+          res: {},
+          err: e,
+        });
+      }
+    });
+    fastify.post('/pong/tour/confirm', async (req, reply) => {
+      try {
+        confirmParticipation(req?.headers['x-user-id'] as string);
+        return JSON.stringify({
+          err: "nil",
+        });
+      }
+      catch (e) {
+        return JSON.stringify({
+          err: e,
+        });
+      }
     });
   };
 
