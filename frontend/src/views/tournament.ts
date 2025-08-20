@@ -1,6 +1,7 @@
 // src/views/tournament.ts
 
 import { getNicknameForPlayerId } from './history'
+import { MetaGameState, buttonSetter, getGameMetaInfo, setterUponMetaInfo } from './dashboard'
 
 // stolen from backend/microservices/game_service/src/pong.ts
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -280,6 +281,8 @@ export async function renderTournamentContent(hideableElements) {
   let tournAnihilationButton = document.getElementById("force-rm-tourn");
   let tournLeaveButton = document.getElementById("leave-tourn");
   let doIAdmin : boolean = false;
+  let noadminFlag : boolean = false;
+  let noparticipateFlag : boolean = false;
   if (tournAnihilationButton) {
     const checkAdminRawResp = await adminCheck();
     const checkAdminResp = await checkAdminRawResp.text();
@@ -295,6 +298,8 @@ export async function renderTournamentContent(hideableElements) {
           alert("wow dude. deleted tournament.");
           localStorage.removeItem("tId");
           tournAnihilationButton.disabled = true;
+          console.log("button setting from tournament 1");
+          buttonSetter(MetaGameState.nothing);
         }
         else {
           console.error("failed to delete tournament:", resOfDeleteObj.err);
@@ -305,6 +310,7 @@ export async function renderTournamentContent(hideableElements) {
     else {
       console.log("just checked and you don't admin anything:", checkAdminRespObj.err);
       tournAnihilationButton.disabled = true;
+      noadminFlag = true;
     }
   }
   if (tournLeaveButton) {
@@ -322,6 +328,8 @@ export async function renderTournamentContent(hideableElements) {
           alert("left the tournament");
           localStorage.removeItem("tId");
           tournLeaveButton.disabled = true;
+          console.log("button setting from tournament 3");
+          buttonSetter(MetaGameState.nothing);
         }
         else {
           console.error("failed to leave tournament:", resOfLeaveObj.err);
@@ -332,10 +340,16 @@ export async function renderTournamentContent(hideableElements) {
     else {
       console.log("just checked and you don't participate in anything OR you admin the thing:", checkPartRespObj.err);
       tournLeaveButton.disabled = true;
+      noparticipateFlag = true;
     }
   }
-  console.log(tournAnihilationButton);
-  console.log(tournLeaveButton);
+  if ((noadminFlag === true) && (noparticipateFlag === true)) {
+    let metaInfo = await getGameMetaInfo();
+    const gameInfo : HTMLElement = document.getElementById("game-info");
+    if (gameInfo) {
+      await setterUponMetaInfo(gameInfo, metaInfo);
+    }
+  }
 
   await fillInTheTournTable();
 }
@@ -436,9 +450,11 @@ async function generateUpdateAllTourTable(canWeJoin: boolean) {
   allTournamentsTable.innerHTML = tempInner;
   for (let newCount = 0; newCount < count; newCount += 1) {
     if (!canWeJoin) {
+      console.log("can join:", newCount);
       document.getElementById(`join-button-${newCount}`).disabled = true;
     }
     else {
+      console.log("can't join:", newCount);
       document.getElementById(`join-button-${newCount}`).disabled = false;
     }
     document.getElementById(`join-button-${newCount}`).addEventListener('click', async () => {
@@ -454,6 +470,7 @@ async function generateUpdateAllTourTable(canWeJoin: boolean) {
             currentJB.disabled = true;
           }
         }
+        buttonSetter(MetaGameState.waittouropp);
       }
       else {
         alert("failed to enroll in " + allPTRObj.res[newCount].tId + " because: " + resOfEnrollObj.err);
@@ -553,11 +570,11 @@ export async function renderTournamentManagerContent(hideableElements) {
         }
         else {
 //          errorField.hidden = true;
-          alert("Registered a tournament: " + tourRespObj.tId);
           console.log("registered a tournament:", tourRespObj.tId);
           canWeJoin = false;
           myTournamentField.innerHTML = "<a href=\"" + document.URL.substring(0, document.URL.search("#")) + "#tournament" + "\"><b><i>Click to view</b></i></a>"
           localStorage.setItem('tId', tourRespObj.tId);
+          buttonSetter(MetaGameState.waittouropp);
         }
         tournamentForm.reset();
         await generateUpdateAllTourTable(canWeJoin);

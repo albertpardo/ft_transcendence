@@ -9,7 +9,7 @@ import { State, nullState } from './pongrender';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-enum MetaGameState {
+export enum MetaGameState {
   nothing,
   waitmmopp,
   waitmmstart,
@@ -32,7 +32,7 @@ async function movePaddleWrapper(d: number) {
   }
 }
 
-async function getGameMetaInfo() {
+export async function getGameMetaInfo() {
   const fresp = await fetch(
     `${API_BASE_URL}/api/pong/game/info`,
     {
@@ -110,7 +110,7 @@ async function checkIsInTourWrapper() {
   return (checkIsInTourObj?.res);
 }
 
-async function buttonSetter(state : MetaGameState) {
+export async function buttonSetter(state : MetaGameState) {
   switch (state) {
     case MetaGameState.nothing: {
       // 1
@@ -198,7 +198,7 @@ async function tourCheckAndSetIdlingButtons() {
   }
 }
 
-async function setterUponMetaInfo(gameInfo : HTMLElement, metaInfo : {gType: string, oppName: string}) {
+export async function setterUponMetaInfo(gameInfo : HTMLElement, metaInfo : {gType: string, oppName: string}) {
   console.log("ENTERED setterUponMetaInfo");
   console.log("metainfo is:", metaInfo);
   if (metaInfo.gType === "none") {
@@ -396,6 +396,7 @@ export async function initDashboard() {
           break;
         case "confirmed":
           document.getElementById('ready-button').disabled = true;
+          buttonSetter(MetaGameState.intourgame);
           break;
         case "abandon":
           started = false;
