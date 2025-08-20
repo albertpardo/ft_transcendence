@@ -275,9 +275,9 @@ class Tournament {
           }
         }
 
-        console.log("tour", this.tId, "awaiting a minute till auto-shutdown; meanwhile deleting everything");
-        this.alive = false;
+        console.log("tour", this.tId, "awaiting a minute till auto-shutdown; will delete everything when shutting down");
         await sleep(60e3);
+        this.alive = false;
         console.log("tour", this.tId, "bye");
         break ;
       }
