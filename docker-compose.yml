@@ -7,6 +7,7 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules
+      - shared_logs:/shared_logs   # add by apardo-m
     ports:
       - "3000:3000"
     depends_on:
@@ -27,7 +28,7 @@ services:
     volumes:
       - ./backend/api-gateway:/app
       - /app/node_modules      # use container-installed deps
-      - ./backend/api-gateway/certs:/app/certs
+      - shared_logs:/shared_logs  # add by apardo-m 
     env_file:
       - ./backend/api-gateway/.env
     restart: always
@@ -42,6 +43,7 @@ services:
     volumes:
       - ./backend/microservices/user_management:/app
       - /app/node_modules      # use container-installed deps
+      - shared_logs:/shared_logs   # add by apardo-m 
     environment:
       - ./backend/microservices/user_management/.env
     restart: always
@@ -54,8 +56,10 @@ services:
     expose:
       - "9002"
     volumes:
+      - ./backend/microservices/game_service:/app   # add by apardo-m
       - /app/node_modules      # use container-installed deps
       - ./backend/microservices/game_service/vol:/app/dbs
+      - shared_logs:/shared_logs  # add by apardo-m 
     restart: always
     networks:
       - backend
@@ -66,6 +70,11 @@ services:
 #      - "9003"
 #    networks:
 #      - backend
+
+# volumes used in ELK 
+volumes:
+  shared_logs:
+    driver: local
 
 networks:
   backend:

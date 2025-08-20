@@ -14,17 +14,19 @@ import * as fs from 'fs';
 import * as path from 'path';
 import fastifyCookie from '@fastify/cookie';
 
+/*  by apardo-m
 console.log('🔐 TLS Key type:', typeof tlsConfig.key);
 console.log('🔐 TLS Cert type:', typeof tlsConfig.cert);
 console.log('🔐 TLS Key length:', tlsConfig.key?.length);
 console.log('🔐 TLS Cert length:', tlsConfig.cert?.length);
-
+*/
 
 /* const httpsOptions = {
   key: fs.readFileSync(path.join(__dirname, '../certs/key.pem')),
   cert: fs.readFileSync(path.join(__dirname, '../certs/cert.pem')),
   };
-  */
+ */
+/* by apardo-m
  //const fastify = require('fastify')({ logger: true, https: httpsOptions });
  delete require.cache[require.resolve('./middlewares/auth')];
  
@@ -46,6 +48,40 @@ const server = Fastify({
     logger: true,
     https: tlsConfig,
 })
+*/
+
+// Start by apardo-m
+const { rateLimitPlugin } = require('./plugins/rateLimit');
+const exampleRoutes = require('./routes/example');
+// End by apardo-m
+
+// Start by apardo-m for LOGS
+import { getLogTransportConfig } from '../dist/pino_utils/logTransportConfig';
+import { logFormat } from './pino_utils/log_format';
+import { MICRO_NAME } from './pino_utils/constants';
+import responseLogger from './pino_utils/plugings/response-logger';
+// End by apardo-m
+
+// Start by apardo-m for LOGS
+const server = Fastify({
+    logger: {
+        transport: getLogTransportConfig(),
+        base: {
+            appName: MICRO_NAME
+        },
+    },
+    https: tlsConfig,
+});
+// End by apardo-m
+
+// Start by apardo-m for LOGS
+const localSource = "index.ts"
+
+server.log.info(...logFormat( localSource, '🔐 TLS Key type:', typeof tlsConfig.key));
+server.log.info(...logFormat( localSource, '🔐 TLS Cert type:', typeof tlsConfig.cert));
+server.log.info(...logFormat( localSource, '🔐 TLS Key length:', tlsConfig.key?.length));
+server.log.info(...logFormat( localSource, '🔐 TLS Cert length:', tlsConfig.cert?.length));
+// End by apardo-m
 
 //register plugins
 async function registerPlugin() {
@@ -78,17 +114,20 @@ async function registerPlugin() {
     })
     await server.register(jwt);
     await server.register(fastifyCookie, {
-     secret: process.env.COOKIE_SECRET || 'super-secret-key-for-signing-cookies',
-     parseOptions: {}
-   });
+      secret: process.env.COOKIE_SECRET || 'super-secret-key-for-signing-cookies',
+      parseOptions: {}
+    });
     await server.register(rateLimitPlugin);
     await server.register(authHook);
     await server.register(googleAuthPlugin);
     await server.register(proxyPlugin);
+    await server.register(responseLogger); // apardo-m 
 }
 
 //start service (using HTTPS)
 async function start() {
+	const source = start.name;
+
     try {
         await registerPlugin()
 
@@ -97,16 +136,19 @@ async function start() {
 
         // print all the routes
         await server.ready()
-        console.log(server.printRoutes())
+        //console.log(server.printRoutes())
+        server.log.info(...logFormat(source, server.printRoutes()));
         server.listen({ port:8443, host: '0.0.0.0' }, (err: Error, address: string) => {
             if (err) {
                 server.log.error(err)
                 process.exit(1)
             }
-            server.log.info(`Server listening on ${address}`)
+           // server.log.info(`Server listening on ${address}`)
+           server.log.info(...logFormat(source, `Server listening on ${address}`));
         })
     } catch (err) {
-        server.log.error(err)
+       // server.log.error(err)
+        server.log.error(...logFormat(source, err));
         process.exit(1)
     }
 }

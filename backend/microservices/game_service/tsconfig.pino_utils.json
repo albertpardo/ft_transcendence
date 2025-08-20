@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.json",
+  "include": ["src/pino_utils/**/*.ts"],
+  "compilerOptions": {
+    "noEmit": false,
+    "rootDir": "src/pino_utils",
+    "outDir": "dist/pino_utils"
+  }
+}
+

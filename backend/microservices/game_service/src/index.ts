@@ -5,6 +5,13 @@ import cors from '@fastify/cors';
 import { PongResponses, State, addPlayerCompletely, removeTheSock, getPongDoneness, getPongState, moveMyPaddle, gamesReadyLoopCheck, dataStreamer } from './pong';
 import { historyMain, getHistForPlayerFromDb } from './history';
 
+// Start by apardo-m
+import { MICRO_NAME } from './pino_utils/constants';
+import { getLogTransportConfig } from '../dist/pino_utils/logTransportConfig';
+import { logFormat } from './pino_utils/log_format';
+import responseLogger from './pino_utils/plugings/response-logger';
+// End by apardo-m
+
 interface PongBodyReq {
   playerId: string,
   getIn: boolean,
@@ -22,8 +29,21 @@ const upperSocksMap = new Map<string, WebSocket>();
 
 const startServer = async () => {
   await historyMain();
+
+/*
   const fastify = Fastify({
     logger: true,
+//    querystringParser: str => qs.parse(str),
+  });
+*/
+
+  const fastify = Fastify({
+    logger: {
+      transport: getLogTransportConfig(),
+      base: {
+        appName: MICRO_NAME
+      },
+    },
 //    querystringParser: str => qs.parse(str),
   });
   await fastify.register(websocket);
@@ -37,6 +57,7 @@ const startServer = async () => {
   // start the meta loop of checking if any of the games are full enough to be started.
   gamesReadyLoopCheck();
 
+/*
   // Registra un plugin para prefijar las rutas API con '/api'
   const apiRoutes = async (fastify) => {
     fastify.get('/pong/game-ws', { websocket: true }, async (sock, req: FastifyRequest<{ Body: PongBodyReq }>) => {
@@ -58,6 +79,7 @@ const startServer = async () => {
       });
       return "Welcome to an \"html\" return for firefox testing purposes.<br>Enjoy your stay!";
     });
+
     fastify.post('/pong', async (req: FastifyRequest<{ Body: PongBodyReq }>, reply) => {
 //      let jsonMsg = JSON.parse(req.body);
       let jsonMsg = req.body;
@@ -69,7 +91,8 @@ const startServer = async () => {
       if (typeof playerId !== "undefined" && playerId !== "") {
         if (typeof getIn !== "undefined" && getIn === true) {
           if (upperSocksMap.has(playerId) === false) {
-            console.error("no associated socket found. this must never happen, i think.");
+            // console.error("no associated socket found. this must never happen, i think.");
+            req.log.error(...logFormat( "/pong", "no associated socket found. this must never happen, i think."));
             return "somehow, the socket hasn't been found";
           }
           sock = upperSocksMap.get(playerId) as WebSocket;
@@ -92,6 +115,83 @@ const startServer = async () => {
   };
 
   fastify.register(apiRoutes, { prefix: '/api' });
+*/
+
+  // Registra un plugin para prefijar las rutas API con '/api'
+
+  const PREFIX = '/api';
+  const apiRoutes = async (fastify) => {
+    // /pong/game-ws
+    let PATH = '/pong/game-ws';
+    fastify.get(PATH, { websocket: true }, async (sock, req: FastifyRequest<{ Body: PongBodyReq }>) => {
+      const usp2 = new URLSearchParams(req.url);
+      let playerId : string = usp2.get("/api/pong/game-ws?uuid") as string;
+      upperSocksMap.set(playerId, sock);
+      sock.on('message', message => {
+        sock.send("connected");
+      });
+      sock.on('close', event => {
+        removeTheSock(sock);
+        upperSocksMap.delete(playerId);
+      });
+    });
+
+	// /pong
+	PATH = '/pong';
+    fastify.get(PATH, {
+	  handler: async (request, reply) => {
+        reply.headers({
+          "Content-Security-Policy": "default-src 'self'",
+          "Content-Type": "text/html",
+        });
+        return "Welcome to an \"html\" return for firefox testing purposes.<br>Enjoy your stay!";
+      },
+	  config: { source: PREFIX + PATH }
+	});
+
+    fastify.post(PATH, {
+	  handler: async (req: FastifyRequest<{ Body: PongBodyReq }>, reply) => {
+//        let jsonMsg = JSON.parse(req.body);
+        let jsonMsg = req.body;
+        // this user id should be completely verified by now.
+        let playerId : string = req.headers['x-user-id'] as string;
+        let getIn = jsonMsg?.getIn;
+        let mov = jsonMsg?.mov;
+        let sock : WebSocket;
+        if (typeof playerId !== "undefined" && playerId !== "") {
+          if (typeof getIn !== "undefined" && getIn === true) {
+            if (upperSocksMap.has(playerId) === false) {
+              // console.error("no associated socket found. this must never happen, i think.");
+              req.log.error(...logFormat( "/pong", "no associated socket found. this must never happen, i think."));
+              return "somehow, the socket hasn't been found";
+            }
+            sock = upperSocksMap.get(playerId) as WebSocket;
+            const resp : PongResponses = addPlayerCompletely(playerId, sock);
+          }
+          else if (typeof mov !== "undefined") {
+            moveMyPaddle(playerId, mov);
+          }
+        }
+        else {
+          return "the request is super malformed";
+        }
+        return "done inerfacing via post";
+      },
+	  config: { source: PREFIX + PATH }
+    });
+    
+	// TODO XXX add public pong hist by username?
+	PATH = '/pong/hist';
+    fastify.post(PATH, {
+	  handler: async (req: FastifyRequest<{ Body: {userId: string} }>, reply) => {
+        const resp = await getHistForPlayerFromDb(req?.body.userId);
+        return JSON.stringify(resp);
+	  },
+	  config: { source: PREFIX + PATH }
+    });
+  };
+
+  fastify.register(apiRoutes, { prefix: PREFIX });
 
   await fastify.listen({ port: 9002, host: '0.0.0.0' });
 };

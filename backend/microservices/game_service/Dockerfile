@@ -6,7 +6,9 @@ COPY package*.json ./
 RUN npm install
 
 COPY . .
+RUN chmod +x script.sh
 
 EXPOSE 9002
 
-CMD ["npm", "run", "dev"]
+#CMD ["npm", "run", "dev"]
+CMD ["sh" , "./script.sh"]
