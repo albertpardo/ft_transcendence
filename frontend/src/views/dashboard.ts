@@ -18,8 +18,6 @@ let gameState: State = nullState;
 let playerSide: string = "tbd";
 let started: boolean = false;
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
 export enum MetaGameState {
   nothing,
   waitmmopp,
@@ -244,6 +242,7 @@ export async function setterUponMetaInfo(gameInfo : HTMLElement, metaInfo : {gTy
     console.log("ginfo setter 2");
     gameInfo.innerHTML = "Game type: " + metaInfo.gType + "; versus: " + metaInfo.oppName;
   }
+}
 
 const cleanupGameArea = () => {
   const gameWindow = document.getElementById('game-window');
@@ -581,6 +580,7 @@ export async function initDashboard() {
   const gameArea = document.getElementById('game-area')!;
   const gameWindow = document.getElementById('game-window')!;
   let gameType = "normal";
+  const gameInfo : HTMLElement = document.getElementById("game-info");
   
   let gameText : HTMLElement | null = document.getElementById("game-text")!;
   if (gameText) {
