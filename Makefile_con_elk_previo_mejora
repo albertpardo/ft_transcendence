@@ -1,20 +1,17 @@
-ENV_EXIST := false
-
 # Load vars from .env
 ifneq ("$(wildcard .env)","")
-    ENV_EXIST := true
     ELK_FOLDER := $(shell grep '^ELK_FOLDER=' .env | cut -d '=' -f 2)
     LOGS_ELASTIC_FOLDER := $(shell grep '^LOGS_ELASTIC_FOLDER=' .env | cut -d '=' -f 2)
     BACKUP_ELASTIC_LOGS := $(shell grep '^BACKUP_ELASTIC_LOGS=' .env | cut -d '=' -f 2)
-	# Check loaded vars from .env
-    ifeq ($(LOGS_ELASTIC_FOLDER),)
-		$(error "LOGS_ELASTIC_FOLDER no defined. Check LOGS_ELASTIC_FOLDER  in .env .")
-    endif
-    ifeq ($(BACKUP_ELASTIC_LOGS),)
-    	$(error "BACKUP_ELASTIC_LOGS no defined. Check BACKUP_ELASTIC_LOGS in .env.")
-    endif
 endif
 
+# Check loaded vars from .env
+ifeq ($(LOGS_ELASTIC_FOLDER),)
+    $(error "LOGS_ELASTIC_FOLDER no defined. Check LOGS_ELASTIC_FOLDER  in .env .")
+endif
+ifeq ($(BACKUP_ELASTIC_LOGS),)
+    $(error "BACKUP_ELASTIC_LOGS no defined. Check BACKUP_ELASTIC_LOGS in .env.")
+endif
 
 all: 
 	@echo > /dev/null
@@ -36,17 +33,13 @@ elk: create_folders
 	@echo "Access to profile view(front) at: https://localhost:3000"
 
 create_folders:
-	@if [ $(ENV_EXIST) = "false" ]; then \
-		echo ".env doesn't exist. Check for .env."; \
-		exit 1; \
-	fi
 	@for dir in $(LOGS_ELASTIC_FOLDER) $(BACKUP_ELASTIC_LOGS); do \
 		if [ ! -d "$$dir" ]; then \
 			mkdir -p "$$dir"; \
 			chmod 777 "$$dir"; \
-			echo "'$$dir' folder has been created."; \
+			echo "La carpeta '$$dir' ha sido creada."; \
 		else \
-			echo "'$$dir' folder exists."; \
+			echo "La carpeta '$$dir' ya existe."; \
 		fi \
 	done
 
@@ -63,9 +56,7 @@ downelk:
 
 # Delete ELK folder (and subfolders) used for snapshots and backups
 cleanfolders:
-	@if [ $(ENV_EXIST) = "true" ]; then \
-		rm -rf $(ELK_FOLDER); \
-	fi
+	@rm -rf $(ELK_FOLDER)
 	@rm -rf ./backend/microservices/game_service/dist/
 	@rm -rf ./backend/api-gateway/dist/
 	@rm -f ./backend/api-gateway/tsconfig.pino_utils.tsbuildinfo
