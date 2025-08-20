@@ -21,13 +21,10 @@
     "fastify-cors": "^6.0.3",
     "fastify-plugin": "^5.0.1",
     "fastify-rate-limit": "^5.8.0",
-    "@fastify/cookie": "^11.0.2",
     "https": "^1.0.0",
     "jsonwebtoken": "^9.0.2",
     "raw-body": "^3.0.0",
-    "serve": "^14.2.4",
-    "google-auth-library": "^9.12.0",
-     "node-fetch": "^2.6.12"
+    "serve": "^14.2.4"
   },
   "devDependencies": {
     "@types/jsonwebtoken": "^9.0.9",

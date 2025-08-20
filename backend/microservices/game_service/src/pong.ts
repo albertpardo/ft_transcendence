@@ -43,9 +43,6 @@ export interface Paddle {
 export interface Ball {
   speed: Vector2;
   coords: Vector2;
-  hitLPaddle?: boolean;
-  hitRPaddle?: boolean;
-  hitWall?: boolean;
 };
 
 export interface State {

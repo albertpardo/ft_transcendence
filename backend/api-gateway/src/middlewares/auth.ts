@@ -17,11 +17,8 @@ export async function authMiddleware(req: FastifyRequest, reply: FastifyReply) {
 
 
     // if requested URL is public, skip auth
-    const publicPaths = ['/api/signup', '/api/login', '/api/public', '/api/auth/google', '/api/user/upsert-google'];
-    if (req.url && publicPaths.some(path => req.url?.startsWith(path))) {
-      console.log(`🔓 Public path skipped: ${req.url}`);
-      return;
-    }
+    const publicPaths = ['/api/signup', '/api/login', '/api/public'];
+    if (publicPaths.some(path => req.url?.startsWith(path))) return;
 
     try {
 //        if (req?.headers['sec-websocket-protocol'] !== null) {

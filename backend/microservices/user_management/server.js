@@ -2,9 +2,9 @@ require('dotenv').config();
 const fastify = require('fastify')({ logger: true });
 const userRoutes = require('./routes/user');
 
+fastify.register(userRoutes);
 
 const start = async () => {
-    await fastify.register(userRoutes);
     try {
         await fastify.listen({ port: process.env.PORT || 9001, host: '0.0.0.0' });
         console.log(`User management service running at https://localhost:${process.env.PORT || 9001}`);

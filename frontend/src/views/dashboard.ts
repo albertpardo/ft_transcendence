@@ -6,17 +6,6 @@ import { renderHistoryContent, getNicknameForPlayerId } from './history';
 import { renderProfileContent } from './profile';
 import { renderTournamentContent, renderTournamentManagerContent, getCompleteTournamentInfo } from './tournament';
 import { State, nullState } from './pongrender';
-import { googleInitialized, resetGoogle, currentGoogleButtonId} from './login';
-import confetti from 'canvas-confetti';
-import { t, i18nReady } from '../i18n';
-
-
-// Import VITE_API_BASE_URL from environment variables
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-let socket: WebSocket | null = null;
-let gameState: State = nullState;
-let playerSide: string = "tbd";
-let started: boolean = false;
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -244,208 +233,6 @@ export async function setterUponMetaInfo(gameInfo : HTMLElement, metaInfo : {gTy
     console.log("ginfo setter 2");
     gameInfo.innerHTML = "Game type: " + metaInfo.gType + "; versus: " + metaInfo.oppName;
   }
-
-const cleanupGameArea = () => {
-  const gameWindow = document.getElementById('game-window');
-  if (gameWindow) {
-    gameWindow.innerHTML = `
-      <div id="rain-overlay" class="absolute inset-0 z-50 pointer-events-none hidden"></div>
-      <!-- Left Controls -->
-      <div class="absolute left-0 top-1/2 transform -translate-y-1/2 flex flex-col space-y-4 z-10">
-        <button id="left-up" class="bg-white text-black p-3 rounded shadow" hidden>^</button>
-        <button id="left-down" class="bg-white text-black p-3 rounded shadow" hidden>v</button>
-      </div>
-      <!-- SVG Field -->
-      <svg width="1280" height="720">
-        <defs>
-          <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-           <feDropShadow dx="0" dy="0" stdDeviation="10" flood-color="#00ff00" />
-          </filter>
-        </defs>
-        <rect width="100%" height="100%" fill="black" />
-        <g id="lpad-group">
-          <rect id="lpad" x="40" y="310" width="10" height="100" class="fill-white" />
-        </g>
-        <g id="rpad-group">
-          <rect id="rpad" x="1230" y="310" width="10" height="100" class="fill-white" />
-        </g>
-        <circle id="ball" cx="640" cy="360" r="3" class="fill-white" />
-        <text id="score-text" x="640" y="60" font-family="Monospace" font-size="40" class="fill-white" text-anchor="middle">
-          0 : 0
-        </text>
-        <text id="game-text" x="640" y="200" font-family="Sans-serif" font-size="60" text-anchor="middle" class="opacity-0 transition-all duration-300 fill-current">
-          Welcome to Pong!
-        </text>
-      </svg>
-      <!-- Right Controls -->
-      <div class="absolute right-0 top-1/2 transform -translate-y-1/2 flex flex-col space-y-4 z-10">
-        <button id="right-up" class="bg-white text-black p-3 rounded shadow" hidden>^</button>
-        <button id="right-down" class="bg-white text-black p-3 rounded shadow" hidden>v</button>
-      </div>
-    `;
-  }
-}
-
-const resetGameText = () => {
-  const gameText = document.getElementById("game-text") as HTMLElement | null;
-  if (!gameText) return;
-
-  gameText.style.visibility = "hidden";
-  gameText.innerHTML = "Welcome to Pong!";
- 
-  gameText.classList.remove(
-    "fill-white",
-    'fill-red-400', 'fill-green-400',
-    'fill-red-500', 'fill-green-500',
-    'animate-win-pulse', 'animate-lose-pulse', 'animate-text-glow'
-  );
-  gameText.classList.add("fill-white");
-}
-
-const resetGameUi = () => {
-  const gameText = document.getElementById("game-text") as HTMLElement | null;
-  const scoreText = document.getElementById("score-text") as HTMLElement | null;
-
-  if (gameText) {
-    gameText.style.visibility = "hidden";
-    gameText.innerHTML = "Welcome to Pong!";
-    // gameText.setAttribute("fill", "white");
-    gameText.classList.remove(
-      'fill-red-400', 'fill-green-400',
-      'fill-red-500', 'fill-green-500',
-      'animate-win-pulse', 'animate-lose-pulse', 'animate-text-glow'
-    );
-  }
-  if (scoreText) {
-    scoreText.innerHTML = "0 : 0";
-    scoreText.classList.add('opacity-0');
-    setTimeout(() => {
-      scoreText.classList.remove('opacity-0');
-    }, 150);
-  } 
-}
-
-function triggerConfetti() {
-  const gameWindow = document.getElementById('game-window');
-  if (!gameWindow) return;
-
-  const rect = gameWindow.getBoundingClientRect();
-  const x = (rect.left + rect.width / 2) / window.innerWidth;
-  const y = (rect.top + rect.height / 4) / window.innerHeight;
-
-  const colors = ['#4ade80', '#f87171', '#fbbf24', '#60a5fa'];
-
-  // 💥 Main burst
-  confetti({
-    particleCount: 150,
-    spread: 90,
-    startVelocity: 50,
-    origin: { x, y },
-    colors,
-    scalar: 1.3
-  });
-
-  // 🎇 Streamers burst
-  confetti({
-    particleCount: 100,
-    angle: 60,
-    spread: 55,
-    decay: 0.9,
-    gravity: 0.3,
-    origin: { x: x - 0.2, y },
-    scalar: 1.8,
-    colors
-  });
-
-  confetti({
-    particleCount: 100,
-    angle: 120,
-    spread: 55,
-    decay: 0.9,
-    gravity: 0.3,
-    origin: { x: x + 0.2, y },
-    scalar: 1.8,
-    colors
-  });
-
-  // ✨ Follow-up bursts
-  setTimeout(() => confetti({
-    particleCount: 80,
-    spread: 120,
-    startVelocity: 40,
-    origin: { x, y },
-    scalar: 1.1,
-    colors
-  }), 300);
-
-  setTimeout(() => confetti({
-    particleCount: 60,
-    spread: 100,
-    startVelocity: 35,
-    origin: { x, y },
-    scalar: 1.2,
-    colors
-  }), 600);
-}
-
-function triggerRainEffect() {
-  const overlay = document.getElementById('rain-overlay');
-  if (!overlay) return;
-
-  overlay.innerHTML = ''; // Clear old rain
-  overlay.classList.remove('hidden');
-
-  for (let i = 0; i < 150; i++) {
-    const drop = document.createElement('div');
-    drop.classList.add('rain-drop');
-    drop.style.left = `${Math.random() * 100}%`;
-    drop.style.animationDuration = `${0.4 + Math.random() * 0.6}s`;
-    drop.style.animationDelay = `${Math.random()}s`;
-    overlay.appendChild(drop);
-  }
-
-  // Optional lightning flash
-  overlay.style.backgroundColor = 'rgba(255,255,255,0.1)';
-  setTimeout(() => overlay.style.backgroundColor = 'transparent', 100);
-
-  setTimeout(() => {
-    overlay.classList.add('hidden');
-    overlay.innerHTML = '';
-  }, 2000);
-}
-
-function triggerPaddleEffect(paddleId: string) {
-  const group = document.getElementById(`${paddleId}-group`);
-  if (!group) return;
-
-  const pivotX = paddleId === 'lpad' ? 45 : 1235; // x + width/2
-  const pivotY = 360;
-  group.setAttribute(
-    'transform',
-    `translate(${pivotX},${pivotY}) scale(1.2) translate(${-pivotX},${-pivotY})`
-  ); 
-
-  setTimeout(() => {
-    group.removeAttribute('filter'); // corrected
-    group.removeAttribute('transform'); // corrected
-  }, 300);
-}
-
-function triggerBallEffect() {
-  const ball = document.getElementById('ball');
-  if (!ball) return;
-  
-  ball.classList.add('animate-ball-pulse');
-  setTimeout(() => ball.classList.remove('animate-ball-pulse'), 300);
-}
-const wrapper = document.getElementById('google-signin-wrapper');
-if (wrapper) {
-  wrapper.hidden = true;
-  if (currentGoogleButtonId) {
-    const old = document.getElementById(currentGoogleButtonId);
-    if (old) old.remove();
-  }
-  // currentGoogleButtonId = null; // Removed because it's a read-only import
 }
 
 export async function initDashboard() {
@@ -481,15 +268,15 @@ export async function initDashboard() {
       </div>
       <h2 class="text-xl md:text-2xl font-bold mb-6 md:mb-8 text-center text-white">Transcendence</h2>
       <nav class="flex-grow space-y-2 md:space-y-3">
-        <a href="#home" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='home'?'bg-blue-600':'bg-gray-700'}">${t('nav.dashboard')}</a>
-        <a href="#profile" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='profile'?'bg-blue-600':'bg-gray-700'}">${t('nav.profile')}</a>
-        <a href="#play" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='play'?'bg-blue-600':'bg-gray-700'}">${t('nav.play')}</a>
-        <a href="#history" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='history'?'bg-blue-600':'bg-gray-700'}">${t('nav.history')}</a>
-        <a href="#tournament" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='tournament'?'bg-blue-600':'bg-gray-700'}">${t('nav.tournament')}</a>
+        <a href="#home" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='home'?'bg-blue-600':'bg-gray-700'}">Dashboard</a>
+        <a href="#profile" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='profile'?'bg-blue-600':'bg-gray-700'}">Profile</a>
+        <a href="#play" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='play'?'bg-blue-600':'bg-gray-700'}">Play Pong</a>
+        <a href="#history" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='play'?'bg-blue-600':'bg-gray-700'}">Match History</a>
+        <a href="#tournament" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='tournament'?'bg-blue-600':'bg-gray-700'}">Tournament</a>
         <a href="#tournamentmanager" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='tournamentmanager'?'bg-blue-600':'bg-gray-700'}">Tournament Management</a>
-        <a href="#stats" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='stats'?'bg-blue-600':'bg-gray-700'}">${t('nav.stats')}</a>
+        <a href="#stats" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='stats'?'bg-blue-600':'bg-gray-700'}">Stats</a>
       </nav>
-      <button id="logout-btn" class="mt-auto w-full p-3 bg-red-600 rounded-lg hover:bg-red-700 transition text-white font-medium">${t('nav.logout')}</button>
+      <button id="logout-btn" class="mt-auto w-full p-3 bg-red-600 rounded-lg hover:bg-red-700 transition text-white font-medium">Logout</button>
     </aside>
 
     <!-- Mobile Backdrop -->
@@ -501,7 +288,6 @@ export async function initDashboard() {
     <!-- Hidden Game Area -->
     <div id="game-area" class="flex flex-col items-center justify-center" hidden>
       <div id="game-window" class="relative w-[1280px] h-[720px]">
-        <div id="rain-overlay" class="absolute inset-0 z-50 pointer-events-none hidden"></div>
 
         <!-- Left Controls -->
         <div class="absolute left-0 top-1/2 transform -translate-y-1/2 flex flex-col space-y-4 z-10">
@@ -511,25 +297,16 @@ export async function initDashboard() {
 
         <!-- SVG Field -->
         <svg width="1280" height="720">
-        <defs>
-          <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-           <feDropShadow dx="0" dy="0" stdDeviation="10" flood-color="#00ff00" />
-          </filter>
-        </defs>
-        <rect width="100%" height="100%" fill="black" />
-        <g id="lpad-group">
-          <rect id="lpad" x="40" y="310" width="10" height="100" class="fill-white" />
-        </g>
-        <g id="rpad-group">
-          <rect id="rpad" x="1230" y="310" width="10" height="100" class="fill-white" />
-        </g>
-        <circle id="ball" cx="640" cy="360" r="3" class="fill-white" />
-        <text id="score-text" x="640" y="60" font-family="Monospace" font-size="40" class="fill-white" text-anchor="middle">
-          0 : 0
-        </text>
-        <text id="game-text" x="640" y="200" font-family="Sans-serif" font-size="60" text-anchor="middle" class="opacity-0 transition-all duration-300 fill-white">
-          Welcome to Pong!
-        </text>
+          <rect width="100%" height="100%" fill="black" />
+          <rect id="lpad" x="40" y="310" width="10" height="100" fill="white" />
+          <rect id="rpad" x="1230" y="310" width="10" height="100" fill="white" />
+          <circle id="ball" cx="640" cy="360" r="3" fill="white" />
+          <text id="score-text" x="640" y="60" font-family="Monospace" font-size="40" fill="white" text-anchor=middle>
+            0 : 0
+          </text>
+          <text id="game-text" x="640" y="200" font-family="Sans-serif" font-size="60" fill="white" text-anchor=middle>
+            Placeholder text
+          </text>
         </svg>
 
         <!-- Right Controls -->
@@ -569,28 +346,23 @@ export async function initDashboard() {
     </div>
   `;
 
-  const leftUpArrow: HTMLElement = document.getElementById("left-up")!;
-  const leftDownArrow : HTMLElement = document.getElementById("left-down")!;
-  const rightUpArrow : HTMLElement = document.getElementById("right-up")!;
-  const rightDownArrow : HTMLElement = document.getElementById("right-down")!;
-  const ball : HTMLElement = document.getElementById("ball")!;
-  const lpad : HTMLElement = document.getElementById("lpad")!;
-  const rpad : HTMLElement = document.getElementById("rpad")!;
-  const contentArea = document.getElementById('content-area')!;
-  const startButton = document.getElementById('start-button')!;
-  const gameArea = document.getElementById('game-area')!;
-  const gameWindow = document.getElementById('game-window')!;
+  const leftUpArrow: HTMLElement = document.getElementById("left-up");
+  const leftDownArrow : HTMLElement = document.getElementById("left-down");
+  const rightUpArrow : HTMLElement = document.getElementById("right-up");
+  const rightDownArrow : HTMLElement = document.getElementById("right-down");
+  const ball : HTMLElement = document.getElementById("ball");
+  const lpad : HTMLElement = document.getElementById("lpad");
+  const rpad : HTMLElement = document.getElementById("rpad");
+  let gameText : HTMLElement = document.getElementById("game-text");
+  const gameInfo : HTMLElement = document.getElementById("game-info");
+  gameText.style.visibility = "hidden";
+  // for some reason, doing a .hidden = false or true on this doesn't work.
+  const scoreText : HTMLElement = document.getElementById("score-text");
   let gameType = "normal";
-  
-  let gameText : HTMLElement | null = document.getElementById("game-text")!;
-  if (gameText) {
-    gameText.style.visibility = "hidden";
-    gameText.classList.remove('opacity-0');
-    gameText.classList.remove('animate-win-pulse', 'animate-lose-pulse', 'animate-text-glow');
-  }
-  // gameText.classList.remove('animate-win-pulse', 'animate-lose-pulse', 'animate-text-glow');
-  const scoreText : HTMLElement = document.getElementById("score-text")!;
-
+//  console.log(ball);
+//  console.log(lpad);
+//  console.log(rpad);
+  //WEBSOCKET TIME!
   let socket : WebSocket;
   let gameState : State = nullState;
   let playerSide : string = "tbd";
@@ -605,13 +377,8 @@ export async function initDashboard() {
       console.log("oh snap! reconnect the socket");
       reconn = true;
     }
-    socket = new WebSocket(`${API_BASE_URL}/api/pong/game-ws?uuid=${localStorage.getItem("userId")}&authorization=${localStorage.getItem("authToken")}`);
-    gameText.classList.remove(
-      'animate-win-pulse', 'animate-lose-pulse', 'animate-text-glow',
-      'fill-red-400', 'fill-green-400', 'fill-red-500', 'fill-green-500'
-    );
+    socket = new WebSocket(`https://127.0.0.1:8443/api/pong/game-ws?uuid=${localStorage.getItem("userId")}&authorization=${localStorage.getItem("authToken")}`);
     socket.addEventListener("message", async (event) => {
-      await i18nReady;
 //      console.log("I, a tokened player, receive:", event.data);
       // XXX maybe a try catch? idk if it'd crash or something on a wrong input
       switch (event.data) {
@@ -661,13 +428,7 @@ export async function initDashboard() {
           rightUpArrow.hidden = true;
           rightDownArrow.hidden = true;
           gameText.style.visibility = "hidden";
-          scoreText.classList.add('opacity-0');
-            setTimeout(() => {
-              scoreText.innerHTML = `${gameState.stateScoreL} : ${gameState.stateScoreR}`;
-
-             scoreText.classList.remove('opacity-0');
-            }, 150);
-    
+          scoreText.innerHTML = "" + 0 + " : " + 0;
           break;
         case "added: R":
           metaInfo = await getGameMetaInfo();
@@ -685,76 +446,40 @@ export async function initDashboard() {
           leftUpArrow.hidden = true;
           leftDownArrow.hidden = true;
           gameText.style.visibility = "hidden";
-          scoreText.classList.add('opacity-0');
-            setTimeout(() => {
-              scoreText.innerHTML = `${gameState.stateScoreL} : ${gameState.stateScoreR}`;
-
-              scoreText.classList.remove('opacity-0');
-            }, 150);
-
+          scoreText.innerHTML = "" + 0 + " : " + 0;
           break;
         case "started":
           started = true;
-          break; 
+          break;
         case "error":
+//          console.log("some error returned from the server");
           break;
         default:
-          const newState: State =JSON.parse(event.data);
-
-           ball.setAttribute("cx", "" + newState.stateBall.coords.x);
-           ball.setAttribute("cy", "" + newState.stateBall.coords.y);
-           lpad.setAttribute("y", "" + newState.stateLP.y);
-           rpad.setAttribute("y", "" + newState.stateRP.y);
-           try { 
-             if (newState.stateBall.hitLPaddle) triggerPaddleEffect('lpad');
-             if (newState.stateBall.hitRPaddle) triggerPaddleEffect('rpad');
-             if (newState.stateBall.hitWall) triggerBallEffect();
-
-           } catch (e) {
-            console.error("Error updating game state:", e);
-            }
-           scoreText.innerHTML = `${newState.stateScoreL} : ${newState.stateScoreR}`;
-           scoreText.classList.remove('opacity-0');
-
-          gameState = newState; 
-          
-
-
+          gameState = JSON.parse(event.data);
+          ball.setAttribute("cx", gameState.stateBall.coords.x);
+          ball.setAttribute("cy", gameState.stateBall.coords.y);
+          lpad.setAttribute("y", gameState.stateLP.y);
+          rpad.setAttribute("y", gameState.stateRP.y);
 
           if (gameState.stateWhoL !== "none" && gameState.stateWhoL !== "null state") {
             gameText.style.visibility = "visible";
-            gameText.classList.remove('opacity-0');
-            // gameText.classList.remove('animate-win-pulse', 'animate-lose-pulse', 'animate-text-glow');
-            
             scoreText.innerHTML = "" + gameState.stateScoreL + " : " + gameState.stateScoreR;
-            scoreText.classList.remove('opacity-0');
-            const playButton = document.getElementById('start-button');
             if (playerSide === "l") {
               switch (gameState.stateWhoL) {
                 case "left":
-                  gameText.innerHTML = `${t("lostRound")}`;
-                  gameText.classList.remove('fill-white');
-                  gameText.setAttribute("fill", "#f87171");
+                  gameText.innerHTML = "You lost the round.";
                   break;
                 case "right":
-                  gameText.innerHTML = `${t("wonRound")}`;
-                  gameText.classList.remove('fill-white');
-                  gameText.setAttribute("fill", "#4ade80");
+                  gameText.innerHTML = "You won the round!";
                   break;
                 case "left fully":
                   started = false;
-                  gameText.innerHTML = `${t("lostgame")}`;
-                  gameText.classList.remove('fill-white');
-                  gameText.setAttribute("fill", "#f87171");
-                  setTimeout(() => triggerRainEffect(), 300);
+                  gameText.innerHTML = "You lost the game.";
                   await tourCheckAndSetIdlingButtons();
                   break;
                 case "right fully":
                   started = false;
-                  gameText.innerHTML = `${t("wongame")}`;
-                  gameText.classList.remove('fill-white');
-                  gameText.setAttribute("fill", "#4ade80");
-                  setTimeout(() => triggerConfetti(), 300);
+                  gameText.innerHTML = "You won the game!";
                   await tourCheckAndSetIdlingButtons();
                   break;
                 case "both":
@@ -766,27 +491,19 @@ export async function initDashboard() {
             } else if (playerSide === "r") {
               switch (gameState.stateWhoL) {
                 case "right":
-                  gameText.innerHTML = `${t("lostRound")}`;
-                  gameText.classList.remove('fill-white');
-                  gameText.setAttribute("fill", "#f87171");
+                  gameText.innerHTML = "You lost the round.";
                   break;
                 case "left":
-                  gameText.innerHTML = `${t("wonRound")}`;
-                  gameText.classList.remove('fill-white');
-                  gameText.setAttribute("fill", "#4ade80");
+                  gameText.innerHTML = "You won the round!";
                   break;
                 case "right fully":
                   started = false;
-                  gameText.innerHTML = `${t("lostGame")}`;
-                  gameText.setAttribute("fill", "#f87171");
-                  setTimeout(() => triggerRainEffect(), 300);
+                  gameText.innerHTML = "You lost the game.";
                   await tourCheckAndSetIdlingButtons();
                   break;
                 case "left fully":
                   started = false;
-                  gameText.innerHTML = `${t("wonGame")}`;
-                  gameText.setAttribute("fill", "#4ade80");
-                  setTimeout(() => triggerConfetti(), 300);
+                  gameText.innerHTML = "You won the game!";
                   await tourCheckAndSetIdlingButtons();
                   break;
                 case "both":
@@ -799,9 +516,7 @@ export async function initDashboard() {
           }
           else {
             gameText.style.visibility = "hidden";
-            
             scoreText.innerHTML = "" + gameState.stateScoreL + " : " + gameState.stateScoreR;
-            scoreText.classList.remove('opacity-0');
           }
       }
     });
@@ -913,20 +628,6 @@ export async function initDashboard() {
     rightDownArrow.addEventListener('mouseleave', () => {
       movePaddleWrapper(0);
     });
-
-    window.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowUp' || e.key === 'w'|| e.key === 'W') {
-        movePaddleWrapper(-2); // move up
-      } else if (e.key === 'ArrowDown' || e.key === 's'|| e.key === 'S') {
-        movePaddleWrapper(2); // move down
-      }
-    });
-
-    window.addEventListener('keyup', (e) => {
-      if (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'w' || e.key === 'W' || e.key === 's' || e.key === 'S') {
-        movePaddleWrapper(0); // stop moving
-      }
-    });
   }
   // Mobile menu functionality
   const mobileMenuToggle = document.getElementById('mobile-menu-toggle')!;
@@ -973,13 +674,9 @@ export async function initDashboard() {
   document.getElementById('logout-btn')!.addEventListener('click', () => {
     localStorage.removeItem('authToken');
     localStorage.removeItem('userId');
-    localStorage.removeItem('authProvider');
     socket.close();
-    resetGoogle();
     window.location.hash = 'login';
-   // if (googleInitialized) resetGoogle();
-   window.location.reload();  
-   //route();
+    route();
   });
 
   // Render active section

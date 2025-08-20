@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>API Gateway Auth Test</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans p-8">
+  <div class="max-w-md mx-auto bg-white p-6 rounded shadow">
+    <h2 class="text-2xl font-bold mb-4">Login</h2>
+    <form id="login-form" class="space-y-4">
+      <input type="text" id="login-username" placeholder="Username" class="w-full p-2 border rounded" />
+      <input type="password" id="login-password" placeholder="Password" class="w-full p-2 border rounded" />
+      <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded w-full">Login</button>
+    </form>
+
+    <h2 class="text-2xl font-bold mt-8 mb-4">Signup</h2>
+    <form id="signup-form" class="space-y-4">
+      <input type="text" id="signup-username" placeholder="Username" class="w-full p-2 border rounded" />
+      <input type="password" id="signup-password" placeholder="Password" class="w-full p-2 border rounded" />
+      <input type="text" id="signup-email" placeholder="Email" class="w-full p-2 border rounded" />
+      <input type="text" id="signup-nickname" placeholder="Nickname" class="w-full p-2 border rounded" />
+      <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded w-full">Signup</button>
+    </form>
+    <h2 class="text-2xl font-bold mt-8 mb-4">Protected</h2>
+    <button id="profile-btn" class="bg-purple-500 text-white px-4 py-2 rounded w-full" disabled>Get Profile</button>
+  
+    <pre id="result" class="mt-6 bg-gray-200 p-4 text-sm"></pre>
+  </div>
+
+  <script type="module">
+    let token = null;
+
+    const loginForm = document.getElementById('login-form');
+    const signupForm = document.getElementById('signup-form');
+    const profileBtn = document.getElementById('profile-btn');
+    const resultBox = document.getElementById('result');
+
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = document.getElementById('login-username').value;
+      const password = document.getElementById('login-password').value;
+
+      try {
+        const res = await fetch('https://localhost:8443/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+
+        const data = await res.json();
+        token = data.token;
+        profileBtn.disabled = !token;
+        resultBox.textContent = 'Login:\n' + JSON.stringify(data, null, 2);
+      } catch (err) {
+        resultBox.textContent = 'Login Error: ' + err.message;
+      }
+    });
+
+    signupForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = document.getElementById('signup-username').value;
+      const password = document.getElementById('signup-password').value;
+      const email = document.getElementById('signup-email').value;
+      const nickname = document.getElementById('signup-nickname').value;
+
+      try {
+        const res = await fetch('https://localhost:8443/api/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password, email, nickname })
+        });
+
+        const data = await res.json();
+        token = data.token;
+        profileBtn.disabled = !token;
+        resultBox.textContent = 'Signup:\n' + JSON.stringify(data, null, 2);
+      } catch (err) {
+        resultBox.textContent = 'Signup Error: ' + err.message;
+      }
+    });
+
+    profileBtn.addEventListener('click', async () => {
+      if (!token) return;
+      try {
+        const res = await fetch('https://localhost:8443/api/profile', {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        const data = await res.json();
+        resultBox.textContent = 'Profile:\n' + JSON.stringify(data, null, 2);
+      } catch (err) {
+        resultBox.textContent = 'Profile Error: ' + err.message;
+      }
+    });
+  </script>
+</body>
+</html>
