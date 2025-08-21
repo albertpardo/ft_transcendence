@@ -1,5 +1,5 @@
 // src/views/dashboard.ts
-import { registerPlayer, forefit, movePaddle, confirmParticipation, checkIsInGame, checkReady, checkIsInTournament } from './buttonClicking';
+import { registerPlayer, forfeit, movePaddle, confirmParticipation, checkIsInGame, checkReady, checkIsInTournament } from './buttonClicking';
 import { route } from '../router';
 import { renderHomeContent, renderPlayContent, renderStatsContent } from './sections';
 import { renderHistoryContent, getNicknameForPlayerId } from './history';
@@ -221,7 +221,7 @@ export async function setterUponMetaInfo(gameInfo : HTMLElement, metaInfo : {gTy
   }
   else if (metaInfo.gType === "normal") {
     // we don't check for anything since basically once you get into a game with whatever state it's got, you
-    // can only forefit/escape, unlike the tournament stuff which has some various conditions for getting ready/forefitting.
+    // can only forfeit/escape, unlike the tournament stuff which has some various conditions for getting ready/forfeitting.
     buttonSetter(MetaGameState.inmmgame);
     console.log("ginfo setter 1");
     gameInfo.innerHTML = "Game type: " + metaInfo.gType + "; versus: " + metaInfo.oppName;
@@ -231,7 +231,7 @@ export async function setterUponMetaInfo(gameInfo : HTMLElement, metaInfo : {gTy
     // there's only ONE situation which requires us to press the ready key.
     // we're in a game of type tournament and we're not ready.
     //
-    // if it's a game and we're ready, just give the forefit button ? TODO to think
+    // if it's a game and we're ready, just give the forfeit button ? TODO to think
     const isready : bool = await checkReadyWrapper();
     if (!isready) {
       buttonSetter(MetaGameState.waittourrdy);
@@ -545,7 +545,7 @@ export async function initDashboard() {
           mt-6 p-3 bg-green-600 rounded-lg hover:bg-green-700 transition text-white font-medium
           disabled:border-gray-200 disabled:bg-gray-700 disabled:text-gray-500 disabled:shadow-none
         ">
-          Click to join or reconnect
+          Search for a quick game
         </button>
         <button id="ready-button" disabled
         class=
@@ -553,7 +553,7 @@ export async function initDashboard() {
           mt-6 p-3 bg-green-600 rounded-lg hover:bg-green-700 transition text-white font-medium
           disabled:border-gray-200 disabled:bg-gray-700 disabled:text-gray-500 disabled:shadow-none
         ">
-          Click to set yourself ready
+          Confirm participation
         </button>
         <button id="giveup-button" disabled
         class=
@@ -561,7 +561,7 @@ export async function initDashboard() {
           mt-6 p-3 bg-red-600 rounded-lg hover:bg-red-700 transition text-white font-medium
           disabled:border-gray-200 disabled:bg-gray-700 disabled:text-gray-500 disabled:shadow-none
         ">
-          INSTANTLY forefit
+          INSTANTLY forfeit
         </button>
       </div>
       <p id="game-info"></p>
@@ -581,6 +581,10 @@ export async function initDashboard() {
   const gameWindow = document.getElementById('game-window')!;
   let gameType = "normal";
   const gameInfo : HTMLElement = document.getElementById("game-info");
+
+  document.getElementById("start-button").innerHTML = t("pong-buttons.start-button-text");
+  document.getElementById("ready-button").innerHTML = t("pong-buttons.ready-button-text");
+  document.getElementById("giveup-button").innerHTML = t("pong-buttons.giveup-button-text");
   
   let gameText : HTMLElement | null = document.getElementById("game-text")!;
   if (gameText) {
@@ -662,11 +666,11 @@ export async function initDashboard() {
           rightDownArrow.hidden = true;
           gameText.style.visibility = "hidden";
           scoreText.classList.add('opacity-0');
-            setTimeout(() => {
-              scoreText.innerHTML = `${gameState.stateScoreL} : ${gameState.stateScoreR}`;
+          setTimeout(() => {
+            scoreText.innerHTML = `${gameState.stateScoreL} : ${gameState.stateScoreR}`;
 
-             scoreText.classList.remove('opacity-0');
-            }, 150);
+           scoreText.classList.remove('opacity-0');
+          }, 150);
     
           break;
         case "added: R":
@@ -686,11 +690,11 @@ export async function initDashboard() {
           leftDownArrow.hidden = true;
           gameText.style.visibility = "hidden";
           scoreText.classList.add('opacity-0');
-            setTimeout(() => {
-              scoreText.innerHTML = `${gameState.stateScoreL} : ${gameState.stateScoreR}`;
+          setTimeout(() => {
+            scoreText.innerHTML = `${gameState.stateScoreL} : ${gameState.stateScoreR}`;
 
-              scoreText.classList.remove('opacity-0');
-            }, 150);
+            scoreText.classList.remove('opacity-0');
+          }, 150);
 
           break;
         case "started":
@@ -849,11 +853,11 @@ export async function initDashboard() {
     });
     document.getElementById('giveup-button')!.addEventListener('click', async () => {
       console.log("after clicking the giveup-button,");
-      const forefitRawResp = await forefit();
-      const forefitResp = await forefitRawResp.text();
-      const forefitRespObj = JSON.parse(forefitResp);
-      if (forefitRespObj.err !== "nil") {
-        console.error(forefitRespObj.err);
+      const forfeitRawResp = await forfeit();
+      const forfeitResp = await forfeitRawResp.text();
+      const forfeitRespObj = JSON.parse(forfeitResp);
+      if (forfeitRespObj.err !== "nil") {
+        console.error(forfeitRespObj.err);
       }
       // after giving up we can have various scenarios so
       metaInfo = await getGameMetaInfo();

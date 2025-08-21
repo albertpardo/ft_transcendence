@@ -214,9 +214,9 @@ class Tournament {
   //
   // this mode also needs to make it so the players have to click confirm before starting
   //
-  // also every time a runtime in tournament mode is created, a 30 second timer is started. if it passes and the enemy isn't ready yet, you can make them forefit.
+  // also every time a runtime in tournament mode is created, a 30 second timer is started. if it passes and the enemy isn't ready yet, you can make them forfeit.
   //
-  // if YOU forefit, the enemy moves thru. if you both ain't ready, game dies after 60 seconds of inactivity, and places the special "failed" id on the winner
+  // if YOU forfeit, the enemy moves thru. if you both ain't ready, game dies after 60 seconds of inactivity, and places the special "failed" id on the winner
   // this id is treated as "no next game" for this next tier
   // visialization:
   //
@@ -332,7 +332,7 @@ class Tournament {
 
   public eliminatePlayer(uuid: string) {
     console.log("beginning to eliminate", uuid);
-    let forefit : boolean = false;
+    let forfeit : boolean = false;
     if (this.currentStage > 0) {
       let i : number = 0;
       for (let pId of this.Ids[this.currentStage - 1]) {
@@ -357,9 +357,9 @@ class Tournament {
         if (runtime.LplayerId === uuid) {
           console.log("met our player in", runtime);
           if (runtime.RplayerId !== "") {
-            runtime.forefit(uuid);
-            forefit = true;
-            console.log("made a lp forefit for", uuid, "while cleaning");
+            runtime.forfeit(uuid);
+            forfeit = true;
+            console.log("made a lp forfeit for", uuid, "while cleaning");
           }
           else {
             runtime.LplayerId = "failed";
@@ -376,9 +376,9 @@ class Tournament {
         if (runtime.RplayerId === uuid) {
           console.log("met our player in", runtime);
           if (runtime.LplayerId !== "") {
-            runtime.forefit(uuid);
-            forefit = true;
-            console.log("made a lp forefit for", uuid, "while cleaning");
+            runtime.forfeit(uuid);
+            forfeit = true;
+            console.log("made a lp forfeit for", uuid, "while cleaning");
           }
           else {
             runtime.RplayerId = "failed";

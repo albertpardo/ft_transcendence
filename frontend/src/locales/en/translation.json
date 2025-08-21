@@ -33,8 +33,12 @@
     "score": "Score",
     "opponent": "Opponent",
     "date": "Date",
-    "victory": "Victory",
-    "loss": "Defeat",
+    "win": "Win",
+	"loss": "Loss",
+	"winForfeit": "Win (enemy forfeited)",
+	"lossForfeit": "Loss (you forfeited)",
+	"winAbsence": "Win (enemy absence)",
+	"lossAbsence": "Loss (you didn't show up)",
     "notLoggedIn": "You're not logged in.",
     "noAuthToken": "Authentication token missing.",
     "failedToLoad": "Failed to load match history."
@@ -88,5 +92,10 @@
   "wonGame": "You won the game!",
   "lostGame": "You lost the game.",
   "wonRound": "You won the round!",
-  "lostRound": "You lost the round."
+  "lostRound": "You lost the round.",
+  "pong-buttons": {
+	"start-button-text": "Search for a quick game",
+	"ready-button-text": "Confirm participation",
+	"giveup-button-text": "INSTANTLY forfeit"
+  }
 }

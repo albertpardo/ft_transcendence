@@ -20,17 +20,21 @@
     "error": "Error al cargar los torneos."
   },
   "historic": {
-  "title": "Historial de partidas",
-  "description": "Consulta tus partidas anteriores de Pong.",
-  "result": "Resultado",
-  "score": "Puntuación",
-  "opponent": "Oponente",
-  "date": "Fecha",
-  "victory": "Victoria",
-  "loss": "Derrota",
-  "notLoggedIn": "No has iniciado sesión.",
-  "noAuthToken": "Token de autenticación ausente.",
-  "failedToLoad": "No se pudo cargar el historial de partidas."
+	"title": "Historial de partidas",
+	"description": "Consulta tus partidas anteriores de Pong.",
+	"result": "Resultado",
+	"score": "Puntuación",
+	"opponent": "Oponente",
+	"date": "Fecha",
+	"win": "Victoria",
+	"loss": "Derrota",
+	"winForfeit": "Victoria (el enemigo se rindió)",
+	"lossForfeit": "Derrota (te rendiste)",
+	"winAbsence": "Victoria (el enemigo no se presentó)",
+	"lossAbsence": "Derrota (no te presentaste)",
+	"notLoggedIn": "No has iniciado sesión.",
+	"noAuthToken": "Token de autenticación ausente.",
+	"failedToLoad": "No se pudo cargar el historial de partidas."
 },
   "profiles": {
     "title": "Tu perfil",
@@ -81,6 +85,10 @@
   "wonGame": "¡Has ganado el juego!",
   "lostGame": "Has perdido el juego.",
   "wonRound": "¡Has ganado la ronda!",
-  "lostRound": "Has perdido la ronda."
-
+  "lostRound": "Has perdido la ronda.",
+  "pong-buttons": {
+	  "start-button-text": "Buscar una partida rápida",
+	  "ready-button-text": "Confirmar participación",
+	  "giveup-button-text": "Rendirse INMEDIATAMENTE"
+	}
 }

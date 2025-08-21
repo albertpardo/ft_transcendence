@@ -121,7 +121,7 @@ class PongRuntime {
     this.whoLost = "none";
   }
 
-  public forefit(playerId: string) : void {
+  public forfeit(playerId: string) : void {
     if (playerId === this.LplayerId) {
       this.LGaveUp = true;
     }
@@ -312,10 +312,10 @@ class PongRuntime {
             this.gstate.stateWhoL = "right fully";
           }
           if (this.LGaveUp) {
-            addMatch(playersMap.get(this.LplayerId), this.LplayerId, this.RplayerId, this.scoreL, this.scoreR, "R", this.gameType, "forefit");
+            addMatch(playersMap.get(this.LplayerId), this.LplayerId, this.RplayerId, this.scoreL, this.scoreR, "R", this.gameType, "forfeit");
           }
           else if (this.RGaveUp) {
-            addMatch(playersMap.get(this.LplayerId), this.LplayerId, this.RplayerId, this.scoreL, this.scoreR, "L", this.gameType, "forefit");
+            addMatch(playersMap.get(this.LplayerId), this.LplayerId, this.RplayerId, this.scoreL, this.scoreR, "L", this.gameType, "forfeit");
           }
           else {
             addMatch(playersMap.get(this.LplayerId), this.LplayerId, this.RplayerId, this.scoreL, this.scoreR, (this.whoLost[0] === 'l' ? "R" : "L"), this.gameType, "normal");
@@ -495,7 +495,7 @@ function sendOnAbandon(lp: string, rp: string) {
   }
 }
 
-export function forefit(playerId: string) {
+export function forfeit(playerId: string) {
   if (playersMap.has(playerId)) {
     const gameId = playersMap.get(playerId);
     if (gamesMap.has(gameId)) {
@@ -509,7 +509,7 @@ export function forefit(playerId: string) {
         console.log("double deleted the players", lpid, rpid, "and the gid", gameId, "cuz abandon");
         return ;
       }
-      gamesMap.get(gameId).forefit(playerId);
+      gamesMap.get(gameId).forfeit(playerId);
       return ;
     }
     return ;

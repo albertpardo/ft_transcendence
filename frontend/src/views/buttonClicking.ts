@@ -40,9 +40,9 @@ export async function movePaddle(d: number) {
   return fresp;
 }
 
-export async function forefit() {
+export async function forfeit() {
   const fresp = fetch(
-    `${API_BASE_URL}/api/pong/game/forefit`,
+    `${API_BASE_URL}/api/pong/game/forfeit`,
     {
       method: 'POST',
       headers: {

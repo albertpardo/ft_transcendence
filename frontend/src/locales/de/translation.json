@@ -32,8 +32,12 @@
     "score": "Punktzahl",
     "opponent": "Gegner",
     "date": "Datum",
-    "victory": "Sieg",
-    "loss": "Niederlage",
+	"win": "Sieg",
+	"loss": "Niederlage",
+	"winForfeit": "Sieg (Gegner hat aufgegeben)",
+	"lossForfeit": "Niederlage (du hast aufgegeben)",
+	"winAbsence": "Sieg (Gegner abwesend)",
+	"lossAbsence": "Niederlage (du bist nicht erschienen)",
     "notLoggedIn": "Sie sind nicht angemeldet.",
     "noAuthToken": "Authentifizierungstoken fehlt.",
     "failedToLoad": "Spielverlauf konnte nicht geladen werden."
@@ -87,5 +91,10 @@
   "wonGame": "Sie haben das Spiel gewonnen!",
   "lostGame": "Sie haben das Spiel verloren.",
   "wonRound": "Sie haben die Runde gewonnen!",
-  "lostRound": "Sie haben die Runde verloren."
+  "lostRound": "Sie haben die Runde verloren.",
+  "pong-buttons": {
+	  "start-button-text": "Schnelles Spiel suchen",
+	  "ready-button-text": "Teilnahme bestätigen",
+	  "giveup-button-text": "SOFORT aufgeben"
+	}
 }
