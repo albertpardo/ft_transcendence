@@ -20,7 +20,6 @@ init.run();
 
 function getNicknameById(userId) {
 	const stmt = db.prepare('SELECT nickname FROM users WHERE id = ?');
-	console.log("hit from backend/microservices/user_management/db/index.js");
 	return stmt.get(userId);
 }
 
