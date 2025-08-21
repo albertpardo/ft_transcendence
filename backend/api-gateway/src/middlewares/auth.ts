@@ -13,15 +13,6 @@ export async function authMiddleware(req: FastifyRequest, reply: FastifyReply) {
 
     itwasasocket = false;
 
-/*
-    console.log("🔍 Incoming request URL:", req.url);
-    console.log("🔍 jwtVerify type in middleware:", typeof req.jwtVerify);
-    console.log("🔍🔍🔍 All keys on req:", Object.keys(req));
-
-    console.log('🔍 Full headers before jwtVerify:', req.headers);
-    console.log('🔍 Authorization Header outside try:', String(req.headers['authorization']));
-*/
-
     req.log.info(...logFormat(source, "🔍 Incoming request URL:", req.url));
     req.log.info(...logFormat(source, "🔍 jwtVerify type in middleware:", typeof req.jwtVerify));
     req.log.info(...logFormat(source, "🔍🔍🔍 All keys on req:", Object.keys(req)));
@@ -36,14 +27,12 @@ export async function authMiddleware(req: FastifyRequest, reply: FastifyReply) {
     }
 
     try {
-//        if (req?.headers['sec-websocket-protocol'] !== null) {
         const usp1 = new URLSearchParams(req.url);
         if (req.headers["upgrade"] === "websocket") {
           itwasasocket = true;
           req.headers["authorization"] = "Bearer " + usp1.get("authorization");
         }
        
-        //console.log('🔍 Raw Authorization Header inside try00:', String(req.headers['authorization']));
         req.log.info(...logFormat(source, '🔍 Raw Authorization Header inside try00:', String(req.headers['authorization'])));
 		
         if (!req.headers['authorization'] || 
@@ -55,18 +44,10 @@ export async function authMiddleware(req: FastifyRequest, reply: FastifyReply) {
                 delete req.headers['use-me-to-authorize'];
             }
         }
-/*
-        console.log('🔍 Raw Authorization Header inside try:', String(req.headers['authorization']));
-        console.log('🔍 JWT Secret in use:', process.env.JWT_SECRET);
-*/
         req.log.info(...logFormat(source, '🔍 Raw Authorization Header inside try:', String(req.headers['authorization'])));
         req.log.info(...logFormat(source, '🔍 JWT Secret in use:', process.env.JWT_SECRET));
 
         await req.jwtVerify(); //verfication by secret automatically
-/*
-        console.log('✅ JWT verified, user:', req.user);
-//        console.log('req.url was:', req.url);
-*/
         req.log.info(...logFormat(source, '✅ JWT verified, user:', JSON.stringify(req.user)));
 
         //inject user ID or username into headers (for downstream services)
@@ -78,26 +59,13 @@ export async function authMiddleware(req: FastifyRequest, reply: FastifyReply) {
               }
             }
             req.headers['x-user-id'] = String(userId);
-/*
-            console.log(`📦 Injected x-user-id = ${userId} into headers`);
-//            console.log(req.headers);
-*/
             req.log.info(...logFormat(source, `📦 Injected x-user-id = ${userId} into headers`));
         }
-/*
-    } catch (err: any) {
-        console.error('❌ JWT verification failed:', err.message);
-        reply.code(401).send({ error: 'Unauthorized' });
-        return;
-    }
-    console.log('✅ Auth middleware triggered!');
-*/
-
-	} catch (err: any) {
-        req.log.error(...logFormat(source, "❌ JWT verification failed: ",  err));
-        reply.log.error(...logFormat(source, "Unauthorized"));
-        reply.code(401).send({ error: 'Unauthorized' });
-        return;
+	  } catch (err: any) {
+      req.log.error(...logFormat(source, "❌ JWT verification failed: ",  err));
+      reply.log.error(...logFormat(source, "Unauthorized"));
+      reply.code(401).send({ error: 'Unauthorized' });
+      return;
     }
     req.log.info(...logFormat(source, '✅ Auth middleware triggered!'));
 };

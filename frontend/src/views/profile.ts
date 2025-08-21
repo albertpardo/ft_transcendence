@@ -1,9 +1,14 @@
 import { googleInitialized } from "./login";
 import { t } from "../i18n";
-export async function renderProfileContent(el: HTMLElement, bu: HTMLElement, gArea: HTMLElement, gWin: HTMLElement) {
-  bu.hidden = true;
-  gArea.hidden = true;
-  gWin.hidden = true;
+export async function renderProfileContent(hideableElements) {
+  hideableElements.buttonArea.hidden = true;
+  hideableElements.gameArea.classList.add("hidden");
+  hideableElements.gameWindow.hidden = true;
+  const el = hideableElements.contentArea;
+  const bu = hideableElements.buttonArea;
+  const gArea = hideableElements.gameArea;
+  const gWin = hideableElements.gameWindow;
+
   const userId = localStorage.getItem('userId') || sessionStorage.getItem('userId');
   const authToken : string = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -32,7 +37,7 @@ export async function renderProfileContent(el: HTMLElement, bu: HTMLElement, gAr
     console.log('🎸🎸🎸Received user on login:', userData);
   } catch (err) {
     console.error(err);
-    el.innerHTML = `<p class="text-red-500">Error loading profile. Please try again later.</p>`;
+    hideableElements.contentArea.innerHTML = `<p class="text-red-500">Error loading profile. Please try again later.</p>`;
     return;
   }
 

@@ -85,28 +85,6 @@ export default fp(async function (fastify: FastifyInstance) {
               return;
             }
 
-/*
-            console.log('🚀 rewriteRequestHeaders - forwarded auth:', req.headers.authorization);
-            console.log('🔐🔐 Authorization Header:', req.headers['authorization']);
-
-            try {
-                console.log('🔍🔐 Raw Authorization Header:', JSON.stringify(req.headers.authorization));
-                console.log('🔍🔐 JWT Secret in use:', process.env.JWT_SECRET);
-
-                await req.jwtVerify();
-                console.log("🔐 Verified JWT in proxy preHandler");
-
-                const userId = (req.user as any)?.userId;
-                if (userId) {
-                    req.headers['x-user-id'] = String(userId);
-                    console.log(`📦 Injected x-user-id = ${userId} into headers`);
-                }
-            } catch (err: any) {
-                console.error('❌ Proxy-level JWT verification failed:', err.message);
-                reply.code(401).send({ error: 'Unauthorized in proxy' });
-            }
-*/
-
             req.log.info(...logFormat(source, '🚀 rewriteRequestHeaders - forwarded auth:', req.headers.authorization));
             req.log.info(...logFormat(source, '🔐🔐 Authorization Header:', req.headers['authorization']));
 
@@ -141,7 +119,6 @@ export default fp(async function (fastify: FastifyInstance) {
         rewritePrefix: '/api/pong',
         httpMethods: ['POST'],
         http2: false,
-
     });
     fastify.register(fastifyHttpProxy, {
         upstream: 'http://game_service:9002',
@@ -150,7 +127,6 @@ export default fp(async function (fastify: FastifyInstance) {
         httpMethods: ['GET'],
         websocket: true,
         http2: false,
-
     });
     fastify.addHook('onSend', async (req, reply, payload) => {
         if ((req.url.startsWith('/api/login') || req.url.startsWith('/api/signup')) && reply.statusCode === 200) {
@@ -165,11 +141,9 @@ export default fp(async function (fastify: FastifyInstance) {
                 } else {
                     body = payload;
                 }
-                //console.log('📦 Final parsed payload:', body);
                 req.log.info(...logFormat(source, '📦 Final parsed payload:', body));
 
                 if (!body.id || !body.username) {
-                    //console.warn('⚠️ No id or username found in payload!'));
                     req.log.info(...logFormat(source, '⚠️ No id or username found in payload!'));
                     return payload;
                 }
