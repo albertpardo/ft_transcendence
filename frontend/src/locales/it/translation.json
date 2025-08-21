@@ -33,8 +33,12 @@
     "score": "Punteggio",
     "opponent": "Avversario",
     "date": "Data",
-    "victory": "Vittoria",
-    "loss": "Sconfitta",
+	"win": "Vittoria",
+	"loss": "Sconfitta",
+	"winForfeit": "Vittoria (il nemico ha rinunciato)",
+	"lossForfeit": "Sconfitta (hai rinunciato)",
+	"winAbsence": "Vittoria (il nemico non si è presentato)",
+	"lossAbsence": "Sconfitta (non ti sei presentato)",
     "notLoggedIn": "Non sei connesso.",
     "noAuthToken": "Token di autenticazione mancante.",
     "failedToLoad": "Impossibile caricare la cronologia partite."
@@ -88,5 +92,10 @@
   "wonGame": "Hai vinto la partita!",
   "lostGame": "Hai perso la partita.",
   "wonRound": "Hai vinto il round!",
-  "lostRound": "Hai perso il round."
+  "lostRound": "Hai perso il round.",
+  "pong-buttons": {
+	  "start-button-text": "Cerca una partita veloce",
+	  "ready-button-text": "Conferma la partecipazione",
+	  "giveup-button-text": "Rinuncia IMMEDIATAMENTE"
+	}
 }

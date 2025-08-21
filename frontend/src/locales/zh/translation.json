@@ -27,8 +27,12 @@
     "score": "得分",
     "opponent": "对手",
     "date": "日期",
-    "victory": "胜利",
-    "loss": "失败",
+	"win": "胜利",
+	"loss": "失败",
+	"winForfeit": "胜利（对手弃权了）",
+	"lossForfeit": "失败（你弃权了）",
+	"winAbsence": "胜利（对手未到场）",
+	"lossAbsence": "失败（你未到场）",
     "notLoggedIn": "您尚未登录。",
     "noAuthToken": "缺少认证令牌。",
     "failedToLoad": "无法加载比赛历史。"
@@ -82,5 +86,10 @@
   "wonGame": "您赢得了比赛！",
   "lostGame": "您输了比赛。",
   "wonRound": "您赢得了这一轮！",
-  "lostRound": "您输了这一轮。"
+  "lostRound": "您输了这一轮。",
+  "pong-buttons": {
+	  "start-button-text": "寻找快速对局",
+	  "ready-button-text": "确认参赛",
+	  "giveup-button-text": "立即弃权"
+	}
 }

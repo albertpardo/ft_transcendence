@@ -8,7 +8,7 @@ import {
   addPlayerCompletely,
   removeTheSock,
   getPongState,
-  forefit,
+  forfeit,
   moveMyPaddle,
   gamesReadyLoopCheck,
   dataStreamer,
@@ -196,13 +196,13 @@ const startServer = async () => {
           },
         config: { source: PREFIX + PATH },
     });
-    PATH = '/pong/game/forefit';
+    PATH = '/pong/game/forfeit';
     fastify.post(PATH, {
         handler:
           async (req, reply) => {
             let playerId : string = req.headers['x-user-id'] as string;
             if (typeof playerId !== "undefined" && playerId !== "") {
-              forefit(playerId);
+              forfeit(playerId);
               return JSON.stringify({
                 err: "nil",
               });

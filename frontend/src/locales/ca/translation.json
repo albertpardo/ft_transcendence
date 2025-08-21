@@ -33,8 +33,12 @@
     "score": "Puntuació",
     "opponent": "Oponent",
     "date": "Data",
-    "victory": "Victòria",
-    "loss": "Derrota",
+	"win": "Victòria",
+	"loss": "Derrota",
+	"winForfeit": "Victòria (l’enemic va renunciar)",
+	"lossForfeit": "Derrota (vas renunciar)",
+	"winAbsence": "Victòria (l’enemic no es va presentar)",
+	"lossAbsence": "Derrota (no et vas presentar)",
     "notLoggedIn": "No has iniciat sessió.",
     "noAuthToken": "Falta el testimoni d'autenticació.",
     "failedToLoad": "No s'ha pogut carregar l'historial de partides."
@@ -88,5 +92,10 @@
   "wonGame": "Has guanyat la partida!",
   "lostGame": "Has perdut la partida.",
   "wonRound": "Has guanyat la ronda!",
-  "lostRound": "Has perdut la ronda."
+  "lostRound": "Has perdut la ronda.",
+  "pong-buttons": {
+	  "start-button-text": "Cerca una partida ràpida",
+	  "ready-button-text": "Confirma la participació",
+	  "giveup-button-text": "Rendir-se INMEDIATAMENT"
+	}
 }

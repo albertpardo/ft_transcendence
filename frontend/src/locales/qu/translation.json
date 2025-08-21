@@ -33,8 +33,12 @@
     "score": "Saykuy",
     "opponent": "Chaylla",
     "date": "P'unchay",
-    "victory": "Winay",
-    "loss": "Yaykuy",
+	"win": "Atipanakuy",
+	"loss": "Chinkay",
+	"winForfeit": "Atipanakuy (awqa saqirqan)",
+	"lossForfeit": "Chinkay (qam saqirqanki)",
+	"winAbsence": "Atipanakuy (awqa mana hamuq)",
+	"lossAbsence": "Chinkay (qam mana hamuq)",
     "notLoggedIn": "Mana kanki chaylla.",
     "noAuthToken": "Mana kachka auth token.",
     "failedToLoad": "Takiy willakuyqa manam kachkanku."
@@ -88,5 +92,10 @@
   "wonGame": "Takiypi winay!",
   "lostGame": "Takiypi yaykuy.",
   "wonRound": "Roundpi winay!",
-  "lostRound": "Roundpi yaykuy."
+  "lostRound": "Roundpi yaykuy.",
+  "pong-buttons": {
+	  "start-button-text": "Sapa kuti pukllanata maskay",
+	  "ready-button-text": "Hukmanta haykuyta ratificay",
+	  "giveup-button-text": "ÑAWPAMAN saqiy"
+	}
 }

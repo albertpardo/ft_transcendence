@@ -67,25 +67,25 @@ export async function renderHistoryContent(hideableElements) {
     let res : string = "";
     if (localStorage.getItem('userId') === idL) {
       if (entry.winner === "L") {
-        if (entry.finish === "forefit") {
-          res = "Win (enemy forefit)";
+        if (entry.finish === "forfeit") {
+          res = t("historic.winForefit");
         }
         else if (entry.finish === "absence" || entry.finish === "technical") {
-          res = "Win (enemy absence)";
+          res = t("historic.winAbsence");
         }
         else {
-          res = "Win";
+          res = t("historic.win");
         }
       }
       else {
-        if (entry.finish === "forefit") {
-          res = "Loss (forefit)";
+        if (entry.finish === "forfeit") {
+          res = t("historic.lossForfeit");
         }
         else if (entry.finish === "technical") {
-          res = "Loss (didn't show up)";
+          res = t("historic.lossAbsence");
         }
         else {
-          res = "Loss";
+          res = t("historic.loss");
         }
       }
       side = "Left";
@@ -100,25 +100,25 @@ export async function renderHistoryContent(hideableElements) {
     }
     else {
       if (entry.winner === "R") {
-        if (entry.finish === "forefit") {
-          res = "Win (enemy forefit)";
+        if (entry.finish === "forfeit") {
+          res = t("historic.winForefit");
         }
         else if (entry.finish === "absence" || entry.finish === "technical") {
-          res = "Win (enemy absence)";
+          res = t("historic.winAbsence");
         }
         else {
-          res = "Win";
+          res = t("historic.win");
         }
       }
       else {
-        if (entry.finish === "forefit") {
-          res = "Loss (forefit)";
+        if (entry.finish === "forfeit") {
+          res = t("historic.lossForfeit");
         }
         else if (entry.finish === "technical") {
-          res = "Loss (didn't show up)";
+          res = t("historic.lossAbsence");
         }
         else {
-          res = "Loss";
+          res = t("historic.loss");
         }
       }
       side = "Right";

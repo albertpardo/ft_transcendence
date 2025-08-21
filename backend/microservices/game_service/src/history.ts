@@ -2,9 +2,9 @@
 import Database from 'better-sqlite3';
 const db = Database('/app/dbs/history.db');
 
-// winner -- necessary because forefits exist
+// winner -- necessary because forfeits exist
 // gameType -- normal or tournament
-// finish -- normal or forefit
+// finish -- normal or forfeit
 
 export const historyMain = async () => {
   const init = db.prepare(`
