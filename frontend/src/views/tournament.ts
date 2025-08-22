@@ -176,7 +176,7 @@ async function fillInTheTournTable() {
             let nnJson = JSON.parse(await respNn.text());
             let nicknameVs = "<i>unknown</i>";
             if (nnJson.err === "nil") {
-              nicknameVs = nnJson.nickname;
+              nicknameVs = nnJson.nick;
             }
             document.getElementById(`${currentTitle}${j + 1}`).innerHTML = "<b>" + nicknameVs + "</b>";
           }
@@ -197,7 +197,7 @@ async function fillInTheTournTable() {
           let nnJson = JSON.parse(await respNn.text());
           let nicknameVs = "<i>unknown</i>";
           if (nnJson.err === "nil") {
-            nicknameVs = nnJson.nickname;
+            nicknameVs = nnJson.nick;
           }
           document.getElementById('table-finalist').innerHTML = "<b>" + nicknameVs + "</b>";
         }
