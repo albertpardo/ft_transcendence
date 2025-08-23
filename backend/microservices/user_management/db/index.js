@@ -2,7 +2,18 @@ const { get } = require('http');
 
 const db = require('better-sqlite3')('./users.db');
 
+db.pragma('foreign_keys = ON');   // No set by default
+
 // TODO make the id a "TEXT PRIMARY KEY UNIQUE", make all the corresponding changes in all the api.
+/* 250822:
+ *
+ * Esta línea :
+ * status TEXT DEFAULT 'offline')
+ *
+ * Se podria poner la alternativa :
+ * status TEXT DEFAULT 'offline' CHECK (status IN ('online', 'offline'))
+ *
+ */ 
 const init = db.prepare(`
     CREATE TABLE IF NOT EXISTS users (
     id TEXT PRIMARY KEY UNIQUE,
@@ -17,6 +28,18 @@ const init = db.prepare(`
     status TEXT DEFAULT 'offline')` 
 );
 init.run();
+
+// table friends by apardo-m
+const initFriends = db.prepare(`
+    CREATE TABLE IF NOT EXISTS friends (
+    user_id TEXT NOT NULL,
+    friend_id TEXT NOT NULL,
+    PRIMARY KEY (user_id, friend_id),
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (friend_id) REFERENCES users(id))`
+);
+initFriends.run();
+
 
 function getNicknameById(userId) {
 	const stmt = db.prepare('SELECT nickname FROM users WHERE id = ?');
@@ -106,6 +129,30 @@ function deleteUser(userId) {
     stmt.run(userId);
 }
 
+// by apardo-m for friends 
+function addFriendById(userId, friendId) {
+	const stmt = db.prepare('INSERT INTO friends (user_id, friend_id) VALUES (?, ?)');
+	stmt.run(userId, friendId);
+}
+
+function getIdByNickname(nick) {
+	const stmt = db.prepare('SELECT id FROM users WHERE username = ? LIMIT 1');
+	return stmt.run(nick);
+}
+
+function addFriendByNick(userId, friendNick) {
+	const friendId = getIdByNickname(friendNick);
+    if (friendId) {
+		addFriendById(userId, friendId);
+	}
+	//TODO : Gestionar Error que friendNick no exista????
+}
+
+function getUserFriends(userId) {
+	const stmt = db.prepare('SELECT u.nickname, u.status FROM friends f JOIN users u ON f.friend_id = u.id WHERE f.user_id = ?');
+	return stmt.run(userId);
+}
+
 module.exports = {
 	getNicknameById,
     getUserByUsernameOrEmail,
@@ -116,5 +163,7 @@ module.exports = {
     getNickname,
     createUser,
     updateUser,
-    deleteUser
+    deleteUser,
+	addFriendByNick,
+	getUserFriends
 };
