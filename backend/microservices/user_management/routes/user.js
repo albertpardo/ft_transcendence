@@ -35,7 +35,7 @@ async function userRoutes(fastify, options) {
   addRouteWithSource('delete', '/api/user/profile', userController.deleteProfile);
 
   addRouteWithSource('post', '/api/user/upsert-google', userController.upsertGoogle);
-  fastify.log.info(...logFormat(source, '/api/user/upsert-google', userController.upsertGoogle));  
+  fastify.log.info(...logFormat(source,'✅ Registered POST /api/user/upsert-google'));  
 }
 
 module.exports = userRoutes;

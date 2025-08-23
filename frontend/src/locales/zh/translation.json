@@ -69,6 +69,7 @@
     "history": "比赛历史",
     "tournament": "锦标赛",
     "stats": "统计",
+    "friends": "朋友们",
     "logout": "登出"
   }, 
   "play": "玩Pong",
@@ -76,6 +77,7 @@
   "history": "比赛历史",
   "tournament": "锦标赛",
   "stats": "统计",
+  "friends": "朋友们",
   "logout": "登出",
   "welcome": "欢迎来到Pong",
   "login": "登录",

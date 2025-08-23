@@ -5,6 +5,7 @@ import { renderHomeContent, renderPlayContent, renderStatsContent } from './sect
 import { renderHistoryContent, getNicknameForPlayerId } from './history';
 import { renderProfileContent } from './profile';
 import { renderTournamentContent, renderTournamentManagerContent, getCompleteTournamentInfo } from './tournament';
+import { renderFriendsContent } from './friends'
 import { State, nullState } from './pongrender';
 import { googleInitialized, resetGoogle, currentGoogleButtonId} from './login';
 import confetti from 'canvas-confetti';
@@ -487,6 +488,7 @@ export async function initDashboard() {
         <a href="#tournament" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='tournament'?'bg-blue-600':'bg-gray-700'}">${t('nav.tournament')}</a>
         <a href="#tournamentmanager" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='tournamentmanager'?'bg-blue-600':'bg-gray-700'}">Tournament Management</a>
         <a href="#stats" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='stats'?'bg-blue-600':'bg-gray-700'}">${t('nav.stats')}</a>
+        <a href="#friends" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='friends'?'bg-blue-600':'bg-gray-700'}">${t('nav.friends')}</a>
       </nav>
       <button id="logout-btn" class="mt-auto w-full p-3 bg-red-600 rounded-lg hover:bg-red-700 transition text-white font-medium">${t('nav.logout')}</button>
     </aside>
@@ -1000,6 +1002,7 @@ export async function initDashboard() {
     case 'tournament':        renderTournamentContent(hideableElements);        break;
     case 'tournamentmanager': renderTournamentManagerContent(hideableElements); break;
     case 'stats':             renderStatsContent(hideableElements);             break;
+    case 'friends':           renderFriendsContent(hideableElements);           break;
     default:                  renderHomeContent(hideableElements);
   }
 }

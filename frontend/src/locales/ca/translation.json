@@ -75,6 +75,7 @@
     "history": "Històric",
     "tournament": "Torneig",
     "stats": "Estadístiques",
+    "friends": "Amics/Amigues",
     "logout": "Tanca sessió"
   },
   "play": "Juga a Pong",
@@ -82,6 +83,7 @@
   "history": "Històric de partides",
   "tournament": "Torneig",
   "stats": "Estadístiques",
+  "friends": "Amics/Amigues",
   "logout": "Tanca sessió",
   "welcome": "Benvingut a Pong",
   "login": "Iniciar sessió",

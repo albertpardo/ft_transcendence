@@ -75,6 +75,7 @@
     "history": "Cronologia",
     "tournament": "Torneo",
     "stats": "Statistiche",
+    "friends": "Amici",
     "logout": "Esci"
   },
   "play": "Gioca a Pong",
@@ -82,6 +83,7 @@
   "history": "Cronologia",
   "tournament": "Torneo",
   "stats": "Statistiche",
+  "friends": "Amici",
   "logout": "Esci",
   "welcome": "Benvenuto su Pong",
   "login": "Accedi",

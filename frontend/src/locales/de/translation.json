@@ -8,6 +8,7 @@
     "winRate": "Gewinnquote",
     "averageScore": "Durchschnittliche Punktzahl",
     "bestScore": "Beste Punktzahl",
+    "lastGameDate": "Datum der letzten Abreise",
     "noStats": "Keine Statistiken verfügbar."
   },
   "tournaments": {
@@ -74,6 +75,7 @@
     "history": "Spielverlauf",
     "tournament": "Turnier",
     "stats": "Statistiken",
+    "friends": "Freunde",
     "logout": "Abmelden"
   },
   "play": "Pong spielen",
@@ -81,9 +83,10 @@
   "history": "Spielverlauf",
   "tournament": "Turnier",
   "stats": "Statistiken",
+  "friends": "Freunde",
   "logout": "Abmelden",
   "welcome": "Willkommen bei Pong",
-	"home.intro": "Willkommen bei Transcendence!",
+  "home.intro": "Willkommen bei Transcendence!",
   "select.language": "Sprache auswählen",
   "login": "Anmelden",
   "signup": "Registrieren",
