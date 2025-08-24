@@ -33,6 +33,7 @@ async function userRoutes(fastify, options) {
   addRouteWithSource('get', '/api/user/profile', userController.getProfile);
   addRouteWithSource('put', '/api/user/profile', userController.updateProfile);
   addRouteWithSource('delete', '/api/user/profile', userController.deleteProfile);
+  addRouteWithSource('get', '/api/user/friends', userController.getFriends);
 
   addRouteWithSource('post', '/api/user/upsert-google', userController.upsertGoogle);
   fastify.log.info(...logFormat(source,'✅ Registered POST /api/user/upsert-google'));  

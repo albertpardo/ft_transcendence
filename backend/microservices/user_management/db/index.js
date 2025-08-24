@@ -135,17 +135,16 @@ function addFriendById(userId, friendId) {
 	stmt.run(userId, friendId);
 }
 
-function getIdByNickname(nick) {
+function getUserIdByNickname(nick) {
 	const stmt = db.prepare('SELECT id FROM users WHERE username = ? LIMIT 1');
 	return stmt.run(nick);
 }
 
 function addFriendByNick(userId, friendNick) {
-	const friendId = getIdByNickname(friendNick);
-    if (friendId) {
-		addFriendById(userId, friendId);
-	}
-	//TODO : Gestionar Error que friendNick no exista????
+	const friendId = getUserIdByNickname(friendNick);
+    if (!friendId) return { error: `${friendNick} doesn´t exits!` };
+	addFriendById(userId, friendId);
+	//TODO : Gestionar Error al insertar friend????
 }
 
 function getUserFriends(userId) {

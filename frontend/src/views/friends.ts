@@ -1,9 +1,19 @@
 // src/views/friends.ts
 import { t } from '../i18n'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
 export async function renderFriendsContent(hideableElements) {
+  const userId = localStorage.getItem('userId') || sessionStorage.getItem('userId');
+  const authToken : string = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+  
+  if (!authToken) {
+    el.innerHTML = `<p class="text-red-500">${t("profiles.not_logged_in")}</p>`;
+    return;
+  }
+
+  const authstringheader : string = "Bearer " + authToken;
+
+  let friendsData;
   let tempInnerHTML : string = `
     <h1 class="text-3xl font-bold mb-6" >Friends</h1>
 	<div class="flex flex-col items-center gap-6 p-7 md:flex-row md:gap-8 rounded-2xl">
@@ -17,6 +27,29 @@ export async function renderFriendsContent(hideableElements) {
       </button>
 	</div>
   `;
+ 
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/friends`, {
+      method: 'GET',
+      headers: {
+        "Use-me-to-authorize": authstringheader,
+        "Content-Type": "application/json",
+      },
+      credentials: 'include',
+      mode: 'cors',
+    });
+
+    if (!res.ok)
+      tempInnerHTML += `<p class="text-red-500">Failed to fetch friends data.</p>`;
+	else {
+      //  userData = await res.json();
+	  console.log('🎸🎸🎸Received friend data:', friendsData);
+	}
+  } catch (err) {
+    console.error(err);
+    tempInnerHTML += `<p class="text-red-500">Error loading friends. Please try again later.</p>`;
+    return;
+  }
 
 //falta el manejador del botón "Add friend"
   // Errores : si el nickname no está o si falla el ADD
@@ -35,13 +68,13 @@ export async function renderFriendsContent(hideableElements) {
    	    </tr>
 	  </thead>
   `;
-//  Componer filas Al igual poner 🟢 o 🔴 para saber el estado
+//  Componer filas poner 🟢 o 🔴 para saber el estado en lugar del texto recibido
   //  formato
   //  <tbody>
   //  PAra cada fila
   //    <tr>
-  //      <td> uno </td>
-  //      <td> dos </td>
+  //      <td> Nick </td>
+  //      <td> Estado </td>
   //    </tr>
   //Fin fila
   //  </tbody>

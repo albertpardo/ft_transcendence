@@ -129,6 +129,11 @@ exports.deleteProfile = async (userId) => {
     return { success: true };
 }
 
+exports.getUserFriends = async (userId) => {
+	const friends = db.getUserFriends(userId);
+	return (friends); 
+}
+
 exports.upsertGoogleUser = async (email, name, picture, googleId) => {
   console.log('🔍 [userService] upsertGoogleUser called with:', { email, googleId, name, picture });
 

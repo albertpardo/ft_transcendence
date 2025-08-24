@@ -74,6 +74,17 @@ exports.deleteProfile = async (request, reply) => {
     return reply.send({ message: "🏊 Profile deleted successfully" });
 }
 
+exports.getFriends = async (request, reply) => {
+    const source = exports.getFriends.name;
+
+    const userId = request.headers['x-user-id'];
+    if (!userId) return reply.code(401).send({ error: 'Unauthorized' });
+    
+	const friends = await userService.getUserFriends(userId);
+	reply.log.info(...logFormat(source, 'check friends list : ', friends));
+    return reply.send(friends);    
+}
+
 exports.upsertGoogle = async (request, reply) => {
   //console.log('🔥 [userController] Received upsert request:', request.body);
   const source = exports.upsertGoogle.name;
