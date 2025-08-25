@@ -68,7 +68,7 @@ export async function renderHistoryContent(hideableElements) {
     if (localStorage.getItem('userId') === idL) {
       if (entry.winner === "L") {
         if (entry.finish === "forfeit") {
-          res = t("historic.winForefit");
+          res = t("historic.winForfeit");
         }
         else if (entry.finish === "absence" || entry.finish === "technical") {
           res = t("historic.winAbsence");
@@ -101,7 +101,7 @@ export async function renderHistoryContent(hideableElements) {
     else {
       if (entry.winner === "R") {
         if (entry.finish === "forfeit") {
-          res = t("historic.winForefit");
+          res = t("historic.winForfeit");
         }
         else if (entry.finish === "absence" || entry.finish === "technical") {
           res = t("historic.winAbsence");
