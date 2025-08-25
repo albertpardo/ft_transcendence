@@ -471,6 +471,7 @@ async function generateUpdateAllTourTable(canWeJoin: boolean) {
           }
         }
         buttonSetter(MetaGameState.waittouropp);
+        document.getElementById('register-tournament-button').disabled = true;
       }
       else {
         alert("failed to enroll in " + allPTRObj.res[newCount].tId + " because: " + resOfEnrollObj.err);
@@ -541,7 +542,11 @@ export async function renderTournamentManagerContent(hideableElements) {
   const tournamentForm = document.getElementById('tournament-form') as HTMLFormElement;
   const errorField = document.getElementById('error-text-field');
   const myTournamentField = document.getElementById('my-tournament');
-  if (tournamentForm) {
+  const metaInfo = await getGameMetaInfo();
+  if (metaInfo.gType === "normal") {
+    console.log("you're already in a normal game btw");
+  }
+  else if (tournamentForm) {
     const submitButton = document.getElementById('register-tournament-button') as HTMLButtonElement;
     const checkPartRawResp = await participantCheck();
     const checkPartResp = await checkPartRawResp.text();
