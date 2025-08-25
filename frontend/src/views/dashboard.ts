@@ -992,6 +992,7 @@ export async function initDashboard() {
     buttonArea: document.getElementById('button-area')!,
     gameArea: document.getElementById('game-area')!,
     gameWindow: document.getElementById('game-window')!,
+    gameInfo: document.getElementById('game-info')!,
   };
   switch (hash) {
     case 'profile':           renderProfileContent(hideableElements);           break;

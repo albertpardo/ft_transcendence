@@ -1,4 +1,5 @@
 import { route } from '../router';
+import { getGameMetaInfo, setterUponMetaInfo } from './dashboard';
 import { t } from '../i18n';
 
 export function renderHomeContent(hideableElements) {
@@ -64,13 +65,14 @@ export function renderHomeContent(hideableElements) {
   });
 }
 
-export function renderPlayContent(hideableElements) {
+export async function renderPlayContent(hideableElements) {
   hideableElements.contentArea.innerHTML = `
   `;
-  // on this view, show the button and the registered games list
   hideableElements.buttonArea.hidden = false;
   hideableElements.gameArea.classList.remove("hidden");
   hideableElements.gameWindow.hidden = false;
+  const metaInfo = await getGameMetaInfo();
+  setterUponMetaInfo(hideableElements.gameInfo, metaInfo);
 }
 
 export function renderStatsContent(hideableElements) {
