@@ -85,6 +85,21 @@ exports.getFriends = async (request, reply) => {
     return reply.send(friends);    
 }
 
+exports.putFriend = async (request, reply) => {
+    const source = exports.putFriend.name;
+
+    const userId = request.headers['x-user-id'];
+    if (!userId) return reply.code(401).send({ error: 'Unauthorized' });
+    const { nick } = request.body;
+	reply.log.info(...logFormat(source, '(check userID, nick) : ', userId, nick));
+	console.log("#######################################");
+	const result = await userService.putUserFriend(userId, nick);
+	console.log("----------putFriend>>>> result <<<<< : ", result.error);
+    if (result.error) return reply.code(400).send(result);
+    return reply.send({ message: "🙌 Friend added successfully" });
+
+}
+
 exports.upsertGoogle = async (request, reply) => {
   //console.log('🔥 [userController] Received upsert request:', request.body);
   const source = exports.upsertGoogle.name;

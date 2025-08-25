@@ -110,7 +110,7 @@ export default fp(async function (fastify: FastifyInstance) {
         upstream: 'http://user_management:9001',
         prefix: '/api/friends',
         rewritePrefix: '/api/user/friends',
-        httpMethods: ['GET', 'POST'],
+        httpMethods: ['GET', 'PUT'],
         http2: false,
     });
     fastify.register(fastifyHttpProxy, {

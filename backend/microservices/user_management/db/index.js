@@ -137,19 +137,23 @@ function addFriendById(userId, friendId) {
 
 function getUserIdByNickname(nick) {
 	const stmt = db.prepare('SELECT id FROM users WHERE username = ? LIMIT 1');
-	return stmt.run(nick);
+	return stmt.get(nick);
 }
 
 function addFriendByNick(userId, friendNick) {
-	const friendId = getUserIdByNickname(friendNick);
-    if (!friendId) return { error: `${friendNick} doesn´t exits!` };
-	addFriendById(userId, friendId);
-	//TODO : Gestionar Error al insertar friend????
+	const row = getUserIdByNickname(friendNick);
+    if (row === undefined) return { error: `${friendNick} doesn´t exits!` };
+    const friendId = row.id;
+	if (friendId !== userId) {
+      addFriendById(userId, friendId);
+      return { success: true, userId, friendId };
+	}
+	return { error : "You can´t be friend of yourself" } 
 }
 
 function getUserFriends(userId) {
 	const stmt = db.prepare('SELECT u.nickname, u.status FROM friends f JOIN users u ON f.friend_id = u.id WHERE f.user_id = ?');
-	return stmt.run(userId);
+	return stmt.get(userId);
 }
 
 module.exports = {
