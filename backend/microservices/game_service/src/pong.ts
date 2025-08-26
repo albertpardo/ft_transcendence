@@ -735,6 +735,9 @@ export function getOppId(uuid: string) {
       if (typeof gr === "undefined") {
         throw "undefined pongruntime";
       }
+      if (gr.gameType === "local") {
+        return "local gaming";
+      }
       if (gr.LplayerId === uuid) {
         return gr.RplayerId;
       }

@@ -47,8 +47,8 @@ async function localMovePaddleWrapper(d: number, p: string) {
   const lmovePaddleRawResp = await localMovePaddle(d, p);
   const lmovePaddleResp = await lmovePaddleRawResp.text();
   const lmovePaddleRespObj = JSON.parse(lmovePaddleResp);
-  if (movePaddleRespObj.err !== "nil") {
-    console.error(movePaddleRespObj.err);
+  if (lmovePaddleRespObj.err !== "nil") {
+    console.error(lmovePaddleRespObj.err);
   }
 }
 
@@ -252,12 +252,10 @@ export async function setterUponMetaInfo(gameInfo : HTMLElement, metaInfo : {gTy
     console.log("ginfo setter 1");
     gameInfo.innerHTML = "Game type: " + metaInfo.gType + "; versus: " + metaInfo.oppName;
   }
-  else {
+  else if (metaInfo.gType === "tournament") {
     // ok, it's a tournament
     // there's only ONE situation which requires us to press the ready key.
     // we're in a game of type tournament and we're not ready.
-    //
-    // if it's a game and we're ready, just give the forfeit button ? TODO to think
     const isready : bool = await checkReadyWrapper();
     if (!isready) {
       buttonSetter(MetaGameState.waittourrdy);
@@ -267,6 +265,11 @@ export async function setterUponMetaInfo(gameInfo : HTMLElement, metaInfo : {gTy
     }
     console.log("ginfo setter 2");
     gameInfo.innerHTML = "Game type: " + metaInfo.gType + "; versus: " + metaInfo.oppName;
+  }
+  else if (metaInfo.gType === "local") {
+    buttonSetter(MetaGameState.inlocalgame);
+    console.log("ginfo setter 3");
+    gameInfo.innerHTML = "Game type: " + metaInfo.gType;
   }
 }
 
@@ -737,34 +740,47 @@ export async function initDashboard() {
           break; 
         case "error":
           break;
+        case "local":
+          metaInfo = await getGameMetaInfo();
+          if (metaInfo.gType === "unknown") {
+            gameInfo.innerHTML = "";
+          }
+          await setterUponMetaInfo(gameInfo, metaInfo);
+          playerSide = "local";
+          rightUpArrow.hidden = false;
+          rightDownArrow.hidden = false;
+          leftUpArrow.hidden = false;
+          leftDownArrow.hidden = false;
+          gameText.style.visibility = "hidden";
+          scoreText.classList.add('opacity-0');
+          setTimeout(() => {
+            scoreText.innerHTML = `${gameState.stateScoreL} : ${gameState.stateScoreR}`;
+
+            scoreText.classList.remove('opacity-0');
+          }, 150);
         default:
           const newState: State =JSON.parse(event.data);
 
-           ball.setAttribute("cx", "" + newState.stateBall.coords.x);
-           ball.setAttribute("cy", "" + newState.stateBall.coords.y);
-           lpad.setAttribute("y", "" + newState.stateLP.y);
-           rpad.setAttribute("y", "" + newState.stateRP.y);
-           try { 
-             if (newState.stateBall.hitLPaddle) triggerPaddleEffect('lpad');
-             if (newState.stateBall.hitRPaddle) triggerPaddleEffect('rpad');
-             if (newState.stateBall.hitWall) triggerBallEffect();
-
-           } catch (e) {
+          ball.setAttribute("cx", "" + newState.stateBall.coords.x);
+          ball.setAttribute("cy", "" + newState.stateBall.coords.y);
+          lpad.setAttribute("y", "" + newState.stateLP.y);
+          rpad.setAttribute("y", "" + newState.stateRP.y);
+          try { 
+            if (newState.stateBall.hitLPaddle) triggerPaddleEffect('lpad');
+            if (newState.stateBall.hitRPaddle) triggerPaddleEffect('rpad');
+            if (newState.stateBall.hitWall) triggerBallEffect();
+          } catch (e) {
             console.error("Error updating game state:", e);
-            }
-           scoreText.innerHTML = `${newState.stateScoreL} : ${newState.stateScoreR}`;
-           scoreText.classList.remove('opacity-0');
+          }
+          scoreText.innerHTML = `${newState.stateScoreL} : ${newState.stateScoreR}`;
+          scoreText.classList.remove('opacity-0');
 
-          gameState = newState; 
-          
-
-
-
+          gameState = newState;
           if (gameState.stateWhoL !== "none" && gameState.stateWhoL !== "null state") {
             gameText.style.visibility = "visible";
             gameText.classList.remove('opacity-0');
             // gameText.classList.remove('animate-win-pulse', 'animate-lose-pulse', 'animate-text-glow');
-            
+
             scoreText.innerHTML = "" + gameState.stateScoreL + " : " + gameState.stateScoreR;
             scoreText.classList.remove('opacity-0');
             const playButton = document.getElementById('start-button');
@@ -802,7 +818,8 @@ export async function initDashboard() {
                   await tourCheckAndSetIdlingButtons();
                   break;
               }
-            } else if (playerSide === "r") {
+            }
+            else if (playerSide === "r") {
               switch (gameState.stateWhoL) {
                 case "right":
                   gameText.innerHTML = `${t("lostRound")}`;
@@ -923,7 +940,12 @@ export async function initDashboard() {
     });
 
     leftUpArrow.addEventListener('mousedown', () => {
-      movePaddleWrapper(-2);
+      if (playerSide === "local") {
+        localMovePaddleWrapper(-2, "l");
+      }
+      else {
+        movePaddleWrapper(-2);
+      }
     });
 
     leftUpArrow.addEventListener('mouseup', () => {
