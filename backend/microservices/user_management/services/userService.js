@@ -131,16 +131,12 @@ exports.deleteProfile = async (userId) => {
 
 exports.getUserFriends = async (userId) => {
 	const friends = db.getUserFriends(userId);
-	console.log("++++++++++ -> userService.getUserFriends :", friends);
 	return (friends); 
 }
 
 exports.putUserFriend = async (userId, friendNick) => {
 
-	console.log('userId: ' , userId , "- FriendNick : " , friendNick);
-
 	const result = db.addFriendByNick(userId, friendNick);
-	console.log("----------putUserFriend>>>> result <<<<< : ", result);
     if (result.error) return (result) ;
 	
     return { success: true };

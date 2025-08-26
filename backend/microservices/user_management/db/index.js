@@ -156,6 +156,19 @@ function getUserFriends(userId) {
 	return ( stmt.all(userId) );
 }
 
+//by apardo-m for set user online/offline
+function setUserOnline(userId) {
+    const stmt = db.prepare('UPDATE users SET status = ? WHERE id = ?');
+    stmt.run('online', userId);
+    return { success: true, id: userId, status: 'online' };
+}
+
+function setUserOffline(userId) {
+    const stmt = db.prepare('UPDATE users SET status = ? WHERE id = ?');
+    stmt.run('offline', userId);
+    return { success: true, id: userId, status: 'offline' };
+}
+
 module.exports = {
 	getNicknameById,
     getUserByUsernameOrEmail,
@@ -168,5 +181,7 @@ module.exports = {
     updateUser,
     deleteUser,
 	addFriendByNick,
-	getUserFriends
+	getUserFriends,
+	setUserOnline,
+	setUserOffline
 };
