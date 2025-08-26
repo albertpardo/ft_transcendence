@@ -121,6 +121,7 @@ async function fillInTheTournTable() {
   if (tournAllInfoRespObj.err !== "nil") {
     console.log("getting all the tourn info resulted in err:", tournAllInfoRespObj.err);
     document.getElementById("tourn-title").innerHTML = "<i>No tournament.</i>";
+    document.getElementById("tourn-id").innerHTML = "";
     const bt = document.getElementById("big-table");
     if (bt) {
       bt.innerHTML = `
@@ -166,7 +167,8 @@ async function fillInTheTournTable() {
       console.error("weird error occured: tour is undefined, although no err received");
     }
     else {
-      document.getElementById("tourn-title").innerHTML = tourn.tName;
+      document.getElementById("tourn-title").innerHTML = "Tournament name: " + tourn.tName;
+      document.getElementById("tourn-id").innerHTML = "id: " + tourn.tId;
       for (let i = 0; i < 3; i++) {
         let currMaxPN : number = Math.pow(2, i + 1);
         let currentTitle : string = ["table-contender-", "table-quarterfinal-", "table-semifinal-"][3 - i - 1];
@@ -217,7 +219,9 @@ export async function renderTournamentContent(hideableElements) {
   hideableElements.gameArea.classList.add("hidden");
   hideableElements.gameWindow.hidden = true;
   let tempHTML : string = `
-    <h1 id="tourn-title">Hi</h1>
+    <h1 id="tourn-title">Tourn title</h1>
+    <h1 id="tourn-id">Tourn ID</h1>
+    <hr />
     <table id="big-table" class="table-fixed"><tbody>
       <tr>
         <td id="table-contender-1">contender 1</td>
@@ -295,11 +299,10 @@ export async function renderTournamentContent(hideableElements) {
         const resOfDelete = await rawResOfDelete.text();
         const resOfDeleteObj = JSON.parse(resOfDelete);
         if (resOfDeleteObj.err === "nil") {
-          alert("wow dude. deleted tournament.");
           localStorage.removeItem("tId");
           tournAnihilationButton.disabled = true;
-          console.log("button setting from tournament 1");
           buttonSetter(MetaGameState.nothing);
+          console.log("tourn deleted");
         }
         else {
           console.error("failed to delete tournament:", resOfDeleteObj.err);
@@ -462,7 +465,7 @@ async function generateUpdateAllTourTable(canWeJoin: boolean) {
       const resOfEnroll = await rawResOfEnroll.text();
       const resOfEnrollObj = JSON.parse(resOfEnroll);
       if (resOfEnrollObj.err === "nil") {
-        alert("enrolled in " + allPTRObj.res[newCount].tId);
+        console.log("enrolled in " + allPTRObj.res[newCount].tId);
         localStorage.setItem("tId", allPTRObj.res[newCount].tId);
         for (let newerCount = 0; newerCount < count; newerCount += 1) {
           let currentJB = document.getElementById(`join-button-${newerCount}`);
@@ -474,7 +477,7 @@ async function generateUpdateAllTourTable(canWeJoin: boolean) {
         document.getElementById('register-tournament-button').disabled = true;
       }
       else {
-        alert("failed to enroll in " + allPTRObj.res[newCount].tId + " because: " + resOfEnrollObj.err);
+        console.error("failed to enroll in " + allPTRObj.res[newCount].tId + " because: " + resOfEnrollObj.err);
       }
     });
   }
@@ -485,53 +488,84 @@ export async function renderTournamentManagerContent(hideableElements) {
   hideableElements.gameArea.classList.add("hidden");
   hideableElements.gameWindow.hidden = true;
   let tempHTML : string = `
-    <p id="error-text-field" class="font-bold mb-4 text-xl" style="color:coral" hidden>You're already participating in a tournament.</p>
     <h1 class="text-3xl font-bold mb-6">Tournament management</h1>
     <p class="mb-4 font-bold">Create a tournament:</p>
-    <!-- form form form TODO XXX -->
-      <form class="mt-8 space-y-6" id="tournament-form">
-        <div>
-          <label for="players">Tournament name</label>
-          <input id="tname" name="tname" type="text" required
-            class="w-full px-3 py-2 text-gray-200 bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Tournament name">
-          </input>
-        </div>
-        <div>
-          <label for="players">Amount of participants</label>
-          <select id="players" name="players" required
-            class="w-full px-3 py-2 text-gray-200 bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder=2>
-            <option value=2>2</option>
-            <option value=4>4</option>
-            <option value=8>8</option>
-          </select>
-        </div>
-        <div>
-          <input type="checkbox" id="rprivate" name="rprivate"
-            />
-          <label for="rprivate">Make it private</label>
-        </div>
-        <div>
-          <button type="submit" id="register-tournament-button"
-            class=
-              "
-              w-full px-4 py-2 text-white bg-blue-600
-              rounded-md hover:bg-blue-700 focus:outline-none
-              focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
-              focus:ring-offset-gray-800
-              disabled:border-gray-200 disabled:bg-gray-700 disabled:text-gray-500 disabled:shadow-none
-          "
-          disabled>
-            Register tournament
-          </button>
-        </div>
-      </form>
+    <form class="mt-8 space-y-6" id="tournament-form">
+      <div>
+        <label for="tname">Tournament name</label>
+        <input id="tname" name="tname" type="text" required
+          class="w-full px-3 py-2 text-gray-200 bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="Tournament name">
+        </input>
+      </div>
+      <div>
+        <label for="players">Amount of participants</label>
+        <select id="players" name="players" required
+          class="w-full px-3 py-2 text-gray-200 bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder=2>
+          <option value=2>2</option>
+          <option value=4>4</option>
+          <option value=8>8</option>
+        </select>
+      </div>
+      <div>
+        <input type="checkbox" id="rprivate" name="rprivate"
+          />
+        <label for="rprivate">Make it private</label>
+      </div>
+      <div>
+        <button type="submit" id="register-tournament-button"
+          class=
+            "
+            w-full px-4 py-2 text-white bg-blue-600
+            rounded-md hover:bg-blue-700 focus:outline-none
+            focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+            focus:ring-offset-gray-800
+            disabled:border-gray-200 disabled:bg-gray-700 disabled:text-gray-500 disabled:shadow-none
+        "
+        disabled>
+          Register tournament
+        </button>
+      </div>
+    </form>
 
+    <br />
+    <hr />
+    <br />
+    <p class="mb-4 font-bold">Join a tournament by ID:</p>
+    <form class="mt-8 space-y-6" id="join-by-id-form">
+      <div>
+        <label for="tid">Tournament ID</label>
+        <input id="tid" name="tid" type="text" required
+          class="w-full px-3 py-2 text-gray-200 bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="ID">
+        </input>
+      </div>
+      <div>
+        <button type="submit" id="enter-tournament-by-id-button"
+          class=
+            "
+            w-full px-4 py-2 text-white bg-blue-600
+            rounded-md hover:bg-blue-700 focus:outline-none
+            focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+            focus:ring-offset-gray-800
+            disabled:border-gray-200 disabled:bg-gray-700 disabled:text-gray-500 disabled:shadow-none
+        "
+        disabled>
+          Enter tournament
+        </button>
+      </div>
+    </form>
+
+    <br />
+    <hr />
+    <br />
     <p class="mb-4">My tournament:</p>
     <div id="my-tournament"><p><i>none</i></p></div>
 
-    <br>
+    <br />
+    <hr />
+    <br />
     <p class="mb-4">All tournaments:</p>
     <table class="table-fixed"><tbody id="all-tournaments-table">
     </tbody></table>
@@ -540,58 +574,98 @@ export async function renderTournamentManagerContent(hideableElements) {
   hideableElements.contentArea.innerHTML = tempHTML;
   let canWeJoin : bool = false;
   const tournamentForm = document.getElementById('tournament-form') as HTMLFormElement;
-  const errorField = document.getElementById('error-text-field');
+  const joinByIDForm = document.getElementById('join-by-id-form') as HTMLFormElement;
   const myTournamentField = document.getElementById('my-tournament');
   const metaInfo = await getGameMetaInfo();
   if (metaInfo.gType === "normal") {
     console.log("you're already in a normal game btw");
   }
-  else if (tournamentForm) {
-    const submitButton = document.getElementById('register-tournament-button') as HTMLButtonElement;
+  else {
     const checkPartRawResp = await participantCheck();
     const checkPartResp = await checkPartRawResp.text();
     const checkPartRespObj = JSON.parse(checkPartResp);
     console.log("check part resp obj:", checkPartRespObj);
-    if (checkPartRespObj.err !== "nil") {
-      canWeJoin = true;
-      submitButton.removeAttribute('disabled');
-      // "no tournament for this player found" => proceed with allowing to create the tournament
-      tournamentForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const tnameEl = document.getElementById('tname') as HTMLInputElement;
-        const playersEl = document.getElementById('players') as HTMLInputElement;
-        const checkboxEl = document.getElementById('rprivate') as HTMLInputElement;
+    if (tournamentForm) {
+      const submitButton = document.getElementById('register-tournament-button') as HTMLButtonElement;
+      if (checkPartRespObj.err !== "nil") {
+        canWeJoin = true;
+        submitButton.removeAttribute('disabled');
+        // "no tournament for this player found" => proceed with allowing to create the tournament
+        tournamentForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const tnameEl = document.getElementById('tname') as HTMLInputElement;
+          const playersEl = document.getElementById('players') as HTMLInputElement;
+          const checkboxEl = document.getElementById('rprivate') as HTMLInputElement;
+          submitButton.disabled = true;
+          document.getElementById('enter-tournament-by-id-button').disabled = true;
+          const rawCreateTournamentResp = await createTournament(tnameEl.value, playersEl.value, checkboxEl.checked);
+          console.log(rawCreateTournamentResp);
+          const tourResp = await rawCreateTournamentResp.text();
+          const tourRespObj = JSON.parse(tourResp);
+          if (tourRespObj.err === "nil") {
+            console.log("registered a tournament:", tourRespObj.tId);
+            canWeJoin = false;
+            myTournamentField.innerHTML = "<a href=\"" + document.URL.substring(0, document.URL.search("#")) + "#tournament" + "\"><b><i>Click to view</b></i></a>";
+            localStorage.setItem('tId', tourRespObj.tId);
+            buttonSetter(MetaGameState.waittouropp);
+          }
+          else {
+            console.error("Tournament creation error: " + tourRespObj.err + " | " + tourRespObj.tId);
+            submitButton.removeAttribute('disabled');
+            document.getElementById('enter-tournament-by-id-button').removeAttribute("disabled");
+            canWeJoin = true;
+          }
+          tournamentForm.reset();
+          await generateUpdateAllTourTable(canWeJoin);
+        });
+      }
+      else {
+        console.log("can't allow generating a tournament");
+        canWeJoin = false;
+        localStorage.setItem('tId', checkPartRespObj.tId);
         submitButton.disabled = true;
-        const rawCreateTournamentResp = await createTournament(tnameEl.value, playersEl.value, checkboxEl.checked);
-        console.log(rawCreateTournamentResp);
-        const tourResp = await rawCreateTournamentResp.text();
-        const tourRespObj = JSON.parse(tourResp);
-        if (tourRespObj.err !== "nil") {
-          alert("Tournament creation error: " + tourRespObj.err + " | " + tourRespObj.tId);
-          submitButton.removeAttribute('disabled');
-          canWeJoin = true;
-//          errorField.innerHTML = "Tournament creation error: " + tId;
-//          errorField.hidden = false;
-        }
-        else {
-//          errorField.hidden = true;
-          console.log("registered a tournament:", tourRespObj.tId);
-          canWeJoin = false;
-          myTournamentField.innerHTML = "<a href=\"" + document.URL.substring(0, document.URL.search("#")) + "#tournament" + "\"><b><i>Click to view</b></i></a>"
-          localStorage.setItem('tId', tourRespObj.tId);
-          buttonSetter(MetaGameState.waittouropp);
-        }
-        tournamentForm.reset();
-        await generateUpdateAllTourTable(canWeJoin);
-      });
+        document.getElementById('enter-tournament-by-id-button').disabled = true;
+        myTournamentField.innerHTML = "<a href=\"" + document.URL.substring(0, document.URL.search("#")) + "#tournament" + "\"><b><i>Click to view</b></i></a>";
+      }
     }
-    else {
-      console.log("can't allow generating a tournament");
-      canWeJoin = false
-      localStorage.setItem('tId', checkPartRespObj.tId);
-      submitButton.disabled = true;
-      errorField.hidden = true;
-      myTournamentField.innerHTML = "<a href=\"" + document.URL.substring(0, document.URL.search("#")) + "#tournament" + "\"><b><i>Click to view</b></i></a>"
+    if (joinByIDForm) {
+      const enterByIdButton = document.getElementById('enter-tournament-by-id-button') as HTMLButtonElement;
+      if (checkPartRespObj.err !== "nil") {
+        enterByIdButton.removeAttribute('disabled');
+        // "no tournament for this player found" => proceed with allowing to create the tournament
+        joinByIDForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const tidEl = document.getElementById('tid') as HTMLInputElement;
+          document.getElementById('register-tournament-button').disabled = true;
+          enterByIdButton.disabled = true;
+          const rawResOfEnroll = await enrollInTournament(tidEl.value);
+          const resOfEnroll = await rawResOfEnroll.text();
+          const resOfEnrollObj = JSON.parse(resOfEnroll);
+          if (resOfEnrollObj.err === "nil") {
+            console.log("enrolled in " + tidEl.value);
+            canWeJoin = false;
+            myTournamentField.innerHTML = "<a href=\"" + document.URL.substring(0, document.URL.search("#")) + "#tournament" + "\"><b><i>Click to view</b></i></a>";
+            localStorage.setItem("tId", tidEl.value);
+            buttonSetter(MetaGameState.waittouropp);
+          }
+          else {
+            console.error("failed to enroll in " + tidEl.value + " because: " + resOfEnrollObj.err);
+            document.getElementById('register-tournament-button').removeAttribute("disabled");
+            enterByIdButton.removeAttribute("disabled");
+            canWeJoin = true;
+          }
+          joinByIDForm.reset();
+          await generateUpdateAllTourTable(canWeJoin);
+        });
+      }
+      else {
+        console.log("can't allow joining a tournament");
+        canWeJoin = false;
+        localStorage.setItem('tId', checkPartRespObj.tId);
+        document.getElementById('register-tournament-button').disabled = true;
+        enterByIdButton.disabled = true;
+        myTournamentField.innerHTML = "<a href=\"" + document.URL.substring(0, document.URL.search("#")) + "#tournament" + "\"><b><i>Click to view</b></i></a>";
+      }
     }
   }
 
