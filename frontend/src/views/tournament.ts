@@ -221,6 +221,7 @@ export async function renderTournamentContent(hideableElements) {
   let tempHTML : string = `
     <h1 id="tourn-title">Tourn title</h1>
     <h1 id="tourn-id">Tourn ID</h1>
+    <hr />
     <table id="big-table" class="table-fixed"><tbody>
       <tr>
         <td id="table-contender-1">contender 1</td>
@@ -528,7 +529,10 @@ export async function renderTournamentManagerContent(hideableElements) {
       </div>
     </form>
 
-    <p class="mb-4">Join a custom tournament by ID:</p>
+    <br />
+    <hr />
+    <br />
+    <p class="mb-4 font-bold">Join a tournament by ID:</p>
     <form class="mt-8 space-y-6" id="join-by-id-form">
       <div>
         <label for="tid">Tournament ID</label>
@@ -553,10 +557,15 @@ export async function renderTournamentManagerContent(hideableElements) {
       </div>
     </form>
 
+    <br />
+    <hr />
+    <br />
     <p class="mb-4">My tournament:</p>
     <div id="my-tournament"><p><i>none</i></p></div>
 
-    <br>
+    <br />
+    <hr />
+    <br />
     <p class="mb-4">All tournaments:</p>
     <table class="table-fixed"><tbody id="all-tournaments-table">
     </tbody></table>
