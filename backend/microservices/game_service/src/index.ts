@@ -6,10 +6,12 @@ import {
   sleep,
   State,
   addPlayerCompletely,
+  createLocalGame,
   removeTheSock,
   getPongState,
   forfeit,
   moveMyPaddle,
+  moveMyPaddleLocal,
   gamesReadyLoopCheck,
   dataStreamer,
   JoinError,
@@ -165,6 +167,59 @@ const startServer = async () => {
           },
         config: { source: PREFIX + PATH },
     });
+    PATH = '/pong/game/local';
+    fastify.post(PATH, {
+        handler:
+          async (req, reply) => {
+            let playerId : string = req.headers['x-user-id'] as string;
+            let sock : WebSocket;
+            if (typeof playerId !== "undefined" && playerId !== "") {
+              let retries : number = 5;
+              while (upperSocksMap.has(playerId) === false) {
+                if (retries <= 0) {
+                  req.log.info(...logFormat("game service on " + PATH, playerId, "outta retries."));
+                  return JSON.stringify({
+                    gType: "",
+                    err: "somehow, the socket hasn't been found",
+                  });
+                }
+                req.log.error(...logFormat("game service on " + PATH, "no associated socket found for", playerId, ", probable sync issue. retrying", retries, "more times..."));
+                retries--;
+                await sleep(1e3);
+              }
+              sock = upperSocksMap.get(playerId) as WebSocket;
+              try {
+                createLocalGame(playerId, sock);
+                return JSON.stringify({
+                  gType: "local",
+                  err: "nil",
+                });
+              }
+              catch (e) {
+                req.log.error(...logFormat("game service on " + PATH, "whoops on creation:", e));
+                // I think using JoinError here is ok since it's just an error of "gtype & err", which is literally
+                //what I'd do for something like "LocalError" as well
+                if (e instanceof JoinError) {
+                  return JSON.stringify({
+                    gType: e.gType,
+                    err: e.err,
+                  });
+                }
+                else {
+                  return JSON.stringify({
+                    gType: "",
+                    err: e,
+                  });
+                }
+              }
+            }
+            return JSON.stringify({
+              gType: "",
+              err: "undefined or empty playerId -- failed to verify?",
+            });
+          },
+        config: { source: PREFIX + PATH },
+    });
     PATH = '/pong/game/move';
     fastify.post(PATH, {
         handler:
@@ -176,6 +231,38 @@ const startServer = async () => {
               if (typeof mov !== "undefined") {
                 try {
                   moveMyPaddle(playerId, mov);
+                  return JSON.stringify({
+                    err: "nil",
+                  });
+                }
+                catch (e) {
+                  return JSON.stringify({
+                    err: e,
+                  });
+                }
+              }
+              return JSON.stringify({
+                err: "undefined mov",
+              })
+            }
+            return JSON.stringify({
+              err: "undefined or empty playerId -- failed to verify?",
+            });
+          },
+        config: { source: PREFIX + PATH },
+    });
+    PATH = '/pong/game/movelocal';
+    fastify.post(PATH, {
+        handler:
+          async (req, reply) => {
+            let jsonMsg = req.body;
+            let playerId : string = req.headers['x-user-id'] as string;
+            let mov = jsonMsg.mov;
+            let side = jsonMsg.side;
+            if (typeof playerId !== "undefined" && playerId !== "") {
+              if (typeof mov !== "undefined") {
+                try {
+                  moveMyPaddleLocal(playerId, mov, side);
                   return JSON.stringify({
                     err: "nil",
                   });

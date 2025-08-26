@@ -431,6 +431,26 @@ export function addPlayerCompletely(playerId: string, sock: WebSocket) {
   }
 }
 
+export function createLocalGame(playerId: string, sock: WebSocket) {
+  if (socksMap.has(playerId) === false) {
+    socksMap.set(playerId, sock);
+  }
+  needToSendStartedMap.set(playerId, true);
+  if (!playersParticipatingTourn.has(playerId) && !playersMap.has(playerId)) {
+    // ok garmin! local gaming
+    const newid : string = makeid(32);
+    gamesMap.set(newid, new PongRuntime);
+    gamesMap.get(newid).LplayerId = playerId;
+    gamesMap.get(newid).gameType = "local";
+    playersMap.set(playerId, newid);
+    sock.send("local");
+    return gamesMap.get(newid).gameType;
+  }
+  else {
+    throw "Can't join/create normal game for this player since they're a tournament or normal game member"
+  }
+}
+
 export function createTournamentGame(lId: string, rId: string) {
   console.log("starting to create with", lId, "and", rId);
   if (playersMap.has(lId)) {
@@ -532,6 +552,22 @@ export function moveMyPaddle(playerId: string, d: number) {
   throw "Player not in map";
 }
 
+export function moveMyPaddleLocal(playerId: string, d: number, side: string) {
+  if (playersMap.has(playerId)) {
+    const gameId = playersMap.get(playerId);
+    if (gamesMap.has(gameId)) {
+      if (side === "l") {
+        gamesMap.get(gameId).LpadMove(d);
+      } else {
+        gamesMap.get(gameId).RpadMove(d);
+      }
+      return ;
+    }
+    throw "Game not in map";
+  }
+  throw "Player not in map";
+}
+
 export const gamesReadyLoopCheck = async () => {
   while (true) {
     for (const [gameId, gameRuntime] of gamesMap) {
@@ -562,6 +598,14 @@ export const gamesReadyLoopCheck = async () => {
             dataStreamer(gameRuntime.RplayerId);
           }
         }
+      }
+      else if (gameRuntime.LplayerId !== "" && gameRuntime.gameType === "local" && needToSendStartedMap.has(gameRuntime.LplayerId)
+      && gameRuntime.pongStarted !== true) {
+        console.log("I'm so local.");
+        gameRuntime.mainLoop();
+        needToSendStartedMap.set(gameRuntime.LplayerId, false);
+        await sleep(10);
+        dataStreamer(gameRuntime.LplayerId);
       }
     }
     await sleep(5e3);

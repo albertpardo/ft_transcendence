@@ -1,5 +1,5 @@
 // src/views/dashboard.ts
-import { registerPlayer, forfeit, movePaddle, confirmParticipation, checkIsInGame, checkReady, checkIsInTournament } from './buttonClicking';
+import { registerPlayer, localGaming, forfeit, movePaddle, localMovePaddle, confirmParticipation, checkIsInGame, checkReady, checkIsInTournament } from './buttonClicking';
 import { route } from '../router';
 import { renderHomeContent, renderPlayContent, renderStatsContent } from './sections';
 import { renderHistoryContent, getNicknameForPlayerId } from './history';
@@ -29,6 +29,7 @@ export enum MetaGameState {
   waittouropprdy,
   intourgame,
   losttour,
+  inlocalgame,
   misc,
 }
 
@@ -36,6 +37,16 @@ async function movePaddleWrapper(d: number) {
   const movePaddleRawResp = await movePaddle(d);
   const movePaddleResp = await movePaddleRawResp.text();
   const movePaddleRespObj = JSON.parse(movePaddleResp);
+  if (movePaddleRespObj.err !== "nil") {
+    console.error(movePaddleRespObj.err);
+  }
+}
+
+async function localMovePaddleWrapper(d: number, p: string) {
+  // p === "l" || "r";
+  const lmovePaddleRawResp = await localMovePaddle(d, p);
+  const lmovePaddleResp = await lmovePaddleRawResp.text();
+  const lmovePaddleRespObj = JSON.parse(lmovePaddleResp);
   if (movePaddleRespObj.err !== "nil") {
     console.error(movePaddleRespObj.err);
   }
@@ -126,6 +137,7 @@ export async function buttonSetter(state : MetaGameState) {
       document.getElementById("start-button").disabled = false;
       document.getElementById("ready-button").disabled = true;
       document.getElementById("giveup-button").disabled = true;
+      document.getElementById("local-play-button").disabled = false;
       break;
     }
     case MetaGameState.waitmmopp: {
@@ -141,6 +153,7 @@ export async function buttonSetter(state : MetaGameState) {
       document.getElementById("start-button").disabled = true;
       document.getElementById("ready-button").disabled = true;
       document.getElementById("giveup-button").disabled = false;
+      document.getElementById("local-play-button").disabled = true;
       break;
     }
     case MetaGameState.waittouropp: {
@@ -152,6 +165,7 @@ export async function buttonSetter(state : MetaGameState) {
       document.getElementById("start-button").disabled = true;
       document.getElementById("ready-button").disabled = true;
       document.getElementById("giveup-button").disabled = true;
+      document.getElementById("local-play-button").disabled = true;
       break;
     }
     case MetaGameState.waittourrdy: {
@@ -159,6 +173,7 @@ export async function buttonSetter(state : MetaGameState) {
       document.getElementById("start-button").disabled = true;
       document.getElementById("ready-button").disabled = false;
       document.getElementById("giveup-button").disabled = true;
+      document.getElementById("local-play-button").disabled = true;
       break;
     }
     case MetaGameState.waittouropprdy: {
@@ -166,6 +181,7 @@ export async function buttonSetter(state : MetaGameState) {
       document.getElementById("start-button").disabled = true;
       document.getElementById("ready-button").disabled = true;
       document.getElementById("giveup-button").disabled = true;
+      document.getElementById("local-play-button").disabled = true;
       break;
     }
     case MetaGameState.intourgame: {
@@ -173,6 +189,7 @@ export async function buttonSetter(state : MetaGameState) {
       document.getElementById("start-button").disabled = true;
       document.getElementById("ready-button").disabled = true;
       document.getElementById("giveup-button").disabled = false;
+      document.getElementById("local-play-button").disabled = true;
       break;
     }
     case MetaGameState.losttour: {
@@ -180,7 +197,15 @@ export async function buttonSetter(state : MetaGameState) {
       document.getElementById("start-button").disabled = true;
       document.getElementById("ready-button").disabled = true;
       document.getElementById("giveup-button").disabled = true;
+      document.getElementById("local-play-button").disabled = true;
       break;
+    }
+    case MetaGameState.inlocalgame: {
+      // 11
+      document.getElementById("start-button").disabled = true;
+      document.getElementById("ready-button").disabled = true;
+      document.getElementById("giveup-button").disabled = false;
+      document.getElementById("local-play-button").disabled = true;
     }
     default: {
       //basically "misc"
@@ -188,6 +213,7 @@ export async function buttonSetter(state : MetaGameState) {
       document.getElementById("start-button").disabled = false;
       document.getElementById("ready-button").disabled = false;
       document.getElementById("giveup-button").disabled = false;
+      document.getElementById("local-play-button").disabled = false;
       break;
     }
   }
@@ -563,6 +589,14 @@ export async function initDashboard() {
         ">
           INSTANTLY forfeit
         </button>
+        <button id="local-play-button" disabled
+        class=
+        "
+          mt-6 p-3 bg-orange-500 rounded-lg hover:bg-orange-600 transition text-white font-medium
+          disabled:border-gray-200 disabled:bg-gray-700 disabled:text-gray-500 disabled:shadow-none
+        ">
+          Launch a local 1v1
+        </button>
       </div>
       <p id="game-info"></p>
     </div>
@@ -585,6 +619,7 @@ export async function initDashboard() {
   document.getElementById("start-button").innerHTML = t("pong-buttons.start-button-text");
   document.getElementById("ready-button").innerHTML = t("pong-buttons.ready-button-text");
   document.getElementById("giveup-button").innerHTML = t("pong-buttons.giveup-button-text");
+  document.getElementById("local-play-button").innerHTML = t("pong-buttons.local-play-button-text");
   
   let gameText : HTMLElement | null = document.getElementById("game-text")!;
   if (gameText) {
@@ -866,6 +901,23 @@ export async function initDashboard() {
       }
       else {
         gameInfo.innerHTML = "Game type: " + metaInfo.gType + "; versus: " + metaInfo.oppName;
+      }
+      await setterUponMetaInfo(gameInfo, metaInfo);
+    });
+    document.getElementById('local-play-button')!.addEventListener('click', async () => {
+      console.log("after clicking the local-play-button,");
+      const localGamingRawResp = await localGaming();
+      const localGamingResp = await localGamingRawResp.text();
+      const localGamingRespObj = JSON.parse(localGamingResp);
+      if (localGamingRespObj.err !== "nil") {
+        console.error(localGamingRespObj.err);
+      }
+      metaInfo = await getGameMetaInfo();
+      if (metaInfo.gType === "local") {
+        gameInfo.innerHTML = "Game type: " + metaInfo.gType;
+      }
+      else {
+        gameInfo.innerHTML = "Something weird has happened trying to do a local game.";
       }
       await setterUponMetaInfo(gameInfo, metaInfo);
     });

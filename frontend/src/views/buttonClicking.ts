@@ -19,6 +19,23 @@ export async function registerPlayer() {
   return fresp;
 }
 
+export async function localGaming() {
+  const fresp = fetch(
+    `${API_BASE_URL}/api/pong/game/local`,
+    {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json,application/html,text/html,*/*',
+        'Origin': 'https://127.0.0.1:3000/',
+        'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
+      },
+      credentials: 'include',
+      mode: 'cors',
+    }
+  );
+  return fresp;
+}
+
 export async function movePaddle(d: number) {
   const fresp = fetch(
     `${API_BASE_URL}/api/pong/game/move`,
@@ -32,6 +49,28 @@ export async function movePaddle(d: number) {
       },
       body: JSON.stringify({
         mov: d,
+      }),
+      credentials: 'include',
+      mode: 'cors',
+    }
+  );
+  return fresp;
+}
+
+export async function localMovePaddle(d: number, p: string) {
+  const fresp = fetch(
+    `${API_BASE_URL}/api/pong/game/movelocal`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json,application/html,text/html,*/*',
+        'Origin': 'https://127.0.0.1:3000/',
+        'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
+      },
+      body: JSON.stringify({
+        mov: d,
+        side: p,
       }),
       credentials: 'include',
       mode: 'cors',
