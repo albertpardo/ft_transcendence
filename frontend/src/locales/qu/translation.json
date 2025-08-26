@@ -68,6 +68,16 @@
     "success.update": "Qelqanakuyqa kamariwaq!",
     "success.delete": "Qelqanakuyqa hukchayarqa kamariwaq!"
   },
+  "friendsTxt": {
+	"nickTxt": "Sutinchana",
+	"addBtn": "Amigo yapay",
+	"nickRow": "Sutinchana",
+	"statusRow": "Imayna kaynin",
+	"addError": "Huk pantaymi karqan amigota yapashaspa.",
+    "addFailed": "Mana Amigo yapayta atirqanichui.",
+	"getError": "Amistadkunata kargachkaspa pantasqa. Ama hina kaspa, qhipaman hukmanta kallpachakuy",
+	"getFailed": "Mana amigukunap willayninkunata apamuyta atirqanchu."
+  },
   "nav": {
     "dashboard": "Ripiq",
     "profile": "Qelqanakuy",

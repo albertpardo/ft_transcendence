@@ -68,7 +68,11 @@
     "success.update": "Profile updated successfully!",
     "success.delete": "Account deleted successfully!"
   },
-  "friendsMsg": {
+  "friendsTxt": {
+	"nickTxt": "Friend's Nickname",
+	"addBtn": "Add friend",
+	"nickRow": "Friend's Nickname",
+	"statusRow": "Status",
 	"addError": "An error occured while adding the friend.",
     "addFailed": "Failed to add Friend.",
 	"getError": "Error loading friends. Please try again later",

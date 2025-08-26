@@ -68,6 +68,16 @@
     "success.update": "Profil erfolgreich aktualisiert!",
     "success.delete": "Konto erfolgreich gelöscht!"
   },
+  "friendsTxt": {
+	"nickTxt": "Spitzname eines Freundes",
+	"addBtn": "Freund hinzufügen",
+	"nickRow": "Spitzname eines Freundes",
+	"statusRow": "Status",
+	"addError": "Beim Hinzufügen des Freundes ist ein Fehler aufgetreten",
+    "addFailed": "Freund konnte nicht hinzugefügt werden",
+	"getError": "Fehler beim Laden der Freunde. Bitte versuchen Sie es später noch einmal",
+	"getFailed": "Das Abrufen der Freundesdaten ist fehlgeschlagen."
+  },
   "nav": {
     "dashboard": "Dashboard",
     "profile": "Profil",

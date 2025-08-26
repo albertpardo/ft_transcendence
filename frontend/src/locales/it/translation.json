@@ -68,6 +68,16 @@
     "success.update": "Profilo aggiornato con successo!",
     "success.delete": "Account eliminato con successo!"
   },
+  "friendsTxt": {
+	"nickTxt": "Soprannome",
+	"addBtn": "Aggiungi amico",
+	"nickRow": "Soprannome",
+	"statusRow": "Stato",
+	"addError": "Si è verificato un errore durante l'aggiunta dell'amico.",
+    "addFailed": "Impossibile aggiungere un amico.",
+	"getError": "Errore durante il caricamento degli amici. Riprova più tardi.",
+	"getFailed": "Impossibile recuperare i dati degli amici."
+  },
   "nav": {
     "dashboard": "Dashboard",
     "profile": "Profilo",

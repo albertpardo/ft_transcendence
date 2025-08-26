@@ -42,23 +42,23 @@ export async function renderFriendsContent(hideableElements) {
 
   let friendsData;
   el.innerHTML = `
-    <h1 class="text-3xl font-bold mb-6">Friends</h1>
+    <h1 class="text-3xl font-bold mb-6">${t("friends")}</h1>
 	<div class="flex flex-col items-center gap-6 p-7 md:flex-row md:gap-8 rounded-2xl">
         <input id="form-friendnick" name="tfriendnick" type="text" required 
 	      class="w-full px-3 py-2 text-gray-200 bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder="Friend's Nickname">
+          placeholder=${t("friendsTxt.nickTxt")}>
 	    </input>
       <button id="add-friend" type="submit"
         class="w-full p-2 bg-blue-500 rounded-lg hover:bg-blue-400 transition text-white font-medium disabled:border-gray-200 disabled:bg-gray-700 disabled:text-gray-500 disabled:shadow-none" >
-        Add friend
+        ${t("friendsTxt.addBtn")}
       </button>
 	</div>
     <p id="errorArea1" class="text-red-500"></p>
 	<table class="table-fixed">
  	  <thead>
         <tr>
-   	      <th>Friend's Nickname</th>
-   	      <th>Status</th>
+   	      <th>${t("friendsTxt.nickRow")}</th>
+   	      <th>${t("friendsTxt.statusRow")}</th>
    	    </tr>
 	  </thead>
       <tbody>
@@ -97,13 +97,13 @@ export async function renderFriendsContent(hideableElements) {
           body: JSON.stringify(updatedData),
         });
 		if (!response.ok) {
-		  errorContent.textContent = t("friendsMsg.addFailed");
-          console.log("!response.ok -- ", t("friendsMsg.addFailed"));  
+		  errorContent.textContent = t("friendsTxt.addFailed");
+          console.log("!response.ok -- ", t("friendsTxt.addFailed"));  
           //alert("!response.ok -- Failed to add Friend's Nickname.");
 		}
 	  } catch (err) {
-        errorContent.textContent = t("friendsMsg.addError");
-		console.error(t("friendsMsg.addError"), err);
+        errorContent.textContent = t("friendsTxt.addError");
+		console.error(t("friendsTxt.addError"), err);
 		//alert("An error occured while adding the friend's nickname.");
       }
   });
@@ -120,8 +120,8 @@ export async function renderFriendsContent(hideableElements) {
     });
 
     if (!res.ok) {
-	  errorContent.textContent = t("friendsMsg.getFailed");
-	  console.error(t("friendsMsg.getFailed"));
+	  errorContent.textContent = t("friendsTxt.getFailed");
+	  console.error(t("friendsTxt.getFailed"));
     } else {
       friendsData = await res.json();
 	  console.log('🎸🎸🎸Received friend data:', friendsData);
@@ -129,7 +129,7 @@ export async function renderFriendsContent(hideableElements) {
 	}
   } catch (err) {
     console.error(err);
-	errorContent.textContent = t("friendsMsg.getError");
+	errorContent.textContent = t("friendsTxt.getError");
     return;
   }
 }

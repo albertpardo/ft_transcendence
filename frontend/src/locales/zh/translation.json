@@ -62,6 +62,16 @@
     "success.update": "个人资料更新成功！",
     "success.delete": "账户删除成功！"
   },
+  "friendsTxt": {
+	"nickTxt": "朋友的昵称",
+	"addBtn": "添加好友",
+	"nickRow": "朋友的昵称",
+	"statusRow": "地位",
+	"addError": "添加好友时出错",
+    "addFailed": "添加好友失败。",
+	"getError": "加载好友时出错。请稍后重试",
+	"getFailed": "无法获取好友数据"
+  },
   "nav": {
     "dashboard": "仪表板",
     "profile": "个人资料",
