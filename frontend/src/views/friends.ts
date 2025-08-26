@@ -1,7 +1,6 @@
 // src/views/friends.ts
 import { t } from '../i18n'
 
-
 function renderFriendsTable(friends: Friend[]) {
   const tbody = document.querySelector<HTMLTableSectionElement>("table tbody");
   if (!tbody) return;
@@ -25,20 +24,6 @@ function renderFriendsTable(friends: Friend[]) {
 }
 
 export async function renderFriendsContent(hideableElements) {
-// START for test
-  interface Friend {
-    nick: string;
-    status: string;
-  }
-  
-  const friendsList: Friend[] = [
-    { nick: "Alice", status: "online" },
-    { nick: "Bob", status: "offline" },
-    { nick: "Charlie", status: "busy" }
-  ];
-
-// END for test
-
   hideableElements.buttonArea.hidden = true;
   hideableElements.gameArea.classList.add("hidden");
   hideableElements.gameWindow.hidden = true;
@@ -81,13 +66,20 @@ export async function renderFriendsContent(hideableElements) {
 	</table>
   `;
 
+  const addFriendButton = document.getElementById("add-friend") as HTMLButtonElement;
+  const errorContent = document.getElementById("errorArea1") as HTMLParagraphElement;
+  const friendNick = document.getElementById("form-friendnick") as HTMLInputElement;
 
-  const addFriendButton = document.getElementById("add-friend");
+  friendNick.addEventListener("focus", () => {
+    const errorContent = document.getElementById("errorArea1");
+
+	errorContent.textContent = "";
+  });
 
   addFriendButton.addEventListener("click", async () => {
 	  const friendNick = document.getElementById("form-friendnick") as HTMLInputElement;
 
-	  alert(`${friendNick.value}`);
+	 // alert(`${friendNick.value}`);
 	  const updatedData: {
         nick: string;
       } = {
@@ -105,12 +97,14 @@ export async function renderFriendsContent(hideableElements) {
           body: JSON.stringify(updatedData),
         });
 		if (!response.ok) {
-          console.log("!response.ok -- Failed to add Friend's Nickname.");  
-          alert("!response.ok -- Failed to add Friend's Nickname.");
+		  errorContent.textContent = t("friendsMsg.addFailed");
+          console.log("!response.ok -- ", t("friendsMsg.addFailed"));  
+          //alert("!response.ok -- Failed to add Friend's Nickname.");
 		}
 	  } catch (err) {
-        console.error("Error adding your friend's Nickname:", err);
-		alert("An error occured while adding the friend's nickname.");
+        errorContent.textContent = t("friendsMsg.addError");
+		console.error(t("friendsMsg.addError"), err);
+		//alert("An error occured while adding the friend's nickname.");
       }
   });
 
@@ -126,8 +120,8 @@ export async function renderFriendsContent(hideableElements) {
     });
 
     if (!res.ok) {
-      //    el.innerHTML += `<p class="text-red-500">Failed to fetch friends data.</p>`;
-	  console.error("Failed to fetch friends data.");
+	  errorContent.textContent = t("friendsMsg.getFailed");
+	  console.error(t("friendsMsg.getFailed"));
     } else {
       friendsData = await res.json();
 	  console.log('🎸🎸🎸Received friend data:', friendsData);
@@ -135,43 +129,7 @@ export async function renderFriendsContent(hideableElements) {
 	}
   } catch (err) {
     console.error(err);
-//    el.innerHTML += `<p class="text-red-500">Error loading friends. Please try again later.</p>`;
+	errorContent.textContent = t("friendsMsg.getError");
     return;
   }
-
-//falta el manejador del botón "Add friend"
-  // Errores : si el nickname no está o si falla el ADD
-
-  // Hacer la consulta al backend/user_management 
-  // Si falla -> ERROR en tempInnerHTML
-
-  // Si NO falla -> componer las filas
-
-/*
-  el.innerHTML += `
-	<table class="table-fixed">
- 	  <thead>
-        <tr>
-   	      <th>Friend's Nickname</th>
-   	      <th>Status</th>
-   	    </tr>
-	  </thead>
-  `;
- */
-//  Componer filas poner 🟢 o 🔴 para saber el estado en lugar del texto recibido
-  //  formato
-  //  <tbody>
-  //  PAra cada fila
-  //    <tr>
-  //      <td> Nick </td>
-  //      <td> Estado </td>
-  //    </tr>
-  //Fin fila
-  //  </tbody>
-  //
-/*
-  el.innerHTML += `
-	</table>
-  `;
-*/
 }

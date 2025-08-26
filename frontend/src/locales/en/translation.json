@@ -42,7 +42,7 @@
     "notLoggedIn": "You're not logged in.",
     "noAuthToken": "Authentication token missing.",
     "failedToLoad": "Failed to load match history."
-},
+  },
   "profiles": {
     "title": "Your Profile",
     "avatar": "Profile Avatar",
@@ -67,7 +67,13 @@
     "save": "Save",
     "success.update": "Profile updated successfully!",
     "success.delete": "Account deleted successfully!"
-},
+  },
+  "friendsMsg": {
+	"addError": "An error occured while adding the friend.",
+    "addFailed": "Failed to add Friend.",
+	"getError": "Error loading friends. Please try again later",
+	"getFailed": "Failed to fetch friends data."
+  },
   "nav": {
     "dashboard": "Dashboard",
     "profile": "Profile",
