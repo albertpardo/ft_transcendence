@@ -195,7 +195,7 @@ export async function buttonSetter(state : MetaGameState) {
 }
 
 async function tourCheckAndSetIdlingButtons() {
-  let isintour : bool = await checkIsInTourWrapper();
+  let isintour : boolean = await checkIsInTourWrapper();
   console.log("isintour:", isintour);
   if (isintour) {
     // no game, but we're in a tournament
@@ -233,7 +233,7 @@ export async function setterUponMetaInfo(gameInfo : HTMLElement, metaInfo : {gTy
     // we're in a game of type tournament and we're not ready.
     //
     // if it's a game and we're ready, just give the forfeit button ? TODO to think
-    const isready : bool = await checkReadyWrapper();
+    const isready : boolean = await checkReadyWrapper();
     if (!isready) {
       buttonSetter(MetaGameState.waittourrdy);
     }

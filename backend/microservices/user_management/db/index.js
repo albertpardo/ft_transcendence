@@ -153,7 +153,7 @@ function addFriendByNick(userId, friendNick) {
 
 function getUserFriends(userId) {
 	const stmt = db.prepare('SELECT u.nickname, u.status FROM friends f JOIN users u ON f.friend_id = u.id WHERE f.user_id = ?');
-	return stmt.get(userId);
+	return ( stmt.all(userId) );
 }
 
 module.exports = {

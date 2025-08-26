@@ -1,7 +1,44 @@
 // src/views/friends.ts
 import { t } from '../i18n'
 
+
+function renderFriendsTable(friends: Friend[]) {
+  const tbody = document.querySelector<HTMLTableSectionElement>("table tbody");
+  if (!tbody) return;
+
+  tbody.innerHTML = ""; // limpiar antes de renderizar
+
+  friends.forEach(friend => {
+    const row = document.createElement("tr");
+
+    const nickCell = document.createElement("td");
+    nickCell.textContent = friend.nickname;
+
+    const statusCell = document.createElement("td");
+	if (friend.status === "online") statusCell.textContent = "🟢";
+	else statusCell.textContent = "🔴";
+
+    row.appendChild(nickCell);
+    row.appendChild(statusCell);
+    tbody.appendChild(row);
+  });
+}
+
 export async function renderFriendsContent(hideableElements) {
+// START for test
+  interface Friend {
+    nick: string;
+    status: string;
+  }
+  
+  const friendsList: Friend[] = [
+    { nick: "Alice", status: "online" },
+    { nick: "Bob", status: "offline" },
+    { nick: "Charlie", status: "busy" }
+  ];
+
+// END for test
+
   hideableElements.buttonArea.hidden = true;
   hideableElements.gameArea.classList.add("hidden");
   hideableElements.gameWindow.hidden = true;
@@ -20,7 +57,7 @@ export async function renderFriendsContent(hideableElements) {
 
   let friendsData;
   el.innerHTML = `
-    <h1 class="text-3xl font-bold mb-6" >Friends</h1>
+    <h1 class="text-3xl font-bold mb-6">Friends</h1>
 	<div class="flex flex-col items-center gap-6 p-7 md:flex-row md:gap-8 rounded-2xl">
         <input id="form-friendnick" name="tfriendnick" type="text" required 
 	      class="w-full px-3 py-2 text-gray-200 bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -31,10 +68,20 @@ export async function renderFriendsContent(hideableElements) {
         Add friend
       </button>
 	</div>
+    <p id="errorArea1" class="text-red-500"></p>
+	<table class="table-fixed">
+ 	  <thead>
+        <tr>
+   	      <th>Friend's Nickname</th>
+   	      <th>Status</th>
+   	    </tr>
+	  </thead>
+      <tbody>
+      </tbody>
+	</table>
   `;
 
-//  hideableElements.contentArea.innerHTML = tempInnerHTML;
-  
+
   const addFriendButton = document.getElementById("add-friend");
 
   addFriendButton.addEventListener("click", async () => {
@@ -84,6 +131,7 @@ export async function renderFriendsContent(hideableElements) {
     } else {
       friendsData = await res.json();
 	  console.log('🎸🎸🎸Received friend data:', friendsData);
+      renderFriendsTable(friendsData);
 	}
   } catch (err) {
     console.error(err);

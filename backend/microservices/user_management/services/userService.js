@@ -131,6 +131,7 @@ exports.deleteProfile = async (userId) => {
 
 exports.getUserFriends = async (userId) => {
 	const friends = db.getUserFriends(userId);
+	console.log("++++++++++ -> userService.getUserFriends :", friends);
 	return (friends); 
 }
 
