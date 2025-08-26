@@ -274,7 +274,7 @@ class PongRuntime {
       }
     }
     else {
-      console.log("everything seems normal.");
+      console.log("everything seems normal. type:", this.gameType);
     }
 
     // now that the tournament-specific fail condition check is done, begin the cycle.
@@ -311,14 +311,16 @@ class PongRuntime {
             this.whoLost = "right fully";
             this.gstate.stateWhoL = "right fully";
           }
-          if (this.LGaveUp) {
-            addMatch(playersMap.get(this.LplayerId), this.LplayerId, this.RplayerId, this.scoreL, this.scoreR, "R", this.gameType, "forfeit");
-          }
-          else if (this.RGaveUp) {
-            addMatch(playersMap.get(this.LplayerId), this.LplayerId, this.RplayerId, this.scoreL, this.scoreR, "L", this.gameType, "forfeit");
-          }
-          else {
-            addMatch(playersMap.get(this.LplayerId), this.LplayerId, this.RplayerId, this.scoreL, this.scoreR, (this.whoLost[0] === 'l' ? "R" : "L"), this.gameType, "normal");
+          if (this.gameType !== "local") {
+            if (this.LGaveUp) {
+              addMatch(playersMap.get(this.LplayerId), this.LplayerId, this.RplayerId, this.scoreL, this.scoreR, "R", this.gameType, "forfeit");
+            }
+            else if (this.RGaveUp) {
+              addMatch(playersMap.get(this.LplayerId), this.LplayerId, this.RplayerId, this.scoreL, this.scoreR, "L", this.gameType, "forfeit");
+            }
+            else {
+              addMatch(playersMap.get(this.LplayerId), this.LplayerId, this.RplayerId, this.scoreL, this.scoreR, (this.whoLost[0] === 'l' ? "R" : "L"), this.gameType, "normal");
+            }
           }
 //          this.gstate = nullState;
 //          this.gstate.stateScoreL = this.scoreL;
@@ -444,7 +446,6 @@ export function createLocalGame(playerId: string, sock: WebSocket) {
     gamesMap.get(newid).gameType = "local";
     playersMap.set(playerId, newid);
     sock.send("local");
-    return gamesMap.get(newid).gameType;
   }
   else {
     throw "Can't join/create normal game for this player since they're a tournament or normal game member"
@@ -519,7 +520,7 @@ export function forfeit(playerId: string) {
   if (playersMap.has(playerId)) {
     const gameId = playersMap.get(playerId);
     if (gamesMap.has(gameId)) {
-      if (gamesMap.get(gameId).pongStarted === false) {
+      if (gamesMap.get(gameId).pongStarted === false || gamesMap.get(gameId).gameType === "local") {
         const lpid = gamesMap.get(gameId).LplayerId;
         const rpid = gamesMap.get(gameId).RplayerId;
         sendOnAbandon(lpid, rpid);
@@ -649,7 +650,7 @@ export const dataStreamer = async (playerId : string) => {
 //    console.log(runtime.gstate);
     }
     else if (runtime.pongDone === true) {
-      if (runtime.gameType !== "tournament") {
+      if (runtime.gameType === "normal") {
         if (runtime.LplayerId === playerId) {
           sock.send(JSON.stringify(runtime.gstate));
           if (socksMap.has(runtime.RplayerId)) {
@@ -674,18 +675,29 @@ export const dataStreamer = async (playerId : string) => {
         }
         else if (runtime.RplayerId === playerId) {
           if (playersMap.has(playerId)) {
-            console.log("deleting rpid", playerId, "from pmap in datastreamer's pongdone thing (being a left player ourselves)");
+            console.log("deleting rpid", playerId, "from pmap in datastreamer's pongdone thing (being a right player ourselves)");
             playersMap.delete(playerId);
           }
         }
       }
-      else {
+      else if (runtime.gameType === "tournament") {
         if (runtime.LplayerId === playerId) {
           sock.send(JSON.stringify(runtime.gstate));
           if (socksMap.has(runtime.RplayerId)) {
             sock = socksMap.get(runtime.RplayerId);
             sock.send(JSON.stringify(runtime.gstate));
           }
+        }
+      }
+      else if (runtime.gameType === "local") {
+        sock.send(JSON.stringify(runtime.gstate));
+        if (gamesMap.has(playersMap.get(playerId))) {
+          console.log("deleting gid", playersMap.get(playerId), "from gmap in datastreamer's pongdone thing (being a left player ourselves)");
+          gamesMap.delete(playersMap.get(playerId));
+        }
+        if (playersMap.has(playerId)) {
+          console.log("deleting lpid", playerId, "from pmap in datastreamer's pongdone thing (being a left player ourselves)");
+          playersMap.delete(playerId);
         }
       }
       break ;

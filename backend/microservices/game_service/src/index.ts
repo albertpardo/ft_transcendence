@@ -338,7 +338,6 @@ const startServer = async () => {
           },
         config: { source: PREFIX + PATH },
     });
-    // TODO XXX add public pong hist by username?
     PATH = '/pong/hist';
     fastify.post(PATH, {
         handler:
