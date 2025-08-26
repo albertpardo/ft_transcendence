@@ -20,6 +20,7 @@ class Tournament {
   public tId : string = "";
   public started : boolean = false;
   public alive : boolean = true;
+  public gotDeleted : boolean = false;
 
   public calculateJoinedPN() {
     let count : number = 0;
@@ -241,13 +242,25 @@ class Tournament {
     while (this.alive) {
       console.log("stage", this.currentStage, "tour: before everyone present");
       while (!this.checkEveryonePresent()) {
+        if (this.gotDeleted) {
+          break ;
+        }
         await sleep(5e3);
+      }
+      if (this.gotDeleted) {
+        break ;
       }
       console.log("stage", this.currentStage, "tour: after everyone present, before checking for stopped");
       this.gameCreator();
       while (!this.matchesStopped()) {
         console.log("stage", this.currentStage, "waiting for matches to be stopped...");
+        if (this.gotDeleted) {
+          break ;
+        }
         await sleep(5e3);
+      }
+      if (this.gotDeleted) {
+        break ;
       }
       console.log("stage", this.currentStage, "tour: after stopped");
       this.currentStage -= 1;
@@ -305,6 +318,7 @@ class Tournament {
         console.log("players participating delete", pid, "from eliminateSelf in tournament", this.tId);
       }
     }
+    this.gotDeleted = true;
   }
 
   public confirmPlayer(uuid: string) {
@@ -447,7 +461,7 @@ export function addTournament(tName: string, playersN: number, privacy: boolean,
 }
 
 export function joinTournament(tId: string, uuid: string, sock: WebSocket) {
-  console.log("joining tourn", tId, "as a", uuid);
+  console.log("trying to join tourn", tId, "as a", uuid);
   if (playersParticipatingTourn.has(uuid)) {
     throw "Player already participates in " + playersParticipatingTourn.get(uuid);
   }
