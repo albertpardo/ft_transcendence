@@ -490,6 +490,13 @@ export function removeTheSock(sock: WebSocket) : void {
   for (const [p, s] of socksMap) {
     if (s === sock) {
       // XXX close?
+      if (playersMap.has(p)) {
+        if (gamesMap.has(playersMap.get(p))) {
+          if (gamesMap.get(playersMap.get(p)).gameType === "local") {
+            forfeit(p);
+          }
+        }
+      }
       socksMap.delete(p);
 //      console.log("player", p, "got their sock removed");
       return ;

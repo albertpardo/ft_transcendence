@@ -206,6 +206,7 @@ export async function buttonSetter(state : MetaGameState) {
       document.getElementById("ready-button").disabled = true;
       document.getElementById("giveup-button").disabled = false;
       document.getElementById("local-play-button").disabled = true;
+      break;
     }
     default: {
       //basically "misc"
