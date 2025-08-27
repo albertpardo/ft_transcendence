@@ -476,6 +476,36 @@ if (wrapper) {
   // currentGoogleButtonId = null; // Removed because it's a read-only import
 }
 
+function generalDirectionButtonHandler(arrow: HTMLButtonElement, dir: number, side: string, playerSide: {v: string}) {
+  console.log("setting general arrow handling with:", arrow, dir, side, playerSide.v);
+  arrow.addEventListener('mousedown', () => {
+    if (playerSide.v === "local") {
+      localMovePaddleWrapper(dir, side);
+    }
+    else {
+      movePaddleWrapper(dir);
+    }
+  });
+
+  arrow.addEventListener('mouseup', () => {
+    if (playerSide.v === "local") {
+      localMovePaddleWrapper(0, side);
+    }
+    else {
+      movePaddleWrapper(0);
+    }
+  });
+
+  arrow.addEventListener('mouseleave', () => {
+    if (playerSide.v === "local") {
+      localMovePaddleWrapper(0, side);
+    }
+    else {
+      movePaddleWrapper(0);
+    }
+  });
+}
+
 export async function initDashboard() {
   const hash = window.location.hash.replace('#', '') || 'home';
   const app = document.getElementById('app')!;
@@ -635,7 +665,9 @@ export async function initDashboard() {
 
   let socket : WebSocket;
   let gameState : State = nullState;
-  let playerSide : string = "tbd";
+  let playerSide = {
+    v : "tbd",
+  };
   // FIXME unused. remove or use.
   let started : boolean = false;
   let metaInfo = await getGameMetaInfo();
@@ -675,7 +707,7 @@ export async function initDashboard() {
           break;
         case "abandon":
           started = false;
-          playerSide = "tbd";
+          playerSide.v = "tbd";
           leftUpArrow.hidden = true;
           leftDownArrow.hidden = true;
           rightUpArrow.hidden = true;
@@ -697,7 +729,7 @@ export async function initDashboard() {
           }
           await setterUponMetaInfo(gameInfo, metaInfo);
           started = false;
-          playerSide = "l";
+          playerSide.v = "l";
           leftUpArrow.hidden = false;
           leftDownArrow.hidden = false;
           rightUpArrow.hidden = true;
@@ -721,7 +753,7 @@ export async function initDashboard() {
           }
           await setterUponMetaInfo(gameInfo, metaInfo);
           started = false;
-          playerSide = "r";
+          playerSide.v = "r";
           rightUpArrow.hidden = false;
           rightDownArrow.hidden = false;
           leftUpArrow.hidden = true;
@@ -746,7 +778,7 @@ export async function initDashboard() {
             gameInfo.innerHTML = "";
           }
           await setterUponMetaInfo(gameInfo, metaInfo);
-          playerSide = "local";
+          playerSide.v = "local";
           rightUpArrow.hidden = false;
           rightDownArrow.hidden = false;
           leftUpArrow.hidden = false;
@@ -784,7 +816,7 @@ export async function initDashboard() {
             scoreText.innerHTML = "" + gameState.stateScoreL + " : " + gameState.stateScoreR;
             scoreText.classList.remove('opacity-0');
             const playButton = document.getElementById('start-button');
-            if (playerSide === "l") {
+            if (playerSide.v === "l") {
               switch (gameState.stateWhoL) {
                 case "left":
                   gameText.innerHTML = `${t("lostRound")}`;
@@ -819,7 +851,7 @@ export async function initDashboard() {
                   break;
               }
             }
-            else if (playerSide === "r") {
+            else if (playerSide.v === "r") {
               switch (gameState.stateWhoL) {
                 case "right":
                   gameText.innerHTML = `${t("lostRound")}`;
@@ -939,113 +971,11 @@ export async function initDashboard() {
       await setterUponMetaInfo(gameInfo, metaInfo);
     });
 
-    leftUpArrow.addEventListener('mousedown', () => {
-      if (playerSide === "local") {
-        localMovePaddleWrapper(-2, "l");
-      }
-      else {
-        movePaddleWrapper(-2);
-      }
-    });
-
-    leftUpArrow.addEventListener('mouseup', () => {
-      if (playerSide === "local") {
-        localMovePaddleWrapper(0, "l");
-      }
-      else {
-        movePaddleWrapper(0);
-      }
-    });
-
-    leftUpArrow.addEventListener('mouseleave', () => {
-      if (playerSide === "local") {
-        localMovePaddleWrapper(0, "l");
-      }
-      else {
-        movePaddleWrapper(0);
-      }
-    });
-
-    leftDownArrow.addEventListener('mousedown', () => {
-      if (playerSide === "local") {
-        localMovePaddleWrapper(2, "l");
-      }
-      else {
-        movePaddleWrapper(2);
-      }
-    });
-
-    leftDownArrow.addEventListener('mouseup', () => {
-      if (playerSide === "local") {
-        localMovePaddleWrapper(0, "l");
-      }
-      else {
-        movePaddleWrapper(0);
-      }
-    });
-
-    leftDownArrow.addEventListener('mouseleave', () => {
-      if (playerSide === "local") {
-        localMovePaddleWrapper(0, "l");
-      }
-      else {
-        movePaddleWrapper(0);
-      }
-    });
-
-    rightUpArrow.addEventListener('mousedown', () => {
-      if (playerSide === "local") {
-        localMovePaddleWrapper(-2, "r");
-      }
-      else {
-        movePaddleWrapper(-2);
-      }
-    });
-
-    rightUpArrow.addEventListener('mouseup', () => {
-      if (playerSide === "local") {
-        localMovePaddleWrapper(0, "r");
-      }
-      else {
-        movePaddleWrapper(0);
-      }
-    });
-
-    rightUpArrow.addEventListener('mouseleave', () => {
-      if (playerSide === "local") {
-        localMovePaddleWrapper(0, "r");
-      }
-      else {
-        movePaddleWrapper(0);
-      }
-    });
-
-    rightDownArrow.addEventListener('mousedown', () => {
-      if (playerSide === "local") {
-        localMovePaddleWrapper(2, "r");
-      }
-      else {
-        movePaddleWrapper(2);
-      }
-    });
-
-    rightDownArrow.addEventListener('mouseup', () => {
-      if (playerSide === "local") {
-        localMovePaddleWrapper(0, "r");
-      }
-      else {
-        movePaddleWrapper(0);
-      }
-    });
-
-    rightDownArrow.addEventListener('mouseleave', () => {
-      if (playerSide === "local") {
-        localMovePaddleWrapper(0, "r");
-      }
-      else {
-        movePaddleWrapper(0);
-      }
-    });
+    console.log("playerside:", playerSide.v);
+    generalDirectionButtonHandler(leftUpArrow, -2, "l", playerSide);
+    generalDirectionButtonHandler(leftDownArrow, 2, "l", playerSide);
+    generalDirectionButtonHandler(rightUpArrow, -2, "r", playerSide);
+    generalDirectionButtonHandler(rightDownArrow, 2, "r", playerSide);
 
     window.addEventListener('keydown', (e) => {
       if (e.key === 'ArrowUp' || e.key === 'w'|| e.key === 'W') {
