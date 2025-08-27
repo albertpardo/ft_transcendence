@@ -949,47 +949,102 @@ export async function initDashboard() {
     });
 
     leftUpArrow.addEventListener('mouseup', () => {
-      movePaddleWrapper(0);
+      if (playerSide === "local") {
+        localMovePaddleWrapper(0, "l");
+      }
+      else {
+        movePaddleWrapper(0);
+      }
     });
 
     leftUpArrow.addEventListener('mouseleave', () => {
-      movePaddleWrapper(0);
+      if (playerSide === "local") {
+        localMovePaddleWrapper(0, "l");
+      }
+      else {
+        movePaddleWrapper(0);
+      }
     });
 
     leftDownArrow.addEventListener('mousedown', () => {
-      movePaddleWrapper(2);
+      if (playerSide === "local") {
+        localMovePaddleWrapper(2, "l");
+      }
+      else {
+        movePaddleWrapper(2);
+      }
     });
 
     leftDownArrow.addEventListener('mouseup', () => {
-      movePaddleWrapper(0);
+      if (playerSide === "local") {
+        localMovePaddleWrapper(0, "l");
+      }
+      else {
+        movePaddleWrapper(0);
+      }
     });
 
     leftDownArrow.addEventListener('mouseleave', () => {
-      movePaddleWrapper(0);
+      if (playerSide === "local") {
+        localMovePaddleWrapper(0, "l");
+      }
+      else {
+        movePaddleWrapper(0);
+      }
     });
 
     rightUpArrow.addEventListener('mousedown', () => {
-      movePaddleWrapper(-2);
+      if (playerSide === "local") {
+        localMovePaddleWrapper(-2, "r");
+      }
+      else {
+        movePaddleWrapper(-2);
+      }
     });
 
     rightUpArrow.addEventListener('mouseup', () => {
-      movePaddleWrapper(0);
+      if (playerSide === "local") {
+        localMovePaddleWrapper(0, "r");
+      }
+      else {
+        movePaddleWrapper(0);
+      }
     });
 
     rightUpArrow.addEventListener('mouseleave', () => {
-      movePaddleWrapper(0);
+      if (playerSide === "local") {
+        localMovePaddleWrapper(0, "r");
+      }
+      else {
+        movePaddleWrapper(0);
+      }
     });
 
     rightDownArrow.addEventListener('mousedown', () => {
-      movePaddleWrapper(2);
+      if (playerSide === "local") {
+        localMovePaddleWrapper(2, "r");
+      }
+      else {
+        movePaddleWrapper(2);
+      }
     });
 
     rightDownArrow.addEventListener('mouseup', () => {
-      movePaddleWrapper(0);
+      if (playerSide === "local") {
+        localMovePaddleWrapper(0, "r");
+      }
+      else {
+        movePaddleWrapper(0);
+      }
     });
 
     rightDownArrow.addEventListener('mouseleave', () => {
-      movePaddleWrapper(0);
+      if (playerSide === "local") {
+        localMovePaddleWrapper(0, "r");
+      }
+      else {
+        movePaddleWrapper(0);
+      }
     });
 
     window.addEventListener('keydown', (e) => {
