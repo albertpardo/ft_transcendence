@@ -1022,16 +1022,44 @@ export async function initDashboard() {
     generalDirectionButtonHandler(rightDownArrow, 2, "r", playerSide);
 
     window.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowUp' || e.key === 'w'|| e.key === 'W') {
-        movePaddleWrapper(-2); // move up
-      } else if (e.key === 'ArrowDown' || e.key === 's'|| e.key === 'S') {
-        movePaddleWrapper(2); // move down
+      if (window.location.hash.replace('#', '') === "play") {
+        if (playerSide.v === "r" || playerSide.v === "l") {
+          if (e.key === 'ArrowUp' || e.key === 'w'|| e.key === 'W') {
+            movePaddleWrapper(-2); // move up
+          } else if (e.key === 'ArrowDown' || e.key === 's'|| e.key === 'S') {
+            movePaddleWrapper(2); // move down
+          }
+        }
+        else if (playerSide.v === "local") {
+          if (e.key === 'w'|| e.key === 'W') {
+            localMovePaddleWrapper(-2, "l");
+          } else if (e.key === 's'|| e.key === 'S') {
+            localMovePaddleWrapper(2, "l");
+          }
+          else if (e.key === 'o'|| e.key === 'O') {
+            localMovePaddleWrapper(-2, "r");
+          } else if (e.key === 'l'|| e.key === 'L') {
+            localMovePaddleWrapper(2, "r");
+          }
+        }
       }
     });
 
     window.addEventListener('keyup', (e) => {
-      if (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'w' || e.key === 'W' || e.key === 's' || e.key === 'S') {
-        movePaddleWrapper(0); // stop moving
+      if (window.location.hash.replace('#', '') === "play") {
+        if (playerSide.v === "r" || playerSide.v === "l") {
+          if (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'w' || e.key === 'W' || e.key === 's' || e.key === 'S') {
+            movePaddleWrapper(0); // stop moving
+          }
+        }
+        else if (playerSide.v === "local") {
+          if (e.key === 'w' || e.key === 'W' || e.key === 's' || e.key === 'S') {
+            localMovePaddleWrapper(0, "l");
+          }
+          else if (e.key === 'o' || e.key === 'O' || e.key === 'l' || e.key === 'L') {
+            localMovePaddleWrapper(0, "r");
+          }
+        }
       }
     });
   }
