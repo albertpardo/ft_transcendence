@@ -91,13 +91,23 @@ exports.putFriend = async (request, reply) => {
     const userId = request.headers['x-user-id'];
     if (!userId) return reply.code(401).send({ error: 'Unauthorized' });
     const { nick } = request.body;
-	reply.log.info(...logFormat(source, '(check userID, nick) : ', userId, nick));
-	console.log("#######################################");
+	reply.log.info(...logFormat(source, '(check userId, nick) : ', userId, nick));
 	const result = await userService.putUserFriend(userId, nick);
-	console.log("----------putFriend>>>> result <<<<< : ", result.error);
     if (result.error) return reply.code(400).send(result);
     return reply.send({ message: "🙌 Friend added successfully" });
+}
 
+exports.putStatus = async (request, reply) => {
+    const source = "putStatus";
+
+    const userId = request.headers['x-user-id'];
+    if (!userId) return reply.code(401).send({ error: 'Unauthorized' });
+    const { userStatus } = request.body;
+	reply.log.info(...logFormat(source, '(check userId, userStatus) : ', userId, userStatus));
+    const result = await userService.putUserStatus(userId, userStatus);
+	reply.log.info(...logFormat(source,"Result : ", result));
+    if (result.error) return reply.code(400).send(result);
+	return reply.send({ message: `Set status : ${userStatus}`});
 }
 
 exports.upsertGoogle = async (request, reply) => {

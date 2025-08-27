@@ -137,9 +137,15 @@ exports.getUserFriends = async (userId) => {
 exports.putUserFriend = async (userId, friendNick) => {
 
 	const result = db.addFriendByNick(userId, friendNick);
-    if (result.error) return (result) ;
-	
+    if (result.error) return (result);
     return { success: true };
+}
+
+exports.putUserStatus = async (userId, userStatus) => {
+    const result = db.putUserStatus(userId, userStatus);
+    if (result.error) return (result) ;
+    return { success: true };
+
 }
 
 exports.upsertGoogleUser = async (email, name, picture, googleId) => {

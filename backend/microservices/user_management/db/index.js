@@ -5,13 +5,10 @@ const db = require('better-sqlite3')('./users.db');
 db.pragma('foreign_keys = ON');   // No set by default
 
 // TODO make the id a "TEXT PRIMARY KEY UNIQUE", make all the corresponding changes in all the api.
-/* 250822:
+/* 250827:
  *
- * Esta línea :
- * status TEXT DEFAULT 'offline')
- *
- * Se podria poner la alternativa :
  * status TEXT DEFAULT 'offline' CHECK (status IN ('online', 'offline'))
+ * Permite chequear que el valor inrtroducido solo puede ser uno de la lista. Si no lo es , lanzará un error.
  *
  */ 
 const init = db.prepare(`
@@ -25,7 +22,7 @@ const init = db.prepare(`
     googleId TEXT UNIQUE,
     firstName TEXT,
     lastName TEXT,
-    status TEXT DEFAULT 'offline')` 
+    status TEXT DEFAULT 'offline' CHECK (status IN ('online', 'offline')))`
 );
 init.run();
 
@@ -157,16 +154,10 @@ function getUserFriends(userId) {
 }
 
 //by apardo-m for set user online/offline
-function setUserOnline(userId) {
+function putUserStatus(userId, userStatus) {
     const stmt = db.prepare('UPDATE users SET status = ? WHERE id = ?');
-    stmt.run('online', userId);
-    return { success: true, id: userId, status: 'online' };
-}
-
-function setUserOffline(userId) {
-    const stmt = db.prepare('UPDATE users SET status = ? WHERE id = ?');
-    stmt.run('offline', userId);
-    return { success: true, id: userId, status: 'offline' };
+    stmt.run(userStatus, userId);
+    return { success: true, id: userId, userStatus: userStatus };
 }
 
 module.exports = {
@@ -182,6 +173,5 @@ module.exports = {
     deleteUser,
 	addFriendByNick,
 	getUserFriends,
-	setUserOnline,
-	setUserOffline
+	putUserStatus
 };
