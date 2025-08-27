@@ -321,7 +321,7 @@ const resetGameText = () => {
 
   gameText.style.visibility = "hidden";
   gameText.innerHTML = "Welcome to Pong!";
- 
+
   gameText.classList.remove(
     "fill-white",
     'fill-red-400', 'fill-green-400',
@@ -351,7 +351,7 @@ const resetGameUi = () => {
     setTimeout(() => {
       scoreText.classList.remove('opacity-0');
     }, 150);
-  } 
+  }
 }
 
 function triggerConfetti() {
@@ -452,7 +452,7 @@ function triggerPaddleEffect(paddleId: string) {
   group.setAttribute(
     'transform',
     `translate(${pivotX},${pivotY}) scale(1.2) translate(${-pivotX},${-pivotY})`
-  ); 
+  );
 
   setTimeout(() => {
     group.removeAttribute('filter'); // corrected
@@ -463,7 +463,7 @@ function triggerPaddleEffect(paddleId: string) {
 function triggerBallEffect() {
   const ball = document.getElementById('ball');
   if (!ball) return;
-  
+
   ball.classList.add('animate-ball-pulse');
   setTimeout(() => ball.classList.remove('animate-ball-pulse'), 300);
 }
@@ -505,6 +505,32 @@ function generalDirectionButtonHandler(arrow: HTMLButtonElement, dir: number, si
       movePaddleWrapper(0);
     }
   });
+}
+
+function lostRoundInfo(gameText: HTMLElement) {
+  gameText.innerHTML = `${t("lostRound")}`;
+  gameText.classList.remove('fill-white');
+  gameText.setAttribute("fill", "#f87171");
+}
+
+function wonRoundInfo(gameText: HTMLElement) {
+  gameText.innerHTML = `${t("wonRound")}`;
+  gameText.classList.remove('fill-white');
+  gameText.setAttribute("fill", "#4ade80");
+}
+
+function lostGameInfo(gameText: HTMLElement) {
+  gameText.innerHTML = `${t("lostgame")}`;
+  gameText.classList.remove('fill-white');
+  gameText.setAttribute("fill", "#f87171");
+  setTimeout(() => triggerRainEffect(), 300);
+}
+
+function wonGameInfo(gameText: HTMLElement) {
+  gameText.innerHTML = `${t("wongame")}`;
+  gameText.classList.remove('fill-white');
+  gameText.setAttribute("fill", "#4ade80");
+  setTimeout(() => triggerConfetti(), 300);
 }
 
 export async function initDashboard() {
@@ -654,7 +680,7 @@ export async function initDashboard() {
   document.getElementById("ready-button").innerHTML = t("pong-buttons.ready-button-text");
   document.getElementById("giveup-button").innerHTML = t("pong-buttons.giveup-button-text");
   document.getElementById("local-play-button").innerHTML = t("pong-buttons.local-play-button-text");
-  
+
   let gameText : HTMLElement | null = document.getElementById("game-text")!;
   if (gameText) {
     gameText.style.visibility = "hidden";
@@ -725,16 +751,26 @@ export async function initDashboard() {
           if (metaInfo.gType === "unknown") {
             gameInfo.innerHTML = "";
           }
+          else if (metaInfo.gType === "local") {
+            gameInfo.innerHTML = "Game type: " + metaInfo.gType;
+          }
           else {
             gameInfo.innerHTML = "Game type: " + metaInfo.gType + "; versus: " + metaInfo.oppName;
           }
           await setterUponMetaInfo(gameInfo, metaInfo);
           started = false;
-          playerSide.v = "l";
+          if (metaInfo.gType === "local") {
+            playerSide.v = "local";
+            rightUpArrow.hidden = false;
+            rightDownArrow.hidden = false;
+          }
+          else {
+            playerSide.v = "l";
+            rightUpArrow.hidden = true;
+            rightDownArrow.hidden = true;
+          }
           leftUpArrow.hidden = false;
           leftDownArrow.hidden = false;
-          rightUpArrow.hidden = true;
-          rightDownArrow.hidden = true;
           gameText.style.visibility = "hidden";
           scoreText.classList.add('opacity-0');
           setTimeout(() => {
@@ -742,7 +778,7 @@ export async function initDashboard() {
 
            scoreText.classList.remove('opacity-0');
           }, 150);
-    
+
           break;
         case "added: R":
           metaInfo = await getGameMetaInfo();
@@ -770,7 +806,7 @@ export async function initDashboard() {
           break;
         case "started":
           started = true;
-          break; 
+          break;
         case "error":
           break;
         case "local":
@@ -798,7 +834,7 @@ export async function initDashboard() {
           ball.setAttribute("cy", "" + newState.stateBall.coords.y);
           lpad.setAttribute("y", "" + newState.stateLP.y);
           rpad.setAttribute("y", "" + newState.stateRP.y);
-          try { 
+          try {
             if (newState.stateBall.hitLPaddle) triggerPaddleEffect('lpad');
             if (newState.stateBall.hitRPaddle) triggerPaddleEffect('rpad');
             if (newState.stateBall.hitWall) triggerBallEffect();
@@ -820,29 +856,19 @@ export async function initDashboard() {
             if (playerSide.v === "l") {
               switch (gameState.stateWhoL) {
                 case "left":
-                  gameText.innerHTML = `${t("lostRound")}`;
-                  gameText.classList.remove('fill-white');
-                  gameText.setAttribute("fill", "#f87171");
+                  lostRoundInfo(gameText);
                   break;
                 case "right":
-                  gameText.innerHTML = `${t("wonRound")}`;
-                  gameText.classList.remove('fill-white');
-                  gameText.setAttribute("fill", "#4ade80");
+                  wonRoundInfo(gameText);
                   break;
                 case "left fully":
                   started = false;
-                  gameText.innerHTML = `${t("lostgame")}`;
-                  gameText.classList.remove('fill-white');
-                  gameText.setAttribute("fill", "#f87171");
-                  setTimeout(() => triggerRainEffect(), 300);
+                  lostGameInfo(gameText);
                   await tourCheckAndSetIdlingButtons();
                   break;
                 case "right fully":
                   started = false;
-                  gameText.innerHTML = `${t("wongame")}`;
-                  gameText.classList.remove('fill-white');
-                  gameText.setAttribute("fill", "#4ade80");
-                  setTimeout(() => triggerConfetti(), 300);
+                  wonGameInfo(gameText);
                   await tourCheckAndSetIdlingButtons();
                   break;
                 case "both":
@@ -855,27 +881,44 @@ export async function initDashboard() {
             else if (playerSide.v === "r") {
               switch (gameState.stateWhoL) {
                 case "right":
-                  gameText.innerHTML = `${t("lostRound")}`;
-                  gameText.classList.remove('fill-white');
-                  gameText.setAttribute("fill", "#f87171");
+                  lostRoundInfo(gameText);
                   break;
                 case "left":
-                  gameText.innerHTML = `${t("wonRound")}`;
-                  gameText.classList.remove('fill-white');
-                  gameText.setAttribute("fill", "#4ade80");
+                  wonRoundInfo(gameText);
                   break;
                 case "right fully":
                   started = false;
-                  gameText.innerHTML = `${t("lostGame")}`;
-                  gameText.setAttribute("fill", "#f87171");
-                  setTimeout(() => triggerRainEffect(), 300);
+                  lostGameInfo(gameText);
                   await tourCheckAndSetIdlingButtons();
                   break;
                 case "left fully":
                   started = false;
-                  gameText.innerHTML = `${t("wonGame")}`;
-                  gameText.setAttribute("fill", "#4ade80");
-                  setTimeout(() => triggerConfetti(), 300);
+                  wonGameInfo(gameText);
+                  await tourCheckAndSetIdlingButtons();
+                  break;
+                case "both":
+                  started = false;
+                  gameText.innerHTML = "In a rare dispay of absense, nobody won";
+                  await tourCheckAndSetIdlingButtons();
+                  break;
+              }
+            }
+            else if (playerSide.v === "local") {
+              switch (gameState.stateWhoL) {
+                case "right":
+                  gameText.innerHTML = "L won";
+                  break;
+                case "left":
+                  gameText.innerHTML = "R won";
+                  break;
+                case "right fully":
+                  started = false;
+                  gameText.innerHTML = "L super won";
+                  await tourCheckAndSetIdlingButtons();
+                  break;
+                case "left fully":
+                  started = false;
+                  gameText.innerHTML = "R super won";
                   await tourCheckAndSetIdlingButtons();
                   break;
                 case "both":
@@ -888,7 +931,7 @@ export async function initDashboard() {
           }
           else {
             gameText.style.visibility = "hidden";
-            
+
             scoreText.innerHTML = "" + gameState.stateScoreL + " : " + gameState.stateScoreR;
             scoreText.classList.remove('opacity-0');
           }
@@ -1042,7 +1085,7 @@ export async function initDashboard() {
     resetGoogle();
     window.location.hash = 'login';
    // if (googleInitialized) resetGoogle();
-   window.location.reload();  
+   window.location.reload();
    //route();
   });
 
