@@ -64,9 +64,9 @@
   },
   "friendsTxt": {
     "refresh": "刷新好友状态",
-    "nickTxt": "朋友的昵称",
+    "nickTxt": "昵称",
     "addBtn": "添加好友",
-    "nickRow": "朋友的昵称",
+    "nickRow": "昵称",
     "statusRow": "地位",
     "addError": "添加好友时出错",
     "addFailed": "添加好友失败。",

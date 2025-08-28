@@ -50,7 +50,7 @@ export async function renderFriendsContent(hideableElements) {
           ⟳
         </button>
     </div>
-    <div class="flex flex-col items-center gap-6 p-7 md:flex-row md:gap-8 rounded-2xl">
+    <div class="w-full flex flex-col items-center gap-6 p-7 md:flex-row md:gap-8 rounded-2xl">
       <input id="form-friendnick" name="tfriendnick" type="text" required 
         class="w-full px-3 py-2 text-gray-200 bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         placeholder=${t("friendsTxt.nickTxt")}>

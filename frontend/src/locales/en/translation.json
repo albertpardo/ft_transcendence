@@ -71,7 +71,7 @@
   "friendsTxt": {
     "refresh": " ",
     "refresh": "Refresh Friends' status",
-    "nickTxt": "Friend's Nickname",
+    "nickTxt": "Nickname",
     "addBtn": "Add friend",
     "nickRow": "Friend's Nickname",
     "statusRow": "Status",

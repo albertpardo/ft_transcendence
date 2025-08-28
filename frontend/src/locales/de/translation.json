@@ -70,9 +70,9 @@
   },
   "friendsTxt": {
     "refresh": " Aktualisieren Sie den Status von Freunden",
-    "nickTxt": "Spitzname eines Freundes",
+    "nickTxt": "Spitzname",
     "addBtn": "Freund hinzufügen",
-	  "nickRow": "Spitzname eines Freundes",
+	  "nickRow": "Spitzname",
     "statusRow": "Status",
     "addError": "Beim Hinzufügen des Freundes ist ein Fehler aufgetreten",
     "addFailed": "Freund konnte nicht hinzugefügt werden",
