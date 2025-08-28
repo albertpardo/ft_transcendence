@@ -3,111 +3,111 @@ const userService = require('../services/userService');
 const logFormat = require('../pino_utils/log_format');
 
 exports.getPublicNickname = async (request, reply) => {
-	const source = exports.getPublicNickname.name;    //Recommended way to get function name dynamically.
-	const { userId } = request.body;
-	const result = await userService.getPublicNickname(userId);
-	return reply.send(JSON.stringify(result));
+  const source = exports.getPublicNickname.name;  //Recommended way to get function name dynamically.
+  const { userId } = request.body;
+  const result = await userService.getPublicNickname(userId);
+  return reply.send(JSON.stringify(result));
 };
 
 exports.signup = async (request, reply) => {
-    const { username, password, nickname, email } = request.body;
-    const result = await userService.signup(username, password, nickname, email);
-    if (result.error) return reply.code(400).send(result);
-    return reply.send(result);
+  const { username, password, nickname, email } = request.body;
+  const result = await userService.signup(username, password, nickname, email);
+  if (result.error) return reply.code(400).send(result);
+  return reply.send(result);
 };
 
 exports.login = async (request, reply) => {
-	const source =exports.login.name;
-    const { username, password } = request.body;
-    const result = await userService.login(username, password);
-    if (result.error) {
-        return reply.code(401).send({ error: '🧸 Invalid credentials' });
-    }
-    //console.log('🎏 username and password are correct!');
-    request.log.info(...logFormat(source, '🎏 username and password are correct!'));
-    return reply.send(result);
+  const source =exports.login.name;
+  const { username, password } = request.body;
+  const result = await userService.login(username, password);
+  if (result.error) {
+    return reply.code(401).send({ error: '🧸 Invalid credentials' });
+  }
+  //console.log('🎏 username and password are correct!');
+  request.log.info(...logFormat(source, '🎏 username and password are correct!'));
+  return reply.send(result);
 };
 
 exports.getProfile = async (request, reply) => {
-	const source = exports.getProfile.name;   
-    const userId = request.headers['x-user-id'];
-    if (!userId) return reply.code(401).send({ error: 'Unauthorized' });
-   // console.log("📦 userId from header:", userId);
-    request.log.info(...logFormat(source, "📦 userId from header:", userId));
+  	const source = exports.getProfile.name;   
+  const userId = request.headers['x-user-id'];
+  if (!userId) return reply.code(401).send({ error: 'Unauthorized' });
+  // console.log("📦 userId from header:", userId);
+  request.log.info(...logFormat(source, "📦 userId from header:", userId));
 
-    const userInfo = await userService.getProfile(userId);
-    return reply.send(userInfo);    
+  const userInfo = await userService.getProfile(userId);
+  return reply.send(userInfo);  
 }
 
 exports.updateProfile = async (request, reply) => {
-    //console.log('🧩 updateProfile triggered');
-    //console.log('📦 userId from header:', request.headers['x-user-id']);
+  //console.log('🧩 updateProfile triggered');
+  //console.log('📦 userId from header:', request.headers['x-user-id']);
 	const source = exports.updateProfile.name;
-    request.log.info(...logFormat(source, '🧩 updateProfile triggered'));
-    request.log.info(...logFormat(source, '📦 userId from header:', request.headers['x-user-id']));
-    const userId = request.headers['x-user-id'];
-    if (!userId) return reply.code(401).send({ error: 'Unauthorized' });
+  request.log.info(...logFormat(source, '🧩 updateProfile triggered'));
+  request.log.info(...logFormat(source, '📦 userId from header:', request.headers['x-user-id']));
+  const userId = request.headers['x-user-id'];
+  if (!userId) return reply.code(401).send({ error: 'Unauthorized' });
 
-    //console.log('🌎 request.body:', request.body);
-    request.log.info(...logFormat(source, '🌎 request.body:', request.body));
+  //console.log('🌎 request.body:', request.body);
+  request.log.info(...logFormat(source, '🌎 request.body:', request.body));
 
-    const { username, nickname, email, password, avatar } = request.body;
-    const result = await userService.updateProfile(userId, {
-        username,
-        nickname,
-        email,
-        password,
-        avatar
-    });
-    // console.log('🌎 updatedResult:', result);
-    request.log.info(...logFormat(source, '🌎 updatedResult:', result));
-    if (result.error) return reply.code(400).send(result);
-    return reply.send({ message: "🏄 Profile updated successfully" });
+  const { username, nickname, email, password, avatar } = request.body;
+  const result = await userService.updateProfile(userId, {
+    username,
+    nickname,
+    email,
+    password,
+    avatar
+  });
+  // console.log('🌎 updatedResult:', result);
+  request.log.info(...logFormat(source, '🌎 updatedResult:', result));
+  if (result.error) return reply.code(400).send(result);
+  return reply.send({ message: "🏄 Profile updated successfully" });
 }
 
 exports.deleteProfile = async (request, reply) => {
-    const userId = request.headers['x-user-id'];
-    if (!userId) return reply.code(401).send({ error: 'Unauthorized' });
+  const userId = request.headers['x-user-id'];
+  if (!userId) return reply.code(401).send({ error: 'Unauthorized' });
 
-    const result = await userService.deleteProfile(userId);
-    if (result.error) return reply.code(400).send(result);
-    return reply.send({ message: "🏊 Profile deleted successfully" });
+  const result = await userService.deleteProfile(userId);
+  if (result.error) return reply.code(400).send(result);
+  return reply.send({ message: "🏊 Profile deleted successfully" });
 }
 
 exports.getFriends = async (request, reply) => {
-    const source = exports.getFriends.name;
+  const source = exports.getFriends.name;
 
-    const userId = request.headers['x-user-id'];
-    if (!userId) return reply.code(401).send({ error: 'Unauthorized' });
-    
-	const friends = await userService.getUserFriends(userId);
-	reply.log.info(...logFormat(source, 'check friends list : ', friends));
-    return reply.send(friends);    
+  const userId = request.headers['x-user-id'];
+  if (!userId) return reply.code(401).send({ error: 'Unauthorized' });
+  
+  const friends = await userService.getUserFriends(userId);
+  reply.log.info(...logFormat(source, 'check friends list : ', friends));
+  return reply.send(friends);  
 }
 
 exports.putFriend = async (request, reply) => {
-    const source = exports.putFriend.name;
+  const source = exports.putFriend.name;
 
-    const userId = request.headers['x-user-id'];
-    if (!userId) return reply.code(401).send({ error: 'Unauthorized' });
-    const { nick } = request.body;
-	reply.log.info(...logFormat(source, '(check userId, nick) : ', userId, nick));
-	const result = await userService.putUserFriend(userId, nick);
-    if (result.error) return reply.code(400).send(result);
-    return reply.send({ message: "🙌 Friend added successfully" });
+  const userId = request.headers['x-user-id'];
+  if (!userId) return reply.code(401).send({ error: 'Unauthorized' });
+  const { nick } = request.body;
+  	reply.log.info(...logFormat(source, '(check userId, nick) : ', userId, nick));
+  	const result = await userService.putUserFriend(userId, nick);
+  if (result.error) return reply.code(400).send(result);
+  return reply.send({ message: "🙌 Friend added successfully" });
 }
 
 exports.putStatus = async (request, reply) => {
-    const source = "putStatus";
+  const source = "putStatus";
 
-    const userId = request.headers['x-user-id'];
-    if (!userId) return reply.code(401).send({ error: 'Unauthorized' });
-    const { userStatus } = request.body;
-	reply.log.info(...logFormat(source, '(check userId, userStatus) : ', userId, userStatus));
-    const result = await userService.putUserStatus(userId, userStatus);
-	reply.log.info(...logFormat(source,"Result : ", result));
-    if (result.error) return reply.code(400).send(result);
-	return reply.send({ message: `Set status : ${userStatus}`});
+  const userId = request.headers['x-user-id'];
+  if (!userId) return reply.code(401).send({ error: 'Unauthorized' });
+  const { userStatus } = request.body;
+  	reply.log.info(...logFormat(source, '(check userId, userStatus) : ', userId, userStatus));
+  const result = await userService.putUserStatus(userId, userStatus);
+	  reply.log.info(...logFormat(source,"Result : ", result));
+  if (result.error) return reply.code(400).send(result);
+ 	return reply.send({ message: `Set status : ${userStatus}`});
 }
 
 exports.upsertGoogle = async (request, reply) => {

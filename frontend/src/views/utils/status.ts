@@ -21,11 +21,10 @@ export async function setUserStatus(userStatus: string) {
       credentials: 'include',
       body: JSON.stringify(updatedData),
     })  ;
-		  if (!response.ok) {
+    if (!response.ok) {
       console.log("!response.ok -- When put Status : ", updatedData.userStatus);  
-		  }
-
+    }
   } catch (err) {
-			console.log("Error when change status: ", err);
+    console.log("Error when change status: ", err);
   }
 }

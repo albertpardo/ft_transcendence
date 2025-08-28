@@ -997,6 +997,8 @@ export async function initDashboard() {
     gameWindow: document.getElementById('game-window')!,
   };
   switch (hash) {
+	  
+	  
     case 'profile':           renderProfileContent(hideableElements);           break;
     case 'play':              renderPlayContent(hideableElements);              break;
     case 'history':           renderHistoryContent(hideableElements);           break;
