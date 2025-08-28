@@ -398,7 +398,7 @@ export function addPlayerCompletely(playerId: string, sock: WebSocket) {
   if (!playersParticipatingTourn.has(playerId)) {
     // default, random MM
     for (const [gameId, gameRuntime] of gamesMap) {
-      if (gameRuntime.gameType === "tournament") {
+      if (gameRuntime.gameType !== "normal") {
         continue ;
       }
       if (gameRuntime.LplayerId === "") {
