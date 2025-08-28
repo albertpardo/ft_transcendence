@@ -40,13 +40,14 @@ export async function renderFriendsContent(hideableElements) {
 
   const authstringheader : string = "Bearer " + authToken;
 
+  // ${t("friendsTxt.refresh")}
   let friendsData;
   el.innerHTML = `
     <div class="w-full flex flex-col items-center gap-6 p-7 md:flex-row md:gap-8 rounded-2xl">
       <h1 class="w-full text-3xl font-bold mb-6 whitespace-nowrap">${t("friends")}</h1>
         <button id="refresh"
-          class="w-full p-2 bg-blue-500 rounded-lg hover:bg-blue-400 transition text-white font-medium disabled:border-gray-200 disabled:bg-gray-700 disabled:text-gray-500 disabled:shadow-none">
-          ${t("friendsTxt.refresh")}
+          class="w-full text-3xl p-2 bg-blue-500 rounded-lg hover:bg-blue-400 transition text-white font-medium disabled:border-gray-200 disabled:bg-gray-700 disabled:text-gray-500 disabled:shadow-none">
+          ⟳
         </button>
     </div>
     <div class="flex flex-col items-center gap-6 p-7 md:flex-row md:gap-8 rounded-2xl">
