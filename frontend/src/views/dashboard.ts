@@ -520,14 +520,14 @@ function wonRoundInfo(gameText: HTMLElement) {
 }
 
 function lostGameInfo(gameText: HTMLElement) {
-  gameText.innerHTML = `${t("lostgame")}`;
+  gameText.innerHTML = `${t("lostGame")}`;
   gameText.classList.remove('fill-white');
   gameText.setAttribute("fill", "#f87171");
   setTimeout(() => triggerRainEffect(), 300);
 }
 
 function wonGameInfo(gameText: HTMLElement) {
-  gameText.innerHTML = `${t("wongame")}`;
+  gameText.innerHTML = `${t("wonGame")}`;
   gameText.classList.remove('fill-white');
   gameText.setAttribute("fill", "#4ade80");
   setTimeout(() => triggerConfetti(), 300);
