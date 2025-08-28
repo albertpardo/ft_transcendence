@@ -33,12 +33,12 @@
     "score": "Punktzahl",
     "opponent": "Gegner",
     "date": "Datum",
-	"win": "Sieg",
-	"loss": "Niederlage",
-	"winForfeit": "Sieg (Gegner hat aufgegeben)",
-	"lossForfeit": "Niederlage (du hast aufgegeben)",
-	"winAbsence": "Sieg (Gegner abwesend)",
-	"lossAbsence": "Niederlage (du bist nicht erschienen)",
+    "win": "Sieg",
+    "loss": "Niederlage",
+    "winForfeit": "Sieg (Gegner hat aufgegeben)",
+    "lossForfeit": "Niederlage (du hast aufgegeben)",
+    "winAbsence": "Sieg (Gegner abwesend)",
+    "lossAbsence": "Niederlage (du bist nicht erschienen)",
     "notLoggedIn": "Sie sind nicht angemeldet.",
     "noAuthToken": "Authentifizierungstoken fehlt.",
     "failedToLoad": "Spielverlauf konnte nicht geladen werden."
@@ -69,14 +69,15 @@
     "success.delete": "Konto erfolgreich gelöscht!"
   },
   "friendsTxt": {
-	"nickTxt": "Spitzname eines Freundes",
-	"addBtn": "Freund hinzufügen",
-	"nickRow": "Spitzname eines Freundes",
-	"statusRow": "Status",
-	"addError": "Beim Hinzufügen des Freundes ist ein Fehler aufgetreten",
+    "refresh": " Aktualisieren Sie den Status von Freunden",
+    "nickTxt": "Spitzname eines Freundes",
+    "addBtn": "Freund hinzufügen",
+	  "nickRow": "Spitzname eines Freundes",
+    "statusRow": "Status",
+    "addError": "Beim Hinzufügen des Freundes ist ein Fehler aufgetreten",
     "addFailed": "Freund konnte nicht hinzugefügt werden",
-	"getError": "Fehler beim Laden der Freunde. Bitte versuchen Sie es später noch einmal",
-	"getFailed": "Das Abrufen der Freundesdaten ist fehlgeschlagen."
+    "getError": "Fehler beim Laden der Freunde. Bitte versuchen Sie es später noch einmal",
+  "getFailed": "Das Abrufen der Freundesdaten ist fehlgeschlagen."
   },
   "nav": {
     "dashboard": "Dashboard",

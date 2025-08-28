@@ -33,12 +33,12 @@
     "score": "Punteggio",
     "opponent": "Avversario",
     "date": "Data",
-	"win": "Vittoria",
-	"loss": "Sconfitta",
-	"winForfeit": "Vittoria (il nemico ha rinunciato)",
-	"lossForfeit": "Sconfitta (hai rinunciato)",
-	"winAbsence": "Vittoria (il nemico non si è presentato)",
-	"lossAbsence": "Sconfitta (non ti sei presentato)",
+    "win": "Vittoria",
+    "loss": "Sconfitta",
+    "winForfeit": "Vittoria (il nemico ha rinunciato)",
+    "lossForfeit": "Sconfitta (hai rinunciato)",
+    "winAbsence": "Vittoria (il nemico non si è presentato)",
+    "lossAbsence": "Sconfitta (non ti sei presentato)",
     "notLoggedIn": "Non sei connesso.",
     "noAuthToken": "Token di autenticazione mancante.",
     "failedToLoad": "Impossibile caricare la cronologia partite."
@@ -69,14 +69,15 @@
     "success.delete": "Account eliminato con successo!"
   },
   "friendsTxt": {
-	"nickTxt": "Soprannome",
-	"addBtn": "Aggiungi amico",
-	"nickRow": "Soprannome",
-	"statusRow": "Stato",
-	"addError": "Si è verificato un errore durante l'aggiunta dell'amico.",
+    "refresh": ""Aggiorna lo stato degli amici",
+    "nickTxt": "Soprannome",
+    "addBtn": "Aggiungi amico",
+    "nickRow": "Soprannome",
+    "statusRow": "Stato",
+    "addError": "Si è verificato un errore durante l'aggiunta dell'amico.",
     "addFailed": "Impossibile aggiungere un amico.",
-	"getError": "Errore durante il caricamento degli amici. Riprova più tardi.",
-	"getFailed": "Impossibile recuperare i dati degli amici."
+    "getError": "Errore durante il caricamento degli amici. Riprova più tardi.",
+    "getFailed": "Impossibile recuperare i dati degli amici."
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -106,8 +107,8 @@
   "wonRound": "Hai vinto il round!",
   "lostRound": "Hai perso il round.",
   "pong-buttons": {
-	  "start-button-text": "Cerca una partita veloce",
-	  "ready-button-text": "Conferma la partecipazione",
-	  "giveup-button-text": "Rinuncia IMMEDIATAMENTE"
-	}
+    "start-button-text": "Cerca una partita veloce",
+    "ready-button-text": "Conferma la partecipazione",
+    "giveup-button-text": "Rinuncia IMMEDIATAMENTE"
+  }
 }

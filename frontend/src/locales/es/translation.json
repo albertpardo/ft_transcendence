@@ -62,14 +62,15 @@
     "success.delete": "¡Cuenta eliminada correctamente!"
   },
   "friendsTxt": {
-	"nickTxt": "Apodo",
-	"addBtn": "Añade al amigo/amiga",
-	"nickRow": "Apodos",
-	"statusRow": "Estados",
-	"addError": "Se ha producido un erro al tratar de añadir a tu amigo/amiga.",
+    "refresh": "Actualiza el estado de los amigos",
+    "nickTxt": "Apodo",
+    "addBtn": "Añade al amigo/amiga",
+    "nickRow": "Apodos",
+    "statusRow": "Estados",
+    "addError": "Se ha producido un erro al tratar de añadir a tu amigo/amiga.",
     "addFailed": "Se ha producido un fallo al añadir a tu amigo/amiga.",
-	"getError": "Se ha producido un error al tratar de obtener la lista de tus amigos. Intentalo más tarde",
-	"getFailed": "No se pudieron obtener los datos de los amigos."
+  "getError": "Se ha producido un error al tratar de obtener la lista de tus amigos. Intentalo más tarde",
+  "getFailed": "No se pudieron obtener los datos de los amigos."
   },
   "nav": {
     "dashboard": "Inicio",

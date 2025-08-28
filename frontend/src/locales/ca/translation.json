@@ -69,14 +69,15 @@
     "success.delete": "Compte eliminat amb èxit!"
   },
   "friendsTxt": {
-	"nickTxt": "Sobrenom",
-	"addBtn": "Afegir amic/amiga",
-	"nickRow": "Sobrenom",
-	"statusRow": "Estat",
-	"addError": "S'ha produït un error en afegir l'amic/amiga",
+    "refresh": "Actualitza l'estat dels amics",
+    "nickTxt": "Sobrenom",
+    "addBtn": "Afegir amic/amiga",
+    "nickRow": "Sobrenom",
+	  "statusRow": "Estat",
+	  "addError": "S'ha produït un error en afegir l'amic/amiga",
     "addFailed": "No s'ha pogut afegir l'amic/amiga",
-	"getError": "S'ha produït un error en carregar els amics. Torna-ho a provar més tard.",
-	"getFailed": "No s'han pogut obtenir les dades dels amics."
+	  "getError": "S'ha produït un error en carregar els amics. Torna-ho a provar més tard.",
+	  "getFailed": "No s'han pogut obtenir les dades dels amics."
   },
   "nav": {
     "dashboard": "Tauler",

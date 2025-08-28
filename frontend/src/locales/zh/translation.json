@@ -27,12 +27,12 @@
     "score": "得分",
     "opponent": "对手",
     "date": "日期",
-	"win": "胜利",
-	"loss": "失败",
-	"winForfeit": "胜利（对手弃权了）",
-	"lossForfeit": "失败（你弃权了）",
-	"winAbsence": "胜利（对手未到场）",
-	"lossAbsence": "失败（你未到场）",
+    "win": "胜利",
+    "loss": "失败",
+    "winForfeit": "胜利（对手弃权了）",
+    "lossForfeit": "失败（你弃权了）",
+    "winAbsence": "胜利（对手未到场）",
+    "lossAbsence": "失败（你未到场）",
     "notLoggedIn": "您尚未登录。",
     "noAuthToken": "缺少认证令牌。",
     "failedToLoad": "无法加载比赛历史。"
@@ -63,14 +63,15 @@
     "success.delete": "账户删除成功！"
   },
   "friendsTxt": {
-	"nickTxt": "朋友的昵称",
-	"addBtn": "添加好友",
-	"nickRow": "朋友的昵称",
-	"statusRow": "地位",
-	"addError": "添加好友时出错",
+    "refresh": "刷新好友状态",
+    "nickTxt": "朋友的昵称",
+    "addBtn": "添加好友",
+    "nickRow": "朋友的昵称",
+    "statusRow": "地位",
+    "addError": "添加好友时出错",
     "addFailed": "添加好友失败。",
-	"getError": "加载好友时出错。请稍后重试",
-	"getFailed": "无法获取好友数据"
+    "getError": "加载好友时出错。请稍后重试",
+    "getFailed": "无法获取好友数据"
   },
   "nav": {
     "dashboard": "仪表板",
@@ -100,8 +101,8 @@
   "wonRound": "您赢得了这一轮！",
   "lostRound": "您输了这一轮。",
   "pong-buttons": {
-	  "start-button-text": "寻找快速对局",
-	  "ready-button-text": "确认参赛",
-	  "giveup-button-text": "立即弃权"
-	}
+    "start-button-text": "寻找快速对局",
+    "ready-button-text": "确认参赛",
+    "giveup-button-text": "立即弃权"
+  }
 }

@@ -34,11 +34,11 @@
     "opponent": "Opponent",
     "date": "Date",
     "win": "Win",
-	"loss": "Loss",
-	"winForfeit": "Win (enemy forfeited)",
-	"lossForfeit": "Loss (you forfeited)",
-	"winAbsence": "Win (enemy absence)",
-	"lossAbsence": "Loss (you didn't show up)",
+    "loss": "Loss",
+    "winForfeit": "Win (enemy forfeited)",
+    "lossForfeit": "Loss (you forfeited)",
+    "winAbsence": "Win (enemy absence)",
+    "lossAbsence": "Loss (you didn't show up)",
     "notLoggedIn": "You're not logged in.",
     "noAuthToken": "Authentication token missing.",
     "failedToLoad": "Failed to load match history."
@@ -69,15 +69,16 @@
     "success.delete": "Account deleted successfully!"
   },
   "friendsTxt": {
-    "refresh": "Refesh Friend's status",
-  	"nickTxt": "Friend's Nickname",
-  	"addBtn": "Add friend",
-  	"nickRow": "Friend's Nickname",
-  	"statusRow": "Status",
-  	"addError": "An error occured while adding the friend.",
+    "refresh": " ",
+    "refresh": "Refresh Friends' status",
+    "nickTxt": "Friend's Nickname",
+    "addBtn": "Add friend",
+    "nickRow": "Friend's Nickname",
+    "statusRow": "Status",
+    "addError": "An error occured while adding the friend.",
     "addFailed": "Failed to add Friend.",
-  	"getError": "Error loading friends. Please try again later",
-  	"getFailed": "Failed to fetch friends data."
+    "getError": "Error loading friends. Please try again later",
+    "getFailed": "Failed to fetch friends data."
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -107,8 +108,8 @@
   "wonRound": "You won the round!",
   "lostRound": "You lost the round.",
   "pong-buttons": {
-	"start-button-text": "Search for a quick game",
-	"ready-button-text": "Confirm participation",
-	"giveup-button-text": "INSTANTLY forfeit"
+    "start-button-text": "Search for a quick game",
+    "ready-button-text": "Confirm participation",
+    "giveup-button-text": "INSTANTLY forfeit"
   }
 }

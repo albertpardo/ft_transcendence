@@ -33,12 +33,12 @@
     "score": "Saykuy",
     "opponent": "Chaylla",
     "date": "P'unchay",
-	"win": "Atipanakuy",
-	"loss": "Chinkay",
-	"winForfeit": "Atipanakuy (awqa saqirqan)",
-	"lossForfeit": "Chinkay (qam saqirqanki)",
-	"winAbsence": "Atipanakuy (awqa mana hamuq)",
-	"lossAbsence": "Chinkay (qam mana hamuq)",
+    "win": "Atipanakuy",
+    "loss": "Chinkay",
+    "winForfeit": "Atipanakuy (awqa saqirqan)",
+    "lossForfeit": "Chinkay (qam saqirqanki)",
+    "winAbsence": "Atipanakuy (awqa mana hamuq)",
+    "lossAbsence": "Chinkay (qam mana hamuq)",
     "notLoggedIn": "Mana kanki chaylla.",
     "noAuthToken": "Mana kachka auth token.",
     "failedToLoad": "Takiy willakuyqa manam kachkanku."
@@ -69,14 +69,15 @@
     "success.delete": "Qelqanakuyqa hukchayarqa kamariwaq!"
   },
   "friendsTxt": {
-	"nickTxt": "Sutinchana",
-	"addBtn": "Amigo yapay",
-	"nickRow": "Sutinchana",
-	"statusRow": "Imayna kaynin",
-	"addError": "Huk pantaymi karqan amigota yapashaspa.",
+    "refresh": "Amigukunap kayninta musuqyachiy",
+    "nickTxt": "Sutinchana",
+    "addBtn": "Amigo yapay",
+    "nickRow": "Sutinchana",
+    "statusRow": "Imayna kaynin",
+    "addError": "Huk pantaymi karqan amigota yapashaspa.",
     "addFailed": "Mana Amigo yapayta atirqanichui.",
-	"getError": "Amistadkunata kargachkaspa pantasqa. Ama hina kaspa, qhipaman hukmanta kallpachakuy",
-	"getFailed": "Mana amigukunap willayninkunata apamuyta atirqanchu."
+    "getError": "Amistadkunata kargachkaspa pantasqa. Ama hina kaspa, qhipaman hukmanta kallpachakuy",
+    "getFailed": "Mana amigukunap willayninkunata apamuyta atirqanchu."
   },
   "nav": {
     "dashboard": "Ripiq",
@@ -106,8 +107,8 @@
   "wonRound": "Roundpi winay!",
   "lostRound": "Roundpi yaykuy.",
   "pong-buttons": {
-	  "start-button-text": "Sapa kuti pukllanata maskay",
-	  "ready-button-text": "Hukmanta haykuyta ratificay",
-	  "giveup-button-text": "ÑAWPAMAN saqiy"
-	}
+    "start-button-text": "Sapa kuti pukllanata maskay",
+    "ready-button-text": "Hukmanta haykuyta ratificay",
+    "giveup-button-text": "ÑAWPAMAN saqiy"
+  }
 }
