@@ -4,7 +4,7 @@ import { getNicknameForPlayerId } from './history'
 import { MetaGameState, buttonSetter, getGameMetaInfo, setterUponMetaInfo } from './dashboard'
 
 // stolen from backend/microservices/game_service/src/pong.ts
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 

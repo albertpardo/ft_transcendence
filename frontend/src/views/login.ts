@@ -1,4 +1,5 @@
 import { route } from "../router";
+import { sleep } from "./tournament";
 
 export function renderLogin(appElement: HTMLElement) {
   const googleId = `google-signin-${performance.now().toFixed(0)}`;
@@ -318,18 +319,45 @@ export function renderLogin(appElement: HTMLElement) {
 }
 
 
-export function waitForGoogle() {
-  const googleButton = document.getElementById('google-signin');
-  if (googleButton && typeof google !== 'undefined') {
-    console.log('✅ #google-signin found and Google script loaded');
-    initGoogleSignIn();
-  } else {
-    console.log('⏳ Waiting for Google script or DOM...');
-    setTimeout(waitForGoogle, 100);
+export async function waitForGoogle() {
+  let googleButton = document.getElementById('google-signin');
+  let counter : number = 5;
+  while (!googleButton || typeof google === "undefined") {
+    try {
+      await initGoogleSignIn();
+      googleButton = document.getElementById('google-signin');
+    }
+    catch (e) {
+      console.error("failed at initgooglesignin:", e);
+    }
+    counter--;
+    if (counter < 0) {
+      console.error("failed to reach google");
+      break ;
+    }
+    await sleep(1e3);
   }
+  if (googleButton) {
+    console.log('✅ #google-signin found and Google script loaded');
+//    initGoogleSignIn();
+  }
+  else {
+    console.error("no google button!");
+  }
+//  if (googleButton && typeof google !== 'undefined') {
+//    console.log('✅ #google-signin found and Google script loaded');
+//    initGoogleSignIn();
+//  } else {
+//    console.log('⏳ Waiting for Google script or DOM...');
+//    setTimeout(initGoogleSignIn, 100);
+//  }
 }
 
-waitForGoogle();
+async function mainFuncLogin() {
+  await waitForGoogle();
+}
+
+mainFuncLogin();
 
 export let currentGoogleButtonId: string | null = null;
 export let googleInitialized = false;
@@ -382,21 +410,19 @@ function renderGoogleButton(container: HTMLElement) {
   });
 }
 
-export function initGoogleSignIn() {
+export async function initGoogleSignIn() {
   const googleButton = document.getElementById('google-signin');
   if (!googleButton) {
-    console.error('❌ #google-signin not found in DOM');
-    return;
+    throw '❌ #google-signin not found in DOM';
   }
 
   // @ts-ignore - Google API is global
   if (typeof google === 'undefined') {
-    console.error('❌ Google script not loaded');
-    return;
+    throw '❌ Google script not loaded';
   }
  if (!googleInitialized) {
     // @ts-ignore
-    google.accounts.id.initialize({
+    await google.accounts.id.initialize({
       client_id: '142914619782-scgrlb1fklqo43g9b2901hemub6hg51h.apps.googleusercontent.com',
       callback: handleGoogleCredentialResponse,
     });
@@ -407,7 +433,7 @@ export function initGoogleSignIn() {
   // ✅ Always clear and re-render
   googleButton.innerHTML = '';
   // @ts-ignore
-  google.accounts.id.renderButton(googleButton, {
+  await google.accounts.id.renderButton(googleButton, {
     theme: 'outline',
     size: 'large',
     text: 'signin_with',
