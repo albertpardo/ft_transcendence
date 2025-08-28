@@ -10,7 +10,8 @@ const PADDLE_H : number = 100;
 const PADDLE_X : number = 50;
 // a shift for the paddles. makes them be not at the very border
 const PADDLE_SPEED : number = 300;
-const MIN_BALL_SPEED_Y : number = 100;
+const BALL_START_SPEED : number = 300;
+const SPEED_ADDIFICATOR : number = 10;
 const INTER_ROUND_COOLDOWN_TIME_MS : number = 1000 * 3;
 const TOURNAMENT_READY_TIMEOUT : number = 10;
 
@@ -83,13 +84,26 @@ function checkLoseConditions(ball: Ball, LGaveUp: boolean, RGaveUp: boolean) : s
 }
 
 function calculateVBounce(ball: Ball, paddle: Paddle) : Vector2 {
-  let  proportion : number = (ball.coords.y - paddle.y) / (paddle.h);
+  // literally the sin() of the angle of the bounce in regards to the normal
+  let xSpeedSign : boolean = ball.speed.x >= 0;
+  let proportion : number = (ball.coords.y - paddle.y) / (paddle.h);
+  let xSpeed : number = 0;
   proportion *= 2;
   proportion -= 1;
-  if (Math.abs(ball.speed.y) < MIN_BALL_SPEED_Y/10) {
-    ball.speed.y = MIN_BALL_SPEED_Y;
+  // to stop crazy vertical gameplay
+  proportion /= 1.1;
+  let speedValue = Math.pow(ball.speed.x, 2.0) + Math.pow(ball.speed.y, 2.0);
+  speedValue = Math.sqrt(speedValue);
+  // for fun :)
+  speedValue += SPEED_ADDIFICATOR;
+  // sin^2 a + cos^2 a = 1  =>  cos a = sqrt( 1 - sin^2 a)
+  if (xSpeedSign) {
+    xSpeed = speedValue * Math.sqrt(1 - Math.pow(proportion, 2.0)) * -1;
   }
-  return { x: -ball.speed.x, y: Math.sin(ALPHA_MAX * proportion) * Math.abs(ball.speed.y)};
+  else {
+    xSpeed = speedValue * Math.sqrt(1 - Math.pow(proportion, 2.0));
+  }
+  return { x: xSpeed, y: speedValue * proportion};
 };
 
 
@@ -97,7 +111,7 @@ function calculateVBounce(ball: Ball, paddle: Paddle) : Vector2 {
 class PongRuntime {
   public LplayerId : string = "";
   public RplayerId : string = "";
-  private ball : Ball = { speed: {x: -200, y: 0}, coords: {x: WINDOW_SIZE.x/2, y: WINDOW_SIZE.y/2}};
+  private ball : Ball = { speed: {x: -BALL_START_SPEED, y: 0}, coords: {x: WINDOW_SIZE.x/2, y: WINDOW_SIZE.y/2}};
   private Lpaddle : Paddle = { y: (WINDOW_SIZE.y - PADDLE_H)/2, h: PADDLE_H, d: 0 };
   private Rpaddle : Paddle = { y: (WINDOW_SIZE.y - PADDLE_H)/2, h: PADDLE_H, d: 0 };
   public whoLost : string = "none";
@@ -111,10 +125,10 @@ class PongRuntime {
 
   private resetGame() : void {
     if (this.whoLost === "right") {
-      this.ball = { speed: {x: 200, y: 0}, coords: {x: WINDOW_SIZE.x/2, y: WINDOW_SIZE.y/2}};
+      this.ball = { speed: {x: BALL_START_SPEED, y: 0}, coords: {x: WINDOW_SIZE.x/2, y: WINDOW_SIZE.y/2}};
     }
     else {
-      this.ball = { speed: {x: -200, y: 0}, coords: {x: WINDOW_SIZE.x/2, y: WINDOW_SIZE.y/2}};
+      this.ball = { speed: {x: -BALL_START_SPEED, y: 0}, coords: {x: WINDOW_SIZE.x/2, y: WINDOW_SIZE.y/2}};
     }
     this.Lpaddle = { y: (WINDOW_SIZE.y - PADDLE_H)/2, h: PADDLE_H, d: 0 };
     this.Rpaddle = { y: (WINDOW_SIZE.y - PADDLE_H)/2, h: PADDLE_H, d: 0 };
