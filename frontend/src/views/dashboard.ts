@@ -1,5 +1,5 @@
 // src/views/dashboard.ts
-import { registerPlayer, forfeit, movePaddle, confirmParticipation, checkIsInGame, checkReady, checkIsInTournament } from './buttonClicking';
+import { registerPlayer, localGaming, forfeit, movePaddle, localMovePaddle, confirmParticipation, checkIsInGame, checkReady, checkIsInTournament } from './buttonClicking';
 import { route } from '../router';
 import { renderHomeContent, renderPlayContent, renderStatsContent } from './sections';
 import { renderHistoryContent, getNicknameForPlayerId } from './history';
@@ -29,6 +29,7 @@ export enum MetaGameState {
   waittouropprdy,
   intourgame,
   losttour,
+  inlocalgame,
   misc,
 }
 
@@ -38,6 +39,16 @@ async function movePaddleWrapper(d: number) {
   const movePaddleRespObj = JSON.parse(movePaddleResp);
   if (movePaddleRespObj.err !== "nil") {
     console.error(movePaddleRespObj.err);
+  }
+}
+
+async function localMovePaddleWrapper(d: number, p: string) {
+  // p === "l" || "r";
+  const lmovePaddleRawResp = await localMovePaddle(d, p);
+  const lmovePaddleResp = await lmovePaddleRawResp.text();
+  const lmovePaddleRespObj = JSON.parse(lmovePaddleResp);
+  if (lmovePaddleRespObj.err !== "nil") {
+    console.error(lmovePaddleRespObj.err);
   }
 }
 
@@ -126,6 +137,7 @@ export async function buttonSetter(state : MetaGameState) {
       document.getElementById("start-button").disabled = false;
       document.getElementById("ready-button").disabled = true;
       document.getElementById("giveup-button").disabled = true;
+      document.getElementById("local-play-button").disabled = false;
       break;
     }
     case MetaGameState.waitmmopp: {
@@ -141,6 +153,7 @@ export async function buttonSetter(state : MetaGameState) {
       document.getElementById("start-button").disabled = true;
       document.getElementById("ready-button").disabled = true;
       document.getElementById("giveup-button").disabled = false;
+      document.getElementById("local-play-button").disabled = true;
       break;
     }
     case MetaGameState.waittouropp: {
@@ -152,6 +165,7 @@ export async function buttonSetter(state : MetaGameState) {
       document.getElementById("start-button").disabled = true;
       document.getElementById("ready-button").disabled = true;
       document.getElementById("giveup-button").disabled = true;
+      document.getElementById("local-play-button").disabled = true;
       break;
     }
     case MetaGameState.waittourrdy: {
@@ -159,6 +173,7 @@ export async function buttonSetter(state : MetaGameState) {
       document.getElementById("start-button").disabled = true;
       document.getElementById("ready-button").disabled = false;
       document.getElementById("giveup-button").disabled = true;
+      document.getElementById("local-play-button").disabled = true;
       break;
     }
     case MetaGameState.waittouropprdy: {
@@ -166,6 +181,7 @@ export async function buttonSetter(state : MetaGameState) {
       document.getElementById("start-button").disabled = true;
       document.getElementById("ready-button").disabled = true;
       document.getElementById("giveup-button").disabled = true;
+      document.getElementById("local-play-button").disabled = true;
       break;
     }
     case MetaGameState.intourgame: {
@@ -173,6 +189,7 @@ export async function buttonSetter(state : MetaGameState) {
       document.getElementById("start-button").disabled = true;
       document.getElementById("ready-button").disabled = true;
       document.getElementById("giveup-button").disabled = false;
+      document.getElementById("local-play-button").disabled = true;
       break;
     }
     case MetaGameState.losttour: {
@@ -180,6 +197,15 @@ export async function buttonSetter(state : MetaGameState) {
       document.getElementById("start-button").disabled = true;
       document.getElementById("ready-button").disabled = true;
       document.getElementById("giveup-button").disabled = true;
+      document.getElementById("local-play-button").disabled = true;
+      break;
+    }
+    case MetaGameState.inlocalgame: {
+      // 11
+      document.getElementById("start-button").disabled = true;
+      document.getElementById("ready-button").disabled = true;
+      document.getElementById("giveup-button").disabled = false;
+      document.getElementById("local-play-button").disabled = true;
       break;
     }
     default: {
@@ -188,6 +214,7 @@ export async function buttonSetter(state : MetaGameState) {
       document.getElementById("start-button").disabled = false;
       document.getElementById("ready-button").disabled = false;
       document.getElementById("giveup-button").disabled = false;
+      document.getElementById("local-play-button").disabled = false;
       break;
     }
   }
@@ -226,12 +253,10 @@ export async function setterUponMetaInfo(gameInfo : HTMLElement, metaInfo : {gTy
     console.log("ginfo setter 1");
     gameInfo.innerHTML = "Game type: " + metaInfo.gType + "; versus: " + metaInfo.oppName;
   }
-  else {
+  else if (metaInfo.gType === "tournament") {
     // ok, it's a tournament
     // there's only ONE situation which requires us to press the ready key.
     // we're in a game of type tournament and we're not ready.
-    //
-    // if it's a game and we're ready, just give the forfeit button ? TODO to think
     const isready : bool = await checkReadyWrapper();
     if (!isready) {
       buttonSetter(MetaGameState.waittourrdy);
@@ -241,6 +266,11 @@ export async function setterUponMetaInfo(gameInfo : HTMLElement, metaInfo : {gTy
     }
     console.log("ginfo setter 2");
     gameInfo.innerHTML = "Game type: " + metaInfo.gType + "; versus: " + metaInfo.oppName;
+  }
+  else if (metaInfo.gType === "local") {
+    buttonSetter(MetaGameState.inlocalgame);
+    console.log("ginfo setter 3");
+    gameInfo.innerHTML = "Game type: " + metaInfo.gType;
   }
 }
 
@@ -291,7 +321,7 @@ const resetGameText = () => {
 
   gameText.style.visibility = "hidden";
   gameText.innerHTML = "Welcome to Pong!";
- 
+
   gameText.classList.remove(
     "fill-white",
     'fill-red-400', 'fill-green-400',
@@ -321,7 +351,7 @@ const resetGameUi = () => {
     setTimeout(() => {
       scoreText.classList.remove('opacity-0');
     }, 150);
-  } 
+  }
 }
 
 function triggerConfetti() {
@@ -422,7 +452,7 @@ function triggerPaddleEffect(paddleId: string) {
   group.setAttribute(
     'transform',
     `translate(${pivotX},${pivotY}) scale(1.2) translate(${-pivotX},${-pivotY})`
-  ); 
+  );
 
   setTimeout(() => {
     group.removeAttribute('filter'); // corrected
@@ -433,7 +463,7 @@ function triggerPaddleEffect(paddleId: string) {
 function triggerBallEffect() {
   const ball = document.getElementById('ball');
   if (!ball) return;
-  
+
   ball.classList.add('animate-ball-pulse');
   setTimeout(() => ball.classList.remove('animate-ball-pulse'), 300);
 }
@@ -445,6 +475,62 @@ if (wrapper) {
     if (old) old.remove();
   }
   // currentGoogleButtonId = null; // Removed because it's a read-only import
+}
+
+function generalDirectionButtonHandler(arrow: HTMLButtonElement, dir: number, side: string, playerSide: {v: string}) {
+  console.log("setting general arrow handling with:", arrow, dir, side, playerSide.v);
+  arrow.addEventListener('mousedown', () => {
+    if (playerSide.v === "local") {
+      localMovePaddleWrapper(dir, side);
+    }
+    else {
+      movePaddleWrapper(dir);
+    }
+  });
+
+  arrow.addEventListener('mouseup', () => {
+    if (playerSide.v === "local") {
+      localMovePaddleWrapper(0, side);
+    }
+    else {
+      movePaddleWrapper(0);
+    }
+  });
+
+  arrow.addEventListener('mouseleave', () => {
+    if (playerSide.v === "local") {
+      localMovePaddleWrapper(0, side);
+    }
+    else {
+      movePaddleWrapper(0);
+    }
+  });
+}
+
+function lostRoundInfo(gameText: HTMLElement) {
+  gameText.innerHTML = `${t("lostRound")}`;
+  gameText.classList.remove('fill-white');
+  gameText.setAttribute("fill", "#f87171");
+}
+
+function wonRoundInfo(gameText: HTMLElement) {
+  gameText.innerHTML = `${t("wonRound")}`;
+  gameText.classList.remove('fill-white');
+  gameText.setAttribute("fill", "#4ade80");
+}
+
+function lostGameInfo(gameText: HTMLElement) {
+  gameText.innerHTML = `${t("lostGame")}`;
+  gameText.classList.remove('fill-white');
+  gameText.setAttribute("fill", "#f87171");
+  setTimeout(() => triggerRainEffect(), 300);
+}
+
+function wonGameInfo(gameText: HTMLElement) {
+  gameText.innerHTML = `${t("wonGame")}`;
+  gameText.classList.remove('fill-white');
+  gameText.setAttribute("fill", "#4ade80");
+  setTimeout(() => triggerConfetti(), 300);
 }
 
 export async function initDashboard() {
@@ -563,6 +649,14 @@ export async function initDashboard() {
         ">
           INSTANTLY forfeit
         </button>
+        <button id="local-play-button" disabled
+        class=
+        "
+          mt-6 p-3 bg-orange-500 rounded-lg hover:bg-orange-600 transition text-white font-medium
+          disabled:border-gray-200 disabled:bg-gray-700 disabled:text-gray-500 disabled:shadow-none
+        ">
+          Launch a local 1v1
+        </button>
       </div>
       <p id="game-info"></p>
     </div>
@@ -585,7 +679,8 @@ export async function initDashboard() {
   document.getElementById("start-button").innerHTML = t("pong-buttons.start-button-text");
   document.getElementById("ready-button").innerHTML = t("pong-buttons.ready-button-text");
   document.getElementById("giveup-button").innerHTML = t("pong-buttons.giveup-button-text");
-  
+  document.getElementById("local-play-button").innerHTML = t("pong-buttons.local-play-button-text");
+
   let gameText : HTMLElement | null = document.getElementById("game-text")!;
   if (gameText) {
     gameText.style.visibility = "hidden";
@@ -597,7 +692,9 @@ export async function initDashboard() {
 
   let socket : WebSocket;
   let gameState : State = nullState;
-  let playerSide : string = "tbd";
+  let playerSide = {
+    v : "tbd",
+  };
   // FIXME unused. remove or use.
   let started : boolean = false;
   let metaInfo = await getGameMetaInfo();
@@ -637,7 +734,7 @@ export async function initDashboard() {
           break;
         case "abandon":
           started = false;
-          playerSide = "tbd";
+          playerSide.v = "tbd";
           leftUpArrow.hidden = true;
           leftDownArrow.hidden = true;
           rightUpArrow.hidden = true;
@@ -654,16 +751,26 @@ export async function initDashboard() {
           if (metaInfo.gType === "unknown") {
             gameInfo.innerHTML = "";
           }
+          else if (metaInfo.gType === "local") {
+            gameInfo.innerHTML = "Game type: " + metaInfo.gType;
+          }
           else {
             gameInfo.innerHTML = "Game type: " + metaInfo.gType + "; versus: " + metaInfo.oppName;
           }
           await setterUponMetaInfo(gameInfo, metaInfo);
           started = false;
-          playerSide = "l";
+          if (metaInfo.gType === "local") {
+            playerSide.v = "local";
+            rightUpArrow.hidden = false;
+            rightDownArrow.hidden = false;
+          }
+          else {
+            playerSide.v = "l";
+            rightUpArrow.hidden = true;
+            rightDownArrow.hidden = true;
+          }
           leftUpArrow.hidden = false;
           leftDownArrow.hidden = false;
-          rightUpArrow.hidden = true;
-          rightDownArrow.hidden = true;
           gameText.style.visibility = "hidden";
           scoreText.classList.add('opacity-0');
           setTimeout(() => {
@@ -671,7 +778,7 @@ export async function initDashboard() {
 
            scoreText.classList.remove('opacity-0');
           }, 150);
-    
+
           break;
         case "added: R":
           metaInfo = await getGameMetaInfo();
@@ -683,7 +790,7 @@ export async function initDashboard() {
           }
           await setterUponMetaInfo(gameInfo, metaInfo);
           started = false;
-          playerSide = "r";
+          playerSide.v = "r";
           rightUpArrow.hidden = false;
           rightDownArrow.hidden = false;
           leftUpArrow.hidden = true;
@@ -699,66 +806,69 @@ export async function initDashboard() {
           break;
         case "started":
           started = true;
-          break; 
+          break;
         case "error":
           break;
+        case "local":
+          metaInfo = await getGameMetaInfo();
+          if (metaInfo.gType === "unknown") {
+            gameInfo.innerHTML = "";
+          }
+          await setterUponMetaInfo(gameInfo, metaInfo);
+          playerSide.v = "local";
+          rightUpArrow.hidden = false;
+          rightDownArrow.hidden = false;
+          leftUpArrow.hidden = false;
+          leftDownArrow.hidden = false;
+          gameText.style.visibility = "hidden";
+          scoreText.classList.add('opacity-0');
+          setTimeout(() => {
+            scoreText.innerHTML = `${gameState.stateScoreL} : ${gameState.stateScoreR}`;
+
+            scoreText.classList.remove('opacity-0');
+          }, 150);
         default:
           const newState: State =JSON.parse(event.data);
 
-           ball.setAttribute("cx", "" + newState.stateBall.coords.x);
-           ball.setAttribute("cy", "" + newState.stateBall.coords.y);
-           lpad.setAttribute("y", "" + newState.stateLP.y);
-           rpad.setAttribute("y", "" + newState.stateRP.y);
-           try { 
-             if (newState.stateBall.hitLPaddle) triggerPaddleEffect('lpad');
-             if (newState.stateBall.hitRPaddle) triggerPaddleEffect('rpad');
-             if (newState.stateBall.hitWall) triggerBallEffect();
-
-           } catch (e) {
+          ball.setAttribute("cx", "" + newState.stateBall.coords.x);
+          ball.setAttribute("cy", "" + newState.stateBall.coords.y);
+          lpad.setAttribute("y", "" + newState.stateLP.y);
+          rpad.setAttribute("y", "" + newState.stateRP.y);
+          try {
+            if (newState.stateBall.hitLPaddle) triggerPaddleEffect('lpad');
+            if (newState.stateBall.hitRPaddle) triggerPaddleEffect('rpad');
+            if (newState.stateBall.hitWall) triggerBallEffect();
+          } catch (e) {
             console.error("Error updating game state:", e);
-            }
-           scoreText.innerHTML = `${newState.stateScoreL} : ${newState.stateScoreR}`;
-           scoreText.classList.remove('opacity-0');
+          }
+          scoreText.innerHTML = `${newState.stateScoreL} : ${newState.stateScoreR}`;
+          scoreText.classList.remove('opacity-0');
 
-          gameState = newState; 
-          
-
-
-
+          gameState = newState;
           if (gameState.stateWhoL !== "none" && gameState.stateWhoL !== "null state") {
             gameText.style.visibility = "visible";
             gameText.classList.remove('opacity-0');
             // gameText.classList.remove('animate-win-pulse', 'animate-lose-pulse', 'animate-text-glow');
-            
+
             scoreText.innerHTML = "" + gameState.stateScoreL + " : " + gameState.stateScoreR;
             scoreText.classList.remove('opacity-0');
             const playButton = document.getElementById('start-button');
-            if (playerSide === "l") {
+            if (playerSide.v === "l") {
               switch (gameState.stateWhoL) {
                 case "left":
-                  gameText.innerHTML = `${t("lostRound")}`;
-                  gameText.classList.remove('fill-white');
-                  gameText.setAttribute("fill", "#f87171");
+                  lostRoundInfo(gameText);
                   break;
                 case "right":
-                  gameText.innerHTML = `${t("wonRound")}`;
-                  gameText.classList.remove('fill-white');
-                  gameText.setAttribute("fill", "#4ade80");
+                  wonRoundInfo(gameText);
                   break;
                 case "left fully":
                   started = false;
-                  gameText.innerHTML = `${t("lostgame")}`;
-                  gameText.classList.remove('fill-white');
-                  gameText.setAttribute("fill", "#f87171");
-                  setTimeout(() => triggerRainEffect(), 300);
+                  lostGameInfo(gameText);
                   await tourCheckAndSetIdlingButtons();
                   break;
                 case "right fully":
                   started = false;
-                  gameText.innerHTML = `${t("wongame")}`;
-                  gameText.classList.remove('fill-white');
-                  gameText.setAttribute("fill", "#4ade80");
-                  setTimeout(() => triggerConfetti(), 300);
+                  wonGameInfo(gameText);
                   await tourCheckAndSetIdlingButtons();
                   break;
                 case "both":
@@ -767,30 +877,48 @@ export async function initDashboard() {
                   await tourCheckAndSetIdlingButtons();
                   break;
               }
-            } else if (playerSide === "r") {
+            }
+            else if (playerSide.v === "r") {
               switch (gameState.stateWhoL) {
                 case "right":
-                  gameText.innerHTML = `${t("lostRound")}`;
-                  gameText.classList.remove('fill-white');
-                  gameText.setAttribute("fill", "#f87171");
+                  lostRoundInfo(gameText);
                   break;
                 case "left":
-                  gameText.innerHTML = `${t("wonRound")}`;
-                  gameText.classList.remove('fill-white');
-                  gameText.setAttribute("fill", "#4ade80");
+                  wonRoundInfo(gameText);
                   break;
                 case "right fully":
                   started = false;
-                  gameText.innerHTML = `${t("lostGame")}`;
-                  gameText.setAttribute("fill", "#f87171");
-                  setTimeout(() => triggerRainEffect(), 300);
+                  lostGameInfo(gameText);
                   await tourCheckAndSetIdlingButtons();
                   break;
                 case "left fully":
                   started = false;
-                  gameText.innerHTML = `${t("wonGame")}`;
-                  gameText.setAttribute("fill", "#4ade80");
-                  setTimeout(() => triggerConfetti(), 300);
+                  wonGameInfo(gameText);
+                  await tourCheckAndSetIdlingButtons();
+                  break;
+                case "both":
+                  started = false;
+                  gameText.innerHTML = "In a rare dispay of absense, nobody won";
+                  await tourCheckAndSetIdlingButtons();
+                  break;
+              }
+            }
+            else if (playerSide.v === "local") {
+              switch (gameState.stateWhoL) {
+                case "right":
+                  gameText.innerHTML = "L won";
+                  break;
+                case "left":
+                  gameText.innerHTML = "R won";
+                  break;
+                case "right fully":
+                  started = false;
+                  gameText.innerHTML = "L super won";
+                  await tourCheckAndSetIdlingButtons();
+                  break;
+                case "left fully":
+                  started = false;
+                  gameText.innerHTML = "R super won";
                   await tourCheckAndSetIdlingButtons();
                   break;
                 case "both":
@@ -803,7 +931,7 @@ export async function initDashboard() {
           }
           else {
             gameText.style.visibility = "hidden";
-            
+
             scoreText.innerHTML = "" + gameState.stateScoreL + " : " + gameState.stateScoreR;
             scoreText.classList.remove('opacity-0');
           }
@@ -869,66 +997,69 @@ export async function initDashboard() {
       }
       await setterUponMetaInfo(gameInfo, metaInfo);
     });
-
-    leftUpArrow.addEventListener('mousedown', () => {
-      movePaddleWrapper(-2);
+    document.getElementById('local-play-button')!.addEventListener('click', async () => {
+      console.log("after clicking the local-play-button,");
+      const localGamingRawResp = await localGaming();
+      const localGamingResp = await localGamingRawResp.text();
+      const localGamingRespObj = JSON.parse(localGamingResp);
+      if (localGamingRespObj.err !== "nil") {
+        console.error(localGamingRespObj.err);
+      }
+      metaInfo = await getGameMetaInfo();
+      if (metaInfo.gType === "local") {
+        gameInfo.innerHTML = "Game type: " + metaInfo.gType;
+      }
+      else {
+        gameInfo.innerHTML = "Something weird has happened trying to do a local game.";
+      }
+      await setterUponMetaInfo(gameInfo, metaInfo);
     });
 
-    leftUpArrow.addEventListener('mouseup', () => {
-      movePaddleWrapper(0);
-    });
-
-    leftUpArrow.addEventListener('mouseleave', () => {
-      movePaddleWrapper(0);
-    });
-
-    leftDownArrow.addEventListener('mousedown', () => {
-      movePaddleWrapper(2);
-    });
-
-    leftDownArrow.addEventListener('mouseup', () => {
-      movePaddleWrapper(0);
-    });
-
-    leftDownArrow.addEventListener('mouseleave', () => {
-      movePaddleWrapper(0);
-    });
-
-    rightUpArrow.addEventListener('mousedown', () => {
-      movePaddleWrapper(-2);
-    });
-
-    rightUpArrow.addEventListener('mouseup', () => {
-      movePaddleWrapper(0);
-    });
-
-    rightUpArrow.addEventListener('mouseleave', () => {
-      movePaddleWrapper(0);
-    });
-
-    rightDownArrow.addEventListener('mousedown', () => {
-      movePaddleWrapper(2);
-    });
-
-    rightDownArrow.addEventListener('mouseup', () => {
-      movePaddleWrapper(0);
-    });
-
-    rightDownArrow.addEventListener('mouseleave', () => {
-      movePaddleWrapper(0);
-    });
+    console.log("playerside:", playerSide.v);
+    generalDirectionButtonHandler(leftUpArrow, -2, "l", playerSide);
+    generalDirectionButtonHandler(leftDownArrow, 2, "l", playerSide);
+    generalDirectionButtonHandler(rightUpArrow, -2, "r", playerSide);
+    generalDirectionButtonHandler(rightDownArrow, 2, "r", playerSide);
 
     window.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowUp' || e.key === 'w'|| e.key === 'W') {
-        movePaddleWrapper(-2); // move up
-      } else if (e.key === 'ArrowDown' || e.key === 's'|| e.key === 'S') {
-        movePaddleWrapper(2); // move down
+      if (window.location.hash.replace('#', '') === "play") {
+        if (playerSide.v === "r" || playerSide.v === "l") {
+          if (e.key === 'ArrowUp' || e.key === 'w'|| e.key === 'W') {
+            movePaddleWrapper(-2); // move up
+          } else if (e.key === 'ArrowDown' || e.key === 's'|| e.key === 'S') {
+            movePaddleWrapper(2); // move down
+          }
+        }
+        else if (playerSide.v === "local") {
+          if (e.key === 'w'|| e.key === 'W') {
+            localMovePaddleWrapper(-2, "l");
+          } else if (e.key === 's'|| e.key === 'S') {
+            localMovePaddleWrapper(2, "l");
+          }
+          else if (e.key === 'o'|| e.key === 'O') {
+            localMovePaddleWrapper(-2, "r");
+          } else if (e.key === 'l'|| e.key === 'L') {
+            localMovePaddleWrapper(2, "r");
+          }
+        }
       }
     });
 
     window.addEventListener('keyup', (e) => {
-      if (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'w' || e.key === 'W' || e.key === 's' || e.key === 'S') {
-        movePaddleWrapper(0); // stop moving
+      if (window.location.hash.replace('#', '') === "play") {
+        if (playerSide.v === "r" || playerSide.v === "l") {
+          if (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'w' || e.key === 'W' || e.key === 's' || e.key === 'S') {
+            movePaddleWrapper(0); // stop moving
+          }
+        }
+        else if (playerSide.v === "local") {
+          if (e.key === 'w' || e.key === 'W' || e.key === 's' || e.key === 'S') {
+            localMovePaddleWrapper(0, "l");
+          }
+          else if (e.key === 'o' || e.key === 'O' || e.key === 'l' || e.key === 'L') {
+            localMovePaddleWrapper(0, "r");
+          }
+        }
       }
     });
   }
@@ -982,7 +1113,7 @@ export async function initDashboard() {
     resetGoogle();
     window.location.hash = 'login';
    // if (googleInitialized) resetGoogle();
-   window.location.reload();  
+   window.location.reload();
    //route();
   });
 
