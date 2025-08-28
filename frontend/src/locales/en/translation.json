@@ -69,14 +69,15 @@
     "success.delete": "Account deleted successfully!"
   },
   "friendsTxt": {
-	"nickTxt": "Friend's Nickname",
-	"addBtn": "Add friend",
-	"nickRow": "Friend's Nickname",
-	"statusRow": "Status",
-	"addError": "An error occured while adding the friend.",
+    "refresh": "Refesh Friend's status",
+  	"nickTxt": "Friend's Nickname",
+  	"addBtn": "Add friend",
+  	"nickRow": "Friend's Nickname",
+  	"statusRow": "Status",
+  	"addError": "An error occured while adding the friend.",
     "addFailed": "Failed to add Friend.",
-	"getError": "Error loading friends. Please try again later",
-	"getFailed": "Failed to fetch friends data."
+  	"getError": "Error loading friends. Please try again later",
+  	"getFailed": "Failed to fetch friends data."
   },
   "nav": {
     "dashboard": "Dashboard",
