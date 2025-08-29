@@ -133,17 +133,21 @@ function addFriendById(userId, friendId) {
 }
 
 function getUserIdByNickname(nick) {
-	const stmt = db.prepare('SELECT id FROM users WHERE username = ? LIMIT 1');
+	const stmt = db.prepare('SELECT id FROM users WHERE nickname = ? LIMIT 1');
 	return stmt.get(nick);
 }
 
 function addFriendByNick(userId, friendNick) {
+  const row1 = getNicknameById("IS34sNmx3AX1QCU9ZSdfH0IK7JGnzsXoorD9KBgfTIot6SKisNtWeUkCpIASJORK");
+  console.log("addFriendByNick --->  ", row1);
+  if (row1.nickname === friendNick) console.log("addFriendByNick ---> Son iguales");
+  else console.log(`addFriendByNick ---> NO IGUALES : "${row1.nickname}", "${friendNick}`); 
 	const row = getUserIdByNickname(friendNick);
-    if (row === undefined) return { error: `${friendNick} doesn´t exits!` };
-    const friendId = row.id;
+  if (row === undefined) return { error: `${friendNick} doesn´t exits!` };
+  const friendId = row.id;
 	if (friendId !== userId) {
-      addFriendById(userId, friendId);
-      return { success: true, userId, friendId };
+    addFriendById(userId, friendId);
+    return { success: true, userId, friendId };
 	}
 	return { error : "You can´t be friend of yourself" } 
 }
@@ -155,13 +159,13 @@ function getUserFriends(userId) {
 
 //by apardo-m for set user online/offline
 function putUserStatus(userId, userStatus) {
-    const stmt = db.prepare('UPDATE users SET status = ? WHERE id = ?');
-    stmt.run(userStatus, userId);
-    return { success: true, id: userId, userStatus: userStatus };
+  const stmt = db.prepare('UPDATE users SET status = ? WHERE id = ?');
+  stmt.run(userStatus, userId);
+  return { success: true, id: userId, userStatus: userStatus };
 }
 
 module.exports = {
-	getNicknameById,
+    getNicknameById,
     getUserByUsernameOrEmail,
     getUserByUsername,
     getUserById,
@@ -171,7 +175,7 @@ module.exports = {
     createUser,
     updateUser,
     deleteUser,
-	addFriendByNick,
-	getUserFriends,
-	putUserStatus
+    addFriendByNick,
+    getUserFriends,
+    putUserStatus
 };

@@ -223,7 +223,7 @@ export function renderLogin(appElement: HTMLElement) {
         }
        
         localStorage.setItem('authToken', data.token);
- 	    localStorage.setItem('userId', data.id);
+        localStorage.setItem('userId', data.id);
         localStorage.setItem('authProvider', '42');
  
         const userAvatar = data.user?.avatar?.trim()
@@ -236,35 +236,6 @@ export function renderLogin(appElement: HTMLElement) {
  //            avatar: data.user?.avatar || `https://i.pravatar.cc/150?u=${username}`
         }));
         window.location.hash = 'home';
-/*         
-        const userId = localStorage.getItem('userId') || sessionStorage.getItem('userId');
-        const authToken : string = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
-        const authstringheader : string = "Bearer " + authToken;
- 	  
-        const updatedData: {
-           userStatus: string;
-        } = {
-          userStatus: "online"
-        }
-  
-        try {
-          const reponse = await fetch(`${API_BASE_URL}/api/user/status`, {
-            method: "PUT",
-            headers: { 
-              "Use-me-to-authorize": authstringheader,
-              "Content-Type": "application/json"
-            },
-            credentials: 'include',
-            body: JSON.stringify(updatedData),
-          })  ;
-		  if (!response.ok) {
-            console.log("!response.ok -- When put Status : ", updatedData.userStatus);  
-		  }
-
-        } catch (err) {
-			console.log("Error when change status: ", err);
-        }
- */
         await setUserStatus("online");
       } catch (error) {
         errorElement.textContent = error instanceof Error ? error.message : 'Login failed';
@@ -466,6 +437,9 @@ async function handleGoogleCredentialResponse(response: { credential: string }) 
     localStorage.setItem('userId', data.id);
     localStorage.setItem('authProvider', 'google');
     window.location.hash = 'home';
+
+    await setUserStatus("online");
+
     route();
   } catch (error) {
     console.error('❌ Google sign-in failed:', error);

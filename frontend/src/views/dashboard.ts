@@ -10,7 +10,6 @@ import { State, nullState } from './pongrender';
 import { googleInitialized, resetGoogle, currentGoogleButtonId} from './login';
 import confetti from 'canvas-confetti';
 import { t, i18nReady } from '../i18n';
-import { setUserStatus } from "./utils/status";
 
 // Import VITE_API_BASE_URL from environment variables
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -977,16 +976,15 @@ export async function initDashboard() {
 
   // Logout functionality
   document.getElementById('logout-btn')!.addEventListener('click', async () => {
-	await setUserStatus("offline");
     localStorage.removeItem('authToken');
     localStorage.removeItem('userId');
     localStorage.removeItem('authProvider');
     socket.close();
     resetGoogle();
     window.location.hash = 'login';
-   // if (googleInitialized) resetGoogle();
-   window.location.reload();  
-   //route();
+    // if (googleInitialized) resetGoogle();
+    window.location.reload();  
+    //route();
   });
 
   // Render active section
@@ -997,8 +995,6 @@ export async function initDashboard() {
     gameWindow: document.getElementById('game-window')!,
   };
   switch (hash) {
-	  
-	  
     case 'profile':           renderProfileContent(hideableElements);           break;
     case 'play':              renderPlayContent(hideableElements);              break;
     case 'history':           renderHistoryContent(hideableElements);           break;

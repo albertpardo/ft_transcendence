@@ -90,7 +90,7 @@ export async function renderFriendsContent(hideableElements) {
   addFriendButton.addEventListener("click", async () => {
 	  const friendNick = document.getElementById("form-friendnick") as HTMLInputElement;
 
-	 // alert(`${friendNick.value}`);
+	  alert(`-${friendNick.value}-`);
 	  const updatedData: {
         nick: string;
     } = {
