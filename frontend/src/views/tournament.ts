@@ -128,35 +128,35 @@ async function fillInTheTournTable() {
       bt.innerHTML = `
         <tbody>
           <tr>
-            <td id="table-contender-1"> t('tournaments.contender') 1</td>
-            <td rowspan="2" id="table-quarterfinal-1">t('tournaments.quarterFinal') 1</td>
-            <td rowspan="4" id="table-semifinal-1">t('tournaments.semiFinal') 1</td>
-            <td rowspan="8" id="table-finalist">t('tournaments.final')!</td>
+            <td id="table-contender-1"> ${t('tournaments.contender')} 1</td>
+            <td rowspan="2" id="table-quarterfinal-1">${t('tournaments.quarterFinal')} 1</td>
+            <td rowspan="4" id="table-semifinal-1">${t('tournaments.semiFinal')} 1</td>
+            <td rowspan="8" id="table-finalist">${t('tournaments.final')}!</td>
           </tr>
           <tr>
-            <td id="table-contender-2">t('tournaments.contender') 2</td>
+            <td id="table-contender-2">${t('tournaments.contender')} 2</td>
           </tr>
           <tr>
-            <td id="table-contender-3">t('tournaments.contender') 3</td>
-            <td rowspan="2" id="table-quarterfinal-2">t('tournaments.quarterFinal') 2</td>
+            <td id="table-contender-3">${t('tournaments.contender')} 3</td>
+            <td rowspan="2" id="table-quarterfinal-2">${t('tournaments.quarterFinal')} 2</td>
           </tr>
           <tr>
-            <td id="table-contender-4">t('tournaments.contender') 4</td>
+            <td id="table-contender-4">${t('tournaments.contender')} 4</td>
           </tr>
           <tr>
-            <td id="table-contender-5">t('tournaments.contender') 5</td>
-            <td rowspan="2" id="table-quarterfinal-3">t('tournaments.quarterFinal') 3</td>
-            <td rowspan="4" id="table-semifinal-2">t('tournaments.semiFinal') 2</td>
+            <td id="table-contender-5">${t('tournaments.contender')} 5</td>
+            <td rowspan="2" id="table-quarterfinal-3">${t('tournaments.quarterFinal')} 3</td>
+            <td rowspan="4" id="table-semifinal-2">${t('tournaments.semiFinal')} 2</td>
           </tr>
           <tr>
-            <td id="table-contender-6">t('tournaments.contender') 6</td>
+            <td id="table-contender-6">${t('tournaments.contender')} 6</td>
           </tr>
           <tr>
-            <td id="table-contender-7">t('tournaments.contender') 7</td>
-            <td rowspan="2" id="table-quarterfinal-4">t('tournaments.quarterFinal') 4</td>
+            <td id="table-contender-7">${t('tournaments.contender')} 7</td>
+            <td rowspan="2" id="table-quarterfinal-4">${t('tournaments.quarterFinal')} 4</td>
           </tr>
           <tr>
-            <td id="table-contender-8">t('tournaments.contender') 8</td>
+            <td id="table-contender-8">${t('tournaments.contender')} 8</td>
           </tr>
         </tbody>
       `;
@@ -267,7 +267,7 @@ export async function renderTournamentContent(hideableElements) {
        focus:ring-offset-gray-800
        disabled:border-gray-200 disabled:bg-gray-700 disabled:text-gray-500 disabled:shadow-none
      ">
-      Leave tournament (participant only)
+      ${t('tournaments.leaveTournament')} (participant only)
     </button>
     <button id="force-rm-tourn" disabled
      class=
@@ -278,7 +278,8 @@ export async function renderTournamentContent(hideableElements) {
        focus:ring-offset-gray-800
        disabled:border-gray-200 disabled:bg-gray-700 disabled:text-gray-500 disabled:shadow-none
      ">
-      COMPLETELY ANNIHILATE THE TOURNAMENT (admin only)
+      ${t('tournaments.destroyTournament')}
+     
     </button>
     </div>
   `;
