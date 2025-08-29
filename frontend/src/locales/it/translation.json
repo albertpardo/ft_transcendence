@@ -16,6 +16,12 @@
     "description": "Unisciti o crea tornei per competere con altri.",
     "create": "Crea Torneo",
     "join": "Partecipa al Torneo",
+    "contender": "Contendente",
+    "quarterFinal": "Quarti di finale",
+    "semiFinal": "Semifinale",
+    "final": "Finalista",
+    "leaveTournament": "Esci dal torneo (se sei iscritto)",
+    "destroyTournament": "Distruggi torneo (solo admin)",
     "noTournaments": "Nessun torneo disponibile al momento.",
     "tournamentName": "Nome torneo",
     "startDate": "Data di inizio",
@@ -33,14 +39,19 @@
     "score": "Punteggio",
     "opponent": "Avversario",
     "date": "Data",
-	"win": "Vittoria",
-	"loss": "Sconfitta",
-	"winForfeit": "Vittoria (il nemico ha rinunciato)",
-	"lossForfeit": "Sconfitta (hai rinunciato)",
-	"winAbsence": "Vittoria (il nemico non si è presentato)",
-	"lossAbsence": "Sconfitta (non ti sei presentato)",
+	  "win": "Vittoria",
+	  "loss": "Sconfitta",
+    "side": "Lateralità",
+    "right": "Destra",
+    "left": "Sinistra",
+    "type": "Tipo",
+	  "winForfeit": "Vittoria (il nemico ha rinunciato)",
+	  "lossForfeit": "Sconfitta (hai rinunciato)",
+	  "winAbsence": "Vittoria (il nemico non si è presentato)",
+	  "lossAbsence": "Sconfitta (non ti sei presentato)",
     "notLoggedIn": "Non sei connesso.",
     "noAuthToken": "Token di autenticazione mancante.",
+    "noGames": "Non hai ancora giocato partite.",
     "failedToLoad": "Impossibile caricare la cronologia partite."
   },
   "profiles": {
@@ -96,6 +107,7 @@
   "pong-buttons": {
 	  "start-button-text": "Cerca una partita veloce",
 	  "ready-button-text": "Conferma la partecipazione",
-	  "giveup-button-text": "Rinuncia IMMEDIATAMENTE"
+	  "giveup-button-text": "Rinuncia IMMEDIATAMENTE",
+    "local-play-button-text": "Avvia partita locale"
 	}
 }

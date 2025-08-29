@@ -14,6 +14,12 @@
     "title": "Turniere",
     "description": "Nehmen Sie an spannenden Pong-Turnieren teil und messen Sie sich mit anderen Spielern.",
     "join": "Tritt dem Turnier bei",
+    "contender": "Contender",
+    "quarterFinal": "Viertelfinale",
+    "semiFinal": "Halbfinale",
+    "final": "Finale",
+    "leaveTournament": "Turnier verlassen (wenn beigetreten)",
+    "destroyTournament": "Turnier zerstören (nur Admin)",
     "create": "Turnier erstellen",
     "noTournaments": "Derzeit sind keine Turniere verfügbar.",
     "tournamentName": "Turniername", 
@@ -31,15 +37,20 @@
     "result": "Ergebnis",
     "score": "Punktzahl",
     "opponent": "Gegner",
+    "side": "Seite",
     "date": "Datum",
-	"win": "Sieg",
-	"loss": "Niederlage",
-	"winForfeit": "Sieg (Gegner hat aufgegeben)",
-	"lossForfeit": "Niederlage (du hast aufgegeben)",
-	"winAbsence": "Sieg (Gegner abwesend)",
-	"lossAbsence": "Niederlage (du bist nicht erschienen)",
+	  "win": "Sieg",
+	  "loss": "Niederlage",
+    "right": "Rechts",
+    "left": "Links",
+    "type": "Typ",
+	  "winForfeit": "Sieg (Gegner hat aufgegeben)",
+	  "lossForfeit": "Niederlage (du hast aufgegeben)",
+	  "winAbsence": "Sieg (Gegner abwesend)",
+	  "lossAbsence": "Niederlage (du bist nicht erschienen)",
     "notLoggedIn": "Sie sind nicht angemeldet.",
     "noAuthToken": "Authentifizierungstoken fehlt.",
+    "noGames": "Sie haben noch keine Spiele gespielt.",
     "failedToLoad": "Spielverlauf konnte nicht geladen werden."
 },
   "profiles": {
@@ -95,6 +106,7 @@
   "pong-buttons": {
 	  "start-button-text": "Schnelles Spiel suchen",
 	  "ready-button-text": "Teilnahme bestätigen",
-	  "giveup-button-text": "SOFORT aufgeben"
+	  "giveup-button-text": "SOFORT aufgeben",
+    "local-play-button-text": "Lokales Spiel starten"
 	}
 }

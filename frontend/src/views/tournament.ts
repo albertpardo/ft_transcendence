@@ -2,6 +2,7 @@
 
 import { getNicknameForPlayerId } from './history'
 import { MetaGameState, buttonSetter, getGameMetaInfo, setterUponMetaInfo } from './dashboard'
+import { t, i18nReady } from '../i18n';
 
 // stolen from backend/microservices/game_service/src/pong.ts
 export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -120,42 +121,42 @@ async function fillInTheTournTable() {
   const tournAllInfoRespObj = JSON.parse(tournAllInfoResp);
   if (tournAllInfoRespObj.err !== "nil") {
     console.log("getting all the tourn info resulted in err:", tournAllInfoRespObj.err);
-    document.getElementById("tourn-title").innerHTML = "<i>No tournament.</i>";
+    document.getElementById("tourn-title").innerHTML = "<i>" + t('tournaments.noTournaments') + "</i>";
     document.getElementById("tourn-id").innerHTML = "";
     const bt = document.getElementById("big-table");
     if (bt) {
       bt.innerHTML = `
         <tbody>
           <tr>
-            <td id="table-contender-1">contender 1</td>
-            <td rowspan="2" id="table-quarterfinal-1">quarterfinal 1</td>
-            <td rowspan="4" id="table-semifinal-1">semifinal 1</td>
-            <td rowspan="8" id="table-finalist">finalist!</td>
+            <td id="table-contender-1"> t('tournaments.contender') 1</td>
+            <td rowspan="2" id="table-quarterfinal-1">t('tournaments.quarterFinal') 1</td>
+            <td rowspan="4" id="table-semifinal-1">t('tournaments.semiFinal') 1</td>
+            <td rowspan="8" id="table-finalist">t('tournaments.final')!</td>
           </tr>
           <tr>
-            <td id="table-contender-2">contender 2</td>
+            <td id="table-contender-2">t('tournaments.contender') 2</td>
           </tr>
           <tr>
-            <td id="table-contender-3">contender 3</td>
-            <td rowspan="2" id="table-quarterfinal-2">quarterfinal 2</td>
+            <td id="table-contender-3">t('tournaments.contender') 3</td>
+            <td rowspan="2" id="table-quarterfinal-2">t('tournaments.quarterFinal') 2</td>
           </tr>
           <tr>
-            <td id="table-contender-4">contender 4</td>
+            <td id="table-contender-4">t('tournaments.contender') 4</td>
           </tr>
           <tr>
-            <td id="table-contender-5">contender 5</td>
-            <td rowspan="2" id="table-quarterfinal-3">quarterfinal 3</td>
-            <td rowspan="4" id="table-semifinal-2">semifinal 2</td>
+            <td id="table-contender-5">t('tournaments.contender') 5</td>
+            <td rowspan="2" id="table-quarterfinal-3">t('tournaments.quarterFinal') 3</td>
+            <td rowspan="4" id="table-semifinal-2">t('tournaments.semiFinal') 2</td>
           </tr>
           <tr>
-            <td id="table-contender-6">contender 6</td>
+            <td id="table-contender-6">t('tournaments.contender') 6</td>
           </tr>
           <tr>
-            <td id="table-contender-7">contender 7</td>
-            <td rowspan="2" id="table-quarterfinal-4">quarterfinal 4</td>
+            <td id="table-contender-7">t('tournaments.contender') 7</td>
+            <td rowspan="2" id="table-quarterfinal-4">t('tournaments.quarterFinal') 4</td>
           </tr>
           <tr>
-            <td id="table-contender-8">contender 8</td>
+            <td id="table-contender-8">t('tournaments.contender') 8</td>
           </tr>
         </tbody>
       `;
