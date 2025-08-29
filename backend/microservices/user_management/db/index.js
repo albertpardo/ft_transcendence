@@ -32,8 +32,8 @@ const initFriends = db.prepare(`
     user_id TEXT NOT NULL,
     friend_id TEXT NOT NULL,
     PRIMARY KEY (user_id, friend_id),
-    FOREIGN KEY (user_id) REFERENCES users(id),
-    FOREIGN KEY (friend_id) REFERENCES users(id))`
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (friend_id) REFERENCES users(id) ON DELETE CASCADE)`
 );
 initFriends.run();
 
