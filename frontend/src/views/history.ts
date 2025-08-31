@@ -1,4 +1,5 @@
 // src/views/history.ts
+import { t } from '../i18n'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -23,7 +24,7 @@ async function getHistoryForPlayerId(userId: string) {
   return (response);
 }
 
-async function getNicknameForPlayerId(userId: string) {
+export async function getNicknameForPlayerId(userId: string) {
   const response = await fetch(
     `${API_BASE_URL}/api/public/nickname`,
     {
@@ -41,23 +42,19 @@ async function getNicknameForPlayerId(userId: string) {
   return (response);
 }
 
-export async function renderHistoryContent(el: HTMLElement, bu: HTMLElement, gArea: HTMLElement, gWin: HTMLElement) {
-
+export async function renderHistoryContent(hideableElements) {
   let tempInnerHTML : string = `
-  <h1 class="text-3xl font-bold mb-6 text-white">Match History</h1>
-  <p class="mb-4 text-white">History of matches</p>
-  <div class="flex justify-center">
-    <table class="table-fixed border-separate border-spacing-x-6 bg-gray-900 text-white w-auto">
-      <thead>
-        <tr>
-          <th class="px-6 py-3 text-center">Result</th>
-          <th class="px-6 py-3 text-center">Score</th>
-          <th class="px-6 py-3 text-center">Opponent</th>
-          <th class="px-6 py-3 text-center">Date</th>
-        </tr>
-      </thead>
-      <tbody>
-`;
+    <h1 class="text-3xl font-bold mb-6">Match History</h1>
+    <p class="mb-4">History of matches</p>
+    <table class="table-fixed"><tbody><tr>
+    <th>Date</th>
+    <th>Opponent</th>
+    <th>Side</th>
+    <th>Type</th>
+    <th>Score</th>
+    <th>Result</th>
+    </tr>
+  `;
   // TODO FIXME spam protection? cache the thing maybe? make it independently get downloaded in the background once every something minutes.
   const rawHist = await getHistoryForPlayerId(localStorage.getItem('userId'));
   const rawHistBody = await rawHist.text();
@@ -65,46 +62,88 @@ export async function renderHistoryContent(el: HTMLElement, bu: HTMLElement, gAr
   for (const entry of parsedHist) {
     const idL : string = entry.leftId;
     const idR : string = entry.rightId;
-    // fallbacks for if getNickname fails I guess
-    let nicknameL : string = idL;
-    let nicknameR : string = idR;
-    const respNickL = await getNicknameForPlayerId(idL);
-    const respNickLBody = await respNickL.text();
-    nicknameL = JSON.parse(respNickLBody)?.nickname;
-    const respNickR = await getNicknameForPlayerId(idR);
-    const respNickRBody = await respNickR.text();
-    nicknameR = JSON.parse(respNickRBody)?.nickname;
-
-    const isLocalLeft = localStorage.getItem('userId') === idL;
-    const localScore = isLocalLeft ? entry.scoreL : entry.scoreR;
-    const oppScore = isLocalLeft ? entry.scoreR : entry.scoreL;
-    const opponent = isLocalLeft ? nicknameR : nicknameL;
-    const didWin = localScore > oppScore;
-    const resultText = didWin ? 'Victory' : 'Loss';
-    const resultColorClass = didWin ? 'text-green-400 font-semibold' : 'text-red-500 font-semibold';
-
+    let side : string = "";
+    let nicknameVs : string = "unknown";
+    let res : string = "";
+    if (localStorage.getItem('userId') === idL) {
+      if (entry.winner === "L") {
+        if (entry.finish === "forfeit") {
+          res = t("historic.winForfeit");
+        }
+        else if (entry.finish === "absence" || entry.finish === "technical") {
+          res = t("historic.winAbsence");
+        }
+        else {
+          res = t("historic.win");
+        }
+      }
+      else {
+        if (entry.finish === "forfeit") {
+          res = t("historic.lossForfeit");
+        }
+        else if (entry.finish === "technical") {
+          res = t("historic.lossAbsence");
+        }
+        else {
+          res = t("historic.loss");
+        }
+      }
+      side = "Left";
+      if (entry.finish !== "absence") {
+        let respNn = await getNicknameForPlayerId(idR);
+        let nnJson = JSON.parse(await respNn.text());
+        nicknameVs = "<i>unknown</i>";
+        if (nnJson.err === "nil") {
+          nicknameVs = nnJson.nick;
+        }
+      }
+    }
+    else {
+      if (entry.winner === "R") {
+        if (entry.finish === "forfeit") {
+          res = t("historic.winForfeit");
+        }
+        else if (entry.finish === "absence" || entry.finish === "technical") {
+          res = t("historic.winAbsence");
+        }
+        else {
+          res = t("historic.win");
+        }
+      }
+      else {
+        if (entry.finish === "forfeit") {
+          res = t("historic.lossForfeit");
+        }
+        else if (entry.finish === "technical") {
+          res = t("historic.lossAbsence");
+        }
+        else {
+          res = t("historic.loss");
+        }
+      }
+      side = "Right";
+      if (entry.finish !== "absence") {
+        let respNn = await getNicknameForPlayerId(idL);
+        let nnJson = JSON.parse(await respNn.text());
+        nicknameVs = "<i>unknown</i>";
+        if (nnJson.err === "nil") {
+          nicknameVs = nnJson.nick;
+        }
+      }
+    }
     const thisdate = new Date(entry.date);
-    const formattedDate = thisdate.toLocaleString('en-GB', {
-      year: 'numeric',
-      month: 'numeric',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-    }).replace(',', '').replace(',', ''); 
-    // const rowClass = entry.win ? 'text-green-400' : 'text-red-500';
-    const rowClass = ''; 
-    tempInnerHTML += `<tr class="${rowClass}">
-      <td class="${resultColorClass} text-center">${resultText}</td>
-      <td class="text-center">${localScore} : ${oppScore}</td>
-      <td class="text-red-500 text-center">${opponent}</td>
-      <td class="text-center">${formattedDate}</td>
-    </tr>`;
-
-
+    tempInnerHTML += `<tr>
+      <td>${thisdate.toDateString()}, ${thisdate.toTimeString()}</td>
+      <td>${nicknameVs}</td>
+      <td>${side}</td>
+      <td>${entry.gameType}</td>
+      <td>${entry.scoreL} : ${entry.scoreR}</td>
+      <td>${res}</td>
+      </tr>
+    `;
   }
-  el.innerHTML = tempInnerHTML;
-  bu.hidden = true;
-  gArea.hidden = true;
-  gWin.hidden = true;
+  hideableElements.contentArea.innerHTML = tempInnerHTML;
+  hideableElements.buttonArea.hidden = true;
+  hideableElements.gameArea.classList.add("hidden");
+  hideableElements.gameWindow.hidden = true;
 }
-

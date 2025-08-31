@@ -1,26 +1,357 @@
 // src/views/dashboard.ts
-import { registerPlayer, movePaddle } from './buttonClicking';
+import { registerPlayer, localGaming, forfeit, movePaddle, localMovePaddle, confirmParticipation, checkIsInGame, checkReady, checkIsInTournament } from './buttonClicking';
 import { route } from '../router';
-import { renderHomeContent, renderPlayContent, renderTournamentContent, renderStatsContent } from './sections';
-import { renderHistoryContent } from './history';
+import { renderHomeContent, renderPlayContent, renderStatsContent } from './sections';
+import { renderHistoryContent, getNicknameForPlayerId } from './history';
 import { renderProfileContent } from './profile';
+import { renderTournamentContent, renderTournamentManagerContent, getCompleteTournamentInfo } from './tournament';
 import { State, nullState } from './pongrender';
+import { googleInitialized, resetGoogle, currentGoogleButtonId} from './login';
 import confetti from 'canvas-confetti';
+import { t, i18nReady } from '../i18n';
+
 
 // Import VITE_API_BASE_URL from environment variables
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+let socket: WebSocket | null = null;
+let gameState: State = nullState;
+let playerSide: string = "tbd";
+let started: boolean = false;
 
-function movePaddleWrapper(d: number) {
-  movePaddle(d, function (error, response) {
-    if (error) {
-      console.error(error);
+export enum MetaGameState {
+  nothing,
+  waitmmopp,
+  waitmmstart,
+  inmmgame,
+  waittouropp,
+  waittourstart,
+  waittourrdy,
+  waittouropprdy,
+  intourgame,
+  losttour,
+  inlocalgame,
+  misc,
+}
+
+async function movePaddleWrapper(d: number) {
+  const movePaddleRawResp = await movePaddle(d);
+  const movePaddleResp = await movePaddleRawResp.text();
+  const movePaddleRespObj = JSON.parse(movePaddleResp);
+  if (movePaddleRespObj.err !== "nil") {
+    console.error(movePaddleRespObj.err);
+  }
+}
+
+async function localMovePaddleWrapper(d: number, p: string) {
+  // p === "l" || "r";
+  const lmovePaddleRawResp = await localMovePaddle(d, p);
+  const lmovePaddleResp = await lmovePaddleRawResp.text();
+  const lmovePaddleRespObj = JSON.parse(lmovePaddleResp);
+  if (lmovePaddleRespObj.err !== "nil") {
+    console.error(lmovePaddleRespObj.err);
+  }
+}
+
+export async function getGameMetaInfo() {
+  const fresp = await fetch(
+    `${API_BASE_URL}/api/pong/game/info`,
+    {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json,application/html,text/html,*/*',
+        'Origin': 'https://127.0.0.1:3000/',
+        'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
+      },
+      credentials: 'include',
+      mode: 'cors',
+    }
+  );
+  const textFresp = await fresp.text();
+  const parsedFresp = JSON.parse(textFresp);
+  if (parsedFresp.err === "nil") {
+    const oppId = parsedFresp.oppId;
+    let oppName = "";
+    if (oppId === "") {
+      oppName = "<i>unknown</i>";
     }
     else {
-      response?.text().then((result) => {
-//        console.log(result);
-      });
+      const oppNameRaw = await getNicknameForPlayerId(oppId);
+      const oppNameText = await oppNameRaw.text();
+      console.log("oppname from metainfo:", oppNameText);
+      const oppNameJson = JSON.parse(oppNameText);
+      if (oppNameJson.err !== "nil") {
+        oppName = "<i>unknown</i>";
+      }
+      else {
+        oppName = oppNameJson.nick;
+      }
     }
-  });
+    const ret = {
+      gType: parsedFresp.gType,
+      oppName: oppName,
+    };
+    return (ret);
+  }
+  else {
+    console.error("suffered an error trying to get game info:", parsedFresp.err);
+    if (parsedFresp.err === "Player not found in playersMap") {
+      const ret = {
+        gType: "none",
+        oppName: "unknown",
+      };
+      return (ret);
+    }
+    const ret = {
+      gType: "unknown",
+      oppName: "unknown",
+    };
+    return (ret);
+  }
+}
+
+async function checkIsInGameWrapper() {
+  const checkIsInGameRaw = await checkIsInGame();
+  const checkIsInGameRes = await checkIsInGameRaw.text();
+  const checkIsInGameObj = JSON.parse(checkIsInGameRes);
+  return (checkIsInGameObj?.res);
+}
+
+async function checkReadyWrapper() {
+  const checkReadyRaw = await checkReady();
+  const checkReadyRes = await checkReadyRaw.text();
+  const checkReadyObj = JSON.parse(checkReadyRes);
+  return (checkReadyObj?.res);
+}
+
+async function checkIsInTourWrapper() {
+  const checkIsInTourRaw = await checkIsInTournament();
+  const checkIsInTourRes = await checkIsInTourRaw.text();
+  const checkIsInTourObj = JSON.parse(checkIsInTourRes);
+  return (checkIsInTourObj?.res);
+}
+
+export async function buttonSetter(state : MetaGameState) {
+  switch (state) {
+    case MetaGameState.nothing: {
+      // 1
+      document.getElementById("start-button").disabled = false;
+      document.getElementById("ready-button").disabled = true;
+      document.getElementById("giveup-button").disabled = true;
+      document.getElementById("local-play-button").disabled = false;
+      break;
+    }
+    case MetaGameState.waitmmopp: {
+      // 2
+      //no break
+    }
+    case MetaGameState.waitmmstart: {
+      // 3
+      //no break
+    }
+    case MetaGameState.inmmgame: {
+      // 4
+      document.getElementById("start-button").disabled = true;
+      document.getElementById("ready-button").disabled = true;
+      document.getElementById("giveup-button").disabled = false;
+      document.getElementById("local-play-button").disabled = true;
+      break;
+    }
+    case MetaGameState.waittouropp: {
+      // 5
+      //no break
+    }
+    case MetaGameState.waittourstart: {
+      // 6
+      document.getElementById("start-button").disabled = true;
+      document.getElementById("ready-button").disabled = true;
+      document.getElementById("giveup-button").disabled = true;
+      document.getElementById("local-play-button").disabled = true;
+      break;
+    }
+    case MetaGameState.waittourrdy: {
+      // 7
+      document.getElementById("start-button").disabled = true;
+      document.getElementById("ready-button").disabled = false;
+      document.getElementById("giveup-button").disabled = true;
+      document.getElementById("local-play-button").disabled = true;
+      break;
+    }
+    case MetaGameState.waittouropprdy: {
+      // 8
+      document.getElementById("start-button").disabled = true;
+      document.getElementById("ready-button").disabled = true;
+      document.getElementById("giveup-button").disabled = true;
+      document.getElementById("local-play-button").disabled = true;
+      break;
+    }
+    case MetaGameState.intourgame: {
+      // 9
+      document.getElementById("start-button").disabled = true;
+      document.getElementById("ready-button").disabled = true;
+      document.getElementById("giveup-button").disabled = false;
+      document.getElementById("local-play-button").disabled = true;
+      break;
+    }
+    case MetaGameState.losttour: {
+      // 10
+      document.getElementById("start-button").disabled = true;
+      document.getElementById("ready-button").disabled = true;
+      document.getElementById("giveup-button").disabled = true;
+      document.getElementById("local-play-button").disabled = true;
+      break;
+    }
+    case MetaGameState.inlocalgame: {
+      // 11
+      document.getElementById("start-button").disabled = true;
+      document.getElementById("ready-button").disabled = true;
+      document.getElementById("giveup-button").disabled = false;
+      document.getElementById("local-play-button").disabled = true;
+      break;
+    }
+    default: {
+      //basically "misc"
+      //idk if that's a good idea
+      document.getElementById("start-button").disabled = false;
+      document.getElementById("ready-button").disabled = false;
+      document.getElementById("giveup-button").disabled = false;
+      document.getElementById("local-play-button").disabled = false;
+      break;
+    }
+  }
+}
+
+async function tourCheckAndSetIdlingButtons() {
+  let isintour : bool = await checkIsInTourWrapper();
+  console.log("isintour:", isintour);
+  if (isintour) {
+    // no game, but we're in a tournament
+    // we're either waiting for it to start, or we've lost it. but the buttons should be the same so...
+    buttonSetter(MetaGameState.waittourstart);
+  }
+  else {
+    // no game. allow mm search
+    buttonSetter(MetaGameState.nothing);
+  }
+}
+
+export async function setterUponMetaInfo(gameInfo : HTMLElement, metaInfo : {gType: string, oppName: string}) {
+  console.log("ENTERED setterUponMetaInfo");
+  console.log("metainfo is:", metaInfo);
+  if (metaInfo.gType === "none") {
+    gameInfo.innerHTML = "";
+    await tourCheckAndSetIdlingButtons();
+  }
+  else if (metaInfo.gType === "unknown") {
+    // some bs happened. must investigate
+    console.error("unknown game type");
+    buttonSetter(MetaGameState.misc);
+  }
+  else if (metaInfo.gType === "normal") {
+    // we don't check for anything since basically once you get into a game with whatever state it's got, you
+    // can only forfeit/escape, unlike the tournament stuff which has some various conditions for getting ready/forfeitting.
+    buttonSetter(MetaGameState.inmmgame);
+    console.log("ginfo setter 1");
+    gameInfo.innerHTML = "Game type: " + metaInfo.gType + "; versus: " + metaInfo.oppName;
+  }
+  else if (metaInfo.gType === "tournament") {
+    // ok, it's a tournament
+    // there's only ONE situation which requires us to press the ready key.
+    // we're in a game of type tournament and we're not ready.
+    const isready : bool = await checkReadyWrapper();
+    if (!isready) {
+      buttonSetter(MetaGameState.waittourrdy);
+    }
+    else {
+      buttonSetter(MetaGameState.intourgame);
+    }
+    console.log("ginfo setter 2");
+    gameInfo.innerHTML = "Game type: " + metaInfo.gType + "; versus: " + metaInfo.oppName;
+  }
+  else if (metaInfo.gType === "local") {
+    buttonSetter(MetaGameState.inlocalgame);
+    console.log("ginfo setter 3");
+    gameInfo.innerHTML = "Game type: " + metaInfo.gType;
+  }
+}
+
+const cleanupGameArea = () => {
+  const gameWindow = document.getElementById('game-window');
+  if (gameWindow) {
+    gameWindow.innerHTML = `
+      <div id="rain-overlay" class="absolute inset-0 z-50 pointer-events-none hidden"></div>
+      <!-- Left Controls -->
+      <div class="absolute left-0 top-1/2 transform -translate-y-1/2 flex flex-col space-y-4 z-10">
+        <button id="left-up" class="bg-white text-black p-3 rounded shadow" hidden>^</button>
+        <button id="left-down" class="bg-white text-black p-3 rounded shadow" hidden>v</button>
+      </div>
+      <!-- SVG Field -->
+      <svg width="1280" height="720">
+        <defs>
+          <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+           <feDropShadow dx="0" dy="0" stdDeviation="10" flood-color="#00ff00" />
+          </filter>
+        </defs>
+        <rect width="100%" height="100%" fill="black" />
+        <g id="lpad-group">
+          <rect id="lpad" x="40" y="310" width="10" height="100" class="fill-white" />
+        </g>
+        <g id="rpad-group">
+          <rect id="rpad" x="1230" y="310" width="10" height="100" class="fill-white" />
+        </g>
+        <circle id="ball" cx="640" cy="360" r="3" class="fill-white" />
+        <text id="score-text" x="640" y="60" font-family="Monospace" font-size="40" class="fill-white" text-anchor="middle">
+          0 : 0
+        </text>
+        <text id="game-text" x="640" y="200" font-family="Sans-serif" font-size="60" text-anchor="middle" class="opacity-0 transition-all duration-300 fill-current">
+          Welcome to Pong!
+        </text>
+      </svg>
+      <!-- Right Controls -->
+      <div class="absolute right-0 top-1/2 transform -translate-y-1/2 flex flex-col space-y-4 z-10">
+        <button id="right-up" class="bg-white text-black p-3 rounded shadow" hidden>^</button>
+        <button id="right-down" class="bg-white text-black p-3 rounded shadow" hidden>v</button>
+      </div>
+    `;
+  }
+}
+
+const resetGameText = () => {
+  const gameText = document.getElementById("game-text") as HTMLElement | null;
+  if (!gameText) return;
+
+  gameText.style.visibility = "hidden";
+  gameText.innerHTML = "Welcome to Pong!";
+
+  gameText.classList.remove(
+    "fill-white",
+    'fill-red-400', 'fill-green-400',
+    'fill-red-500', 'fill-green-500',
+    'animate-win-pulse', 'animate-lose-pulse', 'animate-text-glow'
+  );
+  gameText.classList.add("fill-white");
+}
+
+const resetGameUi = () => {
+  const gameText = document.getElementById("game-text") as HTMLElement | null;
+  const scoreText = document.getElementById("score-text") as HTMLElement | null;
+
+  if (gameText) {
+    gameText.style.visibility = "hidden";
+    gameText.innerHTML = "Welcome to Pong!";
+    // gameText.setAttribute("fill", "white");
+    gameText.classList.remove(
+      'fill-red-400', 'fill-green-400',
+      'fill-red-500', 'fill-green-500',
+      'animate-win-pulse', 'animate-lose-pulse', 'animate-text-glow'
+    );
+  }
+  if (scoreText) {
+    scoreText.innerHTML = "0 : 0";
+    scoreText.classList.add('opacity-0');
+    setTimeout(() => {
+      scoreText.classList.remove('opacity-0');
+    }, 150);
+  }
 }
 
 function triggerConfetti() {
@@ -121,7 +452,7 @@ function triggerPaddleEffect(paddleId: string) {
   group.setAttribute(
     'transform',
     `translate(${pivotX},${pivotY}) scale(1.2) translate(${-pivotX},${-pivotY})`
-  ); 
+  );
 
   setTimeout(() => {
     group.removeAttribute('filter'); // corrected
@@ -132,9 +463,74 @@ function triggerPaddleEffect(paddleId: string) {
 function triggerBallEffect() {
   const ball = document.getElementById('ball');
   if (!ball) return;
-  
+
   ball.classList.add('animate-ball-pulse');
   setTimeout(() => ball.classList.remove('animate-ball-pulse'), 300);
+}
+const wrapper = document.getElementById('google-signin-wrapper');
+if (wrapper) {
+  wrapper.hidden = true;
+  if (currentGoogleButtonId) {
+    const old = document.getElementById(currentGoogleButtonId);
+    if (old) old.remove();
+  }
+  // currentGoogleButtonId = null; // Removed because it's a read-only import
+}
+
+function generalDirectionButtonHandler(arrow: HTMLButtonElement, dir: number, side: string, playerSide: {v: string}) {
+  console.log("setting general arrow handling with:", arrow, dir, side, playerSide.v);
+  arrow.addEventListener('mousedown', () => {
+    if (playerSide.v === "local") {
+      localMovePaddleWrapper(dir, side);
+    }
+    else {
+      movePaddleWrapper(dir);
+    }
+  });
+
+  arrow.addEventListener('mouseup', () => {
+    if (playerSide.v === "local") {
+      localMovePaddleWrapper(0, side);
+    }
+    else {
+      movePaddleWrapper(0);
+    }
+  });
+
+  arrow.addEventListener('mouseleave', () => {
+    if (playerSide.v === "local") {
+      localMovePaddleWrapper(0, side);
+    }
+    else {
+      movePaddleWrapper(0);
+    }
+  });
+}
+
+function lostRoundInfo(gameText: HTMLElement) {
+  gameText.innerHTML = `${t("lostRound")}`;
+  gameText.classList.remove('fill-white');
+  gameText.setAttribute("fill", "#f87171");
+}
+
+function wonRoundInfo(gameText: HTMLElement) {
+  gameText.innerHTML = `${t("wonRound")}`;
+  gameText.classList.remove('fill-white');
+  gameText.setAttribute("fill", "#4ade80");
+}
+
+function lostGameInfo(gameText: HTMLElement) {
+  gameText.innerHTML = `${t("lostGame")}`;
+  gameText.classList.remove('fill-white');
+  gameText.setAttribute("fill", "#f87171");
+  setTimeout(() => triggerRainEffect(), 300);
+}
+
+function wonGameInfo(gameText: HTMLElement) {
+  gameText.innerHTML = `${t("wonGame")}`;
+  gameText.classList.remove('fill-white');
+  gameText.setAttribute("fill", "#4ade80");
+  setTimeout(() => triggerConfetti(), 300);
 }
 
 export async function initDashboard() {
@@ -170,14 +566,15 @@ export async function initDashboard() {
       </div>
       <h2 class="text-xl md:text-2xl font-bold mb-6 md:mb-8 text-center text-white">Transcendence</h2>
       <nav class="flex-grow space-y-2 md:space-y-3">
-        <a href="#home" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='home'?'bg-blue-600':'bg-gray-700'}">Dashboard</a>
-        <a href="#profile" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='profile'?'bg-blue-600':'bg-gray-700'}">Profile</a>
-        <a href="#play" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='play'?'bg-blue-600':'bg-gray-700'}">Play Pong</a>
-        <a href="#history" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='history'?'bg-blue-600':'bg-gray-700'}">Match History</a>
-        <a href="#tournament" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='tournament'?'bg-blue-600':'bg-gray-700'}">Tournament</a>
-        <a href="#stats" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='stats'?'bg-blue-600':'bg-gray-700'}">Stats</a>
+        <a href="#home" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='home'?'bg-blue-600':'bg-gray-700'}">${t('nav.dashboard')}</a>
+        <a href="#profile" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='profile'?'bg-blue-600':'bg-gray-700'}">${t('nav.profile')}</a>
+        <a href="#play" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='play'?'bg-blue-600':'bg-gray-700'}">${t('nav.play')}</a>
+        <a href="#history" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='history'?'bg-blue-600':'bg-gray-700'}">${t('nav.history')}</a>
+        <a href="#tournament" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='tournament'?'bg-blue-600':'bg-gray-700'}">${t('nav.tournament')}</a>
+        <a href="#tournamentmanager" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='tournamentmanager'?'bg-blue-600':'bg-gray-700'}">Tournament Management</a>
+        <a href="#stats" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='stats'?'bg-blue-600':'bg-gray-700'}">${t('nav.stats')}</a>
       </nav>
-      <button id="logout-btn" class="mt-auto w-full p-3 bg-red-600 rounded-lg hover:bg-red-700 transition text-white font-medium">Logout</button>
+      <button id="logout-btn" class="mt-auto w-full p-3 bg-red-600 rounded-lg hover:bg-red-700 transition text-white font-medium">${t('nav.logout')}</button>
     </aside>
 
     <!-- Mobile Backdrop -->
@@ -227,83 +624,184 @@ export async function initDashboard() {
         </div>
 
       </div>
-      <button id="start-button" class="mt-6 p-3 bg-red-600 rounded-lg hover:bg-red-700 transition text-white font-medium">click to join or reconnect</button>
+      <div id="button-area" class="flex flex-col space-y-1">
+        <button id="start-button" disabled
+        class=
+        "
+          mt-6 p-3 bg-green-600 rounded-lg hover:bg-green-700 transition text-white font-medium
+          disabled:border-gray-200 disabled:bg-gray-700 disabled:text-gray-500 disabled:shadow-none
+        ">
+          Search for a quick game
+        </button>
+        <button id="ready-button" disabled
+        class=
+        "
+          mt-6 p-3 bg-green-600 rounded-lg hover:bg-green-700 transition text-white font-medium
+          disabled:border-gray-200 disabled:bg-gray-700 disabled:text-gray-500 disabled:shadow-none
+        ">
+          Confirm participation
+        </button>
+        <button id="giveup-button" disabled
+        class=
+        "
+          mt-6 p-3 bg-red-600 rounded-lg hover:bg-red-700 transition text-white font-medium
+          disabled:border-gray-200 disabled:bg-gray-700 disabled:text-gray-500 disabled:shadow-none
+        ">
+          INSTANTLY forfeit
+        </button>
+        <button id="local-play-button" disabled
+        class=
+        "
+          mt-6 p-3 bg-orange-500 rounded-lg hover:bg-orange-600 transition text-white font-medium
+          disabled:border-gray-200 disabled:bg-gray-700 disabled:text-gray-500 disabled:shadow-none
+        ">
+          Launch a local 1v1
+        </button>
+      </div>
+      <p id="game-info"></p>
     </div>
   `;
 
-  const leftUpArrow: HTMLElement = document.getElementById("left-up");
-  const leftDownArrow : HTMLElement = document.getElementById("left-down");
-  const rightUpArrow : HTMLElement = document.getElementById("right-up");
-  const rightDownArrow : HTMLElement = document.getElementById("right-down");
-  const ball : HTMLElement = document.getElementById("ball");
-  const lpad : HTMLElement = document.getElementById("lpad");
-  const rpad : HTMLElement = document.getElementById("rpad");
-  
-  let gameText : HTMLElement | null = document.getElementById("game-text");
+  const leftUpArrow: HTMLElement = document.getElementById("left-up")!;
+  const leftDownArrow : HTMLElement = document.getElementById("left-down")!;
+  const rightUpArrow : HTMLElement = document.getElementById("right-up")!;
+  const rightDownArrow : HTMLElement = document.getElementById("right-down")!;
+  const ball : HTMLElement = document.getElementById("ball")!;
+  const lpad : HTMLElement = document.getElementById("lpad")!;
+  const rpad : HTMLElement = document.getElementById("rpad")!;
+  const contentArea = document.getElementById('content-area')!;
+  const startButton = document.getElementById('start-button')!;
+  const gameArea = document.getElementById('game-area')!;
+  const gameWindow = document.getElementById('game-window')!;
+  let gameType = "normal";
+  const gameInfo : HTMLElement = document.getElementById("game-info");
+
+  document.getElementById("start-button").innerHTML = t("pong-buttons.start-button-text");
+  document.getElementById("ready-button").innerHTML = t("pong-buttons.ready-button-text");
+  document.getElementById("giveup-button").innerHTML = t("pong-buttons.giveup-button-text");
+  document.getElementById("local-play-button").innerHTML = t("pong-buttons.local-play-button-text");
+
+  let gameText : HTMLElement | null = document.getElementById("game-text")!;
   if (gameText) {
     gameText.style.visibility = "hidden";
     gameText.classList.remove('opacity-0');
     gameText.classList.remove('animate-win-pulse', 'animate-lose-pulse', 'animate-text-glow');
-  } 
-
-
+  }
   // gameText.classList.remove('animate-win-pulse', 'animate-lose-pulse', 'animate-text-glow');
+  const scoreText : HTMLElement = document.getElementById("score-text")!;
 
-
-  // for some reason, doing a .hidden = false or true on this doesn't work.
-  const scoreText : HTMLElement = document.getElementById("score-text");
-//  console.log(ball);
-//  console.log(lpad);
-//  console.log(rpad);
-  //WEBSOCKET TIME!
   let socket : WebSocket;
   let gameState : State = nullState;
-  let playerSide : string = "tbd";
+  let playerSide = {
+    v : "tbd",
+  };
   // FIXME unused. remove or use.
   let started : boolean = false;
+  let metaInfo = await getGameMetaInfo();
+  let reconn : boolean = false;
   if (localStorage.getItem("authToken")) {
+    console.log("before the first setter, have:", metaInfo);
+    await setterUponMetaInfo(gameInfo, metaInfo);
+    if (metaInfo.gType === "tournament" || metaInfo.gType === "normal") {
+      console.log("oh snap! reconnect the socket");
+      reconn = true;
+    }
     socket = new WebSocket(`${API_BASE_URL}/api/pong/game-ws?uuid=${localStorage.getItem("userId")}&authorization=${localStorage.getItem("authToken")}`);
     gameText.classList.remove(
       'animate-win-pulse', 'animate-lose-pulse', 'animate-text-glow',
       'fill-red-400', 'fill-green-400', 'fill-red-500', 'fill-green-500'
     );
-    socket.addEventListener("message", (event) => {
+    socket.addEventListener("message", async (event) => {
+      await i18nReady;
 //      console.log("I, a tokened player, receive:", event.data);
       // XXX maybe a try catch? idk if it'd crash or something on a wrong input
       switch (event.data) {
+        case "opp joined":
+          metaInfo = await getGameMetaInfo();
+          if (metaInfo.gType === "unknown") {
+            gameInfo.innerHTML = "";
+          }
+          else {
+            gameInfo.innerHTML = "Game type: " + metaInfo.gType + "; versus: " + metaInfo.oppName;
+          }
+          break;
         case "connected":
 //          console.log("Welcome to pong.");
           break;
-        case "added: L":
+        case "confirmed":
+          document.getElementById('ready-button').disabled = true;
+          buttonSetter(MetaGameState.intourgame);
+          break;
+        case "abandon":
           started = false;
-          playerSide = "l";
-          leftUpArrow.hidden = false;
-          leftDownArrow.hidden = false;
+          playerSide.v = "tbd";
+          leftUpArrow.hidden = true;
+          leftDownArrow.hidden = true;
           rightUpArrow.hidden = true;
           rightDownArrow.hidden = true;
+          gameText.style.visibility = "visible";
+          gameText.innerHTML = `
+          <tspan x="640" dy="1.2em">The match has been abandoned</tspan>
+          <tspan x="640" dy="1.2em">by either of the two players</tspan>`;
+          scoreText.innerHTML = "" + 0 + " : " + 0;
+          buttonSetter(MetaGameState.nothing);
+          break;
+        case "added: L":
+          metaInfo = await getGameMetaInfo();
+          if (metaInfo.gType === "unknown") {
+            gameInfo.innerHTML = "";
+          }
+          else if (metaInfo.gType === "local") {
+            gameInfo.innerHTML = "Game type: " + metaInfo.gType;
+          }
+          else {
+            gameInfo.innerHTML = "Game type: " + metaInfo.gType + "; versus: " + metaInfo.oppName;
+          }
+          await setterUponMetaInfo(gameInfo, metaInfo);
+          started = false;
+          if (metaInfo.gType === "local") {
+            playerSide.v = "local";
+            rightUpArrow.hidden = false;
+            rightDownArrow.hidden = false;
+          }
+          else {
+            playerSide.v = "l";
+            rightUpArrow.hidden = true;
+            rightDownArrow.hidden = true;
+          }
+          leftUpArrow.hidden = false;
+          leftDownArrow.hidden = false;
           gameText.style.visibility = "hidden";
           scoreText.classList.add('opacity-0');
-            setTimeout(() => {
-              scoreText.innerHTML = `${gameState.stateScoreL} : ${gameState.stateScoreR}`;
+          setTimeout(() => {
+            scoreText.innerHTML = `${gameState.stateScoreL} : ${gameState.stateScoreR}`;
 
-             scoreText.classList.remove('opacity-0');
-            }, 150);
-    
+           scoreText.classList.remove('opacity-0');
+          }, 150);
+
           break;
         case "added: R":
+          metaInfo = await getGameMetaInfo();
+          if (metaInfo.gType === "unknown") {
+            gameInfo.innerHTML = "";
+          }
+          else {
+            gameInfo.innerHTML = "Game type: " + metaInfo.gType + "; versus: " + metaInfo.oppName;
+          }
+          await setterUponMetaInfo(gameInfo, metaInfo);
           started = false;
-          playerSide = "r";
+          playerSide.v = "r";
           rightUpArrow.hidden = false;
           rightDownArrow.hidden = false;
           leftUpArrow.hidden = true;
           leftDownArrow.hidden = true;
           gameText.style.visibility = "hidden";
           scoreText.classList.add('opacity-0');
-            setTimeout(() => {
-              scoreText.innerHTML = `${gameState.stateScoreL} : ${gameState.stateScoreR}`;
+          setTimeout(() => {
+            scoreText.innerHTML = `${gameState.stateScoreL} : ${gameState.stateScoreR}`;
 
-              scoreText.classList.remove('opacity-0');
-            }, 150);
+            scoreText.classList.remove('opacity-0');
+          }, 150);
 
           break;
         case "started":
@@ -311,171 +809,257 @@ export async function initDashboard() {
           break;
         case "error":
           break;
+        case "local":
+          metaInfo = await getGameMetaInfo();
+          if (metaInfo.gType === "unknown") {
+            gameInfo.innerHTML = "";
+          }
+          await setterUponMetaInfo(gameInfo, metaInfo);
+          playerSide.v = "local";
+          rightUpArrow.hidden = false;
+          rightDownArrow.hidden = false;
+          leftUpArrow.hidden = false;
+          leftDownArrow.hidden = false;
+          gameText.style.visibility = "hidden";
+          scoreText.classList.add('opacity-0');
+          setTimeout(() => {
+            scoreText.innerHTML = `${gameState.stateScoreL} : ${gameState.stateScoreR}`;
+
+            scoreText.classList.remove('opacity-0');
+          }, 150);
         default:
           const newState: State =JSON.parse(event.data);
 
-           ball.setAttribute("cx", newState.stateBall.coords.x);
-           ball.setAttribute("cy", newState.stateBall.coords.y);
-           lpad.setAttribute("y", newState.stateLP.y);
-           rpad.setAttribute("y", newState.stateRP.y);
-           try {
-             if (newState.stateBall.hitLPaddle) triggerPaddleEffect('lpad');
-             if (newState.stateBall.hitRPaddle) triggerPaddleEffect('rpad');
-             if (newState.stateBall.hitWall) triggerBallEffect();
-
-           } catch (e) {
+          ball.setAttribute("cx", "" + newState.stateBall.coords.x);
+          ball.setAttribute("cy", "" + newState.stateBall.coords.y);
+          lpad.setAttribute("y", "" + newState.stateLP.y);
+          rpad.setAttribute("y", "" + newState.stateRP.y);
+          try {
+            if (newState.stateBall.hitLPaddle) triggerPaddleEffect('lpad');
+            if (newState.stateBall.hitRPaddle) triggerPaddleEffect('rpad');
+            if (newState.stateBall.hitWall) triggerBallEffect();
+          } catch (e) {
             console.error("Error updating game state:", e);
-            }
-           scoreText.innerHTML = `${newState.stateScoreL} : ${newState.stateScoreR}`;
-           scoreText.classList.remove('opacity-0');
+          }
+          scoreText.innerHTML = `${newState.stateScoreL} : ${newState.stateScoreR}`;
+          scoreText.classList.remove('opacity-0');
 
           gameState = newState;
-          
-
-
-
           if (gameState.stateWhoL !== "none" && gameState.stateWhoL !== "null state") {
             gameText.style.visibility = "visible";
             gameText.classList.remove('opacity-0');
             // gameText.classList.remove('animate-win-pulse', 'animate-lose-pulse', 'animate-text-glow');
-            
+
             scoreText.innerHTML = "" + gameState.stateScoreL + " : " + gameState.stateScoreR;
             scoreText.classList.remove('opacity-0');
-            if (playerSide === "l") {
+            const playButton = document.getElementById('start-button');
+            if (playerSide.v === "l") {
               switch (gameState.stateWhoL) {
                 case "left":
-                  gameText.innerHTML = "You lost the round.";
-                  gameText.classList.remove('fill-white'); 
-                  gameText.setAttribute("fill", "#f87171");
+                  lostRoundInfo(gameText);
                   break;
                 case "right":
-                  gameText.innerHTML = "You won the round!";
-                  gameText.classList.remove('fill-white');
-                  gameText.setAttribute("fill", "#4ade80");
+                  wonRoundInfo(gameText);
                   break;
                 case "left fully":
                   started = false;
-                  gameText.innerHTML = "You lost the game.";
-                  gameText.classList.remove('fill-white');
-                  gameText.setAttribute("fill", "#f87171");
-                  setTimeout(() => triggerRainEffect(), 300);
+                  lostGameInfo(gameText);
+                  await tourCheckAndSetIdlingButtons();
                   break;
                 case "right fully":
                   started = false;
-                  gameText.innerHTML = "You won the game!";
-                  gameText.classList.remove('fill-white');
-                  gameText.setAttribute("fill", "#4ade80");
-                  setTimeout(() => triggerConfetti(), 300);
+                  wonGameInfo(gameText);
+                  await tourCheckAndSetIdlingButtons();
+                  break;
+                case "both":
+                  started = false;
+                  gameText.innerHTML = "In a rare dispay of absense, nobody won";
+                  await tourCheckAndSetIdlingButtons();
                   break;
               }
-            } else if (playerSide === "r") {
+            }
+            else if (playerSide.v === "r") {
               switch (gameState.stateWhoL) {
                 case "right":
-                  gameText.innerHTML = "You lost the round.";
-                  gameText.classList.remove('fill-white');  
-                  gameText.setAttribute("fill", "#f87171");
+                  lostRoundInfo(gameText);
                   break;
                 case "left":
-                  gameText.innerHTML = "You won the round!";
-                  gameText.classList.remove('fill-white');
-                  gameText.setAttribute("fill", "#4ade80");
+                  wonRoundInfo(gameText);
                   break;
                 case "right fully":
-                  started = false; 
-                  gameText.innerHTML = "You lost the game.";
-                  gameText.setAttribute("fill", "#f87171");
-                  setTimeout(() => triggerRainEffect(), 300);
+                  started = false;
+                  lostGameInfo(gameText);
+                  await tourCheckAndSetIdlingButtons();
                   break;
                 case "left fully":
                   started = false;
-                  gameText.innerHTML = "You won the game!";
-                  gameText.setAttribute("fill", "#4ade80");
-                  setTimeout(() => triggerConfetti(), 300);
+                  wonGameInfo(gameText);
+                  await tourCheckAndSetIdlingButtons();
+                  break;
+                case "both":
+                  started = false;
+                  gameText.innerHTML = "In a rare dispay of absense, nobody won";
+                  await tourCheckAndSetIdlingButtons();
+                  break;
+              }
+            }
+            else if (playerSide.v === "local") {
+              switch (gameState.stateWhoL) {
+                case "right":
+                  gameText.innerHTML = "L won";
+                  break;
+                case "left":
+                  gameText.innerHTML = "R won";
+                  break;
+                case "right fully":
+                  started = false;
+                  gameText.innerHTML = "L super won";
+                  await tourCheckAndSetIdlingButtons();
+                  break;
+                case "left fully":
+                  started = false;
+                  gameText.innerHTML = "R super won";
+                  await tourCheckAndSetIdlingButtons();
+                  break;
+                case "both":
+                  started = false;
+                  gameText.innerHTML = "In a rare dispay of absense, nobody won";
+                  await tourCheckAndSetIdlingButtons();
                   break;
               }
             }
           }
           else {
             gameText.style.visibility = "hidden";
-            
+
             scoreText.innerHTML = "" + gameState.stateScoreL + " : " + gameState.stateScoreR;
             scoreText.classList.remove('opacity-0');
           }
       }
     });
+    if (reconn) {
+      const regPlRawResp = await registerPlayer();
+      const regPlResp = await regPlRawResp.text();
+      const regPlRespObj = JSON.parse(regPlResp);
+      if (regPlRespObj.err !== "nil") {
+        console.log(regPlRespObj);
+      }
+      metaInfo = await getGameMetaInfo();
+      await setterUponMetaInfo(gameInfo, metaInfo);
+    }
 
-    document.getElementById('start-button')!.addEventListener('click', () => {
-      registerPlayer(function (error, response) {
-        if (error) {
-          console.error(error);
-        }
-        else {
-          response?.text().then((result) => {
-//            console.log(result);
-          });
-        }
-      });
+    document.getElementById('start-button')!.addEventListener('click', async () => {
+      console.log("after clicking the start-button,");
+      const regPlRawResp = await registerPlayer();
+      const regPlResp = await regPlRawResp.text();
+      const regPlRespObj = JSON.parse(regPlResp);
+      if (regPlRespObj.err !== "nil") {
+        console.error(regPlRespObj.err);
+      }
+      metaInfo = await getGameMetaInfo();
+      if (metaInfo.gType === "unknown") {
+        gameInfo.innerHTML = "";
+      }
+      else {
+        gameInfo.innerHTML = "Game type: " + metaInfo.gType + "; versus: " + metaInfo.oppName;
+      }
+      await setterUponMetaInfo(gameInfo, metaInfo);
+    });
+    document.getElementById('ready-button')!.addEventListener('click', async () => {
+      console.log("after clicking the ready-button,");
+      const readyPlRawResp = await confirmParticipation();
+      const readyPlResp = await readyPlRawResp.text();
+      const readyPlRespObj = JSON.parse(readyPlResp);
+      if (readyPlRespObj.err !== "nil") {
+        console.error(readyPlRespObj.err);
+      }
+      else {
+        document.getElementById('ready-button').disabled = true;
+        // I think it's okay to just do that here instead of the meta way
+        // cuz it's a super simple interaction
+      }
+    });
+    document.getElementById('giveup-button')!.addEventListener('click', async () => {
+      console.log("after clicking the giveup-button,");
+      const forfeitRawResp = await forfeit();
+      const forfeitResp = await forfeitRawResp.text();
+      const forfeitRespObj = JSON.parse(forfeitResp);
+      if (forfeitRespObj.err !== "nil") {
+        console.error(forfeitRespObj.err);
+      }
+      // after giving up we can have various scenarios so
+      metaInfo = await getGameMetaInfo();
+      if (metaInfo.gType === "unknown") {
+        gameInfo.innerHTML = "";
+      }
+      else {
+        gameInfo.innerHTML = "Game type: " + metaInfo.gType + "; versus: " + metaInfo.oppName;
+      }
+      await setterUponMetaInfo(gameInfo, metaInfo);
+    });
+    document.getElementById('local-play-button')!.addEventListener('click', async () => {
+      console.log("after clicking the local-play-button,");
+      const localGamingRawResp = await localGaming();
+      const localGamingResp = await localGamingRawResp.text();
+      const localGamingRespObj = JSON.parse(localGamingResp);
+      if (localGamingRespObj.err !== "nil") {
+        console.error(localGamingRespObj.err);
+      }
+      metaInfo = await getGameMetaInfo();
+      if (metaInfo.gType === "local") {
+        gameInfo.innerHTML = "Game type: " + metaInfo.gType;
+      }
+      else {
+        gameInfo.innerHTML = "Something weird has happened trying to do a local game.";
+      }
+      await setterUponMetaInfo(gameInfo, metaInfo);
     });
 
-    leftUpArrow.addEventListener('mousedown', () => {
-      movePaddleWrapper(-2);
-    });
-
-    leftUpArrow.addEventListener('mouseup', () => {
-      movePaddleWrapper(0);
-    });
-
-    leftUpArrow.addEventListener('mouseleave', () => {
-      movePaddleWrapper(0);
-    });
-
-    leftDownArrow.addEventListener('mousedown', () => {
-      movePaddleWrapper(2);
-    });
-
-    leftDownArrow.addEventListener('mouseup', () => {
-      movePaddleWrapper(0);
-    });
-
-    leftDownArrow.addEventListener('mouseleave', () => {
-      movePaddleWrapper(0);
-    });
-
-    rightUpArrow.addEventListener('mousedown', () => {
-      movePaddleWrapper(-2);
-    });
-
-    rightUpArrow.addEventListener('mouseup', () => {
-      movePaddleWrapper(0);
-    });
-
-    rightUpArrow.addEventListener('mouseleave', () => {
-      movePaddleWrapper(0);
-    });
-
-    rightDownArrow.addEventListener('mousedown', () => {
-      movePaddleWrapper(2);
-    });
-
-    rightDownArrow.addEventListener('mouseup', () => {
-      movePaddleWrapper(0);
-    });
-
-    rightDownArrow.addEventListener('mouseleave', () => {
-      movePaddleWrapper(0);
-    });
+    console.log("playerside:", playerSide.v);
+    generalDirectionButtonHandler(leftUpArrow, -2, "l", playerSide);
+    generalDirectionButtonHandler(leftDownArrow, 2, "l", playerSide);
+    generalDirectionButtonHandler(rightUpArrow, -2, "r", playerSide);
+    generalDirectionButtonHandler(rightDownArrow, 2, "r", playerSide);
 
     window.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowUp' || e.key === 'w'|| e.key === 'W') {
-        movePaddleWrapper(-2); // move up
-      } else if (e.key === 'ArrowDown' || e.key === 's'|| e.key === 'S') {
-        movePaddleWrapper(2); // move down
+      if (window.location.hash.replace('#', '') === "play") {
+        if (playerSide.v === "r" || playerSide.v === "l") {
+          if (e.key === 'ArrowUp' || e.key === 'w'|| e.key === 'W') {
+            movePaddleWrapper(-2); // move up
+          } else if (e.key === 'ArrowDown' || e.key === 's'|| e.key === 'S') {
+            movePaddleWrapper(2); // move down
+          }
+        }
+        else if (playerSide.v === "local") {
+          if (e.key === 'w'|| e.key === 'W') {
+            localMovePaddleWrapper(-2, "l");
+          } else if (e.key === 's'|| e.key === 'S') {
+            localMovePaddleWrapper(2, "l");
+          }
+          else if (e.key === 'o'|| e.key === 'O') {
+            localMovePaddleWrapper(-2, "r");
+          } else if (e.key === 'l'|| e.key === 'L') {
+            localMovePaddleWrapper(2, "r");
+          }
+        }
       }
     });
 
     window.addEventListener('keyup', (e) => {
-      if (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'w' || e.key === 'W' || e.key === 's' || e.key === 'S') {
-        movePaddleWrapper(0); // stop moving
+      if (window.location.hash.replace('#', '') === "play") {
+        if (playerSide.v === "r" || playerSide.v === "l") {
+          if (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'w' || e.key === 'W' || e.key === 's' || e.key === 'S') {
+            movePaddleWrapper(0); // stop moving
+          }
+        }
+        else if (playerSide.v === "local") {
+          if (e.key === 'w' || e.key === 'W' || e.key === 's' || e.key === 'S') {
+            localMovePaddleWrapper(0, "l");
+          }
+          else if (e.key === 'o' || e.key === 'O' || e.key === 'l' || e.key === 'L') {
+            localMovePaddleWrapper(0, "r");
+          }
+        }
       }
     });
   }
@@ -524,23 +1108,31 @@ export async function initDashboard() {
   document.getElementById('logout-btn')!.addEventListener('click', () => {
     localStorage.removeItem('authToken');
     localStorage.removeItem('userId');
+    localStorage.removeItem('authProvider');
     socket.close();
+    resetGoogle();
     window.location.hash = 'login';
-    route();
+   // if (googleInitialized) resetGoogle();
+   window.location.reload();
+   //route();
   });
 
   // Render active section
-  const contentArea = document.getElementById('content-area')!;
-  const startButton = document.getElementById('start-button')!;
-  const gameArea = document.getElementById('game-area')!;
-  const gameWindow = document.getElementById('game-window')!;
+  const hideableElements = {
+    contentArea: document.getElementById('content-area')!,
+    buttonArea: document.getElementById('button-area')!,
+    gameArea: document.getElementById('game-area')!,
+    gameWindow: document.getElementById('game-window')!,
+    gameInfo: document.getElementById('game-info')!,
+  };
   switch (hash) {
-    case 'profile':     renderProfileContent(contentArea, startButton, gameArea, gameWindow);     break;
-    case 'play':        renderPlayContent(contentArea, startButton, gameArea, gameWindow);        break;
-    case 'history':     renderHistoryContent(contentArea, startButton, gameArea, gameWindow);     break;
-    case 'tournament':  renderTournamentContent(contentArea, startButton, gameArea, gameWindow);  break;
-    case 'stats':       renderStatsContent(contentArea, startButton, gameArea, gameWindow);       break;
-    default:            renderHomeContent(contentArea, startButton, gameArea, gameWindow);
+    case 'profile':           renderProfileContent(hideableElements);           break;
+    case 'play':              renderPlayContent(hideableElements);              break;
+    case 'history':           renderHistoryContent(hideableElements);           break;
+    case 'tournament':        renderTournamentContent(hideableElements);        break;
+    case 'tournamentmanager': renderTournamentManagerContent(hideableElements); break;
+    case 'stats':             renderStatsContent(hideableElements);             break;
+    default:                  renderHomeContent(hideableElements);
   }
 }
 

@@ -1,0 +1,221 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: transcendence_frontend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - shared_logs:/shared_logs   # add by apardo-m
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api-gateway
+    networks:
+      - backend
+    restart: unless-stopped
+    command: npm run dev
+
+  api-gateway:
+    build: ./backend/api-gateway
+    container_name: trans_api-gateway
+    ports:
+      - "8443:8443"     # TLS port exposed to host
+    depends_on:
+      - user_management
+      - game_service
+    volumes:
+      - ./backend/api-gateway:/app
+      - /app/node_modules      # use container-installed deps
+      - shared_logs:/shared_logs  # add by apardo-m 
+    env_file:
+      - ./backend/api-gateway/.env
+    restart: always
+    networks:
+      - backend
+
+  user_management:
+    build: ./backend/microservices/user_management
+    container_name: trans_user_management
+    expose:
+      - "9001"
+    volumes:
+      - ./backend/microservices/user_management:/app
+      - /app/node_modules      # use container-installed deps
+      - shared_logs:/shared_logs   # add by apardo-m 
+    environment:
+      - ./backend/microservices/user_management/.env
+    restart: always
+    networks:
+      - backend
+
+  game_service:
+    build: ./backend/microservices/game_service
+    container_name: trans_game_service
+    expose:
+      - "9002"
+    volumes:
+      - ./backend/microservices/game_service:/app   # add by apardo-m
+      - /app/node_modules      # use container-installed deps
+      - ./backend/microservices/game_service/vol:/app/dbs
+      - shared_logs:/shared_logs  # add by apardo-m 
+    restart: always
+    networks:
+      - backend
+
+#  chat_service:
+#    build: ./chat_service
+#    expose:
+#      - "9003"
+#    networks:
+#      - backend
+
+#
+# ELK section
+#
+
+  elastic:
+    container_name: elastic
+    build:
+      context: ./backend/elk
+      dockerfile: ./elastic/Dockerfile
+    image: elastic_img
+    volumes:
+      - elasticdata:/usr/share/elasticsearch/data
+      - ${LOGS_ELASTIC_FOLDER}:/mnt/snapshots
+    environment:
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+    restart: unless-stopped
+    networks:
+      - backend
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -s --cacert config/certs/ca/ca.crt https://localhost:9200 | grep -q 'missing authentication credentials'",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 120
+
+  kibana:
+    container_name: kibana
+    build:
+      context: ./backend/elk
+      dockerfile: ./kibana/Dockerfile
+    image: kibana_img
+    depends_on:
+      elastic:
+        condition: service_healthy
+    volumes:
+      - kibanadata:/usr/share/kibana/data
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTIC_URL=${ELASTIC_URL}
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - KIBANA_US=${KIBANA_US}
+      - KIBANA_PASSWORD=${KIBANA_PASSWORD}
+      - XPACK_ENCRYPTED_SAVED_OBJECTS_ENCRYPTION_KEY=${XPACK_ENCRYPTED_SAVED_OBJECTS_ENCRYPTION_KEY}
+      - XPACK_REPORTING_ENCRYPTION_KEY=${XPACK_REPORTING_ENCRYPTION_KEY}
+      - XPACK_SECURITY_ENCRYPTION_KEY=${XPACK_SECURITY_ENCRYPTION_KEY}
+    restart: unless-stopped
+    networks:
+      - backend
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -I -s --cacert config/certs/ca/ca.crt https://kibana:5601 | grep -q '302'"
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 120
+
+  setup:
+    container_name: setup
+    build:
+      context: ./backend/elk
+      dockerfile: ./setup/Dockerfile
+    image: setup_img
+    depends_on:
+      elastic:
+        condition: service_healthy
+    environment:
+      - ELASTIC_URL=${ELASTIC_URL}
+      - ELASTIC_US=${ELASTIC_US}
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - KIBANA_PASSWORD=${KIBANA_PASSWORD}
+    networks:
+      - backend
+      
+  index_script:
+    container_name: index_script
+    build:
+      context: ./backend/elk
+      dockerfile: ./index_script/Dockerfile
+    image: index_script_img
+    depends_on:
+      kibana:
+        condition: service_healthy
+    environment:
+      - ELASTIC_URL=${ELASTIC_URL}
+      - ELASTIC_US=${ELASTIC_US}
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - KIBANA_URL=${KIBANA_URL}
+    networks:
+      - backend
+
+  logstash:
+    container_name: logstash
+    depends_on:
+      index_script:
+        condition:  service_completed_successfully
+    build:
+      context: ./backend/elk
+      dockerfile: ./logstash/Dockerfile
+    image: logstash_img
+    volumes:
+      - logstashdata:/usr/share/logstash/data
+      - shared_logs:/shared_logs
+    environment:
+      - ELASTIC_URL=${ELASTIC_URL}
+      - ELASTIC_US=${ELASTIC_US}
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+    restart: unless-stopped
+    networks:
+      - backend
+      
+  snapshot_backup:
+    container_name: snapshot_backup
+    depends_on:
+      index_script:
+        condition:  service_completed_successfully
+    build:
+      context: ./backend/elk/snapshot_backup
+      dockerfile: Dockerfile
+    image: snapshot_backup_img
+    volumes:
+      - ${LOGS_ELASTIC_FOLDER}:/backup/logs_elastic:ro
+      - ${BACKUP_ELASTIC_LOGS}:/backup/logs_elastic_backup
+    restart: unless-stopped
+    networks:
+      - backend
+
+# volumes used in ELK 
+volumes:
+  elasticdata:
+    driver: local
+  kibanadata:
+    driver: local
+  logstashdata:
+    driver: local
+  shared_logs:
+    driver: local
+
+networks:
+  backend:
+    name: backend
+    driver: bridge

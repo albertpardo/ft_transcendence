@@ -1,9 +1,10 @@
-//src/router.ts
+///src/router.ts
 
 import { renderLogin } from './views/login';
-import { renderHomeContent, renderPlayContent, renderTournamentContent, renderStatsContent } from './views/sections';
+import { renderHomeContent, renderPlayContent, renderStatsContent } from './views/sections';
 import { renderProfileContent } from './views/profile';
 import { renderHistoryContent } from './views/history';
+import { renderTournamentContent, renderTournamentManagerContent } from './views/tournament';
 import { initDashboard } from './views/dashboard';
 
 export function route() {
@@ -29,17 +30,21 @@ export function route() {
   }
 
   // Renderiza el contenido según la sección
-  const contentArea = document.getElementById('content-area')!;
-  const startButton = document.getElementById('start-button')!;
-  const gameArea = document.getElementById('game-area')!;
-  const gameWindow = document.getElementById('game-window')!;
+  const hideableElements = {
+    contentArea: document.getElementById('content-area')!,
+    buttonArea: document.getElementById('button-area')!,
+    gameArea: document.getElementById('game-area')!,
+    gameWindow: document.getElementById('game-window')!,
+    gameInfo: document.getElementById('game-info')!,
+  };
   switch (hash) {
-    case 'profile':     renderProfileContent(contentArea, startButton, gameArea, gameWindow);     break;
-    case 'play':        renderPlayContent(contentArea, startButton, gameArea, gameWindow);        break;
-    case 'history':     renderHistoryContent(contentArea, startButton, gameArea, gameWindow);     break;
-    case 'tournament':  renderTournamentContent(contentArea, startButton, gameArea, gameWindow);  break;
-    case 'stats':       renderStatsContent(contentArea, startButton, gameArea, gameWindow);       break;
-    default:            renderHomeContent(contentArea, startButton, gameArea, gameWindow);
+    case 'profile':           renderProfileContent(hideableElements);           break;
+    case 'play':              renderPlayContent(hideableElements);              break;
+    case 'history':           renderHistoryContent(hideableElements);           break;
+    case 'tournament':        renderTournamentContent(hideableElements);        break;
+    case 'tournamentmanager': renderTournamentManagerContent(hideableElements); break;
+    case 'stats':             renderStatsContent(hideableElements);             break;
+    default:                  renderHomeContent(hideableElements);
   }
 
   // Actualiza el estado activo de los links del sidebar

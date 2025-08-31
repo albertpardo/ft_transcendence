@@ -156,3 +156,12 @@ git-script.sh
 *package-lock.json
 package-lock.json
 */package-lock.json
+
+# by apardo-m
+/backend/elk/certs
+
+# vim
+*.swp
+*.swo
+.swp
+.swo
