@@ -5,7 +5,6 @@ import { route } from './router';
 
 async function startApp() {
   await initI18n();
-  initDashboard();
   route();
 }
 

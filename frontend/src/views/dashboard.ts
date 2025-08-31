@@ -1135,6 +1135,3 @@ export async function initDashboard() {
     default:                  renderHomeContent(hideableElements);
   }
 }
-
-// Initialize dashboard only once when starting the app
-initDashboard();
