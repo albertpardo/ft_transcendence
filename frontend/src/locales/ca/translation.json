@@ -17,7 +17,13 @@
     "create": "Crear Torneig",
     "join": "Unir-se al Torneig",
     "noTournaments": "No hi ha tornejos disponibles en aquest moment.",
+    "contender": "Contendent",
+    "quarterFinal": "Quarts de final",
+    "semiFinal": "Semifinal",
+    "final": "Finalista",
+    "destroyTournament": "Destruir torneig (només admin)",
     "tournamentName": "Nom del torneig",
+    "leaveTournament": "Sortir del torneig",
     "startDate": "Data d'inici",
     "endDate": "Data de finalització",
     "maxPlayers": "Jugadors màxims",
@@ -32,15 +38,22 @@
     "result": "Resultat",
     "score": "Puntuació",
     "opponent": "Oponent",
+    "side": "Lateralitat",
     "date": "Data",
-	"win": "Victòria",
-	"loss": "Derrota",
-	"winForfeit": "Victòria (l’enemic va renunciar)",
-	"lossForfeit": "Derrota (vas renunciar)",
-	"winAbsence": "Victòria (l’enemic no es va presentar)",
-	"lossAbsence": "Derrota (no et vas presentar)",
+	  "win": "Victòria",
+	  "loss": "Derrota",
+    "right": "Dreta",
+    "left": "Esquerra",
+    "type": "Tipus",
+    "normal": "Normal",
+    "tournament": "Torneig",
+	  "winForfeit": "Victòria (l’enemic va renunciar)",
+	  "lossForfeit": "Derrota (vas renunciar)",
+	  "winAbsence": "Victòria (l’enemic no es va presentar)",
+	  "lossAbsence": "Derrota (no et vas presentar)",
     "notLoggedIn": "No has iniciat sessió.",
     "noAuthToken": "Falta el testimoni d'autenticació.",
+    "noGames": "Encara no has jugat cap partida.",
     "failedToLoad": "No s'ha pogut carregar l'historial de partides."
   },
   "profiles": {
@@ -96,6 +109,7 @@
   "pong-buttons": {
 	  "start-button-text": "Cerca una partida ràpida",
 	  "ready-button-text": "Confirma la participació",
-	  "giveup-button-text": "Rendir-se INMEDIATAMENT"
+	  "giveup-button-text": "Rendir-se INMEDIATAMENT",
+    "local-play-button-text": "Iniciar joc local"
 	}
 }

@@ -1,9 +1,14 @@
 // src/views/history.ts
-import { t } from '../i18n'
+import { t, i18nReady } from '../i18n';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 async function getHistoryForPlayerId(userId: string) {
+  const authToken = localStorage.getItem('authToken');
+  if (!authToken) {
+    throw new Error('No auth token found');
+  }
+
   const response = await fetch(
     `${API_BASE_URL}/api/pong/hist`,
     {
@@ -12,16 +17,19 @@ async function getHistoryForPlayerId(userId: string) {
         'Content-Type': 'application/json',
         'Accept': 'application/json,application/html,text/html,*/*',
         'Origin': 'https://127.0.0.1:3000/',
-        'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
+        'Authorization': 'Bearer ' + authToken,
       },
-      body: JSON.stringify({
-        userId: userId,
-      }),
+      body: JSON.stringify({ userId }),
       credentials: 'include',
       mode: 'cors',
     }
   );
-  return (response);
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  return response;
 }
 
 export async function getNicknameForPlayerId(userId: string) {
@@ -29,119 +37,173 @@ export async function getNicknameForPlayerId(userId: string) {
     `${API_BASE_URL}/api/public/nickname`,
     {
       method: 'POST',
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
       mode: 'cors',
-      body: JSON.stringify({
-        userId: userId,
-      }),
+      body: JSON.stringify({ userId }),
     }
   );
-  return (response);
+  return response;
 }
 
 export async function renderHistoryContent(hideableElements) {
-  let tempInnerHTML : string = `
-    <h1 class="text-3xl font-bold mb-6">Match History</h1>
-    <p class="mb-4">History of matches</p>
-    <table class="table-fixed"><tbody><tr>
-    <th>Date</th>
-    <th>Opponent</th>
-    <th>Side</th>
-    <th>Type</th>
-    <th>Score</th>
-    <th>Result</th>
-    </tr>
+  const cachedNns = new Map();
+  try {
+    await i18nReady;
+  } catch (err) {
+    console.error('i18n not ready, using fallback keys:', err);
+  }
+
+  const userId = localStorage.getItem('userId');
+  const authToken = localStorage.getItem('authToken');
+
+  if (!userId) {
+    hideableElements.contentArea.innerHTML = `<p class="text-red-500">${t('historic.notLoggedIn')}</p>`;
+    hideableElements.buttonArea.hidden = true;
+    hideableElements.gameArea.classList.add("hidden");
+    hideableElements.gameWindow.hidden = true;
+    return;
+  }
+
+  if (!authToken) {
+    hideableElements.contentArea.innerHTML = `<p class="text-red-500">${t('historic.noAuthToken')}</p>`;
+    hideableElements.buttonArea.hidden = true;
+    hideableElements.gameArea.classList.add("hidden");
+    hideableElements.gameWindow.hidden = true;
+    return;
+  }
+
+  let tempInnerHTML = `
+    <h1 class="text-3xl font-bold mb-6">${t('historic.title')}</h1>
+    <p class="mb-4">${t('historic.description')}</p>
+    <div class="flex justify-center">
+      <table class="table-fixed border-separate border-spacing-x-6 bg-gray-900 text-white w-auto">
+        <thead>
+          <tr>
+            <th class="text-center">${t('historic.date')}</th>
+            <th class="text-center">${t('historic.opponent')}</th>
+            <th class="text-center">${t('historic.side')}</th>
+            <th class="text-center">${t('historic.type')}</th>
+            <th class="text-center">${t('historic.score')}</th>
+            <th class="text-center">${t('historic.result')}</th>
+          </tr>
+        </thead>
+        <tbody>
   `;
-  // TODO FIXME spam protection? cache the thing maybe? make it independently get downloaded in the background once every something minutes.
-  const rawHist = await getHistoryForPlayerId(localStorage.getItem('userId'));
-  const rawHistBody = await rawHist.text();
-  const parsedHist = JSON.parse(rawHistBody);
-  for (const entry of parsedHist) {
-    const idL : string = entry.leftId;
-    const idR : string = entry.rightId;
-    let side : string = "";
-    let nicknameVs : string = "unknown";
-    let res : string = "";
-    if (localStorage.getItem('userId') === idL) {
-      if (entry.winner === "L") {
-        if (entry.finish === "forfeit") {
-          res = t("historic.winForfeit");
-        }
-        else if (entry.finish === "absence" || entry.finish === "technical") {
-          res = t("historic.winAbsence");
+
+  try {
+    const rawHist = await getHistoryForPlayerId(userId);
+    const rawHistBody = await rawHist.text();
+    const parsedHist = JSON.parse(rawHistBody);
+    
+   if (!Array.isArray(parsedHist) || parsedHist.length === 0) {
+      tempInnerHTML += `
+        <tr>
+        <td colspan="6" class="text-gray-400 text-center p-4">
+            ${t('historic.noGames')}
+          </td>
+        </tr>
+      `;
+    } else {
+      for (const entry of parsedHist) {
+        const idL = entry.leftId;
+        const idR = entry.rightId;
+        let side = "";
+        let nicknameVs = "unknown";
+        let res = "";
+        let typeGame = "";
+
+        const isUserLeft = String(userId) === String(idL);
+        if (isUserLeft) {
+          side = t('historic.left');
+          if (entry.finish !== "absence") {
+            if (!cachedNns.has(idR)) {
+              const respNn = await getNicknameForPlayerId(idR);
+              const nnJson = JSON.parse(await respNn.text());
+              nicknameVs = "<i>unknown</i>";
+              if (nnJson.err === "nil") {
+                nicknameVs = nnJson.nick;
+                cachedNns.set(idR, nicknameVs);
+              }
+            }
+            else {
+              nicknameVs = cachedNns.get(idR);
+            }
+          }
         }
         else {
-          res = t("historic.win");
+          side = t('historic.right');
+          if (entry.finish !== "absence") {
+            if (!cachedNns.has(idL)) {
+              const respNn = await getNicknameForPlayerId(idL);
+              const nnJson = JSON.parse(await respNn.text());
+              nicknameVs = "<i>unknown</i>";
+              if (nnJson.err === "nil") {
+                nicknameVs = nnJson.nick;
+                cachedNns.set(idL, nicknameVs);
+              }
+            }
+            else {
+              nicknameVs = cachedNns.get(idL);
+            }
+          }
         }
-      }
-      else {
-        if (entry.finish === "forfeit") {
-          res = t("historic.lossForfeit");
-        }
-        else if (entry.finish === "technical") {
-          res = t("historic.lossAbsence");
+
+        const userWon = isUserLeft ? (entry.winner === "L") : (entry.winner === "R");
+        if (userWon) {
+          res = entry.finish === "forfeit" ? t("historic.winForfeit") :
+            (entry.finish === "absence" || entry.finish === "technical") ? t("historic.winAbsence") :
+            t("historic.win");
         }
         else {
-          res = t("historic.loss");
+          res = entry.finish === "forfeit" ? t("historic.lossForfeit") :
+            (entry.finish === "technical") ? t("historic.lossAbsence") :
+            t("historic.loss");
         }
-      }
-      side = "Left";
-      if (entry.finish !== "absence") {
-        let respNn = await getNicknameForPlayerId(idR);
-        let nnJson = JSON.parse(await respNn.text());
-        nicknameVs = "<i>unknown</i>";
-        if (nnJson.err === "nil") {
-          nicknameVs = nnJson.nick;
-        }
+
+        const resultColorClass = userWon ? 'text-green-400 font-semibold' : 'text-red-500 font-semibold';
+        const opponentNameColored = `<span class="text-red-500 font-medium">${nicknameVs}</span>`;
+        typeGame = entry.gameType === "normal" ? t("historic.normal") : t("historic.tournament");
+        /* console.log("Rendering entry:", entry);
+        console.log("Game type:", typeGame); */
+        const thisdate = new Date(entry.date);
+        const formattedDate = thisdate.toLocaleString('en-GB', {
+          year: 'numeric',
+          month: 'numeric',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+        }).replace(/,/g, '');
+
+        tempInnerHTML += `
+          <tr>
+            <td class="text-center">${formattedDate}</td>
+            <td class="text-center">${opponentNameColored}</td>
+            <td class="text-center">${side}</td>
+            <td class="text-center">${typeGame}</td>
+            <td class="text-center">${entry.scoreL} : ${entry.scoreR}</td>
+            <td class="text-center ${resultColorClass}">${res}</td>
+          </tr>
+        `;
       }
     }
-    else {
-      if (entry.winner === "R") {
-        if (entry.finish === "forfeit") {
-          res = t("historic.winForfeit");
-        }
-        else if (entry.finish === "absence" || entry.finish === "technical") {
-          res = t("historic.winAbsence");
-        }
-        else {
-          res = t("historic.win");
-        }
-      }
-      else {
-        if (entry.finish === "forfeit") {
-          res = t("historic.lossForfeit");
-        }
-        else if (entry.finish === "technical") {
-          res = t("historic.lossAbsence");
-        }
-        else {
-          res = t("historic.loss");
-        }
-      }
-      side = "Right";
-      if (entry.finish !== "absence") {
-        let respNn = await getNicknameForPlayerId(idL);
-        let nnJson = JSON.parse(await respNn.text());
-        nicknameVs = "<i>unknown</i>";
-        if (nnJson.err === "nil") {
-          nicknameVs = nnJson.nick;
-        }
-      }
-    }
-    const thisdate = new Date(entry.date);
-    tempInnerHTML += `<tr>
-      <td>${thisdate.toDateString()}, ${thisdate.toTimeString()}</td>
-      <td>${nicknameVs}</td>
-      <td>${side}</td>
-      <td>${entry.gameType}</td>
-      <td>${entry.scoreL} : ${entry.scoreR}</td>
-      <td>${res}</td>
+  } catch (err) {
+    console.error('Failed to render history:', err);
+    tempInnerHTML += `
+      <tr>
+        <td colspan="6" class="text-red-400 text-center p-4">
+          ${t('historic.failedToLoad')}
+        </td>
       </tr>
     `;
   }
+
+  tempInnerHTML += `
+        </tbody>
+      </table>
+    </div>
+  `;
+
   hideableElements.contentArea.innerHTML = tempInnerHTML;
   hideableElements.buttonArea.hidden = true;
   hideableElements.gameArea.classList.add("hidden");

@@ -17,6 +17,12 @@
     "create": "Create Tournament",
     "join": "Join Tournament",
     "noTournaments": "No tournaments available at the moment.",
+    "contender": "Contender",
+    "quarterFinal": "Quarter Final",
+    "semiFinal": "Semi Final",
+    "final": "Finalist",
+    "leaveTournament": "Leave Tournament (if joined)",
+    "destroyTournament": "Destroy Tournament (admin only)",
     "tournamentName": "Tournament Name",
     "startDate": "Start Date",
     "endDate": "End Date",
@@ -34,13 +40,20 @@
     "opponent": "Opponent",
     "date": "Date",
     "win": "Win",
-	"loss": "Loss",
-	"winForfeit": "Win (enemy forfeited)",
-	"lossForfeit": "Loss (you forfeited)",
-	"winAbsence": "Win (enemy absence)",
-	"lossAbsence": "Loss (you didn't show up)",
+	  "loss": "Loss",
+    "side": "Side",
+    "right": "Right",
+    "left": "Left",
+    "type": "Type",
+    "normal": "Normal",
+    "tournament": "Tournament",
+	  "winForfeit": "Win (enemy forfeited)",
+	  "lossForfeit": "Loss (you forfeited)",
+	  "winAbsence": "Win (enemy absence)",
+	  "lossAbsence": "Loss (you didn't show up)",
     "notLoggedIn": "You're not logged in.",
     "noAuthToken": "Authentication token missing.",
+    "noGames": "You haven't played any games yet.",
     "failedToLoad": "Failed to load match history."
 },
   "profiles": {
@@ -94,8 +107,9 @@
   "wonRound": "You won the round!",
   "lostRound": "You lost the round.",
   "pong-buttons": {
-	"start-button-text": "Search for a quick game",
-	"ready-button-text": "Confirm participation",
-	"giveup-button-text": "INSTANTLY forfeit"
+	  "start-button-text": "Search for a quick game",
+	  "ready-button-text": "Confirm participation",
+	  "giveup-button-text": "INSTANTLY forfeit",
+    "local-play-button-text": "Start local game"
   }
 }
