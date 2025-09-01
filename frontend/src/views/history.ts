@@ -112,20 +112,8 @@ export async function renderHistoryContent(hideableElements) {
         let res = "";
         
         const isUserLeft = String(userId) === String(idL);
-        const userWon = isUserLeft ? (entry.state === "left") : (entry.state === "right");
-        
         if (isUserLeft) {
-            if (entry.state === "left") {
-              res = entry.finish === "forfeit" ? t("historic.winForfeit") :
-                   (entry.finish === "absence" || entry.finish === "technical") ? t("historic.winAbsence") :
-                   t("historic.win");
-            } else {
-              res = entry.finish === "forfeit" ? t("historic.lossForfeit") :
-                   (entry.finish === "technical") ? t("historic.lossAbsence") :
-                   t("historic.loss");
-            }
-            // side = "Left";
-            side = t('historic.left');
+          side = t('historic.left');
           if (entry.finish !== "absence") {
             const respNn = await getNicknameForPlayerId(idR);
             const nnJson = JSON.parse(await respNn.text());
@@ -134,18 +122,9 @@ export async function renderHistoryContent(hideableElements) {
               nicknameVs = nnJson.nick;
             }
           }
-        } else {
-          if (entry.state === "right") {
-              res = entry.finish === "forfeit" ? t("historic.winForfeit") :
-                   (entry.finish === "absence" || entry.finish === "technical") ? t("historic.winAbsence") :
-                   t("historic.win");
-            } else {
-              res = entry.finish === "forfeit" ? t("historic.lossForfeit") :
-                   (entry.finish === "technical") ? t("historic.lossAbsence") :
-                   t("historic.loss");
-            }
-            // side = "Right";
-            side = t('historic.right');
+        }
+        else {
+          side = t('historic.right');
           if (entry.finish !== "absence") {
             const respNn = await getNicknameForPlayerId(idL);
             const nnJson = JSON.parse(await respNn.text());
@@ -155,7 +134,18 @@ export async function renderHistoryContent(hideableElements) {
             }
           }
         }
-        
+
+        const userWon = isUserLeft ? (entry.winner === "L") : (entry.winner === "R");
+        if (userWon) {
+          res = entry.finish === "forfeit" ? t("historic.winForfeit") :
+            (entry.finish === "absence" || entry.finish === "technical") ? t("historic.winAbsence") :
+            t("historic.win");
+        }
+        else {
+          res = entry.finish === "forfeit" ? t("historic.lossForfeit") :
+            (entry.finish === "technical") ? t("historic.lossAbsence") :
+            t("historic.loss");
+        }
 
         const resultColorClass = userWon ? 'text-green-400 font-semibold' : 'text-red-500 font-semibold';
         const opponentNameColored = `<span class="text-red-500 font-medium">${nicknameVs}</span>`;
