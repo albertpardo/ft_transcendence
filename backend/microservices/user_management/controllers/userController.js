@@ -11,6 +11,10 @@ exports.getPublicNickname = async (request, reply) => {
 
 exports.signup = async (request, reply) => {
   const { username, password, nickname, email } = request.body;
+  const regex = /[<>\/]+/;
+  if (regex.test(username) || regex.test(nickname) || regex.test(email)) {
+    return reply.code(400).send({ error: "Unacceptable characters detected"});
+  }
   const result = await userService.signup(username, password, nickname, email);
   if (result.error) return reply.code(400).send(result);
   return reply.send(result);
@@ -29,7 +33,7 @@ exports.login = async (request, reply) => {
 };
 
 exports.getProfile = async (request, reply) => {
-  	const source = exports.getProfile.name;   
+  const source = exports.getProfile.name;
   const userId = request.headers['x-user-id'];
   if (!userId) return reply.code(401).send({ error: 'Unauthorized' });
   // console.log("📦 userId from header:", userId);
@@ -52,6 +56,10 @@ exports.updateProfile = async (request, reply) => {
   request.log.info(...logFormat(source, '🌎 request.body:', request.body));
 
   const { username, nickname, email, password, avatar } = request.body;
+  const regex = /[<>\/]+/;
+  if (regex.test(username) || regex.test(nickname) || regex.test(email)) {
+    return reply.code(400).send({ error: "Unacceptable characters detected"});
+  }
   const result = await userService.updateProfile(userId, {
     username,
     nickname,

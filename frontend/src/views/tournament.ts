@@ -428,7 +428,6 @@ async function generateUpdateAllTourTable(canWeJoin: boolean) {
   const allTournamentsTable = document.getElementById('all-tournaments-table');
   const rawAllPublicTournamentsResponse = await fetchAllPublicTournaments();
   const allPTR = await rawAllPublicTournamentsResponse.text();
-  console.log(allPTR);
   const allPTRObj = JSON.parse(allPTR);
   let count : number = 0;
   let tempInner : string = `
@@ -438,6 +437,10 @@ async function generateUpdateAllTourTable(canWeJoin: boolean) {
     <th>Join</th>
   </tr>
   `;
+  if (!allPTRObj || typeof allPTRObj === undefined) {
+    allTournamentsTable.innerHTML = tempInner;
+    return ;
+  }
   for (var item of allPTRObj?.res) {
     tempInner += `
     <tr>
@@ -614,7 +617,7 @@ export async function renderTournamentManagerContent(hideableElements) {
             buttonSetter(MetaGameState.waittouropp);
           }
           else {
-            console.error("Tournament creation error: " + tourRespObj.err + " | " + tourRespObj.tId);
+            console.error("Tournament creation error: " + tourRespObj.err + "; tId (if available): " + tourRespObj.tId);
             submitButton.removeAttribute('disabled');
             document.getElementById('enter-tournament-by-id-button').removeAttribute("disabled");
             canWeJoin = true;

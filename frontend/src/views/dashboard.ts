@@ -614,7 +614,7 @@ export async function initDashboard() {
         <text id="score-text" x="640" y="60" font-family="Monospace" font-size="40" class="fill-white" text-anchor="middle">
           0 : 0
         </text>
-        <text id="game-text" x="640" y="200" font-family="Sans-serif" font-size="60" text-anchor="middle" class="opacity-0 transition-all duration-300 fill-white">
+        <text id="game-text" x="640" y="200" font-family="Sans-serif" font-size="30" text-anchor="middle" class="opacity-0 transition-all duration-300 fill-white">
           Welcome to Pong!
         </text>
         </svg>
@@ -742,9 +742,7 @@ export async function initDashboard() {
           rightUpArrow.hidden = true;
           rightDownArrow.hidden = true;
           gameText.style.visibility = "visible";
-          gameText.innerHTML = `
-          <tspan x="640" dy="1.2em">The match has been abandoned</tspan>
-          <tspan x="640" dy="1.2em">by either of the two players</tspan>`;
+          gameText.innerHTML = t("abandoned");
           scoreText.innerHTML = "" + 0 + " : " + 0;
           buttonSetter(MetaGameState.nothing);
           break;
