@@ -95,8 +95,7 @@ export async function renderHistoryContent(hideableElements) {
     const rawHistBody = await rawHist.text();
     const parsedHist = JSON.parse(rawHistBody);
     
-    // ✅ Add a check for empty history
-    if (!Array.isArray(parsedHist) || parsedHist.length === 0) {
+   if (!Array.isArray(parsedHist) || parsedHist.length === 0) {
       tempInnerHTML += `
         <tr>
         <td colspan="6" class="text-gray-400 text-center p-4">
@@ -125,7 +124,8 @@ export async function renderHistoryContent(hideableElements) {
                    (entry.finish === "technical") ? t("historic.lossAbsence") :
                    t("historic.loss");
             }
-            side = "Left";
+            // side = "Left";
+            side = t('historic.left');
           if (entry.finish !== "absence") {
             const respNn = await getNicknameForPlayerId(idR);
             const nnJson = JSON.parse(await respNn.text());
@@ -144,7 +144,8 @@ export async function renderHistoryContent(hideableElements) {
                    (entry.finish === "technical") ? t("historic.lossAbsence") :
                    t("historic.loss");
             }
-            side = "Right";
+            // side = "Right";
+            side = t('historic.right');
           if (entry.finish !== "absence") {
             const respNn = await getNicknameForPlayerId(idL);
             const nnJson = JSON.parse(await respNn.text());
