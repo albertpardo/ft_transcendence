@@ -40,7 +40,14 @@
     "ID": "ID",
     "enterTournament": "Entrar al torneo",
     "myTournaments": "Mis torneos",
-    "allTournaments": "Todos los torneos"
+    "allTournaments": "Todos los torneos",
+    "nobodyWon": "En una rara exhibición de ausencia, nadie ganó",
+    "empty": "vacío",
+    "finalist": "Finalista",
+    "lWon": "L ha ganado",
+    "rWon": "R ha ganado",
+    "lSuperWon": "L ha ganado completamente",
+    "rSuperWon": "R ha ganado completamente"
   },
   "historic": {
 	  "title": "Historial de partidas",

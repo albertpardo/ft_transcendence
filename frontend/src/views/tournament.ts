@@ -168,7 +168,7 @@ async function fillInTheTournTable() {
       console.error("weird error occured: tour is undefined, although no err received");
     }
     else {
-      document.getElementById("tourn-title").innerHTML = "Tournament name: " + tourn.tName;
+      document.getElementById("tourn-title").innerHTML = t('tournaments.tournamentName') + ": " + tourn.tName;
       document.getElementById("tourn-id").innerHTML = "id: " + tourn.tId;
       for (let i = 0; i < 3; i++) {
         let currMaxPN : number = Math.pow(2, i + 1);
@@ -185,7 +185,7 @@ async function fillInTheTournTable() {
           }
           else {
             // TODO this just highlights the importance of protections against injection. TODO TODO TODO FIXME XXX FIXME TODO TODO TODO.
-            document.getElementById(`${currentTitle}${j + 1}`).innerHTML = "<i>empty</i>";
+            document.getElementById(`${currentTitle}${j + 1}`).innerHTML = "<i>" + t('tournaments.empty') + "</i>";
           }
         }
       }

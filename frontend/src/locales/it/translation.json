@@ -40,10 +40,17 @@
     "ID": "ID",
     "enterTournament": "Entra nel torneo",
     "myTournaments": "I miei tornei",
-    "allTournaments": "Tutti i tornei"
+    "allTournaments": "Tutti i tornei",
+    "nobodyWon": "In una rara esibizione di assenza, nessuno ha vinto",
+    "empty": "vuoto",
+    "finalist": "Finalista",
+    "lWon": "L ha vinto",
+    "rWon": "R ha vinto",
+    "lSuperWon": "L ha vinto completamente",
+    "rSuperWon": "R ha vinto completamente"
   },
   "historic": {
-    "title": "Cronologi1nicka partite",
+    "title": "Cronologia partite",
     "description": "Visualizza le tue partite precedenti di Pong.",
     "result": "Risultato",
     "score": "Punteggio",

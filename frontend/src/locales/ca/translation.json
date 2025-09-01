@@ -40,7 +40,14 @@
     "ID": "ID",
     "enterTournament": "Entrar al torneig",
     "myTournaments": "Els meus tornejos",
-    "allTournaments": "Tots els tornejos"    
+    "allTournaments": "Tots els tornejos",
+    "nobodyWon": "En una rara exhibició d'absència, ningú va guanyar",
+    "empty": "buit",
+    "finalist": "Finalista",
+    "lWon": "L ha guanyat",
+    "rWon": "R ha guanyat",
+    "lSuperWon": "L ha guanyat completament",
+    "rSuperWon": "R ha guanyat completament"
   },
   "historic": {
     "title": "Històric de partides",

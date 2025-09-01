@@ -40,7 +40,14 @@
     "ID": "ID",
     "enterTournament": "Turnier beitreten",
     "myTournaments": "Meine Turniere",
-    "allTournaments": "Alle Turniere"
+    "allTournaments": "Alle Turniere",
+    "nobodyWon": "In einer seltenen Abwesenheitserscheinung hat niemand gewonnen",
+    "empty": "leer",
+    "finalist": "Finalist",
+    "lWon": "L hat gewonnen",
+    "rWon": "R hat gewonnen",
+    "lSuperWon": "L hat komplett gewonnen",
+    "rSuperWon": "R hat komplett gewonnen"
   },
   "historic": {
     "title": "Spielverlauf",
