@@ -40,7 +40,14 @@
     "ID": "ID",
     "enterTournament": "Torneoypi ruwan",
     "myTournaments": "Ñuqanchik torneokuna",
-    "allTournaments": "Tukuy torneokuna"
+    "allTournaments": "Tukuy torneokuna",
+    "nobodyWon": "In a rare display of absence, nobody won",
+    "empty": "vacío",
+    "finalist": "Finalista",
+    "lWon": "L ha ganado",
+    "rWon": "R ha ganado",
+    "lSuperWon": "L ha ganado completamente",
+    "rSuperWon": "R ha ganado completamente"  
   },
   "historic": {
     "title": "Takiy Willakuy",

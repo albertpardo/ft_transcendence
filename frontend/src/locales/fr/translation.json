@@ -40,7 +40,14 @@
     "ID": "ID",
     "enterTournament": "Entrer dans le tournoi",
     "myTournaments": "Mes tournois",
-    "allTournaments": "Tous les tournois"
+    "allTournaments": "Tous les tournois",
+    "nobodyWon": "Dans une rare démonstration d'absence, personne n'a gagné",
+    "empty": "vide",
+    "finalist": "Finaliste",
+    "lWon": "L a gagné",
+    "rWon": "R a gagné",
+    "lSuperWon": "L a complètement gagné",
+    "rSuperWon": "R a complètement gagné"
   },
   "historic": {
 	  "title": "Historique des matchs",

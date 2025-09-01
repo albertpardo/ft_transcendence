@@ -40,7 +40,14 @@
     "ID": "ID",
     "enterTournament": "Enter tournament",
     "myTournaments": "My Tournaments",
-    "allTournaments": "All Tournaments"
+    "allTournaments": "All Tournaments",
+    "nobodyWon": "In a rare display of absence, nobody won",
+    "empty": "empty",
+    "finalist": "Finalist",
+    "lWon": "L won",
+    "rWon": "R won",
+    "lSuperWon": "L super won",
+    "rSuperWon": "R super won"
   },
   "historic": {
     "title": "Match History",
@@ -92,7 +99,6 @@
     "success.delete": "Account deleted successfully!"
   },
   "friendsTxt": {
-    "refresh": " ",
     "refresh": "Refresh Friends' status",
     "nickTxt": "Nickname",
     "addBtn": "Add friend",

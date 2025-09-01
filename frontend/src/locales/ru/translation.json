@@ -41,7 +41,14 @@
     "ID": "ID",
     "enterTournament": "Войти в турнир",
     "myTournaments": "Мои турниры",
-    "allTournaments": "Все турниры"
+    "allTournaments": "Все турниры",
+    "nobodyWon": "В редком случае отсутствия победителя, никто не выиграл",
+    "empty": "пусто",
+    "finalist": "Финалист",
+    "lWon": "L выиграл",
+    "rWon": "R выиграл",
+    "lSuperWon": "L полностью выиграл",
+    "rSuperWon": "R полностью выиграл"
   },
   "historic": {
     "title": "История матчей",

@@ -875,7 +875,8 @@ export async function initDashboard() {
                   break;
                 case "both":
                   started = false;
-                  gameText.innerHTML = "In a rare dispay of absense, nobody won";
+                  // gameText.innerHTML = "In a rare dispay of absense, nobody won";
+                  gameText.innerHTML = `${t("tournaments.nobodyWon")}`;
                   await tourCheckAndSetIdlingButtons();
                   break;
               }
@@ -900,7 +901,8 @@ export async function initDashboard() {
                   break;
                 case "both":
                   started = false;
-                  gameText.innerHTML = "In a rare dispay of absense, nobody won";
+                  // gameText.innerHTML = "In a rare dispay of absense, nobody won";
+                  gameText.innerHTML = `${t("tournaments.nobodyWon")}`;
                   await tourCheckAndSetIdlingButtons();
                   break;
               }
@@ -908,24 +910,26 @@ export async function initDashboard() {
             else if (playerSide.v === "local") {
               switch (gameState.stateWhoL) {
                 case "right":
-                  gameText.innerHTML = "L won";
+                  // gameText.innerHTML = "lWon";//traducitr
+                  gameText.innerHTML = `${t("tournaments.lWon")}`;
                   break;
                 case "left":
-                  gameText.innerHTML = "R won";
+                  gameText.innerHTML = `${t("tournaments.rWon")}`;
                   break;
                 case "right fully":
                   started = false;
-                  gameText.innerHTML = "L super won";
+                  gameText.innerHTML = `${t("tournaments.lSuperWon")}`;
                   await tourCheckAndSetIdlingButtons();
                   break;
                 case "left fully":
                   started = false;
-                  gameText.innerHTML = "R super won";
+                  gameText.innerHTML = `${t("tournaments.rSuperWon")}`;
                   await tourCheckAndSetIdlingButtons();
                   break;
                 case "both":
                   started = false;
-                  gameText.innerHTML = "In a rare dispay of absense, nobody won";
+                  // gameText.innerHTML = "In a rare dispay of absense, nobody won";
+                  gameText.innerHTML = `${t("tournaments.nobodyWon")}`;
                   await tourCheckAndSetIdlingButtons();
                   break;
               }
