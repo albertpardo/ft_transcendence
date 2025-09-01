@@ -15,6 +15,12 @@
     "title": "锦标赛",
     "description": "参加Pong锦标赛以赢取奖励。",
     "join": "加入锦标赛",
+    "contender": "参赛者",
+    "quarterFinal": "四分之一决赛",
+    "semiFinal": "半决赛",
+    "final": "决赛",
+    "leaveTournament": "离开锦标赛（如果已加入）",
+    "destroyTournament": "销毁锦标赛（仅限管理员）",
     "create": "创建锦标赛",
     "view": "查看锦标赛",
     "noTournaments": "目前没有可用的锦标赛。",
@@ -27,14 +33,21 @@
     "score": "得分",
     "opponent": "对手",
     "date": "日期",
-    "win": "胜利",
-    "loss": "失败",
-    "winForfeit": "胜利（对手弃权了）",
-    "lossForfeit": "失败（你弃权了）",
-    "winAbsence": "胜利（对手未到场）",
-    "lossAbsence": "失败（你未到场）",
+	  "win": "胜利",
+	  "loss": "失败",
+    "side": "位置",
+    "right": "右侧",
+    "left": "左侧",
+    "type": "类型",
+    "normal": "普通",
+    "tournament": "锦标赛",
+	  "winForfeit": "胜利（对手弃权了）",
+	  "lossForfeit": "失败（你弃权了）",
+	  "winAbsence": "胜利（对手未到场）",
+	  "lossAbsence": "失败（你未到场）",
     "notLoggedIn": "您尚未登录。",
     "noAuthToken": "缺少认证令牌。",
+    "noGames": "您还没有玩过任何游戏。",
     "failedToLoad": "无法加载比赛历史。"
   },
   "profiles": {
@@ -101,8 +114,9 @@
   "wonRound": "您赢得了这一轮！",
   "lostRound": "您输了这一轮。",
   "pong-buttons": {
-    "start-button-text": "寻找快速对局",
-    "ready-button-text": "确认参赛",
-    "giveup-button-text": "立即弃权"
-  }
+	  "start-button-text": "寻找快速对局",
+	  "ready-button-text": "确认参赛",
+	  "giveup-button-text": "立即弃权",
+    "local-play-button-text": "开始本地游戏"
+	}
 }

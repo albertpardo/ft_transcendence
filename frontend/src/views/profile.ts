@@ -1,5 +1,6 @@
 import { googleInitialized } from "./login";
 import { t } from "../i18n";
+
 export async function renderProfileContent(hideableElements) {
   hideableElements.buttonArea.hidden = true;
   hideableElements.gameArea.classList.add("hidden");
@@ -34,7 +35,7 @@ export async function renderProfileContent(hideableElements) {
     if (!res.ok) throw new Error("Failed to fetch user data");
 
     userData = await res.json();
-    console.log('🎸🎸🎸Received user on login:', userData);
+    console.log('Received user on login:', userData);
   } catch (err) {
     console.error(err);
     hideableElements.contentArea.innerHTML = `<p class="text-red-500">Error loading profile. Please try again later.</p>`;
@@ -181,7 +182,7 @@ export async function renderProfileContent(hideableElements) {
   `;
 
   const form = document.getElementById("profile-form") as HTMLFormElement;
-  const editBtn = document.getElementById("edit-btn")!;
+  const editBtn = document.getElementById("edit-btn");
   const inputs = form.querySelectorAll("input");
   const saveBtn = document.getElementById("save-btn") as HTMLButtonElement;
   const deleteBtn = document.getElementById("delete-btn") as HTMLButtonElement;
@@ -218,31 +219,33 @@ export async function renderProfileContent(hideableElements) {
     });
   }
 
-  editBtn.addEventListener("click", () => {
-    inputs.forEach((input) => {
-      input.disabled = false;
-      
-      // Special handling for password field
-      if (input.id === 'form-password') {
-        const isDummy = input.getAttribute('data-is-dummy') === 'true';
+  if (editBtn) {
+    editBtn.addEventListener("click", () => {
+      inputs.forEach((input) => {
+        input.disabled = false;
         
-        if (isDummy) {
-          // Clear the dummy  s when editing
-          input.value = '';
-          input.removeAttribute('readonly');
-          input.setAttribute('placeholder', 'Enter new password');
-          input.removeAttribute('data-is-dummy');
+        // Special handling for password field
+        if (input.id === 'form-password') {
+          const isDummy = input.getAttribute('data-is-dummy') === 'true';
+          
+          if (isDummy) {
+            // Clear the dummy  s when editing
+            input.value = '';
+            input.removeAttribute('readonly');
+            input.setAttribute('placeholder', 'Enter new password');
+            input.removeAttribute('data-is-dummy');
+          }
+          
+          if (input.type !== "file") input.select();
+        } else {
+          if (input.type !== "file") input.select();
         }
-        
-        if (input.type !== "file") input.select();
-      } else {
-        if (input.type !== "file") input.select();
-      }
+      });
+      
+      saveBtn.disabled = false;
+      deleteBtn.disabled = false;
     });
-    
-    saveBtn.disabled = false;
-    deleteBtn.disabled = false;
-  });
+  }
 
   avatarInput.addEventListener("change", () => {
     const file = avatarInput.files?.[0];

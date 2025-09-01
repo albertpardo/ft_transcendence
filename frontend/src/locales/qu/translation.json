@@ -16,6 +16,12 @@
     "description": "Hukllamanta torneokunapi takiy.",
     "create": "Kamariy Torneo",
     "join": "Chay Torneoypi ruray",
+    "contender": "Contendiente",
+    "quarterFinal": "Cuartos de final",
+    "semiFinal": "Semifinal",
+    "final": "Finalista",
+    "leaveTournament": "Salir del torneo (si se ha unido)",
+    "destroyTournament": "Destruir torneo (sólo admin)",
     "noTournaments": "Manam torneokuna kachkankichu.",
     "tournamentName": "Torneo suti",
     "startDate": "Qallariy p'unchay",
@@ -33,14 +39,21 @@
     "score": "Saykuy",
     "opponent": "Chaylla",
     "date": "P'unchay",
-    "win": "Atipanakuy",
-    "loss": "Chinkay",
-    "winForfeit": "Atipanakuy (awqa saqirqan)",
-    "lossForfeit": "Chinkay (qam saqirqanki)",
-    "winAbsence": "Atipanakuy (awqa mana hamuq)",
-    "lossAbsence": "Chinkay (qam mana hamuq)",
+	  "win": "Atipanakuy",
+	  "loss": "Chinkay",
+    "side": "Lateralidad",
+    "right": "Hanan",
+    "left": "Urin",
+    "type": "Rikch'ariy",
+    "normal": "Normal",
+    "tournament": "Torneo",
+	  "winForfeit": "Atipanakuy (awqa saqirqan)",
+	  "lossForfeit": "Chinkay (qam saqirqanki)",
+	  "winAbsence": "Atipanakuy (awqa mana hamuq)",
+	  "lossAbsence": "Chinkay (qam mana hamuq)",
     "notLoggedIn": "Mana kanki chaylla.",
     "noAuthToken": "Mana kachka auth token.",
+    "noGames": "Mana kachkanchu takiykuna.",
     "failedToLoad": "Takiy willakuyqa manam kachkanku."
   },
   "profiles": {
@@ -107,8 +120,9 @@
   "wonRound": "Roundpi winay!",
   "lostRound": "Roundpi yaykuy.",
   "pong-buttons": {
-    "start-button-text": "Sapa kuti pukllanata maskay",
-    "ready-button-text": "Hukmanta haykuyta ratificay",
-    "giveup-button-text": "ÑAWPAMAN saqiy"
-  }
+	  "start-button-text": "Sapa kuti pukllanata maskay",
+	  "ready-button-text": "Hukmanta haykuyta ratificay",
+	  "giveup-button-text": "ÑAWPAMAN saqiy",
+    "local-play-button-text": "Lokal pukllanata qallarichiy"
+	}
 }
