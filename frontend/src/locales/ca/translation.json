@@ -26,7 +26,7 @@
     "noTournaments": "No hi ha tornejos disponibles en aquest moment.",
     "tournamentName": "Nom del torneig",
     "startDate": "Data d'inici",
-    "endDate": "Data de finalització",
+    "endDate": "Data de finalització", 
     "maxPlayers": "Jugadors màxims",
     "createSuccess": "Torneig creat amb èxit!",
     "joinSuccess": "T'has unit al torneig amb èxit!",
@@ -47,7 +47,9 @@
     "lWon": "L ha guanyat",
     "rWon": "R ha guanyat",
     "lSuperWon": "L ha guanyat completament",
-    "rSuperWon": "R ha guanyat completament"
+    "rSuperWon": "R ha guanyat completament",
+    "name": "Nom",
+    "players": "Jugadors"
   },
   "historic": {
     "title": "Històric de partides",

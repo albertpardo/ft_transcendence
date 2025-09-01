@@ -47,7 +47,9 @@
     "lWon": "L won",
     "rWon": "R won",
     "lSuperWon": "L super won",
-    "rSuperWon": "R super won"
+    "rSuperWon": "R super won",
+    "name": "Name",
+    "players": "Players"
   },
   "historic": {
     "title": "Match History",

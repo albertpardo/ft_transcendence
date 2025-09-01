@@ -47,7 +47,9 @@
     "lWon": "L a gagné",
     "rWon": "R a gagné",
     "lSuperWon": "L a complètement gagné",
-    "rSuperWon": "R a complètement gagné"
+    "rSuperWon": "R a complètement gagné",
+    "name": "Nom",
+    "players": "Joueurs"
   },
   "historic": {
 	  "title": "Historique des matchs",

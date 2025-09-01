@@ -205,7 +205,8 @@ async function fillInTheTournTable() {
           document.getElementById('table-finalist').innerHTML = "<b>" + nicknameVs + "</b>";
         }
         else {
-          document.getElementById('table-finalist').innerHTML = "finalist!";
+          // document.getElementById('table-finalist').innerHTML = "finalist!";
+          document.getElementById('table-finalist').innerHTML = t('tournaments.final');
         }
       }
       else {
@@ -431,29 +432,50 @@ async function generateUpdateAllTourTable(canWeJoin: boolean) {
   const allPTRObj = JSON.parse(allPTR);
   let count : number = 0;
   let tempInner : string = `
-  <tr>
-    <th>Name</th>
-    <th>Players</th>
-    <th>Join</th>
-  </tr>
+    <table class="min-w-full divide-y divide-gray-700">
+    <thead>
+      <tr>
+        <th class="px-6 py-3 text-left text-xs font-medium text-white-300 tracking-wider">${t("tournaments.tournamentName")}</th>
+        <th class="px-6 py-3 text-left text-xs font-medium text-white-300 tracking-wider">${t("tournaments.players")}</th>
+        <th class="px-6 py-3 text-left text-xs font-medium text-white-300 tracking-wider">${t("tournaments.join")}</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-700 bg-gray-800 rounded-lg">
+`;
+  if (!allPTRObj || !allPTRObj.res) {
+  tempInner += `
+      <tr>
+        <td colspan="3" class="px-6 py-4 whitespace-nowrap text-center">
+          <i>${t('tournaments.noTournaments')}</i>
+        </td>
+      </tr>
+    </tbody>
+  </table>
   `;
-  if (!allPTRObj || typeof allPTRObj === undefined) {
-    allTournamentsTable.innerHTML = tempInner;
-    return ;
-  }
-  for (var item of allPTRObj?.res) {
-    tempInner += `
-    <tr>
-      <td>${item.tName}</td>
-      <td>${item.joinedPN}/${item.maxPN}</td>
-      <td><button id="join-button-${count}" class="
-        mt-6 p-3 bg-blue-500 rounded-lg hover:bg-blue-400 transition text-white font-medium
-        disabled:border-gray-200 disabled:bg-gray-700 disabled:text-gray-500 disabled:shadow-none
-      ">
-        Join
-      </button></td>
-    </tr>`;
-    count += 1;
+  allTournamentsTable.innerHTML = tempInner;
+  return;
+}
+  for (var item of allPTRObj.res) {
+  tempInner += `
+      <tr class="hover:bg-gray-700 transition-colors">
+        <td class="px-6 py-4 whitespace-nowrap">
+          <div class="text-sm font-medium text-white">${item.tName}</div>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+          <div class="text-sm text-gray-300">${item.joinedPN}/${item.maxPN}</div>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-right">
+          <button id="join-button-${count}" class="
+            px-4 py-2 bg-blue-600 hover:bg-blue-700 
+            text-white font-medium rounded-md transition-colors
+            disabled:bg-gray-600 disabled:cursor-not-allowed
+          ">
+            ${t("tournaments.join")}
+          </button>
+        </td>
+      </tr>
+  `;
+  count += 1;
   }
   allTournamentsTable.innerHTML = tempInner;
   for (let newCount = 0; newCount < count; newCount += 1) {

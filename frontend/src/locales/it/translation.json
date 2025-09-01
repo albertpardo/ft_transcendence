@@ -47,7 +47,9 @@
     "lWon": "L ha vinto",
     "rWon": "R ha vinto",
     "lSuperWon": "L ha vinto completamente",
-    "rSuperWon": "R ha vinto completamente"
+    "rSuperWon": "R ha vinto completamente",
+    "name": "Nome",
+    "players": "Giocatori"
   },
   "historic": {
     "title": "Cronologia partite",

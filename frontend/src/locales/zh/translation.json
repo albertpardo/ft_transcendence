@@ -48,7 +48,9 @@
     "lWon": "L获胜",
     "rWon": "R获胜",
     "lSuperWon": "L完全获胜",
-    "rSuperWon": "R完全获胜"
+    "rSuperWon": "R完全获胜",
+    "name": "名称",
+    "players": "玩家"
   },
   "historic": {
     "title": "比赛历史",
