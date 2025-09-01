@@ -609,7 +609,7 @@ export async function renderTournamentManagerContent(hideableElements) {
           if (tourRespObj.err === "nil") {
             console.log("registered a tournament:", tourRespObj.tId);
             canWeJoin = false;
-            myTournamentField.innerHTML = "<a href=\"" + document.URL.substring(0, document.URL.search("#")) + "#tournament" + "\"><b><i>Click to view</b></i></a>";
+            myTournamentField.innerHTML = "<a href=\"" + document.URL.substring(0, document.URL.search("#")) + "#tournament" + "\"><b><i>" + t("tournaments.view") + "</b></i></a>";
             localStorage.setItem('tId', tourRespObj.tId);
             buttonSetter(MetaGameState.waittouropp);
           }
@@ -629,7 +629,7 @@ export async function renderTournamentManagerContent(hideableElements) {
         localStorage.setItem('tId', checkPartRespObj.tId);
         submitButton.disabled = true;
         document.getElementById('enter-tournament-by-id-button').disabled = true;
-        myTournamentField.innerHTML = "<a href=\"" + document.URL.substring(0, document.URL.search("#")) + "#tournament" + "\"><b><i>Click to view</b></i></a>";
+        myTournamentField.innerHTML = "<a href=\"" + document.URL.substring(0, document.URL.search("#")) + "#tournament" + "\"><b><i>" + t("tournaments.view") + "</b></i></a>";
       }
     }
     if (joinByIDForm) {
@@ -648,7 +648,7 @@ export async function renderTournamentManagerContent(hideableElements) {
           if (resOfEnrollObj.err === "nil") {
             console.log("enrolled in " + tidEl.value);
             canWeJoin = false;
-            myTournamentField.innerHTML = "<a href=\"" + document.URL.substring(0, document.URL.search("#")) + "#tournament" + "\"><b><i>Click to view</b></i></a>";
+            myTournamentField.innerHTML = "<a href=\"" + document.URL.substring(0, document.URL.search("#")) + "#tournament" + "\"><b><i>" + t("tournaments.view") + "</b></i></a>";
             localStorage.setItem("tId", tidEl.value);
             buttonSetter(MetaGameState.waittouropp);
           }
@@ -668,7 +668,7 @@ export async function renderTournamentManagerContent(hideableElements) {
         localStorage.setItem('tId', checkPartRespObj.tId);
         document.getElementById('register-tournament-button').disabled = true;
         enterByIdButton.disabled = true;
-        myTournamentField.innerHTML = "<a href=\"" + document.URL.substring(0, document.URL.search("#")) + "#tournament" + "\"><b><i>Click to view</b></i></a>";
+        myTournamentField.innerHTML = "<a href=\"" + document.URL.substring(0, document.URL.search("#")) + "#tournament" + "\"><b><i>" + t("tournaments.view") + "</b></i></a>";
       }
     }
   }

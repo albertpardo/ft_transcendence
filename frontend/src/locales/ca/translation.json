@@ -22,6 +22,7 @@
     "leaveTournament": "Sortir del torneig",
     "destroyTournament": "Destruir torneig (només admin)",
     "create": "Crear Torneig",
+    "view": "Veure Torneigs",
     "noTournaments": "No hi ha tornejos disponibles en aquest moment.",
     "tournamentName": "Nom del torneig",
     "startDate": "Data d'inici",
