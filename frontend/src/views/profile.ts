@@ -35,7 +35,6 @@ export async function renderProfileContent(hideableElements) {
     if (!res.ok) throw new Error("Failed to fetch user data");
 
     userData = await res.json();
-    console.log('Received user on login:', userData);
   } catch (err) {
     console.error(err);
     hideableElements.contentArea.innerHTML = `<p class="text-red-500">Error loading profile. Please try again later.</p>`;

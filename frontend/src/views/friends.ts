@@ -107,7 +107,7 @@ export async function renderFriendsContent(hideableElements) {
       });
 	  	if (!response.ok) {
 		    errorContent.textContent = t("friendsTxt.addFailed");
-        console.log("!response.ok -- ", t("friendsTxt.addFailed"));  
+        console.error("!response.ok -- ", t("friendsTxt.addFailed"));  
 	  	}
 	  } catch (err) {
       errorContent.textContent = t("friendsTxt.addError");

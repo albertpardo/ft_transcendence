@@ -337,6 +337,7 @@ export async function waitForGoogle() {
     }
     await sleep(1e3);
   }
+/*
   if (googleButton) {
     console.log('✅ #google-signin found and Google script loaded');
 //    initGoogleSignIn();
@@ -344,6 +345,12 @@ export async function waitForGoogle() {
   else {
     console.error("no google button!");
   }
+*/
+
+  if (!googleButton) {
+    console.error("no google button!");
+  }
+
 //  if (googleButton && typeof google !== 'undefined') {
 //    console.log('✅ #google-signin found and Google script loaded');
 //    initGoogleSignIn();
@@ -398,7 +405,6 @@ function renderGoogleButton(container: HTMLElement) {
       callback: handleGoogleCredentialResponse,
     });
     googleInitialized = true;
-    console.log('✅ Google initialized');
   }
 
   // @ts-ignore
@@ -427,7 +433,6 @@ export async function initGoogleSignIn() {
       callback: handleGoogleCredentialResponse,
     });
     googleInitialized = true;
-    console.log('✅ Google initialized');
   }
 
   // ✅ Always clear and re-render
@@ -439,13 +444,9 @@ export async function initGoogleSignIn() {
     text: 'signin_with',
     shape: 'rectangular',
   });
-
-  console.log('✅ Google Sign-In button rendered');
 }
 
 async function handleGoogleCredentialResponse(response: { credential: string }) {
-  console.log('🔐 Google token received:', response.credential);
-
   try {
     const res = await fetch('https://localhost:8443/api/auth/google', {
       method: 'POST',
@@ -457,7 +458,6 @@ async function handleGoogleCredentialResponse(response: { credential: string }) 
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
     const data = await res.json();
-    console.log('✅ Login success:', data);
 
     localStorage.setItem('authToken', data.token);
     localStorage.setItem('userId', data.id);

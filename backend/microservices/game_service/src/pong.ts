@@ -509,11 +509,9 @@ export function removeTheSock(sock: WebSocket) : void {
         }
       }
       socksMap.delete(p);
-//      console.log("player", p, "got their sock removed");
       return ;
     }
   }
-//  console.log("removing sock failed for some reason");
   return ;
 }
 
@@ -521,7 +519,6 @@ export function getPongState(gameId: string) : State {
   if (gamesMap.has(gameId)) {
     return (gamesMap.get(gameId).gstate);
   }
-//  console.error("no game found registered at " + gameId);
   return nullState;
 }
 

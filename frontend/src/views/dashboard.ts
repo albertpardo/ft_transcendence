@@ -77,7 +77,6 @@ export async function getGameMetaInfo() {
     else {
       const oppNameRaw = await getNicknameForPlayerId(oppId);
       const oppNameText = await oppNameRaw.text();
-      console.log("oppname from metainfo:", oppNameText);
       const oppNameJson = JSON.parse(oppNameText);
       if (oppNameJson.err !== "nil") {
         oppName = "<i>unknown</i>";
@@ -222,7 +221,6 @@ export async function buttonSetter(state : MetaGameState) {
 
 async function tourCheckAndSetIdlingButtons() {
   let isintour : boolean = await checkIsInTourWrapper();
-  console.log("isintour:", isintour);
   if (isintour) {
     // no game, but we're in a tournament
     // we're either waiting for it to start, or we've lost it. but the buttons should be the same so...
@@ -235,8 +233,6 @@ async function tourCheckAndSetIdlingButtons() {
 }
 
 export async function setterUponMetaInfo(gameInfo : HTMLElement, metaInfo : {gType: string, oppName: string}) {
-  console.log("ENTERED setterUponMetaInfo");
-  console.log("metainfo is:", metaInfo);
   if (metaInfo.gType === "none") {
     gameInfo.innerHTML = "";
     await tourCheckAndSetIdlingButtons();
@@ -250,7 +246,6 @@ export async function setterUponMetaInfo(gameInfo : HTMLElement, metaInfo : {gTy
     // we don't check for anything since basically once you get into a game with whatever state it's got, you
     // can only forfeit/escape, unlike the tournament stuff which has some various conditions for getting ready/forfeitting.
     buttonSetter(MetaGameState.inmmgame);
-    console.log("ginfo setter 1");
     gameInfo.innerHTML = "Game type: " + metaInfo.gType + "; versus: " + metaInfo.oppName;
   }
   else if (metaInfo.gType === "tournament") {
@@ -266,12 +261,10 @@ export async function setterUponMetaInfo(gameInfo : HTMLElement, metaInfo : {gTy
     else {
       buttonSetter(MetaGameState.intourgame);
     }
-    console.log("ginfo setter 2");
     gameInfo.innerHTML = "Game type: " + metaInfo.gType + "; versus: " + metaInfo.oppName;
   }
   else if (metaInfo.gType === "local") {
     buttonSetter(MetaGameState.inlocalgame);
-    console.log("ginfo setter 3");
     gameInfo.innerHTML = "Game type: " + metaInfo.gType;
   }
 }
@@ -480,7 +473,6 @@ if (wrapper) {
 }
 
 function generalDirectionButtonHandler(arrow: HTMLButtonElement, dir: number, side: string, playerSide: {v: string}) {
-  console.log("setting general arrow handling with:", arrow, dir, side, playerSide.v);
   arrow.addEventListener('mousedown', () => {
     if (playerSide.v === "local") {
       localMovePaddleWrapper(dir, side);
@@ -702,10 +694,9 @@ export async function initDashboard() {
   let metaInfo = await getGameMetaInfo();
   let reconn : boolean = false;
   if (localStorage.getItem("authToken")) {
-    console.log("before the first setter, have:", metaInfo);
     await setterUponMetaInfo(gameInfo, metaInfo);
     if (metaInfo.gType === "tournament" || metaInfo.gType === "normal") {
-      console.log("oh snap! reconnect the socket");
+      console.warn("oh snap! reconnect the socket");
       reconn = true;
     }
     socket = new WebSocket(`${API_BASE_URL}/api/pong/game-ws?uuid=${localStorage.getItem("userId")}&authorization=${localStorage.getItem("authToken")}`);
@@ -949,7 +940,6 @@ export async function initDashboard() {
     }
 
     document.getElementById('start-button')!.addEventListener('click', async () => {
-      console.log("after clicking the start-button,");
       const regPlRawResp = await registerPlayer();
       const regPlResp = await regPlRawResp.text();
       const regPlRespObj = JSON.parse(regPlResp);
@@ -966,7 +956,6 @@ export async function initDashboard() {
       await setterUponMetaInfo(gameInfo, metaInfo);
     });
     document.getElementById('ready-button')!.addEventListener('click', async () => {
-      console.log("after clicking the ready-button,");
       const readyPlRawResp = await confirmParticipation();
       const readyPlResp = await readyPlRawResp.text();
       const readyPlRespObj = JSON.parse(readyPlResp);
@@ -980,7 +969,6 @@ export async function initDashboard() {
       }
     });
     document.getElementById('giveup-button')!.addEventListener('click', async () => {
-      console.log("after clicking the giveup-button,");
       const forfeitRawResp = await forfeit();
       const forfeitResp = await forfeitRawResp.text();
       const forfeitRespObj = JSON.parse(forfeitResp);
@@ -998,7 +986,6 @@ export async function initDashboard() {
       await setterUponMetaInfo(gameInfo, metaInfo);
     });
     document.getElementById('local-play-button')!.addEventListener('click', async () => {
-      console.log("after clicking the local-play-button,");
       const localGamingRawResp = await localGaming();
       const localGamingResp = await localGamingRawResp.text();
       const localGamingRespObj = JSON.parse(localGamingResp);
@@ -1015,7 +1002,6 @@ export async function initDashboard() {
       await setterUponMetaInfo(gameInfo, metaInfo);
     });
 
-    console.log("playerside:", playerSide.v);
     generalDirectionButtonHandler(leftUpArrow, -2, "l", playerSide);
     generalDirectionButtonHandler(leftDownArrow, 2, "l", playerSide);
     generalDirectionButtonHandler(rightUpArrow, -2, "r", playerSide);
