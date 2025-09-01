@@ -75,17 +75,3 @@ export async function renderPlayContent(hideableElements) {
   setterUponMetaInfo(hideableElements.gameInfo, metaInfo);
 }
 
-export function renderStatsContent(hideableElements) {
-  const el = hideableElements.contentArea;
-  const bu = hideableElements.buttonArea;
-  const gArea = hideableElements.gameArea;
-  const gWin = hideableElements.gameWindow;
-  el.innerHTML = `
-    <h1 class="text-3xl font-bold mb-6">${t("statistics.title")}</h1>
-    <p class="mb-4">${t("statistics.description")}</p>
-    <img src="https://placehold.co/1000x400/444444/ffffff?text=Demo" class="w-full rounded-lg" alt="Stats">
-  `;
-  hideableElements.buttonArea.hidden = true;
-  hideableElements.gameArea.classList.add("hidden");
-  hideableElements.gameWindow.hidden = true;
-}

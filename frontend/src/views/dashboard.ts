@@ -1,7 +1,7 @@
 // src/views/dashboard.ts
 import { registerPlayer, localGaming, forfeit, movePaddle, localMovePaddle, confirmParticipation, checkIsInGame, checkReady, checkIsInTournament } from './buttonClicking';
 import { route } from '../router';
-import { renderHomeContent, renderPlayContent, renderStatsContent } from './sections';
+import { renderHomeContent, renderPlayContent } from './sections';
 import { renderHistoryContent, getNicknameForPlayerId } from './history';
 import { renderProfileContent } from './profile';
 import { renderTournamentContent, renderTournamentManagerContent, getCompleteTournamentInfo } from './tournament';
