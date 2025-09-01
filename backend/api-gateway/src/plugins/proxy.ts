@@ -124,6 +124,13 @@ export default fp(async function (fastify: FastifyInstance) {
         upstream: 'http://game_service:9002',
         prefix: '/api/pong',
         rewritePrefix: '/api/pong',
+        httpMethods: ['GET'],
+        http2: false,
+    });
+    fastify.register(fastifyHttpProxy, {
+        upstream: 'http://game_service:9002',
+        prefix: '/api/pong',
+        rewritePrefix: '/api/pong',
         httpMethods: ['POST'],
         http2: false,
     });
