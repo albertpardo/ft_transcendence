@@ -45,6 +45,8 @@
     "right": "Right",
     "left": "Left",
     "type": "Type",
+    "normal": "Normal",
+    "tournament": "Tournament",
 	  "winForfeit": "Win (enemy forfeited)",
 	  "lossForfeit": "Loss (you forfeited)",
 	  "winAbsence": "Win (enemy absence)",

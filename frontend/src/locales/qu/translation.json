@@ -45,6 +45,8 @@
     "right": "Hanan",
     "left": "Urin",
     "type": "Rikch'ariy",
+    "normal": "Normal",
+    "tournament": "Torneo",
 	  "winForfeit": "Atipanakuy (awqa saqirqan)",
 	  "lossForfeit": "Chinkay (qam saqirqanki)",
 	  "winAbsence": "Atipanakuy (awqa mana hamuq)",

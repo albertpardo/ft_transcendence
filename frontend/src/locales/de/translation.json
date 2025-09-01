@@ -44,6 +44,8 @@
     "right": "Rechts",
     "left": "Links",
     "type": "Typ",
+    "normal": "Normal",
+    "tournament": "Turnier",
 	  "winForfeit": "Sieg (Gegner hat aufgegeben)",
 	  "lossForfeit": "Niederlage (du hast aufgegeben)",
 	  "winAbsence": "Sieg (Gegner abwesend)",

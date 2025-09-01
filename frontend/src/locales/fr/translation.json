@@ -41,6 +41,8 @@
     "right": "Droite",
     "left": "Gauche",
     "type": "Type",
+    "normal": "Normal",
+    "tournament": "Tournoi",
 	  "winForfeit": "Victoire (l’ennemi a abandonné)",
 	  "lossForfeit": "Défaite (vous avez abandonné)",
 	  "winAbsence": "Victoire (l’ennemi était absent)",

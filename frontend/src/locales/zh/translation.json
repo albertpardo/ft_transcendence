@@ -39,6 +39,8 @@
     "right": "右侧",
     "left": "左侧",
     "type": "类型",
+    "normal": "普通",
+    "tournament": "锦标赛",
 	  "winForfeit": "胜利（对手弃权了）",
 	  "lossForfeit": "失败（你弃权了）",
 	  "winAbsence": "胜利（对手未到场）",

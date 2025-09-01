@@ -110,7 +110,8 @@ export async function renderHistoryContent(hideableElements) {
         let side = "";
         let nicknameVs = "unknown";
         let res = "";
-        
+        let typeGame = "";
+
         const isUserLeft = String(userId) === String(idL);
         if (isUserLeft) {
           side = t('historic.left');
@@ -149,6 +150,9 @@ export async function renderHistoryContent(hideableElements) {
 
         const resultColorClass = userWon ? 'text-green-400 font-semibold' : 'text-red-500 font-semibold';
         const opponentNameColored = `<span class="text-red-500 font-medium">${nicknameVs}</span>`;
+        typeGame = entry.gameType === "normal" ? t("historic.normal") : t("historic.tournament");
+        /* console.log("Rendering entry:", entry);
+        console.log("Game type:", typeGame); */
         const thisdate = new Date(entry.date);
         const formattedDate = thisdate.toLocaleString('en-GB', {
           year: 'numeric',
@@ -163,7 +167,7 @@ export async function renderHistoryContent(hideableElements) {
             <td class="text-center">${formattedDate}</td>
             <td class="text-center">${opponentNameColored}</td>
             <td class="text-center">${side}</td>
-            <td class="text-center">${entry.gameType}</td>
+            <td class="text-center">${typeGame}</td>
             <td class="text-center">${entry.scoreL} : ${entry.scoreR}</td>
             <td class="text-center ${resultColorClass}">${res}</td>
           </tr>

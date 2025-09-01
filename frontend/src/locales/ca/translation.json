@@ -45,6 +45,8 @@
     "right": "Dreta",
     "left": "Esquerra",
     "type": "Tipus",
+    "normal": "Normal",
+    "tournament": "Torneig",
 	  "winForfeit": "Victòria (l’enemic va renunciar)",
 	  "lossForfeit": "Derrota (vas renunciar)",
 	  "winAbsence": "Victòria (l’enemic no es va presentar)",

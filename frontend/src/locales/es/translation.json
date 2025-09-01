@@ -41,6 +41,8 @@
     "right": "Derecha",
     "left": "Izquierda",
     "type": "Tipo",
+    "normal": "Normal",
+    "tournament": "Torneo",
 	  "winForfeit": "Victoria (el enemigo se rindió)",
 	  "lossForfeit": "Derrota (te rendiste)",
 	  "winAbsence": "Victoria (el enemigo no se presentó)",
