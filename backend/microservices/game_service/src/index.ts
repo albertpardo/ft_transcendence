@@ -395,6 +395,10 @@ const startServer = async () => {
         handler:
           async (req: FastifyRequest<{ Body: {tName: string, playersN: number, privacy: boolean} }>, reply) => {
             try {
+              const regex = /[<>\/]+/;
+              if (regex.test(req?.body.tName)) {
+                throw "Unacceptable characters";
+              }
               const uuid = req?.headers['x-user-id'] as string;
               if (typeof uuid === "undefined") {
                 throw "bad uuid";
@@ -428,7 +432,7 @@ const startServer = async () => {
                 throw "undefined uuid";
               }
               if (!upperSocksMap.has(uuid)) {
-                throw "User has no socker in the upper socks map";
+                throw "User has no socket in the upper socks map";
               }
               let sock = upperSocksMap.get(uuid);
               if (typeof sock === "undefined") {
