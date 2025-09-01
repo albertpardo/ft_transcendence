@@ -30,7 +30,16 @@
     "createSuccess": "Tournament created successfully!",
     "joinSuccess": "Joined tournament successfully!",
     "errorCreating": "Error creating tournament.",
-    "errorJoining": "Error joining tournament."
+    "errorJoining": "Error joining tournament.",
+    "tournamentManagement": "Tournament Management",
+    "privatizeTournament": "Privatize Tournament",
+    "registerTournament": "Register Tournament",
+    "joinTournamentById": "Join a tournament by ID",
+    "tournamentId": "Tournament ID",
+    "ID": "ID",
+    "enterTournament": "Enter tournament",
+    "myTournaments": "My Tournaments",
+    "allTournaments": "All Tournaments"
   },
   "historic": {
     "title": "Match History",

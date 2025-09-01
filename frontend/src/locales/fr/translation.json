@@ -26,7 +26,21 @@
     "create": "Créer un tournoi",
     "view": "Voir les tournois",
     "noTournaments": "Aucun tournoi disponible pour le moment.",
-    "error": "Erreur lors du chargement des tournois."
+    "error": "Erreur lors du chargement des tournois.",
+    "maxPlayers": "Joueurs max",
+    "createSuccess": "Tournoi créé avec succès !",
+    "joinSuccess": "Vous avez rejoint le tournoi avec succès !",
+    "errorCreating": "Erreur lors de la création du tournoi.",
+    "errorJoining": "Erreur lors de la participation au tournoi.",
+    "tournamentManagement": "Gestion des tournois",
+    "privatizeTournament": "Privatiser le tournoi",
+    "registerTournament": "S'inscrire au tournoi",
+    "joinTournamentById": "Rejoindre un tournoi par ID",
+    "tournamentId": "ID du tournoi",
+    "ID": "ID",
+    "enterTournament": "Entrer dans le tournoi",
+    "myTournaments": "Mes tournois",
+    "allTournaments": "Tous les tournois"
   },
   "historic": {
 	  "title": "Historique des matchs",

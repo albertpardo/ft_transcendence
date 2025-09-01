@@ -489,19 +489,21 @@ export async function renderTournamentManagerContent(hideableElements) {
   hideableElements.buttonArea.hidden = true;
   hideableElements.gameArea.classList.add("hidden");
   hideableElements.gameWindow.hidden = true;
+  console.log("tournaments.tournamentManagement:", t("tournaments.tournamentManagement"));  
+ 
   let tempHTML : string = `
-    <h1 class="text-3xl font-bold mb-6">Tournament management</h1>
-    <p class="mb-4 font-bold">Create a tournament:</p>
+    <h1 class="text-3xl font-bold mb-6">${t("tournaments.tournamentManagement")}</h1>
+    <p class="mb-4 font-bold">${t("tournaments.create")}</p>
     <form class="mt-8 space-y-6" id="tournament-form">
       <div>
-        <label for="tname">Tournament name</label>
+        <label for="tname">${t("tournaments.tournamentName")}</label>
         <input id="tname" name="tname" type="text" required
           class="w-full px-3 py-2 text-gray-200 bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder="Tournament name">
+          placeholder="${t("tournaments.tournamentName")}">
         </input>
       </div>
       <div>
-        <label for="players">Amount of participants</label>
+        <label for="players">${t("tournaments.maxPlayers")}</label>
         <select id="players" name="players" required
           class="w-full px-3 py-2 text-gray-200 bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           placeholder=2>
@@ -513,7 +515,7 @@ export async function renderTournamentManagerContent(hideableElements) {
       <div>
         <input type="checkbox" id="rprivate" name="rprivate"
           />
-        <label for="rprivate">Make it private</label>
+        <label for="rprivate">${t("tournaments.privatizeTournament")}</label>
       </div>
       <div>
         <button type="submit" id="register-tournament-button"
@@ -526,7 +528,7 @@ export async function renderTournamentManagerContent(hideableElements) {
             disabled:border-gray-200 disabled:bg-gray-700 disabled:text-gray-500 disabled:shadow-none
         "
         disabled>
-          Register tournament
+          ${t("tournaments.registerTournament")}
         </button>
       </div>
     </form>
@@ -534,13 +536,13 @@ export async function renderTournamentManagerContent(hideableElements) {
     <br />
     <hr />
     <br />
-    <p class="mb-4 font-bold">Join a tournament by ID:</p>
+    <p class="mb-4 font-bold">${t("tournaments.joinTournamentById")}:</p>
     <form class="mt-8 space-y-6" id="join-by-id-form">
       <div>
-        <label for="tid">Tournament ID</label>
+        <label for="tid">${t("tournaments.tournamentId")}</label>
         <input id="tid" name="tid" type="text" required
           class="w-full px-3 py-2 text-gray-200 bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder="ID">
+          placeholder="${t("tournaments.ID")}">
         </input>
       </div>
       <div>
@@ -554,7 +556,7 @@ export async function renderTournamentManagerContent(hideableElements) {
             disabled:border-gray-200 disabled:bg-gray-700 disabled:text-gray-500 disabled:shadow-none
         "
         disabled>
-          Enter tournament
+          ${t("tournaments.enterTournament")}
         </button>
       </div>
     </form>
@@ -562,13 +564,13 @@ export async function renderTournamentManagerContent(hideableElements) {
     <br />
     <hr />
     <br />
-    <p class="mb-4">My tournament:</p>
-    <div id="my-tournament"><p><i>none</i></p></div>
+    <p class="mb-4">${t("tournaments.myTournaments")}:</p>
+    <div id="my-tournament"><p><i>${t("tournaments.noTournaments")}</i></p></div>
 
     <br />
     <hr />
     <br />
-    <p class="mb-4">All tournaments:</p>
+    <p class="mb-4">${t("tournaments.allTournaments")}:</p>
     <table class="table-fixed"><tbody id="all-tournaments-table">
     </tbody></table>
     <!-- actual table of all public tournaments TODO -->

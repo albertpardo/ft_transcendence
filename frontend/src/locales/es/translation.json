@@ -26,7 +26,21 @@
     "create": "Crear un torneo",
     "view": "Ver torneos",
     "noTournaments": "No hay torneos disponibles en este momento.",
-    "error": "Error al cargar los torneos."
+    "error": "Error al cargar los torneos.",
+    "maxPlayers": "Máximo de jugadores",
+    "createSuccess": "¡Torneo creado con éxito!",
+    "joinSuccess": "¡Te has unido al torneo con éxito!",
+    "errorCreating": "Error al crear el torneo.",
+    "errorJoining": "Error al unirse al torneo.",
+    "tournamentManagement": "Gestión de torneos",
+    "privatizeTournament": "Privatizar torneo",
+    "registerTournament": "Registrar torneo",
+    "joinTournamentById": "Unirse a un torneo por ID",
+    "tournamentId": "ID del torneo",
+    "ID": "ID",
+    "enterTournament": "Entrar al torneo",
+    "myTournaments": "Mis torneos",
+    "allTournaments": "Todos los torneos"
   },
   "historic": {
 	  "title": "Historial de partidas",

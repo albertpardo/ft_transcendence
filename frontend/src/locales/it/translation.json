@@ -30,7 +30,16 @@
     "createSuccess": "Torneo creato con successo!",
     "joinSuccess": "Iscritto al torneo con successo!",
     "errorCreating": "Errore nella creazione del torneo.",
-    "errorJoining": "Errore nell'iscrizione al torneo."
+    "errorJoining": "Errore nell'iscrizione al torneo.",
+    "tournamentManagement": "Gestione torneo",
+    "privatizeTournament": "Privatizza torneo",
+    "registerTournament": "Registra torneo",
+    "joinTournamentById": "Iscriviti a un torneo tramite ID",
+    "tournamentId": "ID torneo",
+    "ID": "ID",
+    "enterTournament": "Entra nel torneo",
+    "myTournaments": "I miei tornei",
+    "allTournaments": "Tutti i tornei"
   },
   "historic": {
     "title": "Cronologia partite",

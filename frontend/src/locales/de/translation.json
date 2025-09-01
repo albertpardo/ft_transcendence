@@ -29,7 +29,16 @@
     "createSuccess": "Turnier erfolgreich erstellt!",
     "joinSuccess": "Sie sind dem Turnier beigetreten!",
     "errorCreating": "Fehler beim Erstellen des Turniers.",
-    "errorJoining": "Fehler beim Beitreten zum Turnier."
+    "errorJoining": "Fehler beim Beitreten zum Turnier.",
+    "tournamentManagement": "Turnierverwaltung",
+    "privatizeTournament": "Turnier privatisieren",
+    "registerTournament": "Turnier registrieren",
+    "joinTournamentById": "Turnier per ID beitreten",
+    "tournamentId": "Turnier-ID",
+    "ID": "ID",
+    "enterTournament": "Turnier beitreten",
+    "myTournaments": "Meine Turniere",
+    "allTournaments": "Alle Turniere"
   },
   "historic": {
     "title": "Spielverlauf",
