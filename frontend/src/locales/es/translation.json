@@ -47,7 +47,9 @@
     "lWon": "L ha ganado",
     "rWon": "R ha ganado",
     "lSuperWon": "L ha ganado completamente",
-    "rSuperWon": "R ha ganado completamente"
+    "rSuperWon": "R ha ganado completamente",
+    "name": "Nombre",
+    "players": "Jugadores"
   },
   "historic": {
 	  "title": "Historial de partidas",
