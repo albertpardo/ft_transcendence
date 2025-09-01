@@ -15,6 +15,7 @@
     "title": "Tournaments",
     "description": "Join or create tournaments to compete with others.",
     "create": "Create Tournament",
+    "view": "View Tournaments",
     "join": "Join Tournament",
     "noTournaments": "No tournaments available at the moment.",
     "contender": "Contender",

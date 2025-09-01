@@ -22,6 +22,7 @@
     "leaveTournament": "Turnier verlassen (wenn beigetreten)",
     "destroyTournament": "Turnier zerstören (nur Admin)",
     "create": "Turnier erstellen",
+    "view": "Turniere anzeigen",
     "noTournaments": "Derzeit sind keine Turniere verfügbar.",
     "tournamentName": "Turniername", 
     "startDate": "Startdatum",
