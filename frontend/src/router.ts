@@ -45,7 +45,6 @@ export function route() {
     case 'history':           renderHistoryContent(hideableElements);           break;
     case 'tournament':        renderTournamentContent(hideableElements);        break;
     case 'tournamentmanager': renderTournamentManagerContent(hideableElements); break;
-    case 'stats':             renderStatsContent(hideableElements);             break;
     case 'friends':           renderFriendsContent(hideableElements);           break;
     default:                  renderHomeContent(hideableElements);
   }

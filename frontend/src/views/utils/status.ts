@@ -12,7 +12,7 @@ export async function setUserStatus(userStatus: string) {
   }
   
   try {
-    const reponse = await fetch(`${API_BASE_URL}/api/status`, {
+    const response = await fetch(`${API_BASE_URL}/api/status`, {
       method: "PUT",
       headers: { 
         "Use-me-to-authorize": authstringheader,
