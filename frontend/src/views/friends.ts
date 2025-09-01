@@ -40,7 +40,6 @@ export async function renderFriendsContent(hideableElements) {
 
   const authstringheader : string = "Bearer " + authToken;
 
-   // ${t("friendsTxt.refresh")}
   let friendsData;
   el.innerHTML = `
     <div class="w-full flex flex-col items-center gap-6 p-7 md:flex-row md:gap-8 rounded-2xl">
@@ -132,7 +131,6 @@ export async function renderFriendsContent(hideableElements) {
 	    console.error(t("friendsTxt.getFailed"));
     } else {
       friendsData = await res.json();
-	    console.log('🎸🎸🎸Received friend data:', friendsData);
       renderFriendsTable(friendsData);
 	  }
   } catch (err) {

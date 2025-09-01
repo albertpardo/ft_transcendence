@@ -166,7 +166,6 @@ class PongRuntime {
   private updatePositions() : void {
     if (this.ball.speed.x < 0) {
       if (this.ball.speed.x * FRAME_TIME + this.ball.coords.x < PADDLE_X) {
-//        console.log("left paddle imminent! : ", this.Lpaddle);
         if ((this.ball.coords.y - this.Lpaddle.y >= 0) && (this.ball.coords.y - this.Lpaddle.y <= this.Lpaddle.h)) {
           // bounce off the left pad
           this.ball.speed = calculateVBounce(this.ball, this.Lpaddle);
@@ -311,12 +310,10 @@ class PongRuntime {
           stateScoreL: this.scoreL,
           stateScoreR: this.scoreR,
         };
-//        console.log("ball lost by...", this.whoLost);
         await sleep(INTER_ROUND_COOLDOWN_TIME_MS);
         // TODO custom score for tournament?
         if (this.scoreL > 2 || this.scoreR > 2 || this.LGaveUp || this.RGaveUp) {
           this.pongDone = true;
-//          console.log("game done.");
           if (this.whoLost === "left") {
             this.whoLost = "left fully";
             this.gstate.stateWhoL = "left fully";
@@ -600,8 +597,6 @@ export const gamesReadyLoopCheck = async () => {
           if (gameRuntime.gameType === "normal") {
             console.log("I'm so normal.");
             gameRuntime.mainLoop();
-//            console.log("one game started: " + gameId + ", with left: " + gameRuntime.LplayerId + " and right: " + gameRuntime.RplayerId);
-//            console.log("sending the appropriate message to both clientis via ws");
             needToSendStartedMap.set(gameRuntime.LplayerId, false);
             needToSendStartedMap.set(gameRuntime.RplayerId, false);
             await sleep(10);
@@ -611,8 +606,6 @@ export const gamesReadyLoopCheck = async () => {
           else {
             console.log("I'm so not normal!");
             gameRuntime.mainLoop();
-//            console.log("one game started: " + gameId + ", with left: " + gameRuntime.LplayerId + " and right: " + gameRuntime.RplayerId);
-//            console.log("sending the appropriate message to both clientis via ws");
             needToSendStartedMap.set(gameRuntime.LplayerId, false);
             needToSendStartedMap.set(gameRuntime.RplayerId, false);
             await sleep(10);
@@ -632,7 +625,6 @@ export const gamesReadyLoopCheck = async () => {
     }
     await sleep(5e3);
 //    getAll();
-//    console.log("one gamesreadyloop iteration passed");
   }
 }
 
@@ -640,7 +632,6 @@ const waitingForReconnect = async (playerId) => {
   while (socksMap.has(playerId) === false) {
     await sleep(3*1000);
   }
-//  console.log("sock was finally detected for", playerId);
 }
 
 export const dataStreamer = async (playerId : string) => {
@@ -668,7 +659,6 @@ export const dataStreamer = async (playerId : string) => {
     }
     else if (runtime.pongDone === false) {
       sock.send(JSON.stringify(runtime.gstate));
-//    console.log(runtime.gstate);
     }
     else if (runtime.pongDone === true) {
       if (runtime.gameType === "normal") {

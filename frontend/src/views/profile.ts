@@ -364,7 +364,6 @@ export async function renderProfileContent(hideableElements) {
       });
 
       if (response.ok) {
-        // alert("Account deleted successfully");
         const successDelete = document.getElementById("success-delete")!;
         successDelete.classList.remove("hidden");
         setTimeout(() => {

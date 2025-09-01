@@ -574,7 +574,6 @@ export async function initDashboard() {
         <a href="#history" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='history'?'bg-blue-600':'bg-gray-700'}">${t('nav.history')}</a>
         <a href="#tournament" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='tournament'?'bg-blue-600':'bg-gray-700'}">${t('nav.tournament')}</a>
         <a href="#tournamentmanager" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='tournamentmanager'?'bg-blue-600':'bg-gray-700'}">${t('tournaments.tournamentManagement')}</a>
-        <a href="#stats" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='stats'?'bg-blue-600':'bg-gray-700'}">${t('nav.stats')}</a>
         <a href="#friends" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='friends'?'bg-blue-600':'bg-gray-700'}">${t('nav.friends')}</a>
       </nav>
       <button id="logout-btn" class="mt-auto w-full p-3 bg-red-600 rounded-lg hover:bg-red-700 transition text-white font-medium">${t('nav.logout')}</button>
@@ -716,7 +715,6 @@ export async function initDashboard() {
     );
     socket.addEventListener("message", async (event) => {
       await i18nReady;
-//      console.log("I, a tokened player, receive:", event.data);
       // XXX maybe a try catch? idk if it'd crash or something on a wrong input
       switch (event.data) {
         case "opp joined":
@@ -729,7 +727,6 @@ export async function initDashboard() {
           }
           break;
         case "connected":
-//          console.log("Welcome to pong.");
           break;
         case "confirmed":
           document.getElementById('ready-button').disabled = true;
@@ -1134,7 +1131,6 @@ export async function initDashboard() {
     case 'history':           renderHistoryContent(hideableElements);           break;
     case 'tournament':        renderTournamentContent(hideableElements);        break;
     case 'tournamentmanager': renderTournamentManagerContent(hideableElements); break;
-    case 'stats':             renderStatsContent(hideableElements);             break;
     case 'friends':           renderFriendsContent(hideableElements);           break;
     default:                  renderHomeContent(hideableElements);
   }

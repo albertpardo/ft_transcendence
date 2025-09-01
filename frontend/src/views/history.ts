@@ -164,8 +164,6 @@ export async function renderHistoryContent(hideableElements) {
         const resultColorClass = userWon ? 'text-green-400 font-semibold' : 'text-red-500 font-semibold';
         const opponentNameColored = `<span class="text-red-500 font-medium">${nicknameVs}</span>`;
         typeGame = entry.gameType === "normal" ? t("historic.normal") : t("historic.tournament");
-        /* console.log("Rendering entry:", entry);
-        console.log("Game type:", typeGame); */
         const thisdate = new Date(entry.date);
         const formattedDate = thisdate.toLocaleString('en-GB', {
           year: 'numeric',
