@@ -120,7 +120,6 @@ async function fillInTheTournTable() {
   const tournAllInfoResp = await tournAllInfoRawResp.text();
   const tournAllInfoRespObj = JSON.parse(tournAllInfoResp);
   if (tournAllInfoRespObj.err !== "nil") {
-    console.log("getting all the tourn info resulted in err:", tournAllInfoRespObj.err);
     document.getElementById("tourn-title").innerHTML = "<i>" + t('tournaments.noTournaments') + "</i>";
     document.getElementById("tourn-id").innerHTML = "";
     const bt = document.getElementById("big-table");
@@ -305,7 +304,6 @@ export async function renderTournamentContent(hideableElements) {
           localStorage.removeItem("tId");
           tournAnihilationButton.disabled = true;
           buttonSetter(MetaGameState.nothing);
-          console.log("tourn deleted");
         }
         else {
           console.error("failed to delete tournament:", resOfDeleteObj.err);
@@ -314,7 +312,6 @@ export async function renderTournamentContent(hideableElements) {
       });
     }
     else {
-      console.log("just checked and you don't admin anything:", checkAdminRespObj.err);
       tournAnihilationButton.disabled = true;
       noadminFlag = true;
     }
@@ -334,7 +331,6 @@ export async function renderTournamentContent(hideableElements) {
           alert("left the tournament");
           localStorage.removeItem("tId");
           tournLeaveButton.disabled = true;
-          console.log("button setting from tournament 3");
           buttonSetter(MetaGameState.nothing);
         }
         else {
@@ -344,7 +340,7 @@ export async function renderTournamentContent(hideableElements) {
       });
     }
     else {
-      console.log("just checked and you don't participate in anything OR you admin the thing:", checkPartRespObj.err);
+      console.err("just checked and you don't participate in anything OR you admin the thing:", checkPartRespObj.err);
       tournLeaveButton.disabled = true;
       noparticipateFlag = true;
     }
@@ -480,11 +476,10 @@ async function generateUpdateAllTourTable(canWeJoin: boolean) {
   allTournamentsTable.innerHTML = tempInner;
   for (let newCount = 0; newCount < count; newCount += 1) {
     if (!canWeJoin) {
-      console.log("can join:", newCount);
       document.getElementById(`join-button-${newCount}`).disabled = true;
     }
     else {
-      console.log("can't join:", newCount);
+      console.warn("can't join:", newCount);
       document.getElementById(`join-button-${newCount}`).disabled = false;
     }
     document.getElementById(`join-button-${newCount}`).addEventListener('click', async () => {
@@ -492,7 +487,6 @@ async function generateUpdateAllTourTable(canWeJoin: boolean) {
       const resOfEnroll = await rawResOfEnroll.text();
       const resOfEnrollObj = JSON.parse(resOfEnroll);
       if (resOfEnrollObj.err === "nil") {
-        console.log("enrolled in " + allPTRObj.res[newCount].tId);
         localStorage.setItem("tId", allPTRObj.res[newCount].tId);
         for (let newerCount = 0; newerCount < count; newerCount += 1) {
           let currentJB = document.getElementById(`join-button-${newerCount}`);
@@ -613,7 +607,6 @@ export async function renderTournamentManagerContent(hideableElements) {
     const checkPartRawResp = await participantCheck();
     const checkPartResp = await checkPartRawResp.text();
     const checkPartRespObj = JSON.parse(checkPartResp);
-    console.log("check part resp obj:", checkPartRespObj);
     if (tournamentForm) {
       const submitButton = document.getElementById('register-tournament-button') as HTMLButtonElement;
       if (checkPartRespObj.err !== "nil") {
@@ -628,11 +621,9 @@ export async function renderTournamentManagerContent(hideableElements) {
           submitButton.disabled = true;
           document.getElementById('enter-tournament-by-id-button').disabled = true;
           const rawCreateTournamentResp = await createTournament(tnameEl.value, playersEl.value, checkboxEl.checked);
-          console.log(rawCreateTournamentResp);
           const tourResp = await rawCreateTournamentResp.text();
           const tourRespObj = JSON.parse(tourResp);
           if (tourRespObj.err === "nil") {
-            console.log("registered a tournament:", tourRespObj.tId);
             canWeJoin = false;
             myTournamentField.innerHTML = "<a href=\"" + document.URL.substring(0, document.URL.search("#")) + "#tournament" + "\"><b><i>" + t("tournaments.view") + "</b></i></a>";
             localStorage.setItem('tId', tourRespObj.tId);
@@ -649,7 +640,7 @@ export async function renderTournamentManagerContent(hideableElements) {
         });
       }
       else {
-        console.log("can't allow generating a tournament");
+        console.error("can't allow generating a tournament");
         canWeJoin = false;
         localStorage.setItem('tId', checkPartRespObj.tId);
         submitButton.disabled = true;
@@ -671,7 +662,6 @@ export async function renderTournamentManagerContent(hideableElements) {
           const resOfEnroll = await rawResOfEnroll.text();
           const resOfEnrollObj = JSON.parse(resOfEnroll);
           if (resOfEnrollObj.err === "nil") {
-            console.log("enrolled in " + tidEl.value);
             canWeJoin = false;
             myTournamentField.innerHTML = "<a href=\"" + document.URL.substring(0, document.URL.search("#")) + "#tournament" + "\"><b><i>" + t("tournaments.view") + "</b></i></a>";
             localStorage.setItem("tId", tidEl.value);
@@ -688,7 +678,7 @@ export async function renderTournamentManagerContent(hideableElements) {
         });
       }
       else {
-        console.log("can't allow joining a tournament");
+        console.error("can't allow joining a tournament");
         canWeJoin = false;
         localStorage.setItem('tId', checkPartRespObj.tId);
         document.getElementById('register-tournament-button').disabled = true;

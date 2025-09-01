@@ -25,23 +25,12 @@ async function responseLogger(fastify, opts) {
         source: request.routeOptions.config.source,
         payload: responseBody
       };
-/*
-      if (statusCode >= 400) {
-        logData.message = "Response error";
-        log.error(logData);
-      } else {
-        logData.message = "Response sent";
-        log.info(logData);
-      }
-*/
       if (statusCode >= 400) {
         log.error(logData, "Response error");
       } else {
         log.info(logData, "Response sent");
       }
-
     }
-
     return payload;
   });
 }

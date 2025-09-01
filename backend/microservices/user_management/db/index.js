@@ -51,7 +51,6 @@ function getUserByUsernameOrEmail(username, email) {
 function getUserByUsername(username) {
     const stmt = db.prepare('SELECT * FROM users WHERE username = ?');
 	const info = stmt.get(username);
-//	console.log(info);
     return info;
 }
 
@@ -138,12 +137,6 @@ function getUserIdByNickname(nick) {
 }
 
 function addFriendByNick(userId, friendNick) {
- /*
-  const row1 = getNicknameById("IS34sNmx3AX1QCU9ZSdfH0IK7JGnzsXoorD9KBgfTIot6SKisNtWeUkCpIASJORK");
-  console.log("addFriendByNick --->  ", row1);
-  if (row1.nickname === friendNick) console.log("addFriendByNick ---> Son iguales");
-  else console.log(`addFriendByNick ---> NO IGUALES : "${row1.nickname}", "${friendNick}`); 
-*/
 	const row = getUserIdByNickname(friendNick);
   if (row === undefined) return { error: `${friendNick} doesn´t exits!` };
   const friendId = row.id;

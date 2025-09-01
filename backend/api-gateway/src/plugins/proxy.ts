@@ -14,31 +14,28 @@ const client = new OAuth2Client(CLIENT_ID);
 
 export default fp(async function (fastify: FastifyInstance) {
     fastify.addHook('onRequest', async (request, reply) => {
-       //fastify.log.info(`🌐 onRequest: ${request.method} ${request.url}`);
-	   const source = "fastify.addHook('onRequest') in proxy.ts";
-       request.log.info(...logFormat( source, `🌐 onRequest: ${request.method} ${request.url}`));
+	    const source = "fastify.addHook('onRequest') in proxy.ts";
+      request.log.info(...logFormat( source, `🌐 onRequest: ${request.method} ${request.url}`));
 
-       reply.header("Content-Security-Policy", `
-         default-src 'self';
-         script-src 'self' https://accounts.google.com https://cdnjs.cloudflare.com;
-         frame-src 'self' https://accounts.google.com;
-         img-src 'self' https://lh3.googleusercontent.com https://i.pravatar.cc;
-         connect-src 'self' https://localhost:8443 https://play.google.com;
-       `.replace(/\s+/g, ' ').trim());
+      reply.header("Content-Security-Policy", `
+        default-src 'self';
+        script-src 'self' https://accounts.google.com https://cdnjs.cloudflare.com;
+        frame-src 'self' https://accounts.google.com;
+        img-src 'self' https://lh3.googleusercontent.com https://i.pravatar.cc;
+        connect-src 'self' https://localhost:8443 https://play.google.com;
+      `.replace(/\s+/g, ' ').trim());
         
-        
-       if (request.method === 'OPTIONS') {
-          //fastify.log.info(`🔥 CORS Preflight: ${request.headers.origin} → ${request.url}`);
-          request.log.info(...logFormat(source, `🔥 CORS Preflight: ${request.headers.origin} → ${request.url}`));
-          reply
-            .header('Access-Control-Allow-Origin', request.headers.origin || '*')
-            .header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS')
-            .header('Access-Control-Allow-Headers', 'Content-Type, Authorization, use-me-to-authorize')
-            .header('Access-Control-Allow-Credentials', 'true')
-            .code(204)
-            .send();
-            return;
-       }
+      if (request.method === 'OPTIONS') {
+        request.log.info(...logFormat(source, `🔥 CORS Preflight: ${request.headers.origin} → ${request.url}`));
+        reply
+          .header('Access-Control-Allow-Origin', request.headers.origin || '*')
+          .header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS')
+          .header('Access-Control-Allow-Headers', 'Content-Type, Authorization, use-me-to-authorize')
+          .header('Access-Control-Allow-Credentials', 'true')
+          .code(204)
+          .send();
+        return;
+      }
     });
 
     fastify.register(fastifyHttpProxy, {
@@ -170,10 +167,8 @@ export default fp(async function (fastify: FastifyInstance) {
                     user: body.username,
                 });
             } catch (err) {
-              //fastify.log.error('Google auth error:', err);
                 req.log.error(...logFormat(source, 'Google auth error:', err));
                 if (err && typeof err === 'object' && 'stack' in err) {
-                    //fastify.log.error('Full error stack:', (err as { stack?: string }).stack);
                     req.log.error(...logFormat(source, 'Full error stack:', (err as { stack?: string }).stack));
                 }
                 if (err && typeof err === 'object' && 'message' in err && typeof (err as any).message === 'string' && (err as any).message.includes('Invalid ID token')) {
