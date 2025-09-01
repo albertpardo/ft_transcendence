@@ -81,6 +81,17 @@
     "success.update": "Qelqanakuyqa kamariwaq!",
     "success.delete": "Qelqanakuyqa hukchayarqa kamariwaq!"
   },
+  "friendsTxt": {
+    "refresh": "Amigukunap kayninta musuqyachiy",
+    "nickTxt": "Allin suti",
+    "addBtn": "Amigo yapay",
+    "nickRow": "Allin suti",
+    "statusRow": "Imayna kaynin",
+    "addError": "Huk pantaymi karqan amigota yapashaspa.",
+    "addFailed": "Mana Amigo yapayta atirqanichui.",
+    "getError": "Amistadkunata kargachkaspa pantasqa. Ama hina kaspa, qhipaman hukmanta kallpachakuy",
+    "getFailed": "Mana amigukunap willayninkunata apamuyta atirqanchu."
+  },
   "nav": {
     "dashboard": "Ripiq",
     "profile": "Qelqanakuy",
@@ -88,6 +99,7 @@
     "history": "Willakuy",
     "tournament": "Torneo",
     "stats": "Saykuy",
+    "friends": "Priyateli",
     "logout": "Llaway"
   },
   "play": "Takiy Pong",
@@ -95,6 +107,7 @@
   "history": "Willakuy",
   "tournament": "Torneo",
   "stats": "Saykuy",
+  "friends": "Priyateli",
   "logout": "Llaway",
   "welcome": "Pongpi qelqanakuy",
   "login": "Qelqanakuy",

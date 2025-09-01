@@ -8,6 +8,7 @@
     "winRate": "Gewinnquote",
     "averageScore": "Durchschnittliche Punktzahl",
     "bestScore": "Beste Punktzahl",
+    "lastGameDate": "Datum der letzten Abreise",
     "noStats": "Keine Statistiken verfügbar."
   },
   "tournaments": {
@@ -80,6 +81,17 @@
     "success.update": "Profil erfolgreich aktualisiert!",
     "success.delete": "Konto erfolgreich gelöscht!"
   },
+  "friendsTxt": {
+    "refresh": " Aktualisieren Sie den Status von Freunden",
+    "nickTxt": "Spitzname",
+    "addBtn": "Freund hinzufügen",
+	  "nickRow": "Spitzname",
+    "statusRow": "Status",
+    "addError": "Beim Hinzufügen des Freundes ist ein Fehler aufgetreten",
+    "addFailed": "Freund konnte nicht hinzugefügt werden",
+    "getError": "Fehler beim Laden der Freunde. Bitte versuchen Sie es später noch einmal",
+  "getFailed": "Das Abrufen der Freundesdaten ist fehlgeschlagen."
+  },
   "nav": {
     "dashboard": "Dashboard",
     "profile": "Profil",
@@ -87,6 +99,7 @@
     "history": "Spielverlauf",
     "tournament": "Turnier",
     "stats": "Statistiken",
+    "friends": "Freunde",
     "logout": "Abmelden"
   },
   "play": "Pong spielen",
@@ -94,9 +107,10 @@
   "history": "Spielverlauf",
   "tournament": "Turnier",
   "stats": "Statistiken",
+  "friends": "Freunde",
   "logout": "Abmelden",
   "welcome": "Willkommen bei Pong",
-	"home.intro": "Willkommen bei Transcendence!",
+  "home.intro": "Willkommen bei Transcendence!",
   "select.language": "Sprache auswählen",
   "login": "Anmelden",
   "signup": "Registrieren",

@@ -5,11 +5,11 @@ import { renderHomeContent, renderPlayContent, renderStatsContent } from './sect
 import { renderHistoryContent, getNicknameForPlayerId } from './history';
 import { renderProfileContent } from './profile';
 import { renderTournamentContent, renderTournamentManagerContent, getCompleteTournamentInfo } from './tournament';
+import { renderFriendsContent } from './friends'
 import { State, nullState } from './pongrender';
 import { googleInitialized, resetGoogle, currentGoogleButtonId} from './login';
 import confetti from 'canvas-confetti';
 import { t, i18nReady } from '../i18n';
-
 
 // Import VITE_API_BASE_URL from environment variables
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -221,7 +221,7 @@ export async function buttonSetter(state : MetaGameState) {
 }
 
 async function tourCheckAndSetIdlingButtons() {
-  let isintour : bool = await checkIsInTourWrapper();
+  let isintour : boolean = await checkIsInTourWrapper();
   console.log("isintour:", isintour);
   if (isintour) {
     // no game, but we're in a tournament
@@ -257,7 +257,9 @@ export async function setterUponMetaInfo(gameInfo : HTMLElement, metaInfo : {gTy
     // ok, it's a tournament
     // there's only ONE situation which requires us to press the ready key.
     // we're in a game of type tournament and we're not ready.
-    const isready : bool = await checkReadyWrapper();
+
+    const isready : boolean = await checkReadyWrapper();
+
     if (!isready) {
       buttonSetter(MetaGameState.waittourrdy);
     }
@@ -573,6 +575,7 @@ export async function initDashboard() {
         <a href="#tournament" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='tournament'?'bg-blue-600':'bg-gray-700'}">${t('nav.tournament')}</a>
         <a href="#tournamentmanager" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='tournamentmanager'?'bg-blue-600':'bg-gray-700'}">Tournament Management</a>
         <a href="#stats" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='stats'?'bg-blue-600':'bg-gray-700'}">${t('nav.stats')}</a>
+        <a href="#friends" class="nav-link block p-3 md:p-4 rounded-lg text-center font-medium hover:bg-blue-500 transition text-white ${hash==='friends'?'bg-blue-600':'bg-gray-700'}">${t('nav.friends')}</a>
       </nav>
       <button id="logout-btn" class="mt-auto w-full p-3 bg-red-600 rounded-lg hover:bg-red-700 transition text-white font-medium">${t('nav.logout')}</button>
     </aside>
@@ -1105,16 +1108,16 @@ export async function initDashboard() {
   });
 
   // Logout functionality
-  document.getElementById('logout-btn')!.addEventListener('click', () => {
+  document.getElementById('logout-btn')!.addEventListener('click', async () => {
     localStorage.removeItem('authToken');
     localStorage.removeItem('userId');
     localStorage.removeItem('authProvider');
     socket.close();
     resetGoogle();
     window.location.hash = 'login';
-   // if (googleInitialized) resetGoogle();
-   window.location.reload();
-   //route();
+    // if (googleInitialized) resetGoogle();
+    window.location.reload();  
+    //route();
   });
 
   // Render active section
@@ -1132,6 +1135,7 @@ export async function initDashboard() {
     case 'tournament':        renderTournamentContent(hideableElements);        break;
     case 'tournamentmanager': renderTournamentManagerContent(hideableElements); break;
     case 'stats':             renderStatsContent(hideableElements);             break;
+    case 'friends':           renderFriendsContent(hideableElements);           break;
     default:                  renderHomeContent(hideableElements);
   }
 }

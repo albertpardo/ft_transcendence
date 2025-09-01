@@ -53,7 +53,7 @@
 	  "failedToLoad": "Échec du chargement de l'historique."
 },
   "profiles": {
-     "title": "Votre profil",
+    "title": "Votre profil",
     "avatar": "Photo de profil",
     "member.since": "Membre depuis :",
     "username": "Nom d'utilisateur",
@@ -77,6 +77,17 @@
     "success.update": "Profil mis à jour avec succès !",
     "success.delete": "Compte supprimé avec succès !"
   },
+  "friendsTxt": {
+    "refresh": "Actualiser le statut des amis",
+    "nickTxt": "Surnom",
+    "addBtn": "Ajouter un ami",
+    "nickRow": "Surnom",
+    "statusRow": "Statut",
+    "addError": "Une erreur s'est produite lors de l'ajout de l'ami.",
+    "addFailed":"Impossible d'ajouter un ami.",
+    "getError": "Erreur lors du chargement des amis. Veuillez réessayer ultérieurement.",
+    "getFailed": "Échec de la récupération des données des amis."
+  },
   "nav": {
     "dashboard": "Tableau de bord",
     "profile": "Profil",
@@ -84,6 +95,7 @@
     "history": "Historique",
     "tournament": "Tournoi",
     "stats": "Statistiques",
+    "friends": "Amis",
     "logout": "Déconnexion"
   },
   "play": "Jouer au Pong",
@@ -91,11 +103,12 @@
   "history": "Historique des matchs",
   "tournament": "Tournoi",
   "stats": "Statistiques",
+  "friends": "Amis",
   "logout": "Déconnexion",
   "welcome": "Bienvenue sur Pong",
   "login": "Connexion",
   "signup": "Inscription",
-	"home.intro": "Bienvenue sur Transcendence!",
+  "home.intro": "Bienvenue sur Transcendence!",
   "select.language": "Sélectionner la langue",
   "rejoin": "Cliquez pour rejoindre ou vous reconnecter",
   "wonGame": "Vous avez gagné le jeu !",

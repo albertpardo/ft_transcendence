@@ -107,10 +107,17 @@ export default fp(async function (fastify: FastifyInstance) {
         },
     });
     fastify.register(fastifyHttpProxy, {
-        upstream: 'http://game_service:9002',
-        prefix: '/api/pong',
-        rewritePrefix: '/api/pong',
-        httpMethods: ['GET'],
+        upstream: 'http://user_management:9001',
+        prefix: '/api/friends',
+        rewritePrefix: '/api/user/friends',
+        httpMethods: ['GET', 'PUT'],
+        http2: false,
+    });
+    fastify.register(fastifyHttpProxy, {
+        upstream: 'http://user_management:9001',
+        prefix: '/api/status',
+        rewritePrefix: '/api/user/status',
+        httpMethods: ['PUT'],
         http2: false,
     });
     fastify.register(fastifyHttpProxy, {

@@ -54,7 +54,8 @@ exports.login = async (username, password) => {
 
     const valid = await bcrypt.compare(password, user.password);
     if (!valid) return { error: 'Password is incorrect!' };
-
+// Cambiar el estado a online desda aqui????
+ 
     return { 
         id: user.id, 
         username: user.username, 
@@ -127,6 +128,23 @@ exports.deleteProfile = async (userId) => {
 
     db.deleteUser(userId);
     return { success: true };
+}
+
+exports.getUserFriends = async (userId) => {
+	const friends = db.getUserFriends(userId);
+	return (friends); 
+}
+
+exports.putUserFriend = async (userId, friendNick) => {
+	const result = db.addFriendByNick(userId, friendNick);
+  if (result.error) return (result);
+  return { success: true };
+}
+
+exports.putUserStatus = async (userId, userStatus) => {
+  const result = db.putUserStatus(userId, userStatus);
+  if (result.error) return (result) ;
+  return { success: true };
 }
 
 exports.upsertGoogleUser = async (email, name, picture, googleId) => {

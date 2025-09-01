@@ -33,7 +33,7 @@
     "errorJoining": "Errore nell'iscrizione al torneo."
   },
   "historic": {
-    "title": "Cronologia partite",
+    "title": "Cronologi1nicka partite",
     "description": "Visualizza le tue partite precedenti di Pong.",
     "result": "Risultato",
     "score": "Punteggio",
@@ -79,6 +79,17 @@
     "success.update": "Profilo aggiornato con successo!",
     "success.delete": "Account eliminato con successo!"
   },
+  "friendsTxt": {
+    "refresh": "Aggiorna lo stato degli amici",
+    "nickTxt": "Soprannome",
+    "addBtn": "Aggiungi amico",
+    "nickRow": "Soprannome",
+    "statusRow": "Stato",
+    "addError": "Si è verificato un errore durante l'aggiunta dell'amico.",
+    "addFailed": "Impossibile aggiungere un amico.",
+    "getError": "Errore durante il caricamento degli amici. Riprova più tardi.",
+    "getFailed": "Impossibile recuperare i dati degli amici."
+  },
   "nav": {
     "dashboard": "Dashboard",
     "profile": "Profilo",
@@ -86,6 +97,7 @@
     "history": "Cronologia",
     "tournament": "Torneo",
     "stats": "Statistiche",
+    "friends": "Amici",
     "logout": "Esci"
   },
   "play": "Gioca a Pong",
@@ -93,6 +105,7 @@
   "history": "Cronologia",
   "tournament": "Torneo",
   "stats": "Statistiche",
+  "friends": "Amici",
   "logout": "Esci",
   "welcome": "Benvenuto su Pong",
   "login": "Accedi",

@@ -7,6 +7,8 @@ import { renderHistoryContent } from './views/history';
 import { renderTournamentContent, renderTournamentManagerContent } from './views/tournament';
 import { initDashboard } from './views/dashboard';
 
+import { renderFriendsContent } from './views/friends'
+
 export function route() {
   const hash = window.location.hash.replace('#', '') || 'home';
   const app = document.getElementById('app')!;
@@ -44,6 +46,7 @@ export function route() {
     case 'tournament':        renderTournamentContent(hideableElements);        break;
     case 'tournamentmanager': renderTournamentManagerContent(hideableElements); break;
     case 'stats':             renderStatsContent(hideableElements);             break;
+    case 'friends':           renderFriendsContent(hideableElements);           break;
     default:                  renderHomeContent(hideableElements);
   }
 

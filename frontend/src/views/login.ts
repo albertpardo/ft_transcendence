@@ -1,4 +1,5 @@
 import { route } from "../router";
+import { setUserStatus } from "./utils/status";
 import { sleep } from "./tournament";
 
 export function renderLogin(appElement: HTMLElement) {
@@ -116,22 +117,22 @@ export function renderLogin(appElement: HTMLElement) {
   const wrapper = document.getElementById('google-signin-wrapper')!;
 
   const togglePasswordVisibility = (fieldId: string, button?: HTMLElement) => {
-  const passwordField = document.getElementById(fieldId) as HTMLInputElement;
-  if (!passwordField) return;
-
-  const isPassword = passwordField.type === 'password';
-  passwordField.type = isPassword ? 'text' : 'password';
-
-  if (button) {
-    const svg = button.querySelector('svg');
-    if (svg) {
-      svg.querySelector('.eye-open')?.classList.toggle('hidden', !isPassword);
-      svg.querySelector('.eye-closed')?.classList.toggle('hidden', isPassword);
+    const passwordField = document.getElementById(fieldId) as HTMLInputElement;
+    if (!passwordField) return;
+  
+    const isPassword = passwordField.type === 'password';
+    passwordField.type = isPassword ? 'text' : 'password';
+  
+    if (button) {
+      const svg = button.querySelector('svg');
+      if (svg) {
+        svg.querySelector('.eye-open')?.classList.toggle('hidden', !isPassword);
+        svg.querySelector('.eye-closed')?.classList.toggle('hidden', isPassword);
+      }
     }
-  }
-};
-(window as any).togglePasswordVisibility = togglePasswordVisibility;
+  };
 
+  (window as any).togglePasswordVisibility = togglePasswordVisibility;
 
   if (toggleForm && loginForm && registerForm && toggleFormText) {
     toggleForm.addEventListener('click', (e) => {
@@ -222,22 +223,21 @@ export function renderLogin(appElement: HTMLElement) {
           throw new Error(data.error || 'Login failed');
         }
        
-       localStorage.setItem('authToken', data.token);
-	     localStorage.setItem('userId', data.id);
-       localStorage.setItem('authProvider', '42');
-
-       const userAvatar = data.user?.avatar?.trim()
-        ? data.user.avatar
-        : `https://i.pravatar.cc/150?u=${username}`;
-       localStorage.setItem('user', JSON.stringify({ 
-            username: data.user?.username || username,
-            nickname: data.user?.nickname || username,
-            avatar: userAvatar
-//            avatar: data.user?.avatar || `https://i.pravatar.cc/150?u=${username}`
-          }));
-          window.location.hash = 'home';
-    
-        
+        localStorage.setItem('authToken', data.token);
+        localStorage.setItem('userId', data.id);
+        localStorage.setItem('authProvider', '42');
+ 
+        const userAvatar = data.user?.avatar?.trim()
+         ? data.user.avatar
+         : `https://i.pravatar.cc/150?u=${username}`;
+        localStorage.setItem('user', JSON.stringify({ 
+             username: data.user?.username || username,
+             nickname: data.user?.nickname || username,
+             avatar: userAvatar
+ //            avatar: data.user?.avatar || `https://i.pravatar.cc/150?u=${username}`
+        }));
+        window.location.hash = 'home';
+        await setUserStatus("online");
       } catch (error) {
         errorElement.textContent = error instanceof Error ? error.message : 'Login failed';
         errorElement.classList.remove('hidden');
@@ -463,6 +463,9 @@ async function handleGoogleCredentialResponse(response: { credential: string }) 
     localStorage.setItem('userId', data.id);
     localStorage.setItem('authProvider', 'google');
     window.location.hash = 'home';
+
+    await setUserStatus("online");
+
     route();
   } catch (error) {
     console.error('❌ Google sign-in failed:', error);

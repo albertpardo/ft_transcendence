@@ -2,7 +2,15 @@ const { get } = require('http');
 
 const db = require('better-sqlite3')('./users.db');
 
+db.pragma('foreign_keys = ON');   // No set by default
+
 // TODO make the id a "TEXT PRIMARY KEY UNIQUE", make all the corresponding changes in all the api.
+/* 250827:
+ *
+ * status TEXT DEFAULT 'offline' CHECK (status IN ('online', 'offline'))
+ * Permite chequear que el valor inrtroducido solo puede ser uno de la lista. Si no lo es , lanzará un error.
+ *
+ */ 
 const init = db.prepare(`
     CREATE TABLE IF NOT EXISTS users (
     id TEXT PRIMARY KEY UNIQUE,
@@ -14,9 +22,21 @@ const init = db.prepare(`
     googleId TEXT UNIQUE,
     firstName TEXT,
     lastName TEXT,
-    status TEXT DEFAULT 'offline')` 
+    status TEXT DEFAULT 'offline' CHECK (status IN ('online', 'offline')))`
 );
 init.run();
+
+// table friends by apardo-m
+const initFriends = db.prepare(`
+    CREATE TABLE IF NOT EXISTS friends (
+    user_id TEXT NOT NULL,
+    friend_id TEXT NOT NULL,
+    PRIMARY KEY (user_id, friend_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (friend_id) REFERENCES users(id) ON DELETE CASCADE)`
+);
+initFriends.run();
+
 
 function getNicknameById(userId) {
 	const stmt = db.prepare('SELECT nickname FROM users WHERE id = ?');
@@ -106,8 +126,48 @@ function deleteUser(userId) {
     stmt.run(userId);
 }
 
+// by apardo-m for friends 
+function addFriendById(userId, friendId) {
+	const stmt = db.prepare('INSERT INTO friends (user_id, friend_id) VALUES (?, ?)');
+	stmt.run(userId, friendId);
+}
+
+function getUserIdByNickname(nick) {
+	const stmt = db.prepare('SELECT id FROM users WHERE nickname = ? LIMIT 1');
+	return stmt.get(nick);
+}
+
+function addFriendByNick(userId, friendNick) {
+ /*
+  const row1 = getNicknameById("IS34sNmx3AX1QCU9ZSdfH0IK7JGnzsXoorD9KBgfTIot6SKisNtWeUkCpIASJORK");
+  console.log("addFriendByNick --->  ", row1);
+  if (row1.nickname === friendNick) console.log("addFriendByNick ---> Son iguales");
+  else console.log(`addFriendByNick ---> NO IGUALES : "${row1.nickname}", "${friendNick}`); 
+*/
+	const row = getUserIdByNickname(friendNick);
+  if (row === undefined) return { error: `${friendNick} doesn´t exits!` };
+  const friendId = row.id;
+	if (friendId !== userId) {
+    addFriendById(userId, friendId);
+    return { success: true, userId, friendId };
+	}
+	return { error : "You can´t be friend of yourself" } 
+}
+
+function getUserFriends(userId) {
+	const stmt = db.prepare('SELECT u.nickname, u.status FROM friends f JOIN users u ON f.friend_id = u.id WHERE f.user_id = ?');
+	return ( stmt.all(userId) );
+}
+
+//by apardo-m for set user online/offline
+function putUserStatus(userId, userStatus) {
+  const stmt = db.prepare('UPDATE users SET status = ? WHERE id = ?');
+  stmt.run(userStatus, userId);
+  return { success: true, id: userId, userStatus: userStatus };
+}
+
 module.exports = {
-	getNicknameById,
+    getNicknameById,
     getUserByUsernameOrEmail,
     getUserByUsername,
     getUserById,
@@ -116,5 +176,8 @@ module.exports = {
     getNickname,
     createUser,
     updateUser,
-    deleteUser
+    deleteUser,
+    addFriendByNick,
+    getUserFriends,
+    putUserStatus
 };

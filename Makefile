@@ -69,6 +69,7 @@ cleanfolders:
 	@rm -rf ./backend/microservices/game_service/dist/
 	@rm -rf ./backend/api-gateway/dist/
 	@rm -f ./backend/api-gateway/tsconfig.pino_utils.tsbuildinfo
+	@docker volume prune
 
 # For easy clean by apardo-m
 cleanapp: downapp cleanfolders

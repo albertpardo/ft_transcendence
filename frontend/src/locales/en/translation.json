@@ -55,7 +55,7 @@
     "noAuthToken": "Authentication token missing.",
     "noGames": "You haven't played any games yet.",
     "failedToLoad": "Failed to load match history."
-},
+  },
   "profiles": {
     "title": "Your Profile",
     "avatar": "Profile Avatar",
@@ -80,7 +80,19 @@
     "save": "Save",
     "success.update": "Profile updated successfully!",
     "success.delete": "Account deleted successfully!"
-},
+  },
+  "friendsTxt": {
+    "refresh": " ",
+    "refresh": "Refresh Friends' status",
+    "nickTxt": "Nickname",
+    "addBtn": "Add friend",
+    "nickRow": "Friend's Nickname",
+    "statusRow": "Status",
+    "addError": "An error occured while adding the friend.",
+    "addFailed": "Failed to add Friend.",
+    "getError": "Error loading friends. Please try again later",
+    "getFailed": "Failed to fetch friends data."
+  },
   "nav": {
     "dashboard": "Dashboard",
     "profile": "Profile",
@@ -88,6 +100,7 @@
     "history": "Match History",
     "tournament": "Tournament",
     "stats": "Stats",
+    "friends": "Friends",
     "logout": "Logout"
   },
   "play": "Play Pong",
@@ -95,6 +108,7 @@
   "history": "Match History",
   "tournament": "Tournament",
   "stats": "Stats",
+  "friends": "Friends",
   "logout": "Logout",
   "welcome": "Welcome to Pong",
   "login": "Login",

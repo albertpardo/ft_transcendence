@@ -41,6 +41,7 @@ import { MICRO_NAME } from './pino_utils/constants';
 import { getLogTransportConfig } from '../dist/pino_utils/logTransportConfig';
 import { logFormat } from './pino_utils/log_format';
 import responseLogger from './pino_utils/plugings/response-logger';
+import { setUserStatus } from './utils/status'
 // End by apardo-m
 
 // id shall come from the req and be per-user unique and persistent (jwt)
@@ -100,6 +101,8 @@ const startServer = async () => {
         sock.send("connected");
       });
       sock.on('close', event => {
+        fastify.log.info(...logFormat( "websocket option 'close' : " + PREFIX + PATH, playerId , "offline"));
+        setUserStatus(playerId, "offline"); 
         removeTheSock(sock);
         upperSocksMap.delete(playerId);
       });
