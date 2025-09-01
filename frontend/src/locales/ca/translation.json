@@ -30,7 +30,8 @@
     "createSuccess": "Torneig creat amb èxit!",
     "joinSuccess": "T'has unit al torneig amb èxit!",
     "errorCreating": "Error en crear el torneig.",
-    "errorJoining": "Error en unir-se al torneig."
+    "errorJoining": "Error en unir-se al torneig.",
+    
   },
   "historic": {
     "title": "Històric de partides",

@@ -30,7 +30,16 @@
     "createSuccess": "Torneo kamariwaq!",
     "joinSuccess": "Torneopi rurayqa kamariwaq!",
     "errorCreating": "Torneo kamariywan paqachiy.",
-    "errorJoining": "Torneopi ruraywan paqachiy."
+    "errorJoining": "Torneopi ruraywan paqachiy.",
+    "tournamentManagement": "Torneo rikch'ariy",
+    "privatizeTournament": "Torneo privatizay",
+    "registerTournament": "Torneo qelqay",
+    "joinTournamentById": "Torneo ID nisqata ruray",
+    "tournamentId": "Torneo ID",
+    "ID": "ID",
+    "enterTournament": "Torneoypi ruwan",
+    "myTournaments": "Ñuqanchik torneokuna",
+    "allTournaments": "Tukuy torneokuna"
   },
   "historic": {
     "title": "Takiy Willakuy",
