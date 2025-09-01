@@ -267,7 +267,7 @@ export async function renderTournamentContent(hideableElements) {
        focus:ring-offset-gray-800
        disabled:border-gray-200 disabled:bg-gray-700 disabled:text-gray-500 disabled:shadow-none
      ">
-      ${t('tournaments.leaveTournament')} (participant only)
+      ${t('tournaments.leaveTournament')}
     </button>
     <button id="force-rm-tourn" disabled
      class=
@@ -489,7 +489,7 @@ export async function renderTournamentManagerContent(hideableElements) {
   hideableElements.buttonArea.hidden = true;
   hideableElements.gameArea.classList.add("hidden");
   hideableElements.gameWindow.hidden = true;
-  console.log("tournaments.tournamentManagement:", t("tournaments.tournamentManagement"));  
+ 
  
   let tempHTML : string = `
     <h1 class="text-3xl font-bold mb-6">${t("tournaments.tournamentManagement")}</h1>
