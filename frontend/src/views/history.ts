@@ -47,6 +47,7 @@ export async function getNicknameForPlayerId(userId: string) {
 }
 
 export async function renderHistoryContent(hideableElements) {
+  const cachedNns = new Map();
   try {
     await i18nReady;
   } catch (err) {
@@ -115,22 +116,34 @@ export async function renderHistoryContent(hideableElements) {
         if (isUserLeft) {
           side = t('historic.left');
           if (entry.finish !== "absence") {
-            const respNn = await getNicknameForPlayerId(idR);
-            const nnJson = JSON.parse(await respNn.text());
-            nicknameVs = "<i>unknown</i>";
-            if (nnJson.err === "nil") {
-              nicknameVs = nnJson.nick;
+            if (!cachedNns.has(idR)) {
+              const respNn = await getNicknameForPlayerId(idR);
+              const nnJson = JSON.parse(await respNn.text());
+              nicknameVs = "<i>unknown</i>";
+              if (nnJson.err === "nil") {
+                nicknameVs = nnJson.nick;
+                cachedNns.set(idR, nicknameVs);
+              }
+            }
+            else {
+              nicknameVs = cachedNns.get(idR);
             }
           }
         }
         else {
           side = t('historic.right');
           if (entry.finish !== "absence") {
-            const respNn = await getNicknameForPlayerId(idL);
-            const nnJson = JSON.parse(await respNn.text());
-            nicknameVs = "<i>unknown</i>";
-            if (nnJson.err === "nil") {
-              nicknameVs = nnJson.nick;
+            if (!cachedNns.has(idL)) {
+              const respNn = await getNicknameForPlayerId(idL);
+              const nnJson = JSON.parse(await respNn.text());
+              nicknameVs = "<i>unknown</i>";
+              if (nnJson.err === "nil") {
+                nicknameVs = nnJson.nick;
+                cachedNns.set(idL, nicknameVs);
+              }
+            }
+            else {
+              nicknameVs = cachedNns.get(idL);
             }
           }
         }
