@@ -96,7 +96,8 @@
     "confirm.save.text": "Sei sicuro di voler salvare queste modifiche?",
     "save": "Salva",
     "success.update": "Profilo aggiornato con successo!",
-    "success.delete": "Account eliminato con successo!"
+    "success.delete": "Account eliminato con successo!",
+    "newPassword": "Inserisci nuova password"
   },
   "friendsTxt": {
     "refresh": "Aggiorna lo stato degli amici",

@@ -99,7 +99,8 @@
     "confirm.save.text": "您确定要保存这些更改吗？",
     "save": "保存",
     "success.update": "个人资料更新成功！",
-    "success.delete": "账户删除成功！"
+    "success.delete": "账户删除成功！",
+    "newPassword": "输入新密码"
   },
   "friendsTxt": {
     "refresh": "刷新好友状态",

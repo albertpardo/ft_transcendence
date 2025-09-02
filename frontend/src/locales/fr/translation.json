@@ -98,7 +98,8 @@
     "confirm.save.text": "Voulez-vous vraiment enregistrer ces modifications ?",
     "save": "Enregistrer",
     "success.update": "Profil mis à jour avec succès !",
-    "success.delete": "Compte supprimé avec succès !"
+    "success.delete": "Compte supprimé avec succès !",
+    "newPassword": "Entrez le nouveau mot de passe"
   },
   "friendsTxt": {
     "refresh": "Actualiser le statut des amis",
