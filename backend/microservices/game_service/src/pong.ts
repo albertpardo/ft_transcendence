@@ -464,7 +464,7 @@ export function createLocalGame(playerId: string, sock: WebSocket) {
 }
 
 export function createTournamentGame(lId: string, rId: string) {
-  console.log("starting to create with", lId, "and", rId);
+  console.log("starting to create T game with", lId, "and", rId);
   if (playersMap.has(lId)) {
     throw "L Player already in " + playersMap.get(lId);
   }
@@ -479,17 +479,19 @@ export function createTournamentGame(lId: string, rId: string) {
   gamesMap.get(newid).gameType = "tournament";
   playersMap.set(lId, newid);
   playersMap.set(rId, newid);
+  console.log("in the createTournamentGame, let's see the socksMap:");
+  console.log(socksMap);
   if (socksMap.has(lId)) {
     socksMap.get(lId).send("added: L");
   }
   else {
-    console.error("left disconnected before the tournament game could even be creaeted. whatever. they can reconnect");
+    console.error("left disconnected before the tournament game could even be created. whatever. they can reconnect");
   }
   if (socksMap.has(rId)) {
     socksMap.get(rId).send("added: R");
   }
   else {
-    console.error("right disconnected before the tournament game could even be creaeted. whatever. they can reconnect");
+    console.error("right disconnected before the tournament game could even be created. whatever. they can reconnect");
   }
   needToSendStartedMap.set(lId, true);
   needToSendStartedMap.set(rId, true);
