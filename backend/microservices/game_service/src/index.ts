@@ -98,11 +98,12 @@ const startServer = async () => {
       let playerId : string = usp2.get("/api/pong/game-ws?uuid") as string;
       upperSocksMap.set(playerId, sock);
       sock.on('message', message => {
+        fastify.log.info(...logFormat( "websocket option 'message' : " + PREFIX + PATH, playerId));
         sock.send("connected");
       });
       sock.on('close', event => {
-        fastify.log.info(...logFormat( "websocket option 'close' : " + PREFIX + PATH, playerId , "offline"));
-        setUserStatus(playerId, "offline"); 
+        fastify.log.info(...logFormat( "websocket option 'close' : " + PREFIX + PATH, playerId));
+       //setUserStatus(playerId, "offline");   // TO test RELOAD page
         removeTheSock(sock);
         upperSocksMap.delete(playerId);
       });
