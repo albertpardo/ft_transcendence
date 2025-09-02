@@ -98,7 +98,8 @@
     "confirm.save.text": "¿Ima ati kanki kay saykuykunata qhawayta?",
     "save": "Qhaway",
     "success.update": "Qelqanakuyqa kamariwaq!",
-    "success.delete": "Qelqanakuyqa hukchayarqa kamariwaq!"
+    "success.delete": "Qelqanakuyqa hukchayarqa kamariwaq!",
+    "newPassword": "Huk yaykuna qelqay"
   },
   "friendsTxt": {
     "refresh": "Amigukunap kayninta musuqyachiy",

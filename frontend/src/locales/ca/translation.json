@@ -98,7 +98,8 @@
     "confirm.save.text": "Esteu segur que voleu desar aquests canvis?",
     "save": "Desa",
     "success.update": "Perfil actualitzat amb èxit!",
-    "success.delete": "Compte eliminat amb èxit!"
+    "success.delete": "Compte eliminat amb èxit!",
+    "newPassword": "Introdueix la nova contrasenya"
   },
   "friendsTxt": {
     "refresh": "Actualitza l'estat dels amics",

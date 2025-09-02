@@ -231,7 +231,7 @@ export async function renderProfileContent(hideableElements) {
             // Clear the dummy  s when editing
             input.value = '';
             input.removeAttribute('readonly');
-            input.setAttribute('placeholder', 'Enter new password');
+            input.setAttribute('placeholder', t("profiles.newPassword"));
             input.removeAttribute('data-is-dummy');
           }
           
