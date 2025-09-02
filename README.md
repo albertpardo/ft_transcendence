@@ -1,7 +1,3 @@
-## REALLY IMPORTANT, a TODO
-
-We have NO checks of html forms. We MUST scan for DB characters, HTML characters and stuff like \(\)$\{whatever\}.
-
 # ft_transcendence
 
 ## WIKI PROJECT
