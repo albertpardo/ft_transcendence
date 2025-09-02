@@ -159,6 +159,7 @@ package-lock.json
 
 # by apardo-m
 /backend/elk/certs
+elk_folder/
 
 # vim
 *.swp
