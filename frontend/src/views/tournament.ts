@@ -340,7 +340,7 @@ export async function renderTournamentContent(hideableElements) {
       });
     }
     else {
-      console.err("just checked and you don't participate in anything OR you admin the thing:", checkPartRespObj.err);
+      console.warn("just checked and you don't participate in anything OR you admin the thing:", checkPartRespObj.err);
       tournLeaveButton.disabled = true;
       noparticipateFlag = true;
     }
@@ -479,7 +479,7 @@ async function generateUpdateAllTourTable(canWeJoin: boolean) {
       document.getElementById(`join-button-${newCount}`).disabled = true;
     }
     else {
-      console.warn("can't join:", newCount);
+      console.warn("can't join count:", newCount);
       document.getElementById(`join-button-${newCount}`).disabled = false;
     }
     document.getElementById(`join-button-${newCount}`).addEventListener('click', async () => {
@@ -496,6 +496,7 @@ async function generateUpdateAllTourTable(canWeJoin: boolean) {
         }
         buttonSetter(MetaGameState.waittouropp);
         document.getElementById('register-tournament-button').disabled = true;
+        document.getElementById('enter-tournament-by-id-button').disabled = true;
       }
       else {
         console.error("failed to enroll in " + allPTRObj.res[newCount].tId + " because: " + resOfEnrollObj.err);
@@ -640,7 +641,7 @@ export async function renderTournamentManagerContent(hideableElements) {
         });
       }
       else {
-        console.error("can't allow generating a tournament");
+        console.warn("can't allow generating a tournament");
         canWeJoin = false;
         localStorage.setItem('tId', checkPartRespObj.tId);
         submitButton.disabled = true;
@@ -650,7 +651,7 @@ export async function renderTournamentManagerContent(hideableElements) {
     }
     if (joinByIDForm) {
       const enterByIdButton = document.getElementById('enter-tournament-by-id-button') as HTMLButtonElement;
-      if (checkPartRespObj.err !== "nil") {
+      if (checkPartRespObj.err !== "nil" && canWeJoin) {
         enterByIdButton.removeAttribute('disabled');
         // "no tournament for this player found" => proceed with allowing to create the tournament
         joinByIDForm.addEventListener('submit', async (e) => {
@@ -678,7 +679,7 @@ export async function renderTournamentManagerContent(hideableElements) {
         });
       }
       else {
-        console.error("can't allow joining a tournament");
+        console.warn("can't allow joining a tournament");
         canWeJoin = false;
         localStorage.setItem('tId', checkPartRespObj.tId);
         document.getElementById('register-tournament-button').disabled = true;
