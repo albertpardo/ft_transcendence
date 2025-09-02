@@ -2,6 +2,8 @@ import { route } from "../router";
 import { setUserStatus } from "./utils/status";
 import { sleep } from "./tournament";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 export function renderLogin(appElement: HTMLElement) {
   const googleId = `google-signin-${performance.now().toFixed(0)}`;
   appElement.innerHTML = `
@@ -112,7 +114,6 @@ export function renderLogin(appElement: HTMLElement) {
   const toggleFormText = document.getElementById('toggle-form-text');
   const loginForm = document.getElementById('login-form') as HTMLFormElement;
   const registerForm = document.getElementById('register-form') as HTMLFormElement;
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const googleButton = document.getElementById('google-signin')!;
   const wrapper = document.getElementById('google-signin-wrapper')!;
 
@@ -195,7 +196,7 @@ export function renderLogin(appElement: HTMLElement) {
 
       if (loginBtn) {
         loginBtn.addEventListener('click', () => {
-          window.location.href = 'https://localhost:8443/api/auth/42';
+          window.location.href = `${API_BASE_URL}/api/auth/42`;
         });
       }
    
@@ -211,7 +212,7 @@ export function renderLogin(appElement: HTMLElement) {
           headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json,application/html,text/html,*/*',
-            'Origin': 'https://127.0.0.1:3000/',
+//            'Origin': 'https://127.0.0.1:3000/',
           },
           body: JSON.stringify({ username, password }),
           credentials: 'include',
@@ -279,7 +280,7 @@ export function renderLogin(appElement: HTMLElement) {
             headers: {
               'Content-Type': 'application/json',
               'Accept': 'application/json,application/html,text/html,*/*',
-              'Origin': 'https://127.0.0.1:3000/',
+//              'Origin': 'https://127.0.0.1:3000/',
             },
             body: JSON.stringify({ nickname, username, email ,password }),
             credentials: 'include',
@@ -448,7 +449,7 @@ export async function initGoogleSignIn() {
 
 async function handleGoogleCredentialResponse(response: { credential: string }) {
   try {
-    const res = await fetch('https://localhost:8443/api/auth/google', {
+    const res = await fetch(`${API_BASE_URL}/api/auth/google`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token: response.credential }),

@@ -9,6 +9,8 @@ import jwt from 'jsonwebtoken';
 
 import { logFormat } from '../pino_utils/log_format'; //by apardo-m
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 const CLIENT_ID = '142914619782-scgrlb1fklqo43g9b2901hemub6hg51h.apps.googleusercontent.com';
 const client = new OAuth2Client(CLIENT_ID);
 
@@ -22,7 +24,7 @@ export default fp(async function (fastify: FastifyInstance) {
         script-src 'self' https://accounts.google.com https://cdnjs.cloudflare.com;
         frame-src 'self' https://accounts.google.com;
         img-src 'self' https://lh3.googleusercontent.com https://i.pravatar.cc;
-        connect-src 'self' https://localhost:8443 https://play.google.com;
+        connect-src 'self' ${API_BASE_URL} https://play.google.com;
       `.replace(/\s+/g, ' ').trim());
         
       if (request.method === 'OPTIONS') {

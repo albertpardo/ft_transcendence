@@ -19,7 +19,7 @@ endif
 all: 
 	@echo > /dev/null
 	docker compose -f docker-compose.yml up --build
-#	@docker compose -f docker-compose.yml up -d --build
+#	docker compose -f docker-compose.yml up -d --build
 	
 	@echo "\n▉▉▉▉▉▉▉▉▉▉ WELCOME TO TRASCENDENCE PROJECT! ▉▉▉▉▉▉▉▉▉▉\n"
 	@echo "To check the system status run: make status\n"
@@ -28,8 +28,8 @@ all:
 
 elk: create_folders
 	@echo > /dev/null
-	@docker compose -f docker-compose_log_elk.yml up --build
-#	@docker compose -f docker-compose_log_elk.yml up -d --build
+#	@docker compose -f docker-compose_log_elk.yml up --build
+	docker compose -f docker-compose_log_elk.yml up -d --build
 	
 	@echo "\n▉▉▉▉▉▉▉▉▉▉ WELCOME TO TRASCENDENCE PROJECT! ▉▉▉▉▉▉▉▉▉▉\n"
 	@echo "To check the system status run: make status\n"

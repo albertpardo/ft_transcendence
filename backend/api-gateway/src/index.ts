@@ -1,6 +1,5 @@
-
 /// <reference path="./types/fastify-jwt.d.ts" />
-require('dotenv').config({ path: __dirname + '/../.env' });
+//require('dotenv').config({ path: __dirname + '/../.env' });
 const Fastify = require('fastify');
 import fastifyJWT from '@fastify/jwt';
 import googleAuthPlugin from './services/google';
@@ -13,6 +12,8 @@ import proxyPlugin from './plugins/proxy';
 import * as fs from 'fs';
 import * as path from 'path';
 import fastifyCookie from '@fastify/cookie';
+
+const FRONT_URL = import.meta.env.FRONT_URL;
 
 /* const httpsOptions = {
   key: fs.readFileSync(path.join(__dirname, '../certs/key.pem')),
@@ -55,6 +56,7 @@ async function registerPlugin() {
               'http://127.0.0.1:3000',
               'https://localhost:3000', 
               'https://127.0.0.1:3000',
+              FRONT_URL,
               'https://your-app.onrender.com'
                 ].includes(origin)) {
               cb(null, true);

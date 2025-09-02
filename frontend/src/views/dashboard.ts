@@ -12,7 +12,8 @@ import confetti from 'canvas-confetti';
 import { t, i18nReady } from '../i18n';
 
 // Import VITE_API_BASE_URL from environment variables
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+//const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL = "https://10.12.15.1:8443/";
 let socket: WebSocket | null = null;
 let gameState: State = nullState;
 let playerSide: string = "tbd";
