@@ -381,7 +381,6 @@ export async function renderTournamentContent(hideableElements) {
         }
       } else if (typeof maxPNStr === 'number') {
         maxPN = maxPNStr;
-        console.log("*************maxPN is already a number:", maxPN);
       }
     } catch (e) {
       console.error("Error parsing maxPN:", e);
