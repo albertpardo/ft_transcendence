@@ -9,6 +9,118 @@ export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
+function generateBracketHTML(tournamentSize: number) {
+  console.log("Generating bracket HTML for size:", tournamentSize);
+  
+  let html = `<h1 id="tourn-title">Tourn title</h1>
+    <h1 id="tourn-id">Tourn ID</h1>
+    <hr />
+    <div class="overflow-x-auto">
+      <table id="big-table" class="min-w-full divide-y divide-gray-700">
+        <tbody>`;
+  
+  // For 2-player tournament - only show 2 contenders and final
+  if (tournamentSize === 2) {
+    console.log("Generating 2-player bracket structure");
+    html += `
+      <tr>
+        <td id="table-contender-1" class="px-6 py-4 whitespace-nowrap">${t('tournaments.contender')} 1</td>
+        <td rowspan="2" id="table-finalist" class="px-6 py-4 whitespace-nowrap">${t('tournaments.final')}</td>
+      </tr>
+      <tr>
+        <td id="table-contender-2" class="px-6 py-4 whitespace-nowrap">${t('tournaments.contender')} 2</td>
+      </tr>
+    `;
+  } 
+  // For 4-player tournament - CORRECTED structure
+  else if (tournamentSize === 4) {
+    console.log("Generating 4-player bracket structure");
+    html += `
+      <tr>
+        <td id="table-contender-1" class="px-6 py-4 whitespace-nowrap">${t('tournaments.contender')} 1</td>
+        <td rowspan="2" id="table-quarterfinal-1" class="px-6 py-4 whitespace-nowrap">${t('tournaments.quarterFinal')} 1</td>
+        <td rowspan="2" id="table-semifinal-1" class="px-6 py-4 whitespace-nowrap">${t('tournaments.semiFinal')} 1</td>
+        <td rowspan="4" id="table-finalist" class="px-6 py-4 whitespace-nowrap">${t('tournaments.final')}</td>
+      </tr>
+      <tr>
+        <td id="table-contender-2" class="px-6 py-4 whitespace-nowrap">${t('tournaments.contender')} 2</td>
+      </tr>
+      <tr>
+        <td id="table-contender-3" class="px-6 py-4 whitespace-nowrap">${t('tournaments.contender')} 3</td>
+        <td rowspan="2" id="table-quarterfinal-2" class="px-6 py-4 whitespace-nowrap">${t('tournaments.quarterFinal')} 2</td>
+        <td rowspan="2" id="table-semifinal-2" class="px-6 py-4 whitespace-nowrap">${t('tournaments.semiFinal')} 2</td>
+      </tr>
+      <tr>
+        <td id="table-contender-4" class="px-6 py-4 whitespace-nowrap">${t('tournaments.contender')} 4</td>
+      </tr>
+    `;
+  }
+  // For 8-player tournament - CORRECTED structure
+  else {
+    console.log("Generating 8-player bracket structure");
+    html += `
+      <tr>
+        <td id="table-contender-1" class="px-6 py-4 whitespace-nowrap">${t('tournaments.contender')} 1</td>
+        <td rowspan="2" id="table-quarterfinal-1" class="px-6 py-4 whitespace-nowrap">${t('tournaments.quarterFinal')} 1</td>
+        <td rowspan="4" id="table-semifinal-1" class="px-6 py-4 whitespace-nowrap">${t('tournaments.semiFinal')} 1</td>
+        <td rowspan="8" id="table-finalist" class="px-6 py-4 whitespace-nowrap">${t('tournaments.final')}</td>
+      </tr>
+      <tr>
+        <td id="table-contender-2" class="px-6 py-4 whitespace-nowrap">${t('tournaments.contender')} 2</td>
+      </tr>
+      <tr>
+        <td id="table-contender-3" class="px-6 py-4 whitespace-nowrap">${t('tournaments.contender')} 3</td>
+        <td rowspan="2" id="table-quarterfinal-2" class="px-6 py-4 whitespace-nowrap">${t('tournaments.quarterFinal')} 2</td>
+      </tr>
+      <tr>
+        <td id="table-contender-4" class="px-6 py-4 whitespace-nowrap">${t('tournaments.contender')} 4</td>
+      </tr>
+      <tr>
+        <td id="table-contender-5" class="px-6 py-4 whitespace-nowrap">${t('tournaments.contender')} 5</td>
+        <td rowspan="2" id="table-quarterfinal-3" class="px-6 py-4 whitespace-nowrap">${t('tournaments.quarterFinal')} 3</td>
+        <td rowspan="4" id="table-semifinal-2" class="px-6 py-4 whitespace-nowrap">${t('tournaments.semiFinal')} 2</td>
+      </tr>
+      <tr>
+        <td id="table-contender-6" class="px-6 py-4 whitespace-nowrap">${t('tournaments.contender')} 6</td>
+      </tr>
+      <tr>
+        <td id="table-contender-7" class="px-6 py-4 whitespace-nowrap">${t('tournaments.contender')} 7</td>
+        <td rowspan="2" id="table-quarterfinal-4" class="px-6 py-4 whitespace-nowrap">${t('tournaments.quarterFinal')} 4</td>
+      </tr>
+      <tr>
+        <td id="table-contender-8" class="px-6 py-4 whitespace-nowrap">${t('tournaments.contender')} 8</td>
+      </tr>
+    `;
+  }
+  
+  html += `</tbody></table>
+    </div>
+    <div class="flex flex-col space-y-1 mt-4">
+    <button id="leave-tourn" disabled
+     class="
+       w-full px-4 py-2 text-white bg-red-600
+       rounded-md hover:bg-red-700 focus:outline-none
+       focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+       focus:ring-offset-gray-800
+       disabled:border-gray-200 disabled:bg-gray-700 disabled:text-gray-500 disabled:shadow-none
+     ">
+      ${t('tournaments.leaveTournament')}
+    </button>
+    <button id="force-rm-tourn" disabled
+     class="
+       w-full px-4 py-2 text-white bg-red-600
+       rounded-md hover:bg-red-700 focus:outline-none
+       focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+       focus:ring-offset-gray-800
+       disabled:border-gray-200 disabled:bg-gray-700 disabled:text-gray-500 disabled:shadow-none
+     ">
+      ${t('tournaments.destroyTournament')}
+    </button>
+    </div>`;
+  
+  return html;
+}
+
 async function adminCheck() {
   const fresp = fetch(
     `${API_BASE_URL}/api/pong/tour/admincheck`,
@@ -115,50 +227,15 @@ async function getFinalist() {
   return fresp;
 }
 
-async function fillInTheTournTable() {
-  const tournAllInfoRawResp = await getCompleteTournamentInfo();
-  const tournAllInfoResp = await tournAllInfoRawResp.text();
-  const tournAllInfoRespObj = JSON.parse(tournAllInfoResp);
+async function fillInTheTournTable(tournAllInfoRespObj, bracketSize = 8) {
+  console.log("Filling in tournament table with bracket size:", bracketSize);
+  
   if (tournAllInfoRespObj.err !== "nil") {
     document.getElementById("tourn-title").innerHTML = "<i>" + t('tournaments.noTournaments') + "</i>";
     document.getElementById("tourn-id").innerHTML = "";
     const bt = document.getElementById("big-table");
     if (bt) {
-      bt.innerHTML = `
-        <tbody>
-          <tr>
-            <td id="table-contender-1"> ${t('tournaments.contender')} 1</td>
-            <td rowspan="2" id="table-quarterfinal-1">${t('tournaments.quarterFinal')} 1</td>
-            <td rowspan="4" id="table-semifinal-1">${t('tournaments.semiFinal')} 1</td>
-            <td rowspan="8" id="table-finalist">${t('tournaments.final')}!</td>
-          </tr>
-          <tr>
-            <td id="table-contender-2">${t('tournaments.contender')} 2</td>
-          </tr>
-          <tr>
-            <td id="table-contender-3">${t('tournaments.contender')} 3</td>
-            <td rowspan="2" id="table-quarterfinal-2">${t('tournaments.quarterFinal')} 2</td>
-          </tr>
-          <tr>
-            <td id="table-contender-4">${t('tournaments.contender')} 4</td>
-          </tr>
-          <tr>
-            <td id="table-contender-5">${t('tournaments.contender')} 5</td>
-            <td rowspan="2" id="table-quarterfinal-3">${t('tournaments.quarterFinal')} 3</td>
-            <td rowspan="4" id="table-semifinal-2">${t('tournaments.semiFinal')} 2</td>
-          </tr>
-          <tr>
-            <td id="table-contender-6">${t('tournaments.contender')} 6</td>
-          </tr>
-          <tr>
-            <td id="table-contender-7">${t('tournaments.contender')} 7</td>
-            <td rowspan="2" id="table-quarterfinal-4">${t('tournaments.quarterFinal')} 4</td>
-          </tr>
-          <tr>
-            <td id="table-contender-8">${t('tournaments.contender')} 8</td>
-          </tr>
-        </tbody>
-      `;
+      bt.innerHTML = "";
     }
   }
   else {
@@ -169,47 +246,111 @@ async function fillInTheTournTable() {
     else {
       document.getElementById("tourn-title").innerHTML = t('tournaments.tournamentName') + ": " + tourn.tName;
       document.getElementById("tourn-id").innerHTML = "id: " + tourn.tId;
-      for (let i = 0; i < 3; i++) {
-        let currMaxPN : number = Math.pow(2, i + 1);
-        let currentTitle : string = ["table-contender-", "table-quarterfinal-", "table-semifinal-"][3 - i - 1];
-        for (let j = 0; j < currMaxPN; j++) {
-          if (tourn?.Ids[i][j] !== "" && tourn?.Ids[i][j] !== "failed") {
-            let respNn = await getNicknameForPlayerId(tourn?.Ids[i][j]);
+      
+      // Use the bracketSize parameter instead of tourn.maxPN
+      const tournamentSize = bracketSize;
+      console.log("Tournament size for filling table:", tournamentSize);
+      
+      // For 2-player bracket
+      if (tournamentSize === 2) {
+        console.log("Filling 2-player bracket");
+        // Only populate the first 2 contenders
+        for (let j = 0; j < 2; j++) {
+          const element = document.getElementById(`table-contender-${j + 1}`);
+          if (element) {
+            if (j < tourn.Ids[0].length && tourn.Ids[0][j] !== "" && tourn.Ids[0][j] !== "failed") {
+              let respNn = await getNicknameForPlayerId(tourn.Ids[0][j]);
+              let nnJson = JSON.parse(await respNn.text());
+              let nicknameVs = "<i>unknown</i>";
+              if (nnJson.err === "nil") {
+                nicknameVs = nnJson.nick;
+              }
+              element.innerHTML = "<b>" + nicknameVs + "</b>";
+            }
+            else {
+              element.innerHTML = "<i>" + t('tournaments.empty') + "</i>";
+            }
+          }
+        }
+      }
+      // For 4-player bracket
+      else if (tournamentSize === 4) {
+        console.log("Filling 4-player bracket");
+        // Populate first 2 rounds
+        for (let i = 0; i < 2; i++) {
+          let currMaxPN = Math.pow(2, i + 1);
+          let currentTitle = ["table-contender-", "table-semifinal-"][2 - i - 1];
+          for (let j = 0; j < currMaxPN; j++) {
+            const element = document.getElementById(`${currentTitle}${j + 1}`);
+            if (element) {
+              if (i < tourn.Ids.length && j < tourn.Ids[i].length && 
+                  tourn.Ids[i][j] !== "" && tourn.Ids[i][j] !== "failed") {
+                let respNn = await getNicknameForPlayerId(tourn.Ids[i][j]);
+                let nnJson = JSON.parse(await respNn.text());
+                let nicknameVs = "<i>unknown</i>";
+                if (nnJson.err === "nil") {
+                  nicknameVs = nnJson.nick;
+                }
+                element.innerHTML = "<b>" + nicknameVs + "</b>";
+              }
+              else {
+                element.innerHTML = "<i>" + t('tournaments.empty') + "</i>";
+              }
+            }
+          }
+        }
+      }
+      // For 8-player bracket
+      else {
+        console.log("Filling 8-player bracket");
+        for (let i = 0; i < 3; i++) {
+          let currMaxPN = Math.pow(2, i + 1);
+          let currentTitle = ["table-contender-", "table-quarterfinal-", "table-semifinal-"][3 - i - 1];
+          for (let j = 0; j < currMaxPN; j++) {
+            const element = document.getElementById(`${currentTitle}${j + 1}`);
+            if (element) {
+              if (i < tourn.Ids.length && j < tourn.Ids[i].length && 
+                  tourn.Ids[i][j] !== "" && tourn.Ids[i][j] !== "failed") {
+                let respNn = await getNicknameForPlayerId(tourn.Ids[i][j]);
+                let nnJson = JSON.parse(await respNn.text());
+                let nicknameVs = "<i>unknown</i>";
+                if (nnJson.err === "nil") {
+                  nicknameVs = nnJson.nick;
+                }
+                element.innerHTML = "<b>" + nicknameVs + "</b>";
+              }
+              else {
+                element.innerHTML = "<i>" + t('tournaments.empty') + "</i>";
+              }
+            }
+          }
+        }
+      }
+      
+      // Finalist handling (same for all tournament sizes)
+      const finRawResp = await getFinalist();
+      const finResp = await finRawResp.text();
+      const finObj = JSON.parse(finResp);
+      if (finObj.err === "nil") {
+        const element = document.getElementById('table-finalist');
+        if (element) {
+          if (finObj.res !== "") {
+            const finId = finObj.res;
+            let respNn = await getNicknameForPlayerId(finId);
             let nnJson = JSON.parse(await respNn.text());
             let nicknameVs = "<i>unknown</i>";
             if (nnJson.err === "nil") {
               nicknameVs = nnJson.nick;
             }
-            document.getElementById(`${currentTitle}${j + 1}`).innerHTML = "<b>" + nicknameVs + "</b>";
+            element.innerHTML = "<b>" + nicknameVs + "</b>";
           }
           else {
-            // TODO this just highlights the importance of protections against injection. TODO TODO TODO FIXME XXX FIXME TODO TODO TODO.
-            document.getElementById(`${currentTitle}${j + 1}`).innerHTML = "<i>" + t('tournaments.empty') + "</i>";
+            element.innerHTML = t('tournaments.final');
           }
-        }
-      }
-      const finRawResp = await getFinalist();
-      const finResp = await finRawResp.text();
-      const finObj = JSON.parse(finResp);
-      if (finObj.err === "nil") {
-        if (finObj.res !== "") {
-          const finId = finObj.res;
-          // looks familiar?
-          let respNn = await getNicknameForPlayerId(finId);
-          let nnJson = JSON.parse(await respNn.text());
-          let nicknameVs = "<i>unknown</i>";
-          if (nnJson.err === "nil") {
-            nicknameVs = nnJson.nick;
-          }
-          document.getElementById('table-finalist').innerHTML = "<b>" + nicknameVs + "</b>";
-        }
-        else {
-          // document.getElementById('table-finalist').innerHTML = "finalist!";
-          document.getElementById('table-finalist').innerHTML = t('tournaments.final');
         }
       }
       else {
-        console.error("finalist lookup error:", e);
+        console.error("finalist lookup error:", finObj.err);
       }
     }
   }
@@ -219,76 +360,62 @@ export async function renderTournamentContent(hideableElements) {
   hideableElements.buttonArea.hidden = true;
   hideableElements.gameArea.classList.add("hidden");
   hideableElements.gameWindow.hidden = true;
-  let tempHTML : string = `
-    <h1 id="tourn-title">Tourn title</h1>
-    <h1 id="tourn-id">Tourn ID</h1>
-    <hr />
-    <table id="big-table" class="table-fixed"><tbody>
-      <tr>
-        <td id="table-contender-1">contender 1</td>
-        <td rowspan="2" id="table-quarterfinal-1">quarterfinal 1</td>
-        <td rowspan="4" id="table-semifinal-1">semifinal 1</td>
-        <td rowspan="8" id="table-finalist">finalist!</td>
-      </tr>
-      <tr>
-        <td id="table-contender-2">contender 2</td>
-      </tr>
-      <tr>
-        <td id="table-contender-3">contender 3</td>
-        <td rowspan="2" id="table-quarterfinal-2">quarterfinal 2</td>
-      </tr>
-      <tr>
-        <td id="table-contender-4">contender 4</td>
-      </tr>
-      <tr>
-        <td id="table-contender-5">contender 5</td>
-        <td rowspan="2" id="table-quarterfinal-3">quarterfinal 3</td>
-        <td rowspan="4" id="table-semifinal-2">semifinal 2</td>
-      </tr>
-      <tr>
-        <td id="table-contender-6">contender 6</td>
-      </tr>
-      <tr>
-        <td id="table-contender-7">contender 7</td>
-        <td rowspan="2" id="table-quarterfinal-4">quarterfinal 4</td>
-      </tr>
-      <tr>
-        <td id="table-contender-8">contender 8</td>
-      </tr>
-    </tbody>
-    </table>
-    <div class="flex flex-col space-y-1">
-    <button id="leave-tourn" disabled
-     class=
-     "
-       w-full px-4 py-2 text-white bg-red-600
-       rounded-md hover:bg-red-700 focus:outline-none
-       focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
-       focus:ring-offset-gray-800
-       disabled:border-gray-200 disabled:bg-gray-700 disabled:text-gray-500 disabled:shadow-none
-     ">
-      ${t('tournaments.leaveTournament')}
-    </button>
-    <button id="force-rm-tourn" disabled
-     class=
-     "
-       w-full px-4 py-2 text-white bg-red-600
-       rounded-md hover:bg-red-700 focus:outline-none
-       focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
-       focus:ring-offset-gray-800
-       disabled:border-gray-200 disabled:bg-gray-700 disabled:text-gray-500 disabled:shadow-none
-     ">
-      ${t('tournaments.destroyTournament')}
-     
-    </button>
-    </div>
-  `;
+  
+  // Get tournament info first to determine size
+  const tournAllInfoRawResp = await getCompleteTournamentInfo();
+  const tournAllInfoResp = await tournAllInfoRawResp.text();
+  const tournAllInfoRespObj = JSON.parse(tournAllInfoResp);
+  
+  let bracketSize = 8; // Default to 8
+  if (tournAllInfoRespObj.err === "nil" && tournAllInfoRespObj.res) {
+    // Parse maxPN safely - THIS IS THE KEY FIX
+    let maxPN = 8;
+    try {
+      const maxPNStr = tournAllInfoRespObj.res.maxPN;
+      if (typeof maxPNStr === 'string' && maxPNStr.trim() !== '') {
+        maxPN = parseInt(maxPNStr, 10);
+        if (isNaN(maxPN)) {
+          console.error("Could not parse maxPN as number, defaulting to 8");
+          maxPN = 8;
+
+        }
+      } else if (typeof maxPNStr === 'number') {
+        maxPN = maxPNStr;
+        console.log("*************maxPN is already a number:", maxPN);
+      }
+    } catch (e) {
+      console.error("Error parsing maxPN:", e);
+      maxPN = 8;
+    }
+    
+    // CRITICAL FIX: Use maxPN directly as the bracket size
+    // No need to calculate based on joined players
+    bracketSize = maxPN;
+    
+    // Ensure bracketSize is one of our supported sizes (2, 4, or 8)
+    if (bracketSize !== 2 && bracketSize !== 4) {
+      bracketSize = 8; // Default to 8 if not 2 or 4
+    }
+    
+    console.log("Tournament size debug:");
+    console.log("maxPN:", maxPN, "type:", typeof maxPN);
+    console.log("Using bracketSize:", bracketSize);
+  } else {
+    console.log("No tournament info available or error:", tournAllInfoRespObj.err);
+  }
+  
+  // Generate bracket HTML based on calculated bracket size
+  let tempHTML = generateBracketHTML(bracketSize);
+  
   hideableElements.contentArea.innerHTML = tempHTML;
+  
+  // Rest of your code...
   let tournAnihilationButton = document.getElementById("force-rm-tourn");
   let tournLeaveButton = document.getElementById("leave-tourn");
-  let doIAdmin : boolean = false;
-  let noadminFlag : boolean = false;
-  let noparticipateFlag : boolean = false;
+  let doIAdmin = false;
+  let noadminFlag = false;
+  let noparticipateFlag = false;
+  
   if (tournAnihilationButton) {
     const checkAdminRawResp = await adminCheck();
     const checkAdminResp = await checkAdminRawResp.text();
@@ -302,13 +429,13 @@ export async function renderTournamentContent(hideableElements) {
         const resOfDeleteObj = JSON.parse(resOfDelete);
         if (resOfDeleteObj.err === "nil") {
           localStorage.removeItem("tId");
-          tournAnihilationButton.disabled = true;
+          (tournAnihilationButton as HTMLButtonElement).disabled = true;
           buttonSetter(MetaGameState.nothing);
         }
         else {
           console.error("failed to delete tournament:", resOfDeleteObj.err);
         }
-        await fillInTheTournTable();
+        await fillInTheTournTable(tournAllInfoRespObj, bracketSize);
       });
     }
     else {
@@ -316,6 +443,7 @@ export async function renderTournamentContent(hideableElements) {
       noadminFlag = true;
     }
   }
+  
   if (tournLeaveButton) {
     tournLeaveButton.disabled = true;
     const checkPartRawResp = await participantCheck();
@@ -336,7 +464,7 @@ export async function renderTournamentContent(hideableElements) {
         else {
           console.error("failed to leave tournament:", resOfLeaveObj.err);
         }
-        await fillInTheTournTable();
+        await fillInTheTournTable(tournAllInfoRespObj, bracketSize);
       });
     }
     else {
@@ -345,15 +473,16 @@ export async function renderTournamentContent(hideableElements) {
       noparticipateFlag = true;
     }
   }
+  
   if ((noadminFlag === true) && (noparticipateFlag === true)) {
     let metaInfo = await getGameMetaInfo();
-    const gameInfo : HTMLElement = document.getElementById("game-info");
+    const gameInfo = document.getElementById("game-info");
     if (gameInfo) {
       await setterUponMetaInfo(gameInfo, metaInfo);
     }
   }
 
-  await fillInTheTournTable();
+  await fillInTheTournTable(tournAllInfoRespObj, bracketSize);
 }
 
 async function createTournament(tName : string, playersN : number, privacy : boolean) {
