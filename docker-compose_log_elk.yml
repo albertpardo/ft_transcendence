@@ -3,11 +3,11 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: transcendence_frontend
+    container_name: trans_frontend
     volumes:
       - ./frontend:/app
       - /app/node_modules
-      - shared_logs:/shared_logs   # add by apardo-m
+      - shared_logs:/shared_logs
     ports:
       - "3000:3000"
     depends_on:
@@ -28,7 +28,7 @@ services:
     volumes:
       - ./backend/api-gateway:/app
       - /app/node_modules      # use container-installed deps
-      - shared_logs:/shared_logs  # add by apardo-m 
+      - shared_logs:/shared_logs
     env_file:
       - ./backend/api-gateway/.env
     restart: always
@@ -43,7 +43,7 @@ services:
     volumes:
       - ./backend/microservices/user_management:/app
       - /app/node_modules      # use container-installed deps
-      - shared_logs:/shared_logs   # add by apardo-m 
+      - shared_logs:/shared_logs
     environment:
       - ./backend/microservices/user_management/.env
     restart: always
@@ -56,27 +56,20 @@ services:
     expose:
       - "9002"
     volumes:
-      - ./backend/microservices/game_service:/app   # add by apardo-m
+      - ./backend/microservices/game_service:/app
       - /app/node_modules      # use container-installed deps
       - ./backend/microservices/game_service/vol:/app/dbs
-      - shared_logs:/shared_logs  # add by apardo-m 
+      - shared_logs:/shared_logs 
     restart: always
     networks:
       - backend
-
-#  chat_service:
-#    build: ./chat_service
-#    expose:
-#      - "9003"
-#    networks:
-#      - backend
 
 #
 # ELK section
 #
 
   elastic:
-    container_name: elastic
+    container_name: trans_elastic
     build:
       context: ./backend/elk
       dockerfile: ./elastic/Dockerfile
@@ -101,7 +94,7 @@ services:
       retries: 120
 
   kibana:
-    container_name: kibana
+    container_name: trans_kibana
     build:
       context: ./backend/elk
       dockerfile: ./kibana/Dockerfile
@@ -135,7 +128,7 @@ services:
       retries: 120
 
   setup:
-    container_name: setup
+    container_name: trans_setup
     build:
       context: ./backend/elk
       dockerfile: ./setup/Dockerfile
@@ -152,7 +145,7 @@ services:
       - backend
       
   index_script:
-    container_name: index_script
+    container_name: trans_index_script
     build:
       context: ./backend/elk
       dockerfile: ./index_script/Dockerfile
@@ -169,7 +162,7 @@ services:
       - backend
 
   logstash:
-    container_name: logstash
+    container_name: trans_logstash
     depends_on:
       index_script:
         condition:  service_completed_successfully
@@ -189,7 +182,7 @@ services:
       - backend
       
   snapshot_backup:
-    container_name: snapshot_backup
+    container_name: trans_snapshot_backup
     depends_on:
       index_script:
         condition:  service_completed_successfully
@@ -204,7 +197,7 @@ services:
     networks:
       - backend
 
-# volumes used in ELK 
+# shared_logs store log's files from microservices 
 volumes:
   elasticdata:
     driver: local
