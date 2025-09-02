@@ -44,6 +44,13 @@ import responseLogger from './pino_utils/plugings/response-logger';
 import { setUserStatus } from './utils/status'
 // End by apardo-m
 
+require('dotenv').config({ path: __dirname + '/../.env' });
+const FRONT_URL = process.env.FRONT_URL;
+if (typeof FRONT_URL !== "string") {
+  throw "some weird stuff happened. no FRONT_URL being string found.";
+}
+console.log(FRONT_URL);
+
 // id shall come from the req and be per-user unique and persistent (jwt)
 // getIn tells do we wanna move (false) or do we wanna get into a game (true)
 // mov tells us where to move and if we wanna
@@ -77,7 +84,7 @@ const startServer = async () => {
   await fastify.register(websocket);
 
   await fastify.register(cors, {
-    origin: ['https://localhost:3000', 'https://127.0.0.1:3000'],
+    origin: ['https://localhost:3000', 'https://127.0.0.1:3000', FRONT_URL],
     credentials: true,
     allowedHeaders: 'Access-Content-Allow-Origin,Content-Type,Authorization,Upgrade',
   });

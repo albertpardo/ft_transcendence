@@ -2,6 +2,7 @@
 import { t, i18nReady } from '../i18n';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const FRONT_URL = import.meta.env.VITE_FRONT_URL;
 
 async function getHistoryForPlayerId(userId: string) {
   const authToken = localStorage.getItem('authToken');
@@ -16,7 +17,7 @@ async function getHistoryForPlayerId(userId: string) {
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json,application/html,text/html,*/*',
-        'Origin': 'https://127.0.0.1:3000/',
+        'Origin': FRONT_URL,
         'Authorization': 'Bearer ' + authToken,
       },
       body: JSON.stringify({ userId }),

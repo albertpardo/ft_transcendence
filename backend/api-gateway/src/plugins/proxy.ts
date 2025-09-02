@@ -6,6 +6,8 @@ import { Readable } from 'stream';
 import { OAuth2Client } from 'google-auth-library';
 import fetch from 'node-fetch';
 import jwt from 'jsonwebtoken';
+require('dotenv').config({ path: __dirname + '/../../.env' });
+const API_BASE_URL = process.env.API_BASE_URL;
 
 import { logFormat } from '../pino_utils/log_format'; //by apardo-m
 
@@ -22,7 +24,7 @@ export default fp(async function (fastify: FastifyInstance) {
         script-src 'self' https://accounts.google.com https://cdnjs.cloudflare.com;
         frame-src 'self' https://accounts.google.com;
         img-src 'self' https://lh3.googleusercontent.com https://i.pravatar.cc;
-        connect-src 'self' https://localhost:8443 https://play.google.com;
+        connect-src 'self' ${API_BASE_URL} https://play.google.com;
       `.replace(/\s+/g, ' ').trim());
         
       if (request.method === 'OPTIONS') {

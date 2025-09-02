@@ -1,6 +1,7 @@
 // src/views/buttonClicking.ts
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const FRONT_URL = import.meta.env.VITE_FRONT_URL;
 
 export async function registerPlayer() {
   const fresp = fetch(
@@ -9,7 +10,7 @@ export async function registerPlayer() {
       method: 'POST',
       headers: {
         'Accept': 'application/json,application/html,text/html,*/*',
-        'Origin': 'https://127.0.0.1:3000/',
+        'Origin': FRONT_URL,
         'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
       },
       credentials: 'include',
@@ -26,7 +27,7 @@ export async function localGaming() {
       method: 'POST',
       headers: {
         'Accept': 'application/json,application/html,text/html,*/*',
-        'Origin': 'https://127.0.0.1:3000/',
+        'Origin': FRONT_URL,
         'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
       },
       credentials: 'include',
@@ -44,7 +45,7 @@ export async function movePaddle(d: number) {
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json,application/html,text/html,*/*',
-        'Origin': 'https://127.0.0.1:3000/',
+        'Origin': FRONT_URL,
         'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
       },
       body: JSON.stringify({
@@ -65,7 +66,7 @@ export async function localMovePaddle(d: number, p: string) {
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json,application/html,text/html,*/*',
-        'Origin': 'https://127.0.0.1:3000/',
+        'Origin': FRONT_URL,
         'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
       },
       body: JSON.stringify({
@@ -86,7 +87,7 @@ export async function forfeit() {
       method: 'POST',
       headers: {
         'Accept': 'application/json,application/html,text/html,*/*',
-        'Origin': 'https://127.0.0.1:3000/',
+        'Origin': FRONT_URL,
         'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
       },
       credentials: 'include',
@@ -103,7 +104,7 @@ export async function confirmParticipation() {
       method: 'POST',
       headers: {
         'Accept': 'application/json,application/html,text/html,*/*',
-        'Origin': 'https://127.0.0.1:3000/',
+        'Origin': FRONT_URL,
         'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
       },
       credentials: 'include',
@@ -120,7 +121,7 @@ export async function checkIsInTournament() {
       method: 'GET',
       headers: {
         'Accept': 'application/json,application/html,text/html,*/*',
-        'Origin': 'https://127.0.0.1:3000/',
+        'Origin': FRONT_URL,
         'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
       },
       credentials: 'include',
@@ -137,7 +138,7 @@ export async function checkReady() {
       method: 'GET',
       headers: {
         'Accept': 'application/json,application/html,text/html,*/*',
-        'Origin': 'https://127.0.0.1:3000/',
+        'Origin': FRONT_URL,
         'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
       },
       credentials: 'include',
@@ -154,7 +155,7 @@ export async function checkIsInGame() {
       method: 'GET',
       headers: {
         'Accept': 'application/json,application/html,text/html,*/*',
-        'Origin': 'https://127.0.0.1:3000/',
+        'Origin': FRONT_URL,
         'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
       },
       credentials: 'include',

@@ -13,6 +13,7 @@ import { t, i18nReady } from '../i18n';
 
 // Import VITE_API_BASE_URL from environment variables
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const FRONT_URL = import.meta.env.VITE_FRONT_URL;
 let socket: WebSocket | null = null;
 let gameState: State = nullState;
 let playerSide: string = "tbd";
@@ -59,7 +60,7 @@ export async function getGameMetaInfo() {
       method: 'GET',
       headers: {
         'Accept': 'application/json,application/html,text/html,*/*',
-        'Origin': 'https://127.0.0.1:3000/',
+        'Origin': FRONT_URL,
         'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
       },
       credentials: 'include',
