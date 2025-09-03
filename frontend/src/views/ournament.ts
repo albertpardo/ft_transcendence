@@ -354,7 +354,6 @@ async function fillInTheTournTable(tournAllInfoRespObj, bracketSize = 8) {
       }
       
       // FINALIST HANDLING MUST BE OUTSIDE ALL BRACKET SIZE CONDITIONS
-      // This was the critical error - it was nested inside the 8-player bracket section
       const finRawResp = await getFinalist();
       const finResp = await finRawResp.text();
       const finObj = JSON.parse(finResp);
@@ -388,74 +387,42 @@ export async function renderTournamentContent(hideableElements) {
   hideableElements.gameArea.classList.add("hidden");
   hideableElements.gameWindow.hidden = true;
   
-  // Get tournament info first to determine size
   const tournAllInfoRawResp = await getCompleteTournamentInfo();
   const tournAllInfoResp = await tournAllInfoRawResp.text();
   const tournAllInfoRespObj = JSON.parse(tournAllInfoResp);
+ 
+  const rawAllPublicTournamentsResponse = await fetchAllPublicTournaments();
+  const allPTR = await rawAllPublicTournamentsResponse.text();
+  const allPTRObj = JSON.parse(allPTR);
   
-  let bracketSize = 8; // Default to 8
+  let bracketSize = 8;
   if (tournAllInfoRespObj.err === "nil" && tournAllInfoRespObj.res) {
     const tourn = tournAllInfoRespObj.res;
-    
-    // CRITICAL FIX: Determine bracket size based on actual tournament data
-    // NOT just on maxPN value from backend
-    let actualBracketSize = 8;
-    
-    // Check if we have tournament data to analyze
-    if (tourn.Ids && Array.isArray(tourn.Ids) && tourn.Ids.length > 0) {
-      // For 2-player tournament: Only 1 round with 2 players
-      if (tourn.Ids.length === 1 && tourn.Ids[0].length === 2) {
-        actualBracketSize = 2;
-      }
-      // For 4-player tournament: 2 rounds (semifinals + final)
-      else if (tourn.Ids.length === 2 && tourn.Ids[1].length === 4) {
-        actualBracketSize = 4;
-      }
-      // For 8-player tournament: 3 rounds (quarterfinals + semifinals + final)
-      else if (tourn.Ids.length === 3 && tourn.Ids[2].length === 8) {
-        actualBracketSize = 8;
-      }
-      // Fallback: Use the number of players in the initial round
-      else if (tourn.Ids[tourn.Ids.length-1] && tourn.Ids[tourn.Ids.length-1].length > 0) {
-        const initialPlayers = tourn.Ids[tourn.Ids.length-1].length;
-        if (initialPlayers <= 2) actualBracketSize = 2;
-        else if (initialPlayers <= 4) actualBracketSize = 4;
-        else actualBracketSize = 8;
-      }
-    }
-    
-    // Also check maxPN as a secondary source
-    let maxPN = 8;
+
+    let tournamentSize = allPTRObj.res[0].maxPN || 8;
     try {
-      const maxPNStr = tournAllInfoRespObj.res.maxPN;
-      if (typeof maxPNStr === 'string' && maxPNStr.trim() !== '') {
-        maxPN = parseInt(maxPNStr, 10);
-        if (isNaN(maxPN)) maxPN = 8;
-      } else if (typeof maxPNStr === 'number') {
-        maxPN = maxPNStr;
+      const maxPN = parseInt(tourn.maxPN);
+      if (!isNaN(maxPN)) {
+        tournamentSize = maxPN;
       }
     } catch (e) {
-      maxPN = 8;
+      console.error("Error parsing tournament size:", e);
     }
     
-    // Use the most reliable size we can determine
-    bracketSize = actualBracketSize;
-    
-    // Ensure bracketSize is one of our supported sizes
-    if (bracketSize !== 2 && bracketSize !== 4) {
-      bracketSize = 8;
+    // Ensure it's a valid tournament size
+    if (tournamentSize === 2 || tournamentSize === 4) {
+      bracketSize = tournamentSize;
+    } else {
+      bracketSize = 8; // Default to 8 if not 2 or 4
     }
-    
-    console.log("Tournament size debug:");
-    console.log("Backend maxPN:", maxPN);
-    console.log("Actual bracket size determined from data:", bracketSize);
-    console.log("Tournament data structure:", JSON.parse(JSON.stringify(tourn.Ids)));
   }
   
-  // Generate bracket HTML based on calculated bracket size
-  let tempHTML = generateBracketHTML(bracketSize);
-  hideableElements.contentArea.innerHTML = tempHTML;  
   
+  // Generate bracket HTML based on ACTUAL tournament size
+  let tempHTML = generateBracketHTML(bracketSize);
+  hideableElements.contentArea.innerHTML = tempHTML;
+  
+  // Rest of your code
   let tournAnihilationButton = document.getElementById("force-rm-tourn");
   let tournLeaveButton = document.getElementById("leave-tourn");
   let doIAdmin = false;

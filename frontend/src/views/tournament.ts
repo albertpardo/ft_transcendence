@@ -387,42 +387,48 @@ export async function renderTournamentContent(hideableElements) {
   hideableElements.gameArea.classList.add("hidden");
   hideableElements.gameWindow.hidden = true;
   
-  // Get tournament info first
   const tournAllInfoRawResp = await getCompleteTournamentInfo();
   const tournAllInfoResp = await tournAllInfoRawResp.text();
   const tournAllInfoRespObj = JSON.parse(tournAllInfoResp);
+ 
+  const rawAllPublicTournamentsResponse = await fetchAllPublicTournaments();
+  const allPTR = await rawAllPublicTournamentsResponse.text();
+  const allPTRObj = JSON.parse(allPTR);
   
-  let bracketSize = 8; // Default to 8
-  if (tournAllInfoRespObj.err === "nil" && tournAllInfoRespObj.res) {
-    const tourn = tournAllInfoRespObj.res;
-    
-    // CORRECT WAY TO DETERMINE TOURNAMENT SIZE
-    // Use the actual tournament size that was set when created
-    // This is the ONLY reliable method
-    let tournamentSize = 8; // Default to 8
-    try {
-      // Parse maxPN as integer (this is the tournament size set at creation)
-      const maxPN = parseInt(tourn.maxPN);
-      if (!isNaN(maxPN)) {
-        alert("using actual bs: " + maxPN);
-        tournamentSize = maxPN;
+  let bracketSize = 8;
+  // Define a type for tournament objects
+  type TournamentInfo = {
+    tId: string;
+    tName: string;
+    maxPN: number;
+    joinedPN?: number;
+    // add other properties as needed
+  };
+  
+    if (tournAllInfoRespObj.err === "nil" && tournAllInfoRespObj.res) {
+      const tourn = tournAllInfoRespObj.res;
+      const currentTournamentId = tourn.tId;
+  
+      // CRITICAL FIX: Find the current tournament in the list of all tournaments
+      let currentTournament: TournamentInfo | undefined = undefined;
+      if (allPTRObj && allPTRObj.res && Array.isArray(allPTRObj.res)) {
+        currentTournament = (allPTRObj.res as TournamentInfo[]).find(t => t.tId === currentTournamentId);
       }
-    } catch (e) {
-      console.error("Error parsing tournament size:", e);
-    }
-    
-    // Ensure it's a valid tournament size
-    if (tournamentSize === 2 || tournamentSize === 4) {
-      bracketSize = tournamentSize;
-    } else {
-      alert("fallback bs 8" + tournamentSize);
-      bracketSize = 8; // Default to 8 if not 2 or 4
-    }
-    
-    console.log("CORRECT: Using tournament size from creation:", bracketSize);
-  }
   
-  
+      // Determine bracket size from the ACTUAL tournament we're viewing
+      if (currentTournament) {
+        // Get the tournament size that was set when it was created
+        const tournamentSize = currentTournament.maxPN || 8;
+
+        // Ensure it's a valid tournament size
+        if (tournamentSize === 2 || tournamentSize === 4) {
+          bracketSize = tournamentSize;
+        }
+        // Otherwise keep default of 8
+      }
+    }
+
+
   // Generate bracket HTML based on ACTUAL tournament size
   let tempHTML = generateBracketHTML(bracketSize);
   hideableElements.contentArea.innerHTML = tempHTML;
