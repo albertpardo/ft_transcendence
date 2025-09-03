@@ -1,4 +1,5 @@
 # Use Node with Alpine for small size
+# {"registry-mirrors": ["https://nexus.42barcelona.com:5000/"]}%    
 FROM node:23-slim
 
 # Install dependencies we need for ts-node (including typescript)

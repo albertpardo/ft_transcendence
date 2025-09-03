@@ -9,7 +9,8 @@ import jwt from 'jsonwebtoken';
 
 import { logFormat } from '../pino_utils/log_format'; //by apardo-m
 
-const CLIENT_ID = '142914619782-scgrlb1fklqo43g9b2901hemub6hg51h.apps.googleusercontent.com';
+//const CLIENT_ID = '142914619782-scgrlb1fklqo43g9b2901hemub6hg51h.apps.googleusercontent.com';
+const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const client = new OAuth2Client(CLIENT_ID);
 
 export default fp(async function (fastify: FastifyInstance) {
