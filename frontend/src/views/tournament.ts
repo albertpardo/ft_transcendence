@@ -221,8 +221,7 @@ async function getFinalist() {
 }
 
 
-/* 
-async function fillInTheTournTable(tournAllInfoRespObj, bracketSize = 8) {
+/* async function fillInTheTournTable(tournAllInfoRespObj, bracketSize = 8) {
   console.log("Filling in tournament table with bracket size:", bracketSize);
   
   if (tournAllInfoRespObj.err !== "nil") {
@@ -387,8 +386,7 @@ async function fillInTheTournTable(tournAllInfoRespObj, bracketSize = 8) {
  */
 
 
-/* 
-export async function renderTournamentContent(hideableElements) {
+/* export async function renderTournamentContent(hideableElements) {
   hideableElements.buttonArea.hidden = true;
   hideableElements.gameArea.classList.add("hidden");
   hideableElements.gameWindow.hidden = true;
@@ -564,11 +562,26 @@ export async function renderTournamentContent(hideableElements) {
         bracketSize = tournamentSize;
       }
       // Otherwise keep default of 8
-    } else {
-      console.warn("Could not find current tournament in public tournaments list, using default bracket size");
-    }
-  } else {
-    console.warn("No tournament info available, using default bracket size");
+     } else {
+      console.warn("Could not find current tournament in public tournaments list, trying to determine size from tournament data");
+      if (tourn.Ids) {
+        // For 2-player tournaments, we typically have 2 players in the first level
+        if (tourn.Ids[0] && tourn.Ids[0].length === 2 && 
+            (!tourn.Ids[1] || tourn.Ids[1].every(id => id === ""))) {
+          bracketSize = 2;
+        } 
+        // For 4-player tournaments, we have 2 players in the first level (semifinals)
+        // and 4 players in the second level (contenders)
+        else if (tourn.Ids[0] && tourn.Ids[0].length === 2 && 
+                 tourn.Ids[1] && tourn.Ids[1].length === 4) {
+          bracketSize = 4;
+        }
+        // Otherwise, assume it's an 8-player tournament
+        else {
+          bracketSize = 8;
+        }
+      }
+    } 
   }
 
   console.log("Final bracket size determined:", bracketSize);
