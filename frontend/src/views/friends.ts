@@ -105,12 +105,10 @@ export async function renderFriendsContent(hideableElements) {
   const friendNick = document.getElementById("form-friendnick") as HTMLInputElement;
 
   refreshButton.addEventListener("click", async () => {
-    //location.reload();
     getFriendsAndRenderFriendsTable(authstringheader, API_BASE_URL, errorContent );
   });
   
   friendNick.addEventListener("focus", () => {
-    //const errorContent = document.getElementById("errorArea1");
 	  errorContent.textContent = "";
   });
 
@@ -144,29 +142,4 @@ export async function renderFriendsContent(hideableElements) {
   });
 
   getFriendsAndRenderFriendsTable(authstringheader, API_BASE_URL, errorContent );
-/*
-  try {
-    const res = await fetch(`${API_BASE_URL}/api/friends`, {
-      method: 'GET',
-      headers: {
-        "Use-me-to-authorize": authstringheader,
-        "Content-Type": "application/json",
-      },
-      credentials: 'include',
-      mode: 'cors',
-    });
-
-    if (!res.ok) {
-	    errorContent.textContent = t("friendsTxt.getFailed");
-	    console.error(t("friendsTxt.getFailed"));
-    } else {
-      friendsData = await res.json();
-      renderFriendsTable(friendsData);
-	  }
-  } catch (err) {
-    console.error(err);
-	  errorContent.textContent = t("friendsTxt.getError");
-    return;
-  }
-*/
 }
