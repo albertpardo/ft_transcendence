@@ -145,5 +145,34 @@
 	  "ready-button-text": "Confirmar participación",
 	  "giveup-button-text": "Rendirse INMEDIATAMENTE",
     "local-play-button-text": "Iniciar juego local"
-	}
+	},
+  "instructions": {
+    "title": "Instrucciones del juego",
+    "intro": "Esta guía te ayudará a navegar por todas las funciones y controles del juego.",
+    "controls": {
+      "title": "Controles del juego",
+      "online": "Partidas online:",
+      "onlineText": "Usa W/S para controlar tu pala",
+      "local": "Partidas locales:",
+      "localText": "Usa W/S para la pala izquierda y O/L para la pala derecha",
+      "altControls": "Controles alternativos: teclas ↑/↓ o subir y bajar en móvil",
+      "important": "Importante:",
+      "importantText": "Si usas el modo de pantalla completa, se recomienda encarecidamente NO usar las flechas"
+    },
+    "navMenu": {
+      "title": "Descripción del menú de navegación",
+      "profile": "Perfil",
+      "profileText": "En tu perfil puedes personalizar tu experiencia cambiando la imagen de perfil (avatar), contraseña, apodo, correo y usuario. Estas opciones solo están disponibles si no iniciaste sesión con Google OAuth.",
+      "playPong": "Jugar a Pong",
+      "playPongText": "• Elige oponentes aleatorios para partidas rápidas\n• Abandona partidas en curso si lo necesitas\n• Inicia partidas locales en la misma pantalla\n• Confirma tu participación en torneos\n• Disfruta de controles fluidos",
+      "history": "Historial",
+      "historyText": "Consulta el resumen de todas tus partidas, con detalles de oponentes y si fueron torneos o partidas normales.",
+      "tournament": "Torneo",
+      "tournamentText": "Mira la estructura de los torneos en curso y su progreso. Los resultados se muestran en un árbol de rondas.",
+      "tournamentMgmt": "Gestión de torneos",
+      "tournamentMgmtText": "• Crea torneos de 2, 4 u 8 jugadores\n• Hazlos privados o públicos\n• Únete por ID o busca torneos disponibles\n• Cada torneo muestra nombre, jugadores y botones para unirse",
+      "friends": "Amigos",
+      "friendsText": "Agrega jugadores a tu lista de amigos y consulta su estado en línea. Usa el botón de refresco para actualizar el estado."
+    }
+  }
 }

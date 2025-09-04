@@ -145,5 +145,35 @@
 	  "ready-button-text": "Confirmer la participation",
 	  "giveup-button-text": "Abandonner IMMÉDIATEMENT",
     "local-play-button-text": "Démarrer une partie locale"
-	}
+	},
+  "instructions": {
+  "title": "Instructions du jeu",
+  "intro": "Ce guide vous aidera à comprendre toutes les fonctionnalités et les contrôles du jeu.",
+  "controls": {
+    "title": "Contrôles du jeu",
+    "online": "Parties en ligne :",
+    "onlineText": "Utilisez W/S pour contrôler votre raquette",
+    "local": "Parties locales :",
+    "localText": "Utilisez W/S pour la raquette de gauche et O/L pour la raquette de droite",
+    "altControls": "Contrôles alternatifs : touches ↑/↓ ou déplacement vers le haut/bas sur mobile",
+    "important": "Important :",
+    "importantText": "En mode plein écran, il est fortement recommandé de NE PAS utiliser les flèches"
+  },
+  "navMenu": {
+    "title": "Description du menu de navigation",
+    "profile": "Profil",
+    "profileText": "Dans votre profil, vous pouvez personnaliser votre expérience en changeant l’avatar, le mot de passe, le surnom, l’adresse e-mail et le nom d’utilisateur. Ces options ne sont disponibles que si vous ne vous êtes pas connecté avec Google OAuth.",
+    "playPong": "Jouer à Pong",
+    "playPongText": "• Choisissez des adversaires aléatoires pour des parties rapides\n• Abandonnez une partie en cours si nécessaire\n• Lancez des parties locales sur le même écran\n• Confirmez votre participation à des tournois\n• Profitez de commandes fluides",
+    "history": "Historique",
+    "historyText": "Consultez le résumé de toutes vos parties, avec les détails des adversaires et s’il s’agissait de tournois ou de parties normales.",
+    "tournament": "Tournoi",
+    "tournamentText": "Consultez la structure et la progression des tournois en cours. Les résultats sont affichés sous forme d’arbre.",
+    "tournamentMgmt": "Gestion des tournois",
+    "tournamentMgmtText": "• Créez des tournois de 2, 4 ou 8 joueurs\n• Rendez-les privés ou publics\n• Rejoignez un tournoi par ID ou cherchez ceux disponibles\n• Chaque tournoi affiche le nom, les joueurs et des boutons pour rejoindre",
+    "friends": "Amis",
+    "friendsText": "Ajoutez des joueurs à votre liste d’amis et vérifiez leur statut en ligne. Utilisez le bouton de mise à jour pour rafraîchir les statuts."
+  }
+}
+
 }

@@ -145,5 +145,34 @@
 	  "ready-button-text": "Teilnahme bestätigen",
 	  "giveup-button-text": "SOFORT aufgeben",
     "local-play-button-text": "Lokales Spiel starten"
-	}
+	},
+  "instructions": {
+  "title": "Spielanleitung",
+  "intro": "Dieser Leitfaden hilft dir, alle Funktionen und Steuerungen des Spiels zu verstehen.",
+  "controls": {
+    "title": "Spielsteuerung",
+    "online": "Online-Spiele:",
+    "onlineText": "Benutze W/S, um dein Paddle zu steuern",
+    "local": "Lokale Spiele:",
+    "localText": "Benutze W/S für das linke Paddle und O/L für das rechte Paddle",
+    "altControls": "Alternative Steuerung: ↑/↓-Tasten oder Wischen nach oben/unten auf dem Handy",
+    "important": "Wichtig:",
+    "importantText": "Wenn du den Vollbildmodus benutzt, wird dringend empfohlen, NICHT die Pfeiltasten zu verwenden"
+  },
+  "navMenu": {
+    "title": "Übersicht des Navigationsmenüs",
+    "profile": "Profil",
+    "profileText": "In deinem Profil kannst du dein Erlebnis personalisieren, indem du Avatar, Passwort, Spitzname, E-Mail und Benutzername änderst. Diese Optionen sind nur verfügbar, wenn du dich nicht mit Google OAuth angemeldet hast.",
+    "playPong": "Pong spielen",
+    "playPongText": "• Wähle zufällige Gegner für schnelle Spiele\n• Verlasse laufende Spiele bei Bedarf\n• Starte lokale Spiele auf demselben Bildschirm\n• Bestätige deine Teilnahme an Turnieren\n• Genieße flüssige Steuerungen",
+    "history": "Verlauf",
+    "historyText": "Sieh dir die Zusammenfassung all deiner Spiele an, mit Details zu Gegnern und ob es Turniere oder normale Spiele waren.",
+    "tournament": "Turnier",
+    "tournamentText": "Sieh dir die Struktur und den Fortschritt laufender Turniere an. Ergebnisse werden in einem Rundenbaum angezeigt.",
+    "tournamentMgmt": "Turnierverwaltung",
+    "tournamentMgmtText": "• Erstelle Turniere mit 2, 4 oder 8 Spielern\n• Mach sie privat oder öffentlich\n• Tritt über eine ID bei oder suche verfügbare Turniere\n• Jedes Turnier zeigt Name, Spieler und Beitrittsknöpfe",
+    "friends": "Freunde",
+    "friendsText": "Füge Spieler zu deiner Freundesliste hinzu und überprüfe ihren Online-Status. Benutze den Aktualisieren-Button, um die Stati zu aktualisieren."
+  }
+}
 }

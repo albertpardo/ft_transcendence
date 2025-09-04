@@ -145,5 +145,34 @@
 	  "ready-button-text": "Confirm participation",
 	  "giveup-button-text": "INSTANTLY forfeit",
     "local-play-button-text": "Start local game"
+  },
+  "instructions": {
+  "title": "Game Instructions",
+  "intro": "This guide will help you navigate all the game’s features and controls.",
+  "controls": {
+    "title": "Game Controls",
+    "online": "Online matches:",
+    "onlineText": "Use W/S to control your paddle",
+    "local": "Local matches:",
+    "localText": "Use W/S for the left paddle and O/L for the right paddle",
+    "altControls": "Alternative controls: ↑/↓ keys or swipe up/down on mobile",
+    "important": "Important:",
+    "importantText": "If you use fullscreen mode, it is strongly recommended NOT to use the arrow keys"
+  },
+  "navMenu": {
+    "title": "Navigation Menu Overview",
+    "profile": "Profile",
+    "profileText": "In your profile you can personalize your experience by changing your avatar, password, nickname, email, and username. These options are only available if you did not log in with Google OAuth.",
+    "playPong": "Play Pong",
+    "playPongText": "• Choose random opponents for quick matches\n• Leave ongoing matches if needed\n• Start local matches on the same screen\n• Confirm your participation in tournaments\n• Enjoy smooth controls",
+    "history": "History",
+    "historyText": "View a summary of all your matches, with details about opponents and whether they were tournaments or normal games.",
+    "tournament": "Tournament",
+    "tournamentText": "See the structure and progress of ongoing tournaments. Results are displayed in a round tree.",
+    "tournamentMgmt": "Tournament Management",
+    "tournamentMgmtText": "• Create tournaments of 2, 4, or 8 players\n• Make them private or public\n• Join by ID or browse available tournaments\n• Each tournament shows name, players, and join buttons",
+    "friends": "Friends",
+    "friendsText": "Add players to your friends list and check their online status. Use the refresh button to update statuses."
   }
+}
 }
