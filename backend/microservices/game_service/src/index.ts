@@ -102,10 +102,18 @@ const startServer = async () => {
         sock.send("connected");
       });
       sock.on('close', event => {
+        let limitReconectionTime : number = 3000;
+        let oldPlayerId : string  = playerId;
+
         fastify.log.info(...logFormat( "websocket option 'close' : " + PREFIX + PATH, playerId));
-       //setUserStatus(playerId, "offline");   // TO test RELOAD page
         removeTheSock(sock);
         upperSocksMap.delete(playerId);
+        setTimeout (() => {
+          if (upperSocksMap.has(oldPlayerId) === false) {
+            setUserStatus(oldPlayerId, "offline");
+            fastify.log.info(...logFormat( "websocket option 'close' : " + PREFIX + PATH, oldPlayerId, " is offline!!!"));
+          }
+        }, limitReconectionTime );
       });
     });
 	  PATH = '/pong';
