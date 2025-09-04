@@ -11,6 +11,7 @@ import { googleInitialized, resetGoogle, currentGoogleButtonId} from './login';
 import confetti from 'canvas-confetti';
 import { t, i18nReady } from '../i18n';
 
+import { setUserStatus } from "./utils/status";
 // Import VITE_API_BASE_URL from environment variables
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 let socket: WebSocket | null = null;
@@ -1094,6 +1095,7 @@ export async function initDashboard() {
 
   // Logout functionality
   document.getElementById('logout-btn')!.addEventListener('click', async () => {
+    await setUserStatus("offline");
     localStorage.removeItem('authToken');
     localStorage.removeItem('userId');
     localStorage.removeItem('authProvider');
