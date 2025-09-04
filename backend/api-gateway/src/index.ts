@@ -1,4 +1,5 @@
 
+// tst
 /// <reference path="./types/fastify-jwt.d.ts" />
 require('dotenv').config({ path: __dirname + '/../.env' });
 const Fastify = require('fastify');
