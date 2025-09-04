@@ -17,7 +17,7 @@ function generateBracketHTML(tournamentSize: number) {
     <div class="overflow-x-auto">
       <table id="big-table" class="min-w-full divide-y divide-gray-700">
         <tbody>`;
-  
+
   // For 2-player tournament
   if (tournamentSize === 2) {
     html += `
@@ -29,7 +29,7 @@ function generateBracketHTML(tournamentSize: number) {
         <td id="table-contender-2" class="px-6 py-4 whitespace-nowrap">${t('tournaments.contender')} 2</td>
       </tr>
     `;
-  } 
+  }
   // For 4-player tournament - CORRECTED STRUCTURE (NO QUARTERFINALS!)
   else if (tournamentSize === 4) {
     html += `
@@ -86,7 +86,7 @@ function generateBracketHTML(tournamentSize: number) {
       </tr>
     `;
   }
-  
+
   html += `</tbody></table>
     </div>
     <div class="flex flex-col space-y-1 mt-4">
@@ -111,7 +111,7 @@ function generateBracketHTML(tournamentSize: number) {
       ${t('tournaments.destroyTournament')}
     </button>
     </div>`;
-  
+
   return html;
 }
 
@@ -226,17 +226,17 @@ export async function renderTournamentContent(hideableElements) {
   hideableElements.buttonArea.hidden = true;
   hideableElements.gameArea.classList.add("hidden");
   hideableElements.gameWindow.hidden = true;
-  
+
   const tournAllInfoRawResp = await getCompleteTournamentInfo();
   const tournAllInfoResp = await tournAllInfoRawResp.text();
   const tournAllInfoRespObj = JSON.parse(tournAllInfoResp);
- 
+
   const rawAllPublicTournamentsResponse = await fetchAllPublicTournaments();
   const allPTR = await rawAllPublicTournamentsResponse.text();
   const allPTRObj = JSON.parse(allPTR);
-  
+
   let bracketSize = 8;
-  
+
   type TournamentInfo = {
     tId: string;
     tName: string;
@@ -253,27 +253,7 @@ export async function renderTournamentContent(hideableElements) {
       currentTournament = (allPTRObj.res as TournamentInfo[]).find(t => t.tId === currentTournamentId);
     }
 
-    if (currentTournament) {
-      const tournamentSize = currentTournament.maxPN || 8;
-      console.log("Found tournament with size:", tournamentSize);
-
-      if (tournamentSize === 2 || tournamentSize === 4) {
-        bracketSize = tournamentSize;
-      }
-     } else {
-      console.warn("Could not find current tournament in public tournaments list, trying to determine size from tournament data");
-      if (tourn.Ids) {
-        if (tourn.Ids[0] && tourn.Ids[0].length === 2 && 
-            (!tourn.Ids[1] || tourn.Ids[1].every(id => id === ""))) {
-          bracketSize = 2;
-        } else if (tourn.Ids[0] && tourn.Ids[0].length === 2 &&
-                   tourn.Ids[1] && tourn.Ids[1].length === 4) {
-          bracketSize = 4;
-        } else {
-          bracketSize = 8;
-        }
-      }
-    } 
+    bracketSize = Math.pow(2, tourn.stages);
   }
 
   // console.log("Final bracket size determined:", bracketSize);
@@ -281,13 +261,13 @@ export async function renderTournamentContent(hideableElements) {
   // Generate bracket HTML based on ACTUAL tournament size
   let tempHTML = generateBracketHTML(bracketSize);
   hideableElements.contentArea.innerHTML = tempHTML;
-  
+
   let tournAnihilationButton = document.getElementById("force-rm-tourn");
   let tournLeaveButton = document.getElementById("leave-tourn");
   let doIAdmin = false;
   let noadminFlag = false;
   let noparticipateFlag = false;
-  
+
   if (tournAnihilationButton) {
     const checkAdminRawResp = await adminCheck();
     const checkAdminResp = await checkAdminRawResp.text();
@@ -315,7 +295,7 @@ export async function renderTournamentContent(hideableElements) {
       noadminFlag = true;
     }
   }
-  
+
   if (tournLeaveButton) {
     (tournLeaveButton as HTMLButtonElement).disabled = true;
     const checkPartRawResp = await participantCheck();
@@ -345,7 +325,7 @@ export async function renderTournamentContent(hideableElements) {
       noparticipateFlag = true;
     }
   }
-  
+
   if ((noadminFlag === true) && (noparticipateFlag === true)) {
     let metaInfo = await getGameMetaInfo();
     const gameInfo = document.getElementById("game-info");
@@ -359,9 +339,6 @@ export async function renderTournamentContent(hideableElements) {
 
 
 async function fillInTheTournTable(tournAllInfoRespObj, bracketSize = 8) {
-  console.log("=== TOURNAMENT DEBUG INFO ===");
-  console.log("Filling in tournament table with bracket size:", bracketSize);
-  
   if (tournAllInfoRespObj.err !== "nil") {
     document.getElementById("tourn-title")!.innerHTML = "<i>" + t('tournaments.noTournaments') + "</i>";
     document.getElementById("tourn-id")!.innerHTML = "";
@@ -378,45 +355,26 @@ async function fillInTheTournTable(tournAllInfoRespObj, bracketSize = 8) {
     return;
   }
 
-  console.log("Complete tournament object:", tourn);
-  console.log("Tournament Ids structure:", tourn.Ids);
-  console.log("Number of levels in Ids:", tourn.Ids ? tourn.Ids.length : 0);
-  
-  // Log each level
-  if (tourn.Ids) {
-    tourn.Ids.forEach((level, index) => {
-      console.log(`Level ${index}:`, level, `(length: ${level ? level.length : 0})`);
-    });
-  }
-
   document.getElementById("tourn-title")!.innerHTML = t('tournaments.tournamentName') + ": " + tourn.tName;
   document.getElementById("tourn-id")!.innerHTML = "id: " + tourn.tId;
 
-  console.log("Tournament size for filling table:", bracketSize);
-  
   // For 2-player bracket
   if (bracketSize === 2) {
-    console.log("=== FILLING 2-PLAYER BRACKET ===");
-    
     // For 2-player, we just need to find where the 2 initial players are stored
     // Let's check all levels to find the one with exactly 2 players
     let contenderData = null;
     for (let level = 0; level < tourn.Ids.length; level++) {
       if (tourn.Ids[level] && tourn.Ids[level].length >= 2) {
-        console.log(`Found potential contenders at level ${level}:`, tourn.Ids[level]);
         contenderData = tourn.Ids[level];
         break; // Use the first level that has at least 2 players
       }
     }
-    
+
     if (contenderData) {
       for (let j = 0; j < 2; j++) {
         const element = document.getElementById(`table-contender-${j + 1}`);
-        console.log(`Processing contender ${j + 1}, element:`, element);
-        
-        if (element && j < contenderData.length && 
+        if (element && j < contenderData.length &&
             contenderData[j] !== "" && contenderData[j] !== "failed") {
-          console.log(`Fetching nickname for player ID: ${contenderData[j]}`);
           let respNn = await getNicknameForPlayerId(contenderData[j]);
           let nnJson = JSON.parse(await respNn.text());
           let nicknameVs = "<i>unknown</i>";
@@ -424,11 +382,9 @@ async function fillInTheTournTable(tournAllInfoRespObj, bracketSize = 8) {
             nicknameVs = nnJson.nick;
           }
           element.innerHTML = "<b>" + nicknameVs + "</b>";
-          console.log(`Set contender ${j + 1} to: ${nicknameVs}`);
         }
         else if (element) {
           element.innerHTML = "<i>" + t('tournaments.empty') + "</i>";
-          console.log(`Set contender ${j + 1} to empty`);
         }
       }
     } else {
@@ -443,30 +399,24 @@ async function fillInTheTournTable(tournAllInfoRespObj, bracketSize = 8) {
   }
   // For 4-player bracket
   else if (bracketSize === 4) {
-    console.log("=== FILLING 4-PLAYER BRACKET ===");
-    
     // For 4-player tournaments, we need semifinals and contenders
     // Semifinals should be in an earlier level, contenders in a later level
-    
+
     // Find semifinals (should be 2 players)
     let semifinalData = null;
     for (let level = 0; level < tourn.Ids.length; level++) {
       if (tourn.Ids[level] && tourn.Ids[level].length >= 2) {
-        console.log(`Found potential semifinals at level ${level}:`, tourn.Ids[level]);
         semifinalData = tourn.Ids[level];
         break;
       }
     }
-    
+
     // Fill semifinals
     if (semifinalData) {
       for (let j = 0; j < 2; j++) {
         const element = document.getElementById(`table-semifinal-${j + 1}`);
-        console.log(`Processing semifinal ${j + 1}, element:`, element);
-        
-        if (element && j < semifinalData.length && 
+        if (element && j < semifinalData.length &&
             semifinalData[j] !== "" && semifinalData[j] !== "failed") {
-          console.log(`Fetching nickname for semifinal player ID: ${semifinalData[j]}`);
           let respNn = await getNicknameForPlayerId(semifinalData[j]);
           let nnJson = JSON.parse(await respNn.text());
           let nicknameVs = "<i>unknown</i>";
@@ -474,33 +424,27 @@ async function fillInTheTournTable(tournAllInfoRespObj, bracketSize = 8) {
             nicknameVs = nnJson.nick;
           }
           element.innerHTML = "<b>" + nicknameVs + "</b>";
-          console.log(`Set semifinal ${j + 1} to: ${nicknameVs}`);
         } else if (element) {
           element.innerHTML = "<i>" + t('tournaments.empty') + "</i>";
-          console.log(`Set semifinal ${j + 1} to empty`);
         }
       }
     }
-    
+
     // Find contenders (should be 4 players)
     let contenderData = null;
     for (let level = 0; level < tourn.Ids.length; level++) {
       if (tourn.Ids[level] && tourn.Ids[level].length >= 4) {
-        console.log(`Found potential contenders at level ${level}:`, tourn.Ids[level]);
         contenderData = tourn.Ids[level];
         break;
       }
     }
-    
+
     // Fill contenders
     if (contenderData) {
       for (let j = 0; j < 4; j++) {
         const element = document.getElementById(`table-contender-${j + 1}`);
-        console.log(`Processing contender ${j + 1}, element:`, element);
-        
-        if (element && j < contenderData.length && 
+        if (element && j < contenderData.length &&
             contenderData[j] !== "" && contenderData[j] !== "failed") {
-          console.log(`Fetching nickname for contender player ID: ${contenderData[j]}`);
           let respNn = await getNicknameForPlayerId(contenderData[j]);
           let nnJson = JSON.parse(await respNn.text());
           let nicknameVs = "<i>unknown</i>";
@@ -508,15 +452,12 @@ async function fillInTheTournTable(tournAllInfoRespObj, bracketSize = 8) {
             nicknameVs = nnJson.nick;
           }
           element.innerHTML = "<b>" + nicknameVs + "</b>";
-          console.log(`Set contender ${j + 1} to: ${nicknameVs}`);
         }
         else if (element) {
           element.innerHTML = "<i>" + t('tournaments.empty') + "</i>";
-          console.log(`Set contender ${j + 1} to empty`);
         }
       }
     } else {
-      console.warn("No contender data found for 4-player tournament");
       // Set all to empty
       for (let j = 0; j < 4; j++) {
         const element = document.getElementById(`table-contender-${j + 1}`);
@@ -528,12 +469,11 @@ async function fillInTheTournTable(tournAllInfoRespObj, bracketSize = 8) {
   }
   // For 8-player bracket
   else {
-    console.log("=== FILLING 8-PLAYER BRACKET ===");
     // Keep your existing 8-player logic
     // Fill semifinals first (they're in tourn.Ids[0])
     for (let j = 0; j < 2; j++) {
       const element = document.getElementById(`table-semifinal-${j + 1}`);
-      if (element && 0 < tourn.Ids.length && j < tourn.Ids[0].length && 
+      if (element && 0 < tourn.Ids.length && j < tourn.Ids[0].length &&
           tourn.Ids[0][j] !== "" && tourn.Ids[0][j] !== "failed") {
         let respNn = await getNicknameForPlayerId(tourn.Ids[0][j]);
         let nnJson = JSON.parse(await respNn.text());
@@ -546,11 +486,11 @@ async function fillInTheTournTable(tournAllInfoRespObj, bracketSize = 8) {
         element.innerHTML = "<i>" + t('tournaments.empty') + "</i>";
       }
     }
-    
+
     // Fill quarterfinals next (they're in tourn.Ids[1])
     for (let j = 0; j < 4; j++) {
       const element = document.getElementById(`table-quarterfinal-${j + 1}`);
-      if (element && 1 < tourn.Ids.length && j < tourn.Ids[1].length && 
+      if (element && 1 < tourn.Ids.length && j < tourn.Ids[1].length &&
           tourn.Ids[1][j] !== "" && tourn.Ids[1][j] !== "failed") {
         let respNn = await getNicknameForPlayerId(tourn.Ids[1][j]);
         let nnJson = JSON.parse(await respNn.text());
@@ -563,11 +503,11 @@ async function fillInTheTournTable(tournAllInfoRespObj, bracketSize = 8) {
         element.innerHTML = "<i>" + t('tournaments.empty') + "</i>";
       }
     }
-    
+
     // Fill contenders last (they're in tourn.Ids[2])
     for (let j = 0; j < 8; j++) {
       const element = document.getElementById(`table-contender-${j + 1}`);
-      if (element && 2 < tourn.Ids.length && j < tourn.Ids[2].length && 
+      if (element && 2 < tourn.Ids.length && j < tourn.Ids[2].length &&
           tourn.Ids[2][j] !== "" && tourn.Ids[2][j] !== "failed") {
         let respNn = await getNicknameForPlayerId(tourn.Ids[2][j]);
         let nnJson = JSON.parse(await respNn.text());
@@ -582,20 +522,17 @@ async function fillInTheTournTable(tournAllInfoRespObj, bracketSize = 8) {
       }
     }
   }
-  
+
   // FINALIST HANDLING - this should work for all tournament sizes
-  console.log("=== FILLING FINALIST ===");
   const finRawResp = await getFinalist();
   const finResp = await finRawResp.text();
   const finObj = JSON.parse(finResp);
-  console.log("Finalist response:", finObj);
-  
+
   if (finObj.err === "nil") {
     const element = document.getElementById('table-finalist');
     if (element) {
       if (finObj.res !== "") {
         const finId = finObj.res;
-        console.log(`Fetching nickname for finalist ID: ${finId}`);
         let respNn = await getNicknameForPlayerId(finId);
         let nnJson = JSON.parse(await respNn.text());
         let nicknameVs = "<i>unknown</i>";
@@ -603,19 +540,16 @@ async function fillInTheTournTable(tournAllInfoRespObj, bracketSize = 8) {
           nicknameVs = nnJson.nick;
         }
         element.innerHTML = "<b>" + nicknameVs + "</b>";
-        console.log(`Set finalist to: ${nicknameVs}`);
       }
       else {
         element.innerHTML = t('tournaments.final');
-        console.log("Set finalist to default text");
       }
     }
   }
   else {
     console.error("finalist lookup error:", finObj.err);
   }
-  
-  console.log("=== TOURNAMENT FILL COMPLETE ===");
+
 }
 
 
@@ -728,7 +662,7 @@ async function generateUpdateAllTourTable(canWeJoin: boolean) {
         </td>
         <td class="px-6 py-4 whitespace-nowrap text-right">
           <button id="join-button-${count}" class="
-            px-4 py-2 bg-blue-600 hover:bg-blue-700 
+            px-4 py-2 bg-blue-600 hover:bg-blue-700
             text-white font-medium rounded-md transition-colors
             disabled:bg-gray-600 disabled:cursor-not-allowed
           ">
@@ -773,7 +707,7 @@ async function generateUpdateAllTourTable(canWeJoin: boolean) {
             window.location.hash = "tournament";
         }
       }
-        
+
       }
       else {
         console.error("failed to enroll in " + allPTRObj.res[newCount].tId + " because: " + resOfEnrollObj.err);
@@ -786,8 +720,8 @@ export async function renderTournamentManagerContent(hideableElements) {
   hideableElements.buttonArea.hidden = true;
   hideableElements.gameArea.classList.add("hidden");
   hideableElements.gameWindow.hidden = true;
- 
- 
+
+
   let tempHTML : string = `
     <h1 class="text-3xl font-bold mb-6">${t("tournaments.tournamentManagement")}</h1>
     <p class="mb-4 font-bold">${t("tournaments.create")}</p>
