@@ -146,5 +146,35 @@
 	  "ready-button-text": "Hukmanta haykuyta ratificay",
 	  "giveup-button-text": "ÑAWPAMAN saqiy",
     "local-play-button-text": "Lokal pukllanata qallarichiy"
-	}
+	},
+  "instructions": {
+  "title": "Ruwanakuna kamachiy",
+  "intro": "Kay qillqa yanapawanqa qawayta, llank'ayta ruwanaykipaq.",
+  "controls": {
+    "title": "Ruwanakuna kamachiy",
+    "online": "Internetpi ruwanakuna:",
+    "onlineText": "W/S ñit’iykuna ruwana waqra apachiy",
+    "local": "Kaypim ruwanakuna:",
+    "localText": "W/S ñit’iykuna llapan ruwana lluq'iypaq, O/L ñit’iykuna paña ruwanapaq",
+    "altControls": "Wak kamachiykuna: ↑/↓ ñit’iykuna utaq hatunpa/qhichk'a qhipa telefonopi",
+    "important": "Aswanmi:",
+    "importantText": "Pantallata hunt'achispaqa, manam atikunichu flechanakuta apaykachiyta"
+  },
+  "navMenu": {
+    "title": "Navigación menú nisqa",
+    "profile": "Ruwana rimay",
+    "profileText": "Ruwana rimaykipiqa atikunki avatar, contraseña, sutinchay, correo electrónico utaq usuario nisqayki hukchaspa.",
+    "playPong": "Pong pukllay",
+    "playPongText": "• Allichasqa awkinakuta akllay utqhay pukllaypaq<br>• Pukllayta saqiy aswanmi mana munankiqa<br>• Hukninwan huk pantallapi pukllayta qallariy<br>• T'inkiy torneos nisqapi yaykuykipaq<br>• Allin controlkunawan kusisqa pukllay",
+    "history": "Ñawpaq ruwanakuna",
+    "historyText": "Ñawpaq ruwanakunata qhawariy, awkinakuna, torneo utaq mana torneo karqan chayta.",
+    "tournament": "Torneo",
+    "tournamentText": "Torneonpa ñawinchasqan qhawariy, qhipa kasqan. Qhawanakuna sach'a hina rikuchkanmi.",
+    "tournamentMgmt": "Torneo kamachiy",
+    "tournamentMgmtText": "• 2, 4 utaq 8 runa torneos ruwanki<br>• Sapaq utaq llapanpaq ruwanki<br>• IDwan yaykuy utaq apachiy torneos rikuy<br>• Sapa torneoqa rikuchkanmi sutin, ruwanakuna, yaykuy botonkunata",
+    "friends": "Masikuna",
+    "friendsText": "Masikunata yapay listaykipi. Rikuy masiykikunaqa internetpi kanman. Actualizar botonwan qhawanakunata musuqyachiy."
+  }
+}
+
 }
