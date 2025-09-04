@@ -12,7 +12,7 @@ export function renderHomeContent(hideableElements) {
   const gWin = hideableElements.gameWindow;
   el.innerHTML = `
     <h1 class="text-3xl font-bold mb-6 text-center">${t('welcome')} 👋</h1>
-    <p class="mb-4 text-center">${t('home.intro')}</p>
+   <!-- <p class="mb-4 text-center">${t('home.intro')}</p> -->
 
     <!-- Language Switcher -->
     <div id="lang-switcher" class="mt-8 p-4 bg-gray-800 rounded-lg text-white text-sm max-w-md mx-auto">

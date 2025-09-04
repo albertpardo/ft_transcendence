@@ -164,13 +164,13 @@
     "profile": "Profil",
     "profileText": "In deinem Profil kannst du dein Erlebnis personalisieren, indem du Avatar, Passwort, Spitzname, E-Mail und Benutzername änderst. Diese Optionen sind nur verfügbar, wenn du dich nicht mit Google OAuth angemeldet hast.",
     "playPong": "Pong spielen",
-    "playPongText": "• Wähle zufällige Gegner für schnelle Spiele\n• Verlasse laufende Spiele bei Bedarf\n• Starte lokale Spiele auf demselben Bildschirm\n• Bestätige deine Teilnahme an Turnieren\n• Genieße flüssige Steuerungen",
+    "playPongText": "• Wähle zufällige Gegner für schnelle Spiele<br>• Verlasse laufende Spiele bei Bedarf<br>• Starte lokale Spiele auf demselben Bildschirm<br>• Bestätige deine Teilnahme an Turnieren<br>• Genieße flüssige Steuerungen",
     "history": "Verlauf",
     "historyText": "Sieh dir die Zusammenfassung all deiner Spiele an, mit Details zu Gegnern und ob es Turniere oder normale Spiele waren.",
     "tournament": "Turnier",
     "tournamentText": "Sieh dir die Struktur und den Fortschritt laufender Turniere an. Ergebnisse werden in einem Rundenbaum angezeigt.",
     "tournamentMgmt": "Turnierverwaltung",
-    "tournamentMgmtText": "• Erstelle Turniere mit 2, 4 oder 8 Spielern\n• Mach sie privat oder öffentlich\n• Tritt über eine ID bei oder suche verfügbare Turniere\n• Jedes Turnier zeigt Name, Spieler und Beitrittsknöpfe",
+    "tournamentMgmtText": "• Erstelle Turniere mit 2, 4 oder 8 Spielern<br>• Mach sie privat oder öffentlich<br>• Tritt über eine ID bei oder suche verfügbare Turniere<br>• Jedes Turnier zeigt Name, Spieler und Beitrittsknöpfe",
     "friends": "Freunde",
     "friendsText": "Füge Spieler zu deiner Freundesliste hinzu und überprüfe ihren Online-Status. Benutze den Aktualisieren-Button, um die Stati zu aktualisieren."
   }

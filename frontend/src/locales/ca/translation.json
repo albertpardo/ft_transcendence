@@ -164,13 +164,13 @@
     "profile": "Perfil",
     "profileText": "Al teu perfil pots personalitzar l'experiència canviant l'avatar, la contrasenya, el sobrenom, el correu electrònic i l'usuari. Aquestes opcions només estan disponibles si no has iniciat sessió amb Google OAuth.",
     "playPong": "Jugar a Pong",
-    "playPongText": "• Tria oponents aleatoris per a partides ràpides\n• Abandona partides en curs si cal\n• Inicia partides locals a la mateixa pantalla\n• Confirma la teva participació en tornejos\n• Gaudeix de controls fluids",
+    "playPongText": "• Tria oponents aleatoris per a partides ràpides<br>• Abandona partides en curs si cal<br>• Inicia partides locals a la mateixa pantalla<br>• Confirma la teva participació en tornejos<br>• Gaudeix de controls fluids",
     "history": "Historial",
     "historyText": "Consulta el resum de totes les teves partides, amb detalls dels oponents i si van ser tornejos o partides normals.",
     "tournament": "Torneig",
     "tournamentText": "Mira l'estructura i el progrés dels tornejos en curs. Els resultats es mostren en un arbre de rondes.",
     "tournamentMgmt": "Gestió de tornejos",
-    "tournamentMgmtText": "• Crea tornejos de 2, 4 o 8 jugadors\n• Fes-los privats o públics\n• Uneix-te per ID o busca tornejos disponibles\n• Cada torneig mostra nom, jugadors i botons per unir-se",
+    "tournamentMgmtText": "• Crea tornejos de 2, 4 o 8 jugadors<br>• Fes-los privats o públics<br>• Uneix-te per ID o busca tornejos disponibles<br>• Cada torneig mostra nom, jugadors i botons per unir-se",
     "friends": "Amics",
     "friendsText": "Afegeix jugadors a la teva llista d'amics i consulta el seu estat en línia. Utilitza el botó d'actualitzar per refrescar els estats."
   }

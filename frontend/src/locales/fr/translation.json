@@ -164,13 +164,13 @@
     "profile": "Profil",
     "profileText": "Dans votre profil, vous pouvez personnaliser votre expérience en changeant l’avatar, le mot de passe, le surnom, l’adresse e-mail et le nom d’utilisateur. Ces options ne sont disponibles que si vous ne vous êtes pas connecté avec Google OAuth.",
     "playPong": "Jouer à Pong",
-    "playPongText": "• Choisissez des adversaires aléatoires pour des parties rapides\n• Abandonnez une partie en cours si nécessaire\n• Lancez des parties locales sur le même écran\n• Confirmez votre participation à des tournois\n• Profitez de commandes fluides",
+    "playPongText": "• Choisissez des adversaires aléatoires pour des parties rapides<br>• Abandonnez une partie en cours si nécessaire<br>• Lancez des parties locales sur le même écran<br>• Confirmez votre participation à des tournois<br>• Profitez de commandes fluides",
     "history": "Historique",
     "historyText": "Consultez le résumé de toutes vos parties, avec les détails des adversaires et s’il s’agissait de tournois ou de parties normales.",
     "tournament": "Tournoi",
     "tournamentText": "Consultez la structure et la progression des tournois en cours. Les résultats sont affichés sous forme d’arbre.",
     "tournamentMgmt": "Gestion des tournois",
-    "tournamentMgmtText": "• Créez des tournois de 2, 4 ou 8 joueurs\n• Rendez-les privés ou publics\n• Rejoignez un tournoi par ID ou cherchez ceux disponibles\n• Chaque tournoi affiche le nom, les joueurs et des boutons pour rejoindre",
+    "tournamentMgmtText": "• Créez des tournois de 2, 4 ou 8 joueurs<br>• Rendez-les privés ou publics<br>• Rejoignez un tournoi par ID ou cherchez ceux disponibles<br>• Chaque tournoi affiche le nom, les joueurs et des boutons pour rejoindre",
     "friends": "Amis",
     "friendsText": "Ajoutez des joueurs à votre liste d’amis et vérifiez leur statut en ligne. Utilisez le bouton de mise à jour pour rafraîchir les statuts."
   }

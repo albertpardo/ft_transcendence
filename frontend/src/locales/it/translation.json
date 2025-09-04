@@ -162,13 +162,13 @@
     "profile": "Profilo",
     "profileText": "Nel tuo profilo puoi personalizzare l’esperienza cambiando avatar, password, soprannome, email e nome utente. Queste opzioni sono disponibili solo se non hai effettuato l’accesso con Google OAuth.",
     "playPong": "Gioca a Pong",
-    "playPongText": "• Scegli avversari casuali per partite veloci\n• Abbandona partite in corso se necessario\n• Avvia partite locali sullo stesso schermo\n• Conferma la tua partecipazione ai tornei\n• Goditi controlli fluidi",
+    "playPongText": "• Scegli avversari casuali per partite veloci<br>• Abbandona partite in corso se necessario<br>• Avvia partite locali sullo stesso schermo<br>• Conferma la tua partecipazione ai tornei<br>• Goditi controlli fluidi",
     "history": "Storico",
     "historyText": "Consulta il riepilogo di tutte le tue partite, con i dettagli degli avversari e se erano tornei o partite normali.",
     "tournament": "Torneo",
     "tournamentText": "Visualizza la struttura e l’avanzamento dei tornei in corso. I risultati sono mostrati in un albero delle fasi.",
     "tournamentMgmt": "Gestione tornei",
-    "tournamentMgmtText": "• Crea tornei da 2, 4 o 8 giocatori\n• Rendili privati o pubblici\n• Unisciti tramite ID o cerca i tornei disponibili\n• Ogni torneo mostra nome, giocatori e pulsanti per partecipare",
+    "tournamentMgmtText": "• Crea tornei da 2, 4 o 8 giocatori<br>• Rendili privati o pubblici<br>• Unisciti tramite ID o cerca i tornei disponibili<br>• Ogni torneo mostra nome, giocatori e pulsanti per partecipare",
     "friends": "Amici",
     "friendsText": "Aggiungi giocatori alla tua lista amici e controlla il loro stato online. Usa il pulsante aggiorna per ricaricare gli stati."
   }
