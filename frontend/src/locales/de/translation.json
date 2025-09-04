@@ -24,6 +24,7 @@
     "create": "Turnier erstellen",
     "view": "Turnier anzeigen",
     "noTournaments": "Nicht für ein Turnier angemeldet.",
+    "noTournamentsAvailable": "Keine Turniere verfügbar.",
     "tournamentName": "Turniername",
     "startDate": "Startdatum",
     "endDate": "Enddatum",

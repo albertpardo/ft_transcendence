@@ -1,6 +1,11 @@
 // src/views/friends.ts
 import { t } from '../i18n'
 
+interface Friend {
+  nickname: string;
+  status: string;
+}
+
 function renderFriendsTable(friends: Friend[]) {
   const tbody = document.querySelector<HTMLTableSectionElement>("table tbody");
   if (!tbody) return;
@@ -14,6 +19,7 @@ function renderFriendsTable(friends: Friend[]) {
     nickCell.textContent = friend.nickname;
 
     const statusCell = document.createElement("td");
+    statusCell.className = "text-center";
 	if (friend.status === "online") statusCell.textContent = "🟢";
 	else statusCell.textContent = "🔴";
 
@@ -22,7 +28,7 @@ function renderFriendsTable(friends: Friend[]) {
     tbody.appendChild(row);
   });
 }
-
+ 
 async function getFriendsAndRenderFriendsTable( authstringheader : string, API_BASE_URL: string, errorContent: HTMLElement) {
   let friendsData;
 
@@ -87,17 +93,18 @@ export async function renderFriendsContent(hideableElements) {
       </button>
 	  </div>
     <p id="errorArea1" class="text-red-500"></p>
-  	<table class="table-fixed">
- 	    <thead>
-          <tr>
-   	       <th>${t("friendsTxt.nickRow")}</th>
-   	       <th>${t("friendsTxt.statusRow")}</th>
-   	     </tr>
-      </thead>
-      <tbody>
-      </tbody>
-	  </table>
-  `;
+  <table class="min-w-full divide-y divide-gray-700">
+  <thead>
+    <tr>
+      <th class="px-0 py-3 text-left text-xs font-medium text-white-300 tracking-wider">${t("friendsTxt.nickRow")}</th>
+      <th class="px-0 py-3 text-center text-xs font-medium text-white-300 tracking-wider w-16">${t("friendsTxt.statusRow")}</th>
+ 
+    </tr>
+  </thead>
+  <tbody >
+  </tbody>
+    </table>
+`;
 
   const refreshButton = document.getElementById("refresh") as HTMLButtonElement;
   const addFriendButton = document.getElementById("add-friend") as HTMLButtonElement;

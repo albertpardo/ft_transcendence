@@ -24,6 +24,7 @@
     "create": "Crear Torneig",
     "view": "Veure Torneig",
     "noTournaments": "No estàs subscrit a cap torneig.",
+    "noTournamentsAvailable": "No hi ha tornejos disponibles.",
     "tournamentName": "Nom del torneig",
     "startDate": "Data d'inici",
     "endDate": "Data de finalització", 

@@ -26,6 +26,7 @@
     "create": "Créer un tournoi",
     "view": "Voir le tournoi",
     "noTournaments": "Vous n'êtes inscrit à aucun tournoi.",
+    "noTournamentsAvailable": "Aucun tournoi disponible.",
     "error": "Erreur lors du chargement des tournois.",
     "maxPlayers": "Joueurs max",
     "createSuccess": "Tournoi créé avec succès !",
