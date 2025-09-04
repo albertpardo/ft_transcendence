@@ -222,301 +222,6 @@ async function getFinalist() {
 }
 
 
-/* async function fillInTheTournTable(tournAllInfoRespObj, bracketSize = 8) {
-  console.log("Filling in tournament table with bracket size:", bracketSize);
-  
-  if (tournAllInfoRespObj.err !== "nil") {
-    document.getElementById("tourn-title").innerHTML = "<i>" + t('tournaments.noTournaments') + "</i>";
-    document.getElementById("tourn-id").innerHTML = "";
-    const bt = document.getElementById("big-table");
-    if (bt) {
-      bt.innerHTML = "";
-    }
-  }
-  else {
-    const tourn = tournAllInfoRespObj.res;
-    if (typeof tourn === "undefined") {
-      console.error("weird error occured: tour is undefined, although no err received");
-    }
-    else {
-      document.getElementById("tourn-title").innerHTML = t('tournaments.tournamentName') + ": " + tourn.tName;
-      document.getElementById("tourn-id").innerHTML = "id: " + tourn.tId;
-      
-      // Use the bracketSize parameter instead of tourn.maxPN
-      const tournamentSize = bracketSize;
-      console.log("Tournament size for filling table:", tournamentSize);
-      
-      // For 2-player bracket
-      if (tournamentSize === 2) {
-        console.log("Filling 2-player bracket");
-        // Only populate the first 2 contenders (from tourn.Ids[0])
-        for (let j = 0; j < 2; j++) {
-          const element = document.getElementById(`table-contender-${j + 1}`);
-          if (element && 0 < tourn.Ids.length && j < tourn.Ids[0].length && 
-              tourn.Ids[0][j] !== "" && tourn.Ids[0][j] !== "failed") {
-            let respNn = await getNicknameForPlayerId(tourn.Ids[0][j]);
-            let nnJson = JSON.parse(await respNn.text());
-            let nicknameVs = "<i>unknown</i>";
-            if (nnJson.err === "nil") {
-              nicknameVs = nnJson.nick;
-            }
-            element.innerHTML = "<b>" + nicknameVs + "</b>";
-          }
-          else if (element) {
-            element.innerHTML = "<i>" + t('tournaments.empty') + "</i>";
-          }
-        }
-      }
-      // For 4-player bracket
-      else if (tournamentSize === 4) {
-        console.log("Filling 4-player bracket");
-        // Fill semifinals first (they're in tourn.Ids[0])
-        for (let j = 0; j < 2; j++) {
-          const element = document.getElementById(`table-semifinal-${j + 1}`);
-          if (element && 0 < tourn.Ids.length && j < tourn.Ids[0].length && 
-              tourn.Ids[0][j] !== "" && tourn.Ids[0][j] !== "failed") {
-            let respNn = await getNicknameForPlayerId(tourn.Ids[0][j]);
-            let nnJson = JSON.parse(await respNn.text());
-            let nicknameVs = "<i>unknown</i>";
-            if (nnJson.err === "nil") {
-              nicknameVs = nnJson.nick;
-            }
-            element.innerHTML = "<b>" + nicknameVs + "</b>";
-          }
-        }
-        
-        // Fill contenders (they're in tourn.Ids[1])
-        for (let j = 0; j < 4; j++) {
-          const element = document.getElementById(`table-contender-${j + 1}`);
-          if (element && 1 < tourn.Ids.length && j < tourn.Ids[1].length && 
-              tourn.Ids[1][j] !== "" && tourn.Ids[1][j] !== "failed") {
-            let respNn = await getNicknameForPlayerId(tourn.Ids[1][j]);
-            let nnJson = JSON.parse(await respNn.text());
-            let nicknameVs = "<i>unknown</i>";
-            if (nnJson.err === "nil") {
-              nicknameVs = nnJson.nick;
-            }
-            element.innerHTML = "<b>" + nicknameVs + "</b>";
-          }
-          else if (element) {
-            element.innerHTML = "<i>" + t('tournaments.empty') + "</i>";
-          }
-        }
-      }
-      // For 8-player bracket
-      else {
-        console.log("Filling 8-player bracket");
-        // Fill semifinals first (they're in tourn.Ids[0])
-        for (let j = 0; j < 2; j++) {
-          const element = document.getElementById(`table-semifinal-${j + 1}`);
-          if (element && 0 < tourn.Ids.length && j < tourn.Ids[0].length && 
-              tourn.Ids[0][j] !== "" && tourn.Ids[0][j] !== "failed") {
-            let respNn = await getNicknameForPlayerId(tourn.Ids[0][j]);
-            let nnJson = JSON.parse(await respNn.text());
-            let nicknameVs = "<i>unknown</i>";
-            if (nnJson.err === "nil") {
-              nicknameVs = nnJson.nick;
-            }
-            element.innerHTML = "<b>" + nicknameVs + "</b>";
-          }
-        }
-        
-        // Fill quarterfinals next (they're in tourn.Ids[1])
-        for (let j = 0; j < 4; j++) {
-          const element = document.getElementById(`table-quarterfinal-${j + 1}`);
-          if (element && 1 < tourn.Ids.length && j < tourn.Ids[1].length && 
-              tourn.Ids[1][j] !== "" && tourn.Ids[1][j] !== "failed") {
-            let respNn = await getNicknameForPlayerId(tourn.Ids[1][j]);
-            let nnJson = JSON.parse(await respNn.text());
-            let nicknameVs = "<i>unknown</i>";
-            if (nnJson.err === "nil") {
-              nicknameVs = nnJson.nick;
-            }
-            element.innerHTML = "<b>" + nicknameVs + "</b>";
-          }
-        }
-        
-        // Fill contenders last (they're in tourn.Ids[2])
-        for (let j = 0; j < 8; j++) {
-          const element = document.getElementById(`table-contender-${j + 1}`);
-          if (element && 2 < tourn.Ids.length && j < tourn.Ids[2].length && 
-              tourn.Ids[2][j] !== "" && tourn.Ids[2][j] !== "failed") {
-            let respNn = await getNicknameForPlayerId(tourn.Ids[2][j]);
-            let nnJson = JSON.parse(await respNn.text());
-            let nicknameVs = "<i>unknown</i>";
-            if (nnJson.err === "nil") {
-              nicknameVs = nnJson.nick;
-            }
-            element.innerHTML = "<b>" + nicknameVs + "</b>";
-          }
-          else if (element) {
-            element.innerHTML = "<i>" + t('tournaments.empty') + "</i>";
-          }
-        }
-      }
-      
-      // FINALIST HANDLING MUST BE OUTSIDE ALL BRACKET SIZE CONDITIONS
-      const finRawResp = await getFinalist();
-      const finResp = await finRawResp.text();
-      const finObj = JSON.parse(finResp);
-      if (finObj.err === "nil") {
-        const element = document.getElementById('table-finalist');
-        if (element) {
-          if (finObj.res !== "") {
-            const finId = finObj.res;
-            let respNn = await getNicknameForPlayerId(finId);
-            let nnJson = JSON.parse(await respNn.text());
-            let nicknameVs = "<i>unknown</i>";
-            if (nnJson.err === "nil") {
-              nicknameVs = nnJson.nick;
-            }
-            element.innerHTML = "<b>" + nicknameVs + "</b>";
-          }
-          else {
-            element.innerHTML = t('tournaments.final');
-          }
-        }
-      }
-      else {
-        console.error("finalist lookup error:", finObj.err);
-      }
-    }
-  }
-}
-
- */
-
-
-/* export async function renderTournamentContent(hideableElements) {
-  hideableElements.buttonArea.hidden = true;
-  hideableElements.gameArea.classList.add("hidden");
-  hideableElements.gameWindow.hidden = true;
-  
-  const tournAllInfoRawResp = await getCompleteTournamentInfo();
-  const tournAllInfoResp = await tournAllInfoRawResp.text();
-  const tournAllInfoRespObj = JSON.parse(tournAllInfoResp);
- 
-  const rawAllPublicTournamentsResponse = await fetchAllPublicTournaments();
-  const allPTR = await rawAllPublicTournamentsResponse.text();
-  const allPTRObj = JSON.parse(allPTR);
-  
-  let bracketSize = 8;
-  // Define a type for tournament objects
-  type TournamentInfo = {
-    tId: string;
-    tName: string;
-    maxPN: number;
-    joinedPN?: number;
-  };
-  
-    if (tournAllInfoRespObj.err === "nil" && tournAllInfoRespObj.res) {
-      const tourn = tournAllInfoRespObj.res;
-      const currentTournamentId = tourn.tId;
-  
-      // CRITICAL FIX: Find the current tournament in the list of all tournaments
-      let currentTournament: TournamentInfo | undefined = undefined;
-      if (allPTRObj && allPTRObj.res && Array.isArray(allPTRObj.res)) {
-        currentTournament = (allPTRObj.res as TournamentInfo[]).find(t => t.tId === currentTournamentId);
-      }
-  
-      // Determine bracket size from the ACTUAL tournament we're viewing
-      if (currentTournament) {
-        // Get the tournament size that was set when it was created
-        const tournamentSize = currentTournament.maxPN || 8;
-
-        // Ensure it's a valid tournament size
-        if (tournamentSize === 2 || tournamentSize === 4) {
-          bracketSize = tournamentSize;
-        }
-        // Otherwise keep default of 8
-      }
-    }
-
-
-  // Generate bracket HTML based on ACTUAL tournament size
-  let tempHTML = generateBracketHTML(bracketSize);
-  hideableElements.contentArea.innerHTML = tempHTML;
-  
-  // Rest of your code
-  let tournAnihilationButton = document.getElementById("force-rm-tourn");
-  let tournLeaveButton = document.getElementById("leave-tourn");
-  let doIAdmin = false;
-  let noadminFlag = false;
-  let noparticipateFlag = false;
-  
-  if (tournAnihilationButton) {
-    const checkAdminRawResp = await adminCheck();
-    const checkAdminResp = await checkAdminRawResp.text();
-    const checkAdminRespObj = JSON.parse(checkAdminResp);
-    if (checkAdminRespObj.err === "nil") {
-      doIAdmin = true;
-      tournAnihilationButton.removeAttribute('disabled');
-      tournAnihilationButton.addEventListener("click", async () => {
-        const rawResOfDelete = await deleteTournament();
-        const resOfDelete = await rawResOfDelete.text();
-        const resOfDeleteObj = JSON.parse(resOfDelete);
-        if (resOfDeleteObj.err === "nil") {
-          localStorage.removeItem("tId");
-          (tournAnihilationButton as HTMLButtonElement).disabled = true;
-          buttonSetter(MetaGameState.nothing);
-        }
-        else {
-          console.error("failed to delete tournament:", resOfDeleteObj.err);
-        }
-        await fillInTheTournTable(tournAllInfoRespObj, bracketSize);
-      });
-    }
-    else {
-      tournAnihilationButton.disabled = true;
-      noadminFlag = true;
-    }
-  }
-  
-  if (tournLeaveButton) {
-    tournLeaveButton.disabled = true;
-    const checkPartRawResp = await participantCheck();
-    const checkPartResp = await checkPartRawResp.text();
-    const checkPartRespObj = JSON.parse(checkPartResp);
-    if (checkPartRespObj.err === "nil" && !doIAdmin) {
-      tournLeaveButton.removeAttribute('disabled');
-      tournLeaveButton.addEventListener("click", async () => {
-        const rawResOfLeave = await leaveTournament();
-        const resOfLeave = await rawResOfLeave.text();
-        const resOfLeaveObj = JSON.parse(resOfLeave);
-        if (resOfLeaveObj.err === "nil") {
-          alert("left the tournament");
-          localStorage.removeItem("tId");
-          tournLeaveButton.disabled = true;
-          buttonSetter(MetaGameState.nothing);
-        }
-        else {
-          console.error("failed to leave tournament:", resOfLeaveObj.err);
-        }
-        await fillInTheTournTable(tournAllInfoRespObj, bracketSize);
-      });
-    }
-    else {
-      console.warn("just checked and you don't participate in anything OR you admin the thing:", checkPartRespObj.err);
-      tournLeaveButton.disabled = true;
-      noparticipateFlag = true;
-    }
-  }
-  
-  if ((noadminFlag === true) && (noparticipateFlag === true)) {
-    let metaInfo = await getGameMetaInfo();
-    const gameInfo = document.getElementById("game-info");
-    if (gameInfo) {
-      await setterUponMetaInfo(gameInfo, metaInfo);
-    }
-  }
-
-  await fillInTheTournTable(tournAllInfoRespObj, bracketSize);
-}
-
- */
-
-
-
 export async function renderTournamentContent(hideableElements) {
   hideableElements.buttonArea.hidden = true;
   hideableElements.gameArea.classList.add("hidden");
@@ -530,68 +235,53 @@ export async function renderTournamentContent(hideableElements) {
   const allPTR = await rawAllPublicTournamentsResponse.text();
   const allPTRObj = JSON.parse(allPTR);
   
-  let bracketSize = 8; // Default value
+  let bracketSize = 8;
   
-  // Define a type for tournament objects
   type TournamentInfo = {
     tId: string;
     tName: string;
     maxPN: number;
     joinedPN?: number;
-    // add other properties as needed
   };
-  
-  // CRITICAL FIX: Determine bracket size BEFORE generating HTML
+
   if (tournAllInfoRespObj.err === "nil" && tournAllInfoRespObj.res) {
     const tourn = tournAllInfoRespObj.res;
     const currentTournamentId = tourn.tId;
 
-    // Find the current tournament in the list of all tournaments
     let currentTournament: TournamentInfo | undefined = undefined;
     if (allPTRObj && allPTRObj.res && Array.isArray(allPTRObj.res)) {
       currentTournament = (allPTRObj.res as TournamentInfo[]).find(t => t.tId === currentTournamentId);
     }
 
-    // Determine bracket size from the ACTUAL tournament we're viewing
     if (currentTournament) {
-      // Get the tournament size that was set when it was created
       const tournamentSize = currentTournament.maxPN || 8;
       console.log("Found tournament with size:", tournamentSize);
 
-      // Ensure it's a valid tournament size and update bracketSize
       if (tournamentSize === 2 || tournamentSize === 4) {
         bracketSize = tournamentSize;
       }
-      // Otherwise keep default of 8
      } else {
       console.warn("Could not find current tournament in public tournaments list, trying to determine size from tournament data");
       if (tourn.Ids) {
-        // For 2-player tournaments, we typically have 2 players in the first level
         if (tourn.Ids[0] && tourn.Ids[0].length === 2 && 
             (!tourn.Ids[1] || tourn.Ids[1].every(id => id === ""))) {
           bracketSize = 2;
-        } 
-        // For 4-player tournaments, we have 2 players in the first level (semifinals)
-        // and 4 players in the second level (contenders)
-        else if (tourn.Ids[0] && tourn.Ids[0].length === 2 && 
-                 tourn.Ids[1] && tourn.Ids[1].length === 4) {
+        } else if (tourn.Ids[0] && tourn.Ids[0].length === 2 &&
+                   tourn.Ids[1] && tourn.Ids[1].length === 4) {
           bracketSize = 4;
-        }
-        // Otherwise, assume it's an 8-player tournament
-        else {
+        } else {
           bracketSize = 8;
         }
       }
     } 
   }
 
-  console.log("Final bracket size determined:", bracketSize);
+  // console.log("Final bracket size determined:", bracketSize);
 
   // Generate bracket HTML based on ACTUAL tournament size
   let tempHTML = generateBracketHTML(bracketSize);
   hideableElements.contentArea.innerHTML = tempHTML;
   
-  // Rest of your existing button handling code...
   let tournAnihilationButton = document.getElementById("force-rm-tourn");
   let tournLeaveButton = document.getElementById("leave-tourn");
   let doIAdmin = false;
@@ -621,13 +311,13 @@ export async function renderTournamentContent(hideableElements) {
       });
     }
     else {
-      tournAnihilationButton.disabled = true;
+      (tournAnihilationButton as HTMLButtonElement).disabled = true;
       noadminFlag = true;
     }
   }
   
   if (tournLeaveButton) {
-    tournLeaveButton.disabled = true;
+    (tournLeaveButton as HTMLButtonElement).disabled = true;
     const checkPartRawResp = await participantCheck();
     const checkPartResp = await checkPartRawResp.text();
     const checkPartRespObj = JSON.parse(checkPartResp);
@@ -640,7 +330,7 @@ export async function renderTournamentContent(hideableElements) {
         if (resOfLeaveObj.err === "nil") {
           alert("left the tournament");
           localStorage.removeItem("tId");
-          tournLeaveButton.disabled = true;
+          (tournLeaveButton as HTMLButtonElement).disabled = true;
           buttonSetter(MetaGameState.nothing);
         }
         else {
@@ -651,7 +341,7 @@ export async function renderTournamentContent(hideableElements) {
     }
     else {
       console.warn("just checked and you don't participate in anything OR you admin the thing:", checkPartRespObj.err);
-      tournLeaveButton.disabled = true;
+      (tournLeaveButton as HTMLButtonElement).disabled = true;
       noparticipateFlag = true;
     }
   }
@@ -664,187 +354,17 @@ export async function renderTournamentContent(hideableElements) {
     }
   }
 
-  // Fill the table with the correct bracket size
   await fillInTheTournTable(tournAllInfoRespObj, bracketSize);
 }
 
-// Also, make sure the fillInTheTournTable function handles empty slots correctly for smaller tournaments
-/* async function fillInTheTournTable(tournAllInfoRespObj, bracketSize = 8) {
-  console.log("Filling in tournament table with bracket size:", bracketSize);
-  
-  if (tournAllInfoRespObj.err !== "nil") {
-    document.getElementById("tourn-title").innerHTML = "<i>" + t('tournaments.noTournaments') + "</i>";
-    document.getElementById("tourn-id").innerHTML = "";
-    const bt = document.getElementById("big-table");
-    if (bt) {
-      bt.innerHTML = "";
-    }
-    return; // Early return if there's an error
-  }
 
-  const tourn = tournAllInfoRespObj.res;
-  if (typeof tourn === "undefined") {
-    console.error("weird error occured: tour is undefined, although no err received");
-    return;
-  }
-
-  document.getElementById("tourn-title").innerHTML = t('tournaments.tournamentName') + ": " + tourn.tName;
-  document.getElementById("tourn-id").innerHTML = "id: " + tourn.tId;
-  
-  console.log("Tournament size for filling table:", bracketSize);
-  
-  // For 2-player bracket
-  if (bracketSize === 2) {
-    console.log("Filling 2-player bracket");
-    // Only populate the first 2 contenders (from tourn.Ids[0])
-    for (let j = 0; j < 2; j++) {
-      const element = document.getElementById(`table-contender-${j + 1}`);
-      if (element && 0 < tourn.Ids.length && j < tourn.Ids[0].length && 
-          tourn.Ids[0][j] !== "" && tourn.Ids[0][j] !== "failed") {
-        let respNn = await getNicknameForPlayerId(tourn.Ids[0][j]);
-        let nnJson = JSON.parse(await respNn.text());
-        let nicknameVs = "<i>unknown</i>";
-        if (nnJson.err === "nil") {
-          nicknameVs = nnJson.nick;
-        }
-        element.innerHTML = "<b>" + nicknameVs + "</b>";
-      }
-      else if (element) {
-        element.innerHTML = "<i>" + t('tournaments.empty') + "</i>";
-      }
-    }
-  }
-  // For 4-player bracket
-  else if (bracketSize === 4) {
-    console.log("Filling 4-player bracket");
-    // Fill semifinals first (they're in tourn.Ids[0])
-    for (let j = 0; j < 2; j++) {
-      const element = document.getElementById(`table-semifinal-${j + 1}`);
-      if (element && 0 < tourn.Ids.length && j < tourn.Ids[0].length && 
-          tourn.Ids[0][j] !== "" && tourn.Ids[0][j] !== "failed") {
-        let respNn = await getNicknameForPlayerId(tourn.Ids[0][j]);
-        let nnJson = JSON.parse(await respNn.text());
-        let nicknameVs = "<i>unknown</i>";
-        if (nnJson.err === "nil") {
-          nicknameVs = nnJson.nick;
-        }
-        element.innerHTML = "<b>" + nicknameVs + "</b>";
-      } else if (element) {
-        element.innerHTML = "<i>" + t('tournaments.empty') + "</i>";
-      }
-    }
-    
-    // Fill contenders (they're in tourn.Ids[1])
-    for (let j = 0; j < 4; j++) {
-      const element = document.getElementById(`table-contender-${j + 1}`);
-      if (element && 1 < tourn.Ids.length && j < tourn.Ids[1].length && 
-          tourn.Ids[1][j] !== "" && tourn.Ids[1][j] !== "failed") {
-        let respNn = await getNicknameForPlayerId(tourn.Ids[1][j]);
-        let nnJson = JSON.parse(await respNn.text());
-        let nicknameVs = "<i>unknown</i>";
-        if (nnJson.err === "nil") {
-          nicknameVs = nnJson.nick;
-        }
-        element.innerHTML = "<b>" + nicknameVs + "</b>";
-      }
-      else if (element) {
-        element.innerHTML = "<i>" + t('tournaments.empty') + "</i>";
-      }
-    }
-  }
-  // For 8-player bracket
-  else {
-    console.log("Filling 8-player bracket");
-    // Fill semifinals first (they're in tourn.Ids[0])
-    for (let j = 0; j < 2; j++) {
-      const element = document.getElementById(`table-semifinal-${j + 1}`);
-      if (element && 0 < tourn.Ids.length && j < tourn.Ids[0].length && 
-          tourn.Ids[0][j] !== "" && tourn.Ids[0][j] !== "failed") {
-        let respNn = await getNicknameForPlayerId(tourn.Ids[0][j]);
-        let nnJson = JSON.parse(await respNn.text());
-        let nicknameVs = "<i>unknown</i>";
-        if (nnJson.err === "nil") {
-          nicknameVs = nnJson.nick;
-        }
-        element.innerHTML = "<b>" + nicknameVs + "</b>";
-      } else if (element) {
-        element.innerHTML = "<i>" + t('tournaments.empty') + "</i>";
-      }
-    }
-    
-    // Fill quarterfinals next (they're in tourn.Ids[1])
-    for (let j = 0; j < 4; j++) {
-      const element = document.getElementById(`table-quarterfinal-${j + 1}`);
-      if (element && 1 < tourn.Ids.length && j < tourn.Ids[1].length && 
-          tourn.Ids[1][j] !== "" && tourn.Ids[1][j] !== "failed") {
-        let respNn = await getNicknameForPlayerId(tourn.Ids[1][j]);
-        let nnJson = JSON.parse(await respNn.text());
-        let nicknameVs = "<i>unknown</i>";
-        if (nnJson.err === "nil") {
-          nicknameVs = nnJson.nick;
-        }
-        element.innerHTML = "<b>" + nicknameVs + "</b>";
-      } else if (element) {
-        element.innerHTML = "<i>" + t('tournaments.empty') + "</i>";
-      }
-    }
-    
-    // Fill contenders last (they're in tourn.Ids[2])
-    for (let j = 0; j < 8; j++) {
-      const element = document.getElementById(`table-contender-${j + 1}`);
-      if (element && 2 < tourn.Ids.length && j < tourn.Ids[2].length && 
-          tourn.Ids[2][j] !== "" && tourn.Ids[2][j] !== "failed") {
-        let respNn = await getNicknameForPlayerId(tourn.Ids[2][j]);
-        let nnJson = JSON.parse(await respNn.text());
-        let nicknameVs = "<i>unknown</i>";
-        if (nnJson.err === "nil") {
-          nicknameVs = nnJson.nick;
-        }
-        element.innerHTML = "<b>" + nicknameVs + "</b>";
-      }
-      else if (element) {
-        element.innerHTML = "<i>" + t('tournaments.empty') + "</i>";
-      }
-    }
-  }
-  
-  // FINALIST HANDLING - this should work for all tournament sizes
-  const finRawResp = await getFinalist();
-  const finResp = await finRawResp.text();
-  const finObj = JSON.parse(finResp);
-  if (finObj.err === "nil") {
-    const element = document.getElementById('table-finalist');
-    if (element) {
-      if (finObj.res !== "") {
-        const finId = finObj.res;
-        let respNn = await getNicknameForPlayerId(finId);
-        let nnJson = JSON.parse(await respNn.text());
-        let nicknameVs = "<i>unknown</i>";
-        if (nnJson.err === "nil") {
-          nicknameVs = nnJson.nick;
-        }
-        element.innerHTML = "<b>" + nicknameVs + "</b>";
-      }
-      else {
-        element.innerHTML = t('tournaments.final');
-      }
-    }
-  }
-  else {
-    console.error("finalist lookup error:", finObj.err);
-  }
-}
- */
-
-
-// Enhanced version with debugging to understand the data structure
 async function fillInTheTournTable(tournAllInfoRespObj, bracketSize = 8) {
   console.log("=== TOURNAMENT DEBUG INFO ===");
   console.log("Filling in tournament table with bracket size:", bracketSize);
   
   if (tournAllInfoRespObj.err !== "nil") {
-    document.getElementById("tourn-title").innerHTML = "<i>" + t('tournaments.noTournaments') + "</i>";
-    document.getElementById("tourn-id").innerHTML = "";
+    document.getElementById("tourn-title")!.innerHTML = "<i>" + t('tournaments.noTournaments') + "</i>";
+    document.getElementById("tourn-id")!.innerHTML = "";
     const bt = document.getElementById("big-table");
     if (bt) {
       bt.innerHTML = "";
@@ -869,9 +389,9 @@ async function fillInTheTournTable(tournAllInfoRespObj, bracketSize = 8) {
     });
   }
 
-  document.getElementById("tourn-title").innerHTML = t('tournaments.tournamentName') + ": " + tourn.tName;
-  document.getElementById("tourn-id").innerHTML = "id: " + tourn.tId;
-  
+  document.getElementById("tourn-title")!.innerHTML = t('tournaments.tournamentName') + ": " + tourn.tName;
+  document.getElementById("tourn-id")!.innerHTML = "id: " + tourn.tId;
+
   console.log("Tournament size for filling table:", bracketSize);
   
   // For 2-player bracket
@@ -913,7 +433,6 @@ async function fillInTheTournTable(tournAllInfoRespObj, bracketSize = 8) {
       }
     } else {
       console.warn("No contender data found for 2-player tournament");
-      // Set both to empty
       for (let j = 0; j < 2; j++) {
         const element = document.getElementById(`table-contender-${j + 1}`);
         if (element) {
@@ -1195,7 +714,7 @@ async function generateUpdateAllTourTable(canWeJoin: boolean) {
     </tbody>
   </table>
   `;
-  allTournamentsTable.innerHTML = tempInner;
+  allTournamentsTable!.innerHTML = tempInner;
   return;
 }
   for (var item of allPTRObj.res) {
@@ -1220,16 +739,16 @@ async function generateUpdateAllTourTable(canWeJoin: boolean) {
   `;
   count += 1;
   }
-  allTournamentsTable.innerHTML = tempInner;
+  allTournamentsTable!.innerHTML = tempInner;
   for (let newCount = 0; newCount < count; newCount += 1) {
     if (!canWeJoin) {
-      document.getElementById(`join-button-${newCount}`).disabled = true;
+      (document.getElementById(`join-button-${newCount}`) as HTMLButtonElement)!.disabled = true;
     }
     else {
       console.warn("can't join count:", newCount);
-      document.getElementById(`join-button-${newCount}`).disabled = false;
+      (document.getElementById(`join-button-${newCount}`) as HTMLButtonElement)!.disabled = false;
     }
-    document.getElementById(`join-button-${newCount}`).addEventListener('click', async () => {
+    document.getElementById(`join-button-${newCount}`)!.addEventListener('click', async () => {
       const rawResOfEnroll = await enrollInTournament(allPTRObj.res[newCount].tId);
       const resOfEnroll = await rawResOfEnroll.text();
       const resOfEnrollObj = JSON.parse(resOfEnroll);
@@ -1238,12 +757,23 @@ async function generateUpdateAllTourTable(canWeJoin: boolean) {
         for (let newerCount = 0; newerCount < count; newerCount += 1) {
           let currentJB = document.getElementById(`join-button-${newerCount}`);
           if (currentJB) {
-            currentJB.disabled = true;
+            (currentJB as HTMLButtonElement).disabled = true;
           }
         }
         buttonSetter(MetaGameState.waittouropp);
-        document.getElementById('register-tournament-button').disabled = true;
-        document.getElementById('enter-tournament-by-id-button').disabled = true;
+        (document.getElementById('register-tournament-button') as HTMLButtonElement)!.disabled = true;
+        (document.getElementById('enter-tournament-by-id-button') as HTMLButtonElement)!.disabled = true;
+        const myTournamentField = document.getElementById('my-tournament');
+        if (myTournamentField) {
+          myTournamentField.textContent = t("tournaments.view");
+          myTournamentField.classList.remove("bg-gray-700");
+          myTournamentField.classList.add("bg-blue-600", "hover:bg-blue-700");
+          myTournamentField.removeAttribute("disabled");
+          myTournamentField.onclick = () => {
+            window.location.hash = "tournament";
+        }
+      }
+        
       }
       else {
         console.error("failed to enroll in " + allPTRObj.res[newCount].tId + " because: " + resOfEnrollObj.err);
@@ -1331,16 +861,15 @@ export async function renderTournamentManagerContent(hideableElements) {
     <br />
     <hr />
     <br />
-    <p class="mb-4">${t("tournaments.myTournaments")}:</p>
-    <!-- changed to button, before was <div> -->
-    <button type="button"
-    class="w-full px-4 py-2 text-white bg-gray-700
-    rounded-md focus:outline-none
-    focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
-    focus:ring-offset-gray-800
-    disabled:border-gray-200 disabled:bg-gray-700 disabled:text-gray-500 disabled:shadow-none"
-    id="my-tournament"><p><i>${t("tournaments.noTournaments")}</i></p></button>
-
+   <p class="mb-4">${t("tournaments.myTournaments")}:</p>
+    <div>
+      <button type="button"
+        class="w-full px-4 py-2 text-white bg-gray-700 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800 disabled:border-gray-200 disabled:bg-gray-700 disabled:text-gray-500 disabled:shadow-none"
+        id="my-tournament"
+        disabled>
+        ${t("tournaments.noTournaments")}
+      </button>
+    </div>
     <br />
     <hr />
     <br />
@@ -1374,20 +903,27 @@ export async function renderTournamentManagerContent(hideableElements) {
           const playersEl = document.getElementById('players') as HTMLInputElement;
           const checkboxEl = document.getElementById('rprivate') as HTMLInputElement;
           submitButton.disabled = true;
-          document.getElementById('enter-tournament-by-id-button').disabled = true;
+          (document.getElementById('enter-tournament-by-id-button') as HTMLButtonElement).disabled = true;
           const rawCreateTournamentResp = await createTournament(tnameEl.value, playersEl.value, checkboxEl.checked);
           const tourResp = await rawCreateTournamentResp.text();
           const tourRespObj = JSON.parse(tourResp);
           if (tourRespObj.err === "nil") {
             canWeJoin = false;
-            myTournamentField.innerHTML = "<a href=\"" + document.URL.substring(0, document.URL.search("#")) + "#tournament" + "\"><b><i>" + t("tournaments.view") + "</b></i></a>";
+            // myTournamentField.innerHTML = "<a href=\"" + document.URL.substring(0, document.URL.search("#")) + "#tournament" + "\"><b><i>" + t("tournaments.view") + "</b></i></a>";
+            myTournamentField!.textContent = t("tournaments.view");
+            myTournamentField!.classList.remove("bg-gray-700");
+            myTournamentField!.classList.add("bg-blue-600", "hover:bg-blue-700");
+            myTournamentField!.removeAttribute("disabled");
+            myTournamentField!.addEventListener("click", () => {
+              window.location.hash = "tournament";
+            });
             localStorage.setItem('tId', tourRespObj.tId);
             buttonSetter(MetaGameState.waittouropp);
           }
           else {
             console.error("Tournament creation error: " + tourRespObj.err + "; tId (if available): " + tourRespObj.tId);
             submitButton.removeAttribute('disabled');
-            document.getElementById('enter-tournament-by-id-button').removeAttribute("disabled");
+            document.getElementById('enter-tournament-by-id-button')!.removeAttribute("disabled");
             canWeJoin = true;
           }
           tournamentForm.reset();
@@ -1399,8 +935,15 @@ export async function renderTournamentManagerContent(hideableElements) {
         canWeJoin = false;
         localStorage.setItem('tId', checkPartRespObj.tId);
         submitButton.disabled = true;
-        document.getElementById('enter-tournament-by-id-button').disabled = true;
-        myTournamentField.innerHTML = "<a href=\"" + document.URL.substring(0, document.URL.search("#")) + "#tournament" + "\"><b><i>" + t("tournaments.view") + "</b></i></a>";
+        (document.getElementById('enter-tournament-by-id-button') as HTMLButtonElement).disabled = true;
+        myTournamentField!.textContent = t("tournaments.view");
+        myTournamentField!.classList.remove("bg-gray-700");
+        myTournamentField!.classList.add("bg-blue-600", "hover:bg-blue-700");
+        myTournamentField!.removeAttribute("disabled");
+        myTournamentField!.addEventListener("click", () => {
+          window.location.hash = "tournament";
+        });
+        // myTournamentField.innerHTML = "<a href=\"" + document.URL.substring(0, document.URL.search("#")) + "#tournament" + "\"><b><i>" + t("tournaments.view") + "</b></i></a>";
       }
     }
     if (joinByIDForm) {
@@ -1411,20 +954,24 @@ export async function renderTournamentManagerContent(hideableElements) {
         joinByIDForm.addEventListener('submit', async (e) => {
           e.preventDefault();
           const tidEl = document.getElementById('tid') as HTMLInputElement;
-          document.getElementById('register-tournament-button').disabled = true;
+          (document.getElementById('register-tournament-button') as HTMLButtonElement).disabled = true;
           enterByIdButton.disabled = true;
           const rawResOfEnroll = await enrollInTournament(tidEl.value);
           const resOfEnroll = await rawResOfEnroll.text();
           const resOfEnrollObj = JSON.parse(resOfEnroll);
           if (resOfEnrollObj.err === "nil") {
             canWeJoin = false;
-            myTournamentField.innerHTML = "<a href=\"" + document.URL.substring(0, document.URL.search("#")) + "#tournament" + "\"><b><i>" + t("tournaments.view") + "</b></i></a>";
+            // myTournamentField.innerHTML = "<a href=\"" + document.URL.substring(0, document.URL.search("#")) + "#tournament" + "\"><b><i>" + t("tournaments.view") + "</b></i></a>";
+            myTournamentField!.textContent = t("tournaments.view");
+            myTournamentField!.classList.remove("bg-gray-700");
+            myTournamentField!.classList.add("bg-blue-600", "hover:bg-blue-700");
+            myTournamentField!.removeAttribute("disabled");
             localStorage.setItem("tId", tidEl.value);
             buttonSetter(MetaGameState.waittouropp);
           }
           else {
             console.error("failed to enroll in " + tidEl.value + " because: " + resOfEnrollObj.err);
-            document.getElementById('register-tournament-button').removeAttribute("disabled");
+            document.getElementById('register-tournament-button')!.removeAttribute("disabled");
             enterByIdButton.removeAttribute("disabled");
             canWeJoin = true;
           }
@@ -1436,9 +983,16 @@ export async function renderTournamentManagerContent(hideableElements) {
         console.warn("can't allow joining a tournament");
         canWeJoin = false;
         localStorage.setItem('tId', checkPartRespObj.tId);
-        document.getElementById('register-tournament-button').disabled = true;
-        enterByIdButton.disabled = true;
-        myTournamentField.innerHTML = "<a href=\"" + document.URL.substring(0, document.URL.search("#")) + "#tournament" + "\"><b><i>" + t("tournaments.view") + "</b></i></a>";
+        (document.getElementById('register-tournament-button') as HTMLButtonElement).disabled = true;
+        (enterByIdButton as HTMLButtonElement).disabled = true;
+        // myTournamentField.innerHTML = "<a href=\"" + document.URL.substring(0, document.URL.search("#")) + "#tournament" + "\"><b><i>" + t("tournaments.view") + "</b></i></a>";
+        myTournamentField!.textContent = t("tournaments.view");
+        myTournamentField!.classList.remove("bg-gray-700");
+        myTournamentField!.classList.add("bg-blue-600", "hover:bg-blue-700");
+        myTournamentField!.removeAttribute("disabled");
+        myTournamentField!.addEventListener("click", () => {
+          window.location.hash = "tournament";
+        });
       }
     }
   }
