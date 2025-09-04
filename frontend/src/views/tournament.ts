@@ -642,7 +642,7 @@ async function generateUpdateAllTourTable(canWeJoin: boolean) {
   tempInner += `
       <tr>
         <td colspan="3" class="px-6 py-4 whitespace-nowrap text-center">
-          <i>${t('tournaments.noTournaments')}</i>
+          <i>${t('tournaments.noTournamentsAvailable')}</i>
         </td>
       </tr>
     </tbody>

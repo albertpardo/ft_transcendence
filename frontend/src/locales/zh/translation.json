@@ -24,6 +24,7 @@
     "create": "创建锦标赛",
     "view": "查看锦标赛",
     "noTournaments": "您尚未订阅任何锦标赛。",
+    "noTournamentsAvailable": "没有可用的锦标赛。",
     "error": "加载锦标赛时出错。",
     "tournamentName": "锦标赛名称",
     "startDate": "开始日期",

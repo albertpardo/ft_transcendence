@@ -24,6 +24,7 @@
     "leaveTournament": "Esci dal torneo (se sei iscritto)",
     "destroyTournament": "Distruggi torneo (solo admin)",
     "noTournaments": "Non sei iscritto a nessun torneo.",
+    "noTournamentsAvailable": "Nessun torneo disponibile.",
     "tournamentName": "Nome torneo",
     "startDate": "Data di inizio",
     "endDate": "Data di fine",

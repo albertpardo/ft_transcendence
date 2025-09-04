@@ -24,6 +24,8 @@
     "leaveTournament": "Salir del torneo (si se ha unido)",
     "destroyTournament": "Destruir torneo (sólo admin)",
     "noTournaments": "Mana kachkanchu huk torneo rurayta.",
+    "noTournamentsAvailable": "Mana kachkanchu torneokuna.",
+    "error": "Torneokunata kargaywan paqachiy.",
     "tournamentName": "Torneo suti",
     "startDate": "Qallariy p'unchay",
     "endDate": "Paqarina p'unchay",

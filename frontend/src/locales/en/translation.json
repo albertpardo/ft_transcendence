@@ -18,6 +18,7 @@
     "view": "View Tournament",
     "join": "Join Tournament",
     "noTournaments": "Not subscribed to any tournament.",
+    "noTournamentsAvailable": "No tournaments available.",
     "contender": "Contender",
     "quarterFinal": "Quarter Final",
     "semiFinal": "Semi Final",

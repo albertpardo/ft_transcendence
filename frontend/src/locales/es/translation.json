@@ -26,6 +26,7 @@
     "create": "Crear un torneo",
     "view": "Ver torneo",
     "noTournaments": "No estás suscrito a ningún torneo.",
+    "noTournamentsAvailable": "No hay torneos disponibles.",
     "error": "Error al cargar los torneos.",
     "maxPlayers": "Máximo de jugadores",
     "createSuccess": "¡Torneo creado con éxito!",
