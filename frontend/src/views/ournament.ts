@@ -8,7 +8,6 @@ import { t, i18nReady } from '../i18n';
 export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-const FRONT_URL = import.meta.env.VITE_FRONT_URL;
 
 function generateBracketHTML(tournamentSize: number) {
   let html = `<h1 id="tourn-title">Tourn title</h1>
@@ -122,7 +121,7 @@ async function adminCheck() {
       method: 'POST',
       headers: {
         'Accept': 'application/json,application/html,text/html,*/*',
-        'Origin': FRONT_URL,
+        'Origin': 'https://127.0.0.1:3000/',
         'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
       },
       credentials: 'include',
@@ -139,7 +138,7 @@ async function participantCheck() {
       method: 'POST',
       headers: {
         'Accept': 'application/json,application/html,text/html,*/*',
-        'Origin': FRONT_URL,
+        'Origin': 'https://127.0.0.1:3000/',
         'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
       },
       credentials: 'include',
@@ -157,7 +156,7 @@ async function deleteTournament() {
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json,application/html,text/html,*/*',
-        'Origin': FRONT_URL,
+        'Origin': 'https://127.0.0.1:3000/',
         'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
       },
       credentials: 'include',
@@ -175,7 +174,7 @@ async function leaveTournament() {
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json,application/html,text/html,*/*',
-        'Origin': FRONT_URL,
+        'Origin': 'https://127.0.0.1:3000/',
         'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
       },
       credentials: 'include',
@@ -193,7 +192,7 @@ export async function getCompleteTournamentInfo() {
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json,application/html,text/html,*/*',
-        'Origin': FRONT_URL,
+        'Origin': 'https://127.0.0.1:3000/',
         'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
       },
       credentials: 'include',
@@ -211,7 +210,7 @@ async function getFinalist() {
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json,application/html,text/html,*/*',
-        'Origin': FRONT_URL,
+        'Origin': 'https://127.0.0.1:3000/',
         'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
       },
       credentials: 'include',
@@ -397,39 +396,28 @@ export async function renderTournamentContent(hideableElements) {
   const allPTRObj = JSON.parse(allPTR);
   
   let bracketSize = 8;
-  // Define a type for tournament objects
-  type TournamentInfo = {
-    tId: string;
-    tName: string;
-    maxPN: number;
-    joinedPN?: number;
-    // add other properties as needed
-  };
-  
-    if (tournAllInfoRespObj.err === "nil" && tournAllInfoRespObj.res) {
-      const tourn = tournAllInfoRespObj.res;
-      const currentTournamentId = tourn.tId;
-  
-      // CRITICAL FIX: Find the current tournament in the list of all tournaments
-      let currentTournament: TournamentInfo | undefined = undefined;
-      if (allPTRObj && allPTRObj.res && Array.isArray(allPTRObj.res)) {
-        currentTournament = (allPTRObj.res as TournamentInfo[]).find(t => t.tId === currentTournamentId);
-      }
-  
-      // Determine bracket size from the ACTUAL tournament we're viewing
-      if (currentTournament) {
-        // Get the tournament size that was set when it was created
-        const tournamentSize = currentTournament.maxPN || 8;
+  if (tournAllInfoRespObj.err === "nil" && tournAllInfoRespObj.res) {
+    const tourn = tournAllInfoRespObj.res;
 
-        // Ensure it's a valid tournament size
-        if (tournamentSize === 2 || tournamentSize === 4) {
-          bracketSize = tournamentSize;
-        }
-        // Otherwise keep default of 8
+    let tournamentSize = allPTRObj.res[0].maxPN || 8;
+    try {
+      const maxPN = parseInt(tourn.maxPN);
+      if (!isNaN(maxPN)) {
+        tournamentSize = maxPN;
       }
+    } catch (e) {
+      console.error("Error parsing tournament size:", e);
     }
-
-
+    
+    // Ensure it's a valid tournament size
+    if (tournamentSize === 2 || tournamentSize === 4) {
+      bracketSize = tournamentSize;
+    } else {
+      bracketSize = 8; // Default to 8 if not 2 or 4
+    }
+  }
+  
+  
   // Generate bracket HTML based on ACTUAL tournament size
   let tempHTML = generateBracketHTML(bracketSize);
   hideableElements.contentArea.innerHTML = tempHTML;
@@ -518,7 +506,7 @@ async function createTournament(tName : string, playersN : number, privacy : boo
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json,application/html,text/html,*/*',
-        'Origin': FRONT_URL,
+        'Origin': 'https://127.0.0.1:3000/',
         'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
       },
       body: JSON.stringify({
@@ -541,7 +529,7 @@ async function enrollInTournament(tId: string) {
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json,application/html,text/html,*/*',
-        'Origin': FRONT_URL,
+        'Origin': 'https://127.0.0.1:3000/',
         'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
       },
       body: JSON.stringify({
@@ -565,7 +553,7 @@ async function fetchAllPublicTournaments() {
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json,application/html,text/html,*/*',
-        'Origin': FRONT_URL,
+        'Origin': 'https://127.0.0.1:3000/',
         'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
       },
       credentials: 'include',
