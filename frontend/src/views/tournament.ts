@@ -221,7 +221,8 @@ async function getFinalist() {
   return fresp;
 }
 
-async function fillInTheTournTable(tournAllInfoRespObj, bracketSize = 8) {
+
+/* async function fillInTheTournTable(tournAllInfoRespObj, bracketSize = 8) {
   console.log("Filling in tournament table with bracket size:", bracketSize);
   
   if (tournAllInfoRespObj.err !== "nil") {
@@ -383,7 +384,10 @@ async function fillInTheTournTable(tournAllInfoRespObj, bracketSize = 8) {
   }
 }
 
-export async function renderTournamentContent(hideableElements) {
+ */
+
+
+/* export async function renderTournamentContent(hideableElements) {
   hideableElements.buttonArea.hidden = true;
   hideableElements.gameArea.classList.add("hidden");
   hideableElements.gameWindow.hidden = true;
@@ -403,7 +407,6 @@ export async function renderTournamentContent(hideableElements) {
     tName: string;
     maxPN: number;
     joinedPN?: number;
-    // add other properties as needed
   };
   
     if (tournAllInfoRespObj.err === "nil" && tournAllInfoRespObj.res) {
@@ -509,6 +512,596 @@ export async function renderTournamentContent(hideableElements) {
 
   await fillInTheTournTable(tournAllInfoRespObj, bracketSize);
 }
+
+ */
+
+
+
+export async function renderTournamentContent(hideableElements) {
+  hideableElements.buttonArea.hidden = true;
+  hideableElements.gameArea.classList.add("hidden");
+  hideableElements.gameWindow.hidden = true;
+  
+  const tournAllInfoRawResp = await getCompleteTournamentInfo();
+  const tournAllInfoResp = await tournAllInfoRawResp.text();
+  const tournAllInfoRespObj = JSON.parse(tournAllInfoResp);
+ 
+  const rawAllPublicTournamentsResponse = await fetchAllPublicTournaments();
+  const allPTR = await rawAllPublicTournamentsResponse.text();
+  const allPTRObj = JSON.parse(allPTR);
+  
+  let bracketSize = 8; // Default value
+  
+  // Define a type for tournament objects
+  type TournamentInfo = {
+    tId: string;
+    tName: string;
+    maxPN: number;
+    joinedPN?: number;
+    // add other properties as needed
+  };
+  
+  // CRITICAL FIX: Determine bracket size BEFORE generating HTML
+  if (tournAllInfoRespObj.err === "nil" && tournAllInfoRespObj.res) {
+    const tourn = tournAllInfoRespObj.res;
+    const currentTournamentId = tourn.tId;
+
+    // Find the current tournament in the list of all tournaments
+    let currentTournament: TournamentInfo | undefined = undefined;
+    if (allPTRObj && allPTRObj.res && Array.isArray(allPTRObj.res)) {
+      currentTournament = (allPTRObj.res as TournamentInfo[]).find(t => t.tId === currentTournamentId);
+    }
+
+    // Determine bracket size from the ACTUAL tournament we're viewing
+    if (currentTournament) {
+      // Get the tournament size that was set when it was created
+      const tournamentSize = currentTournament.maxPN || 8;
+      console.log("Found tournament with size:", tournamentSize);
+
+      // Ensure it's a valid tournament size and update bracketSize
+      if (tournamentSize === 2 || tournamentSize === 4) {
+        bracketSize = tournamentSize;
+      }
+      // Otherwise keep default of 8
+     } else {
+      console.warn("Could not find current tournament in public tournaments list, trying to determine size from tournament data");
+      if (tourn.Ids) {
+        // For 2-player tournaments, we typically have 2 players in the first level
+        if (tourn.Ids[0] && tourn.Ids[0].length === 2 && 
+            (!tourn.Ids[1] || tourn.Ids[1].every(id => id === ""))) {
+          bracketSize = 2;
+        } 
+        // For 4-player tournaments, we have 2 players in the first level (semifinals)
+        // and 4 players in the second level (contenders)
+        else if (tourn.Ids[0] && tourn.Ids[0].length === 2 && 
+                 tourn.Ids[1] && tourn.Ids[1].length === 4) {
+          bracketSize = 4;
+        }
+        // Otherwise, assume it's an 8-player tournament
+        else {
+          bracketSize = 8;
+        }
+      }
+    } 
+  }
+
+  console.log("Final bracket size determined:", bracketSize);
+
+  // Generate bracket HTML based on ACTUAL tournament size
+  let tempHTML = generateBracketHTML(bracketSize);
+  hideableElements.contentArea.innerHTML = tempHTML;
+  
+  // Rest of your existing button handling code...
+  let tournAnihilationButton = document.getElementById("force-rm-tourn");
+  let tournLeaveButton = document.getElementById("leave-tourn");
+  let doIAdmin = false;
+  let noadminFlag = false;
+  let noparticipateFlag = false;
+  
+  if (tournAnihilationButton) {
+    const checkAdminRawResp = await adminCheck();
+    const checkAdminResp = await checkAdminRawResp.text();
+    const checkAdminRespObj = JSON.parse(checkAdminResp);
+    if (checkAdminRespObj.err === "nil") {
+      doIAdmin = true;
+      tournAnihilationButton.removeAttribute('disabled');
+      tournAnihilationButton.addEventListener("click", async () => {
+        const rawResOfDelete = await deleteTournament();
+        const resOfDelete = await rawResOfDelete.text();
+        const resOfDeleteObj = JSON.parse(resOfDelete);
+        if (resOfDeleteObj.err === "nil") {
+          localStorage.removeItem("tId");
+          (tournAnihilationButton as HTMLButtonElement).disabled = true;
+          buttonSetter(MetaGameState.nothing);
+        }
+        else {
+          console.error("failed to delete tournament:", resOfDeleteObj.err);
+        }
+        await fillInTheTournTable(tournAllInfoRespObj, bracketSize);
+      });
+    }
+    else {
+      tournAnihilationButton.disabled = true;
+      noadminFlag = true;
+    }
+  }
+  
+  if (tournLeaveButton) {
+    tournLeaveButton.disabled = true;
+    const checkPartRawResp = await participantCheck();
+    const checkPartResp = await checkPartRawResp.text();
+    const checkPartRespObj = JSON.parse(checkPartResp);
+    if (checkPartRespObj.err === "nil" && !doIAdmin) {
+      tournLeaveButton.removeAttribute('disabled');
+      tournLeaveButton.addEventListener("click", async () => {
+        const rawResOfLeave = await leaveTournament();
+        const resOfLeave = await rawResOfLeave.text();
+        const resOfLeaveObj = JSON.parse(resOfLeave);
+        if (resOfLeaveObj.err === "nil") {
+          alert("left the tournament");
+          localStorage.removeItem("tId");
+          tournLeaveButton.disabled = true;
+          buttonSetter(MetaGameState.nothing);
+        }
+        else {
+          console.error("failed to leave tournament:", resOfLeaveObj.err);
+        }
+        await fillInTheTournTable(tournAllInfoRespObj, bracketSize);
+      });
+    }
+    else {
+      console.warn("just checked and you don't participate in anything OR you admin the thing:", checkPartRespObj.err);
+      tournLeaveButton.disabled = true;
+      noparticipateFlag = true;
+    }
+  }
+  
+  if ((noadminFlag === true) && (noparticipateFlag === true)) {
+    let metaInfo = await getGameMetaInfo();
+    const gameInfo = document.getElementById("game-info");
+    if (gameInfo) {
+      await setterUponMetaInfo(gameInfo, metaInfo);
+    }
+  }
+
+  // Fill the table with the correct bracket size
+  await fillInTheTournTable(tournAllInfoRespObj, bracketSize);
+}
+
+// Also, make sure the fillInTheTournTable function handles empty slots correctly for smaller tournaments
+/* async function fillInTheTournTable(tournAllInfoRespObj, bracketSize = 8) {
+  console.log("Filling in tournament table with bracket size:", bracketSize);
+  
+  if (tournAllInfoRespObj.err !== "nil") {
+    document.getElementById("tourn-title").innerHTML = "<i>" + t('tournaments.noTournaments') + "</i>";
+    document.getElementById("tourn-id").innerHTML = "";
+    const bt = document.getElementById("big-table");
+    if (bt) {
+      bt.innerHTML = "";
+    }
+    return; // Early return if there's an error
+  }
+
+  const tourn = tournAllInfoRespObj.res;
+  if (typeof tourn === "undefined") {
+    console.error("weird error occured: tour is undefined, although no err received");
+    return;
+  }
+
+  document.getElementById("tourn-title").innerHTML = t('tournaments.tournamentName') + ": " + tourn.tName;
+  document.getElementById("tourn-id").innerHTML = "id: " + tourn.tId;
+  
+  console.log("Tournament size for filling table:", bracketSize);
+  
+  // For 2-player bracket
+  if (bracketSize === 2) {
+    console.log("Filling 2-player bracket");
+    // Only populate the first 2 contenders (from tourn.Ids[0])
+    for (let j = 0; j < 2; j++) {
+      const element = document.getElementById(`table-contender-${j + 1}`);
+      if (element && 0 < tourn.Ids.length && j < tourn.Ids[0].length && 
+          tourn.Ids[0][j] !== "" && tourn.Ids[0][j] !== "failed") {
+        let respNn = await getNicknameForPlayerId(tourn.Ids[0][j]);
+        let nnJson = JSON.parse(await respNn.text());
+        let nicknameVs = "<i>unknown</i>";
+        if (nnJson.err === "nil") {
+          nicknameVs = nnJson.nick;
+        }
+        element.innerHTML = "<b>" + nicknameVs + "</b>";
+      }
+      else if (element) {
+        element.innerHTML = "<i>" + t('tournaments.empty') + "</i>";
+      }
+    }
+  }
+  // For 4-player bracket
+  else if (bracketSize === 4) {
+    console.log("Filling 4-player bracket");
+    // Fill semifinals first (they're in tourn.Ids[0])
+    for (let j = 0; j < 2; j++) {
+      const element = document.getElementById(`table-semifinal-${j + 1}`);
+      if (element && 0 < tourn.Ids.length && j < tourn.Ids[0].length && 
+          tourn.Ids[0][j] !== "" && tourn.Ids[0][j] !== "failed") {
+        let respNn = await getNicknameForPlayerId(tourn.Ids[0][j]);
+        let nnJson = JSON.parse(await respNn.text());
+        let nicknameVs = "<i>unknown</i>";
+        if (nnJson.err === "nil") {
+          nicknameVs = nnJson.nick;
+        }
+        element.innerHTML = "<b>" + nicknameVs + "</b>";
+      } else if (element) {
+        element.innerHTML = "<i>" + t('tournaments.empty') + "</i>";
+      }
+    }
+    
+    // Fill contenders (they're in tourn.Ids[1])
+    for (let j = 0; j < 4; j++) {
+      const element = document.getElementById(`table-contender-${j + 1}`);
+      if (element && 1 < tourn.Ids.length && j < tourn.Ids[1].length && 
+          tourn.Ids[1][j] !== "" && tourn.Ids[1][j] !== "failed") {
+        let respNn = await getNicknameForPlayerId(tourn.Ids[1][j]);
+        let nnJson = JSON.parse(await respNn.text());
+        let nicknameVs = "<i>unknown</i>";
+        if (nnJson.err === "nil") {
+          nicknameVs = nnJson.nick;
+        }
+        element.innerHTML = "<b>" + nicknameVs + "</b>";
+      }
+      else if (element) {
+        element.innerHTML = "<i>" + t('tournaments.empty') + "</i>";
+      }
+    }
+  }
+  // For 8-player bracket
+  else {
+    console.log("Filling 8-player bracket");
+    // Fill semifinals first (they're in tourn.Ids[0])
+    for (let j = 0; j < 2; j++) {
+      const element = document.getElementById(`table-semifinal-${j + 1}`);
+      if (element && 0 < tourn.Ids.length && j < tourn.Ids[0].length && 
+          tourn.Ids[0][j] !== "" && tourn.Ids[0][j] !== "failed") {
+        let respNn = await getNicknameForPlayerId(tourn.Ids[0][j]);
+        let nnJson = JSON.parse(await respNn.text());
+        let nicknameVs = "<i>unknown</i>";
+        if (nnJson.err === "nil") {
+          nicknameVs = nnJson.nick;
+        }
+        element.innerHTML = "<b>" + nicknameVs + "</b>";
+      } else if (element) {
+        element.innerHTML = "<i>" + t('tournaments.empty') + "</i>";
+      }
+    }
+    
+    // Fill quarterfinals next (they're in tourn.Ids[1])
+    for (let j = 0; j < 4; j++) {
+      const element = document.getElementById(`table-quarterfinal-${j + 1}`);
+      if (element && 1 < tourn.Ids.length && j < tourn.Ids[1].length && 
+          tourn.Ids[1][j] !== "" && tourn.Ids[1][j] !== "failed") {
+        let respNn = await getNicknameForPlayerId(tourn.Ids[1][j]);
+        let nnJson = JSON.parse(await respNn.text());
+        let nicknameVs = "<i>unknown</i>";
+        if (nnJson.err === "nil") {
+          nicknameVs = nnJson.nick;
+        }
+        element.innerHTML = "<b>" + nicknameVs + "</b>";
+      } else if (element) {
+        element.innerHTML = "<i>" + t('tournaments.empty') + "</i>";
+      }
+    }
+    
+    // Fill contenders last (they're in tourn.Ids[2])
+    for (let j = 0; j < 8; j++) {
+      const element = document.getElementById(`table-contender-${j + 1}`);
+      if (element && 2 < tourn.Ids.length && j < tourn.Ids[2].length && 
+          tourn.Ids[2][j] !== "" && tourn.Ids[2][j] !== "failed") {
+        let respNn = await getNicknameForPlayerId(tourn.Ids[2][j]);
+        let nnJson = JSON.parse(await respNn.text());
+        let nicknameVs = "<i>unknown</i>";
+        if (nnJson.err === "nil") {
+          nicknameVs = nnJson.nick;
+        }
+        element.innerHTML = "<b>" + nicknameVs + "</b>";
+      }
+      else if (element) {
+        element.innerHTML = "<i>" + t('tournaments.empty') + "</i>";
+      }
+    }
+  }
+  
+  // FINALIST HANDLING - this should work for all tournament sizes
+  const finRawResp = await getFinalist();
+  const finResp = await finRawResp.text();
+  const finObj = JSON.parse(finResp);
+  if (finObj.err === "nil") {
+    const element = document.getElementById('table-finalist');
+    if (element) {
+      if (finObj.res !== "") {
+        const finId = finObj.res;
+        let respNn = await getNicknameForPlayerId(finId);
+        let nnJson = JSON.parse(await respNn.text());
+        let nicknameVs = "<i>unknown</i>";
+        if (nnJson.err === "nil") {
+          nicknameVs = nnJson.nick;
+        }
+        element.innerHTML = "<b>" + nicknameVs + "</b>";
+      }
+      else {
+        element.innerHTML = t('tournaments.final');
+      }
+    }
+  }
+  else {
+    console.error("finalist lookup error:", finObj.err);
+  }
+}
+ */
+
+
+// Enhanced version with debugging to understand the data structure
+async function fillInTheTournTable(tournAllInfoRespObj, bracketSize = 8) {
+  console.log("=== TOURNAMENT DEBUG INFO ===");
+  console.log("Filling in tournament table with bracket size:", bracketSize);
+  
+  if (tournAllInfoRespObj.err !== "nil") {
+    document.getElementById("tourn-title").innerHTML = "<i>" + t('tournaments.noTournaments') + "</i>";
+    document.getElementById("tourn-id").innerHTML = "";
+    const bt = document.getElementById("big-table");
+    if (bt) {
+      bt.innerHTML = "";
+    }
+    return;
+  }
+
+  const tourn = tournAllInfoRespObj.res;
+  if (typeof tourn === "undefined") {
+    console.error("weird error occured: tour is undefined, although no err received");
+    return;
+  }
+
+  console.log("Complete tournament object:", tourn);
+  console.log("Tournament Ids structure:", tourn.Ids);
+  console.log("Number of levels in Ids:", tourn.Ids ? tourn.Ids.length : 0);
+  
+  // Log each level
+  if (tourn.Ids) {
+    tourn.Ids.forEach((level, index) => {
+      console.log(`Level ${index}:`, level, `(length: ${level ? level.length : 0})`);
+    });
+  }
+
+  document.getElementById("tourn-title").innerHTML = t('tournaments.tournamentName') + ": " + tourn.tName;
+  document.getElementById("tourn-id").innerHTML = "id: " + tourn.tId;
+  
+  console.log("Tournament size for filling table:", bracketSize);
+  
+  // For 2-player bracket
+  if (bracketSize === 2) {
+    console.log("=== FILLING 2-PLAYER BRACKET ===");
+    
+    // For 2-player, we just need to find where the 2 initial players are stored
+    // Let's check all levels to find the one with exactly 2 players
+    let contenderData = null;
+    for (let level = 0; level < tourn.Ids.length; level++) {
+      if (tourn.Ids[level] && tourn.Ids[level].length >= 2) {
+        console.log(`Found potential contenders at level ${level}:`, tourn.Ids[level]);
+        contenderData = tourn.Ids[level];
+        break; // Use the first level that has at least 2 players
+      }
+    }
+    
+    if (contenderData) {
+      for (let j = 0; j < 2; j++) {
+        const element = document.getElementById(`table-contender-${j + 1}`);
+        console.log(`Processing contender ${j + 1}, element:`, element);
+        
+        if (element && j < contenderData.length && 
+            contenderData[j] !== "" && contenderData[j] !== "failed") {
+          console.log(`Fetching nickname for player ID: ${contenderData[j]}`);
+          let respNn = await getNicknameForPlayerId(contenderData[j]);
+          let nnJson = JSON.parse(await respNn.text());
+          let nicknameVs = "<i>unknown</i>";
+          if (nnJson.err === "nil") {
+            nicknameVs = nnJson.nick;
+          }
+          element.innerHTML = "<b>" + nicknameVs + "</b>";
+          console.log(`Set contender ${j + 1} to: ${nicknameVs}`);
+        }
+        else if (element) {
+          element.innerHTML = "<i>" + t('tournaments.empty') + "</i>";
+          console.log(`Set contender ${j + 1} to empty`);
+        }
+      }
+    } else {
+      console.warn("No contender data found for 2-player tournament");
+      // Set both to empty
+      for (let j = 0; j < 2; j++) {
+        const element = document.getElementById(`table-contender-${j + 1}`);
+        if (element) {
+          element.innerHTML = "<i>" + t('tournaments.empty') + "</i>";
+        }
+      }
+    }
+  }
+  // For 4-player bracket
+  else if (bracketSize === 4) {
+    console.log("=== FILLING 4-PLAYER BRACKET ===");
+    
+    // For 4-player tournaments, we need semifinals and contenders
+    // Semifinals should be in an earlier level, contenders in a later level
+    
+    // Find semifinals (should be 2 players)
+    let semifinalData = null;
+    for (let level = 0; level < tourn.Ids.length; level++) {
+      if (tourn.Ids[level] && tourn.Ids[level].length >= 2) {
+        console.log(`Found potential semifinals at level ${level}:`, tourn.Ids[level]);
+        semifinalData = tourn.Ids[level];
+        break;
+      }
+    }
+    
+    // Fill semifinals
+    if (semifinalData) {
+      for (let j = 0; j < 2; j++) {
+        const element = document.getElementById(`table-semifinal-${j + 1}`);
+        console.log(`Processing semifinal ${j + 1}, element:`, element);
+        
+        if (element && j < semifinalData.length && 
+            semifinalData[j] !== "" && semifinalData[j] !== "failed") {
+          console.log(`Fetching nickname for semifinal player ID: ${semifinalData[j]}`);
+          let respNn = await getNicknameForPlayerId(semifinalData[j]);
+          let nnJson = JSON.parse(await respNn.text());
+          let nicknameVs = "<i>unknown</i>";
+          if (nnJson.err === "nil") {
+            nicknameVs = nnJson.nick;
+          }
+          element.innerHTML = "<b>" + nicknameVs + "</b>";
+          console.log(`Set semifinal ${j + 1} to: ${nicknameVs}`);
+        } else if (element) {
+          element.innerHTML = "<i>" + t('tournaments.empty') + "</i>";
+          console.log(`Set semifinal ${j + 1} to empty`);
+        }
+      }
+    }
+    
+    // Find contenders (should be 4 players)
+    let contenderData = null;
+    for (let level = 0; level < tourn.Ids.length; level++) {
+      if (tourn.Ids[level] && tourn.Ids[level].length >= 4) {
+        console.log(`Found potential contenders at level ${level}:`, tourn.Ids[level]);
+        contenderData = tourn.Ids[level];
+        break;
+      }
+    }
+    
+    // Fill contenders
+    if (contenderData) {
+      for (let j = 0; j < 4; j++) {
+        const element = document.getElementById(`table-contender-${j + 1}`);
+        console.log(`Processing contender ${j + 1}, element:`, element);
+        
+        if (element && j < contenderData.length && 
+            contenderData[j] !== "" && contenderData[j] !== "failed") {
+          console.log(`Fetching nickname for contender player ID: ${contenderData[j]}`);
+          let respNn = await getNicknameForPlayerId(contenderData[j]);
+          let nnJson = JSON.parse(await respNn.text());
+          let nicknameVs = "<i>unknown</i>";
+          if (nnJson.err === "nil") {
+            nicknameVs = nnJson.nick;
+          }
+          element.innerHTML = "<b>" + nicknameVs + "</b>";
+          console.log(`Set contender ${j + 1} to: ${nicknameVs}`);
+        }
+        else if (element) {
+          element.innerHTML = "<i>" + t('tournaments.empty') + "</i>";
+          console.log(`Set contender ${j + 1} to empty`);
+        }
+      }
+    } else {
+      console.warn("No contender data found for 4-player tournament");
+      // Set all to empty
+      for (let j = 0; j < 4; j++) {
+        const element = document.getElementById(`table-contender-${j + 1}`);
+        if (element) {
+          element.innerHTML = "<i>" + t('tournaments.empty') + "</i>";
+        }
+      }
+    }
+  }
+  // For 8-player bracket
+  else {
+    console.log("=== FILLING 8-PLAYER BRACKET ===");
+    // Keep your existing 8-player logic
+    // Fill semifinals first (they're in tourn.Ids[0])
+    for (let j = 0; j < 2; j++) {
+      const element = document.getElementById(`table-semifinal-${j + 1}`);
+      if (element && 0 < tourn.Ids.length && j < tourn.Ids[0].length && 
+          tourn.Ids[0][j] !== "" && tourn.Ids[0][j] !== "failed") {
+        let respNn = await getNicknameForPlayerId(tourn.Ids[0][j]);
+        let nnJson = JSON.parse(await respNn.text());
+        let nicknameVs = "<i>unknown</i>";
+        if (nnJson.err === "nil") {
+          nicknameVs = nnJson.nick;
+        }
+        element.innerHTML = "<b>" + nicknameVs + "</b>";
+      } else if (element) {
+        element.innerHTML = "<i>" + t('tournaments.empty') + "</i>";
+      }
+    }
+    
+    // Fill quarterfinals next (they're in tourn.Ids[1])
+    for (let j = 0; j < 4; j++) {
+      const element = document.getElementById(`table-quarterfinal-${j + 1}`);
+      if (element && 1 < tourn.Ids.length && j < tourn.Ids[1].length && 
+          tourn.Ids[1][j] !== "" && tourn.Ids[1][j] !== "failed") {
+        let respNn = await getNicknameForPlayerId(tourn.Ids[1][j]);
+        let nnJson = JSON.parse(await respNn.text());
+        let nicknameVs = "<i>unknown</i>";
+        if (nnJson.err === "nil") {
+          nicknameVs = nnJson.nick;
+        }
+        element.innerHTML = "<b>" + nicknameVs + "</b>";
+      } else if (element) {
+        element.innerHTML = "<i>" + t('tournaments.empty') + "</i>";
+      }
+    }
+    
+    // Fill contenders last (they're in tourn.Ids[2])
+    for (let j = 0; j < 8; j++) {
+      const element = document.getElementById(`table-contender-${j + 1}`);
+      if (element && 2 < tourn.Ids.length && j < tourn.Ids[2].length && 
+          tourn.Ids[2][j] !== "" && tourn.Ids[2][j] !== "failed") {
+        let respNn = await getNicknameForPlayerId(tourn.Ids[2][j]);
+        let nnJson = JSON.parse(await respNn.text());
+        let nicknameVs = "<i>unknown</i>";
+        if (nnJson.err === "nil") {
+          nicknameVs = nnJson.nick;
+        }
+        element.innerHTML = "<b>" + nicknameVs + "</b>";
+      }
+      else if (element) {
+        element.innerHTML = "<i>" + t('tournaments.empty') + "</i>";
+      }
+    }
+  }
+  
+  // FINALIST HANDLING - this should work for all tournament sizes
+  console.log("=== FILLING FINALIST ===");
+  const finRawResp = await getFinalist();
+  const finResp = await finRawResp.text();
+  const finObj = JSON.parse(finResp);
+  console.log("Finalist response:", finObj);
+  
+  if (finObj.err === "nil") {
+    const element = document.getElementById('table-finalist');
+    if (element) {
+      if (finObj.res !== "") {
+        const finId = finObj.res;
+        console.log(`Fetching nickname for finalist ID: ${finId}`);
+        let respNn = await getNicknameForPlayerId(finId);
+        let nnJson = JSON.parse(await respNn.text());
+        let nicknameVs = "<i>unknown</i>";
+        if (nnJson.err === "nil") {
+          nicknameVs = nnJson.nick;
+        }
+        element.innerHTML = "<b>" + nicknameVs + "</b>";
+        console.log(`Set finalist to: ${nicknameVs}`);
+      }
+      else {
+        element.innerHTML = t('tournaments.final');
+        console.log("Set finalist to default text");
+      }
+    }
+  }
+  else {
+    console.error("finalist lookup error:", finObj.err);
+  }
+  
+  console.log("=== TOURNAMENT FILL COMPLETE ===");
+}
+
+
+
+
 
 async function createTournament(tName : string, playersN : number, privacy : boolean) {
   const fresp = fetch(
@@ -739,7 +1332,14 @@ export async function renderTournamentManagerContent(hideableElements) {
     <hr />
     <br />
     <p class="mb-4">${t("tournaments.myTournaments")}:</p>
-    <div id="my-tournament"><p><i>${t("tournaments.noTournaments")}</i></p></div>
+    <!-- changed to button, before was <div> -->
+    <button type="button"
+    class="w-full px-4 py-2 text-white bg-gray-700
+    rounded-md focus:outline-none
+    focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+    focus:ring-offset-gray-800
+    disabled:border-gray-200 disabled:bg-gray-700 disabled:text-gray-500 disabled:shadow-none"
+    id="my-tournament"><p><i>${t("tournaments.noTournaments")}</i></p></button>
 
     <br />
     <hr />
