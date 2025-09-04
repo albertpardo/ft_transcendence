@@ -663,27 +663,17 @@ export const dataStreamer = async (playerId : string) => {
       if (runtime.gameType === "normal") {
         if (runtime.LplayerId === playerId) {
           sock.send(JSON.stringify(runtime.gstate));
-          if (socksMap.has(runtime.RplayerId)) {
-            sock = socksMap.get(runtime.RplayerId);
-            sock.send(JSON.stringify(runtime.gstate));
-          }
-          // only delete the game id if the datastreamer is from the left to avoid double delete
-          // XXX TODO leaks?
-          // XXX mutex alert.
-          if (playersMap.has(runtime.RplayerId)) {
-            console.log("deleting rpid", runtime.RplayerId, "from pmap in datastreamer's pongdone thing (being a left player ourselves)");
-            playersMap.delete(runtime.RplayerId);
+          if (playersMap.has(playerId)) {
+            console.log("deleting lpid", playerId, "from pmap in datastreamer's pongdone thing (being a left player ourselves)");
+            playersMap.delete(playerId);
           }
           if (gamesMap.has(playersMap.get(playerId))) {
             console.log("deleting gid", playersMap.get(playerId), "from gmap in datastreamer's pongdone thing (being a left player ourselves)");
             gamesMap.delete(playersMap.get(playerId));
           }
-          if (playersMap.has(playerId)) {
-            console.log("deleting lpid", playerId, "from pmap in datastreamer's pongdone thing (being a left player ourselves)");
-            playersMap.delete(playerId);
-          }
         }
         else if (runtime.RplayerId === playerId) {
+          sock.send(JSON.stringify(runtime.gstate));
           if (playersMap.has(playerId)) {
             console.log("deleting rpid", playerId, "from pmap in datastreamer's pongdone thing (being a right player ourselves)");
             playersMap.delete(playerId);
@@ -693,10 +683,9 @@ export const dataStreamer = async (playerId : string) => {
       else if (runtime.gameType === "tournament") {
         if (runtime.LplayerId === playerId) {
           sock.send(JSON.stringify(runtime.gstate));
-          if (socksMap.has(runtime.RplayerId)) {
-            sock = socksMap.get(runtime.RplayerId);
-            sock.send(JSON.stringify(runtime.gstate));
-          }
+        }
+        else if (runtime.RplayerId === playerId) {
+          sock.send(JSON.stringify(runtime.gstate));
         }
       }
       else if (runtime.gameType === "local") {

@@ -8,6 +8,7 @@ import { t, i18nReady } from '../i18n';
 export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const FRONT_URL = import.meta.env.VITE_FRONT_URL;
 
 function generateBracketHTML(tournamentSize: number) {
   let html = `<h1 id="tourn-title">Tourn title</h1>
@@ -121,7 +122,7 @@ async function adminCheck() {
       method: 'POST',
       headers: {
         'Accept': 'application/json,application/html,text/html,*/*',
-        'Origin': 'https://127.0.0.1:3000/',
+        'Origin': FRONT_URL,
         'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
       },
       credentials: 'include',
@@ -138,7 +139,7 @@ async function participantCheck() {
       method: 'POST',
       headers: {
         'Accept': 'application/json,application/html,text/html,*/*',
-        'Origin': 'https://127.0.0.1:3000/',
+        'Origin': FRONT_URL,
         'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
       },
       credentials: 'include',
@@ -156,7 +157,7 @@ async function deleteTournament() {
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json,application/html,text/html,*/*',
-        'Origin': 'https://127.0.0.1:3000/',
+        'Origin': FRONT_URL,
         'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
       },
       credentials: 'include',
@@ -174,7 +175,7 @@ async function leaveTournament() {
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json,application/html,text/html,*/*',
-        'Origin': 'https://127.0.0.1:3000/',
+        'Origin': FRONT_URL,
         'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
       },
       credentials: 'include',
@@ -192,7 +193,7 @@ export async function getCompleteTournamentInfo() {
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json,application/html,text/html,*/*',
-        'Origin': 'https://127.0.0.1:3000/',
+        'Origin': FRONT_URL,
         'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
       },
       credentials: 'include',
@@ -210,7 +211,7 @@ async function getFinalist() {
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json,application/html,text/html,*/*',
-        'Origin': 'https://127.0.0.1:3000/',
+        'Origin': FRONT_URL,
         'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
       },
       credentials: 'include',
@@ -629,7 +630,7 @@ async function createTournament(tName : string, playersN : number, privacy : boo
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json,application/html,text/html,*/*',
-        'Origin': 'https://127.0.0.1:3000/',
+        'Origin': FRONT_URL,
         'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
       },
       body: JSON.stringify({
@@ -652,7 +653,7 @@ async function enrollInTournament(tId: string) {
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json,application/html,text/html,*/*',
-        'Origin': 'https://127.0.0.1:3000/',
+        'Origin': FRONT_URL,
         'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
       },
       body: JSON.stringify({
@@ -676,7 +677,7 @@ async function fetchAllPublicTournaments() {
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json,application/html,text/html,*/*',
-        'Origin': 'https://127.0.0.1:3000/',
+        'Origin': FRONT_URL,
         'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
       },
       credentials: 'include',

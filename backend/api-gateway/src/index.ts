@@ -13,6 +13,7 @@ import proxyPlugin from './plugins/proxy';
 import * as fs from 'fs';
 import * as path from 'path';
 import fastifyCookie from '@fastify/cookie';
+const FRONT_URL = process.env.FRONT_URL;
 
 /* const httpsOptions = {
   key: fs.readFileSync(path.join(__dirname, '../certs/key.pem')),
@@ -55,7 +56,8 @@ async function registerPlugin() {
               'http://127.0.0.1:3000',
               'https://localhost:3000', 
               'https://127.0.0.1:3000',
-              'https://your-app.onrender.com'
+              'https://your-app.onrender.com',
+              FRONT_URL
                 ].includes(origin)) {
               cb(null, true);
             } else {

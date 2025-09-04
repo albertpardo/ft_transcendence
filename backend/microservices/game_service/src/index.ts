@@ -44,6 +44,13 @@ import responseLogger from './pino_utils/plugings/response-logger';
 import { setUserStatus } from './utils/status'
 // End by apardo-m
 
+require('dotenv').config({ path: __dirname + '/../.env' });
+const FRONT_URL = process.env.FRONT_URL;
+if (typeof FRONT_URL !== "string") {
+  throw "some weird stuff happened. no FRONT_URL being string found.";
+}
+console.log(FRONT_URL);
+
 // id shall come from the req and be per-user unique and persistent (jwt)
 // getIn tells do we wanna move (false) or do we wanna get into a game (true)
 // mov tells us where to move and if we wanna
@@ -77,7 +84,7 @@ const startServer = async () => {
   await fastify.register(websocket);
 
   await fastify.register(cors, {
-    origin: ['https://localhost:3000', 'https://127.0.0.1:3000'],
+    origin: ['https://localhost:3000', 'https://127.0.0.1:3000', FRONT_URL],
     credentials: true,
     allowedHeaders: 'Access-Content-Allow-Origin,Content-Type,Authorization,Upgrade',
   });
@@ -98,13 +105,22 @@ const startServer = async () => {
       let playerId : string = usp2.get("/api/pong/game-ws?uuid") as string;
       upperSocksMap.set(playerId, sock);
       sock.on('message', message => {
+        fastify.log.info(...logFormat( "websocket option 'message' : " + PREFIX + PATH, playerId));
         sock.send("connected");
       });
       sock.on('close', event => {
-        fastify.log.info(...logFormat( "websocket option 'close' : " + PREFIX + PATH, playerId , "offline"));
-        setUserStatus(playerId, "offline"); 
+        let limitReconectionTime : number = 3000;
+        let oldPlayerId : string  = playerId;
+
+        fastify.log.info(...logFormat( "websocket option 'close' : " + PREFIX + PATH, playerId));
         removeTheSock(sock);
         upperSocksMap.delete(playerId);
+        setTimeout (() => {
+          if (upperSocksMap.has(oldPlayerId) === false) {
+            setUserStatus(oldPlayerId, "offline");
+            fastify.log.info(...logFormat( "websocket option 'close' : " + PREFIX + PATH, oldPlayerId, " is offline!!!"));
+          }
+        }, limitReconectionTime );
       });
     });
 	  PATH = '/pong';

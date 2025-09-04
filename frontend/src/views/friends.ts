@@ -23,6 +23,34 @@ function renderFriendsTable(friends: Friend[]) {
   });
 }
 
+async function getFriendsAndRenderFriendsTable( authstringheader : string, API_BASE_URL: string, errorContent: HTMLElement) {
+  let friendsData;
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/friends`, {
+      method: 'GET',
+      headers: {
+        "Use-me-to-authorize": authstringheader,
+        "Content-Type": "application/json",
+      },
+      credentials: 'include',
+      mode: 'cors',
+    });
+
+    if (!res.ok) {
+	    errorContent.textContent = t("friendsTxt.getFailed");
+	    console.error(t("friendsTxt.getFailed"));
+    } else {
+      friendsData = await res.json();
+      renderFriendsTable(friendsData);
+	  }
+  } catch (err) {
+    console.error(err);
+	  errorContent.textContent = t("friendsTxt.getError");
+    return;
+  }
+}
+
 export async function renderFriendsContent(hideableElements) {
   hideableElements.buttonArea.hidden = true;
   hideableElements.gameArea.classList.add("hidden");
@@ -40,7 +68,6 @@ export async function renderFriendsContent(hideableElements) {
 
   const authstringheader : string = "Bearer " + authToken;
 
-  let friendsData;
   el.innerHTML = `
     <div class="w-full flex flex-col items-center gap-6 p-7 md:flex-row md:gap-8 rounded-2xl">
       <h1 class="w-full text-3xl font-bold mb-6 whitespace-nowrap">${t("friends")}</h1>
@@ -78,11 +105,10 @@ export async function renderFriendsContent(hideableElements) {
   const friendNick = document.getElementById("form-friendnick") as HTMLInputElement;
 
   refreshButton.addEventListener("click", async () => {
-    location.reload();
+    getFriendsAndRenderFriendsTable(authstringheader, API_BASE_URL, errorContent );
   });
   
   friendNick.addEventListener("focus", () => {
-    const errorContent = document.getElementById("errorArea1");
 	  errorContent.textContent = "";
   });
 
@@ -115,27 +141,5 @@ export async function renderFriendsContent(hideableElements) {
     }
   });
 
-  try {
-    const res = await fetch(`${API_BASE_URL}/api/friends`, {
-      method: 'GET',
-      headers: {
-        "Use-me-to-authorize": authstringheader,
-        "Content-Type": "application/json",
-      },
-      credentials: 'include',
-      mode: 'cors',
-    });
-
-    if (!res.ok) {
-	    errorContent.textContent = t("friendsTxt.getFailed");
-	    console.error(t("friendsTxt.getFailed"));
-    } else {
-      friendsData = await res.json();
-      renderFriendsTable(friendsData);
-	  }
-  } catch (err) {
-    console.error(err);
-	  errorContent.textContent = t("friendsTxt.getError");
-    return;
-  }
+  getFriendsAndRenderFriendsTable(authstringheader, API_BASE_URL, errorContent );
 }
