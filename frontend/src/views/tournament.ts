@@ -308,7 +308,7 @@ export async function renderTournamentContent(hideableElements) {
         const resOfLeave = await rawResOfLeave.text();
         const resOfLeaveObj = JSON.parse(resOfLeave);
         if (resOfLeaveObj.err === "nil") {
-          alert("left the tournament");
+         // alert("left the tournament");
           localStorage.removeItem("tId");
           (tournLeaveButton as HTMLButtonElement).disabled = true;
           buttonSetter(MetaGameState.nothing);
@@ -362,7 +362,7 @@ async function fillInTheTournTable(tournAllInfoRespObj, bracketSize = 8) {
   if (bracketSize === 2) {
     // For 2-player, we just need to find where the 2 initial players are stored
     // Let's check all levels to find the one with exactly 2 players
-    let contenderData = null;
+    let contenderData: string[] | null = null;
     for (let level = 0; level < tourn.Ids.length; level++) {
       if (tourn.Ids[level] && tourn.Ids[level].length >= 2) {
         contenderData = tourn.Ids[level];
@@ -819,7 +819,7 @@ export async function renderTournamentManagerContent(hideableElements) {
   const myTournamentField = document.getElementById('my-tournament');
   const metaInfo = await getGameMetaInfo();
   if (metaInfo.gType === "normal") {
-    console.log("you're already in a normal game btw");
+    console.info("you're already in a normal game btw");
   }
   else {
     const checkPartRawResp = await participantCheck();

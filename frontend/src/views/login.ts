@@ -446,7 +446,7 @@ async function handleGoogleCredentialResponse(response: { credential: string }) 
     route();
   } catch (error) {
     console.error('❌ Google sign-in failed:', error);
-    alert('Google sign-in failed. Please try again.');
+    // alert('Google sign-in failed. Please try again.');
   }
 }
 

@@ -11,7 +11,7 @@ export async function renderProfileContent(hideableElements) {
   const gWin = hideableElements.gameWindow;
 
   const userId = localStorage.getItem('userId') || sessionStorage.getItem('userId');
-  const authToken : string = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+  const authToken: string = localStorage.getItem('authToken') || sessionStorage.getItem('authToken') || '';
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   if (!authToken) {
@@ -139,7 +139,7 @@ export async function renderProfileContent(hideableElements) {
 </div>
 
 <!-- Modal: Confirm Delete -->
-<div id="delete-modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 hidden">
+<div id="delete-modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50" style="display:none;">
   <div class="bg-gray-800 p-8 rounded-lg max-w-md w-full">
     <h3 class="text-xl font-bold text-white mb-4">${t("profiles.delete.account")}</h3>
     <p class="text-gray-300 mb-6">${t("profiles.confirm.delete")}</p>
@@ -155,7 +155,7 @@ export async function renderProfileContent(hideableElements) {
 </div>
 
 <!-- Modal: Confirm Save -->
-<div id="save-modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 hidden">
+<div id="save-modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50" style="display:none;">
   <div class="bg-gray-800 p-8 rounded-lg max-w-md w-full">
     <h3 class="text-xl font-bold text-white mb-4">${t("profiles.confirm.save")}</h3>
     <p class="text-gray-300 mb-6">${t("profiles.confirm.save.text")}</p>
@@ -259,11 +259,11 @@ export async function renderProfileContent(hideableElements) {
 
   form.addEventListener("submit", (e) => {
     e.preventDefault();
-    saveModal.classList.remove("hidden");
+    saveModal.style.display = "flex";
   });
 
   cancelSaveBtn.addEventListener("click", () => {
-    saveModal.classList.add("hidden");
+    saveModal.style.display = "none";
   });
 
   confirmSaveBtn.addEventListener("click", async () => {
@@ -334,12 +334,12 @@ export async function renderProfileContent(hideableElements) {
         deleteBtn.disabled = true;
         saveModal.classList.add("hidden");
       } else {
-        alert("Failed to update profile");
+        // alert("Failed to update profile");
         saveModal.classList.add("hidden");
       }
     } catch (err) {
       console.error("Error updating profile:", err);
-      alert("An error occurred while updating the profile.");
+      // alert("An error occurred while updating the profile.");
       saveModal.classList.add("hidden");
     }
   });
@@ -382,12 +382,12 @@ export async function renderProfileContent(hideableElements) {
           window.location.replace("/");
         }, 2000); // 2 segundos de espera antes de redirigir
       } else {
-        alert("Failed to delete account");
+        // alert("Failed to delete account");
         deleteModal.classList.add("hidden");
       }
     } catch (err) {
       console.error("Error deleting account:", err);
-      alert("An error occurred while deleting the account");
+      // alert("An error occurred while deleting the account");
       deleteModal.classList.add("hidden");
     }
   });

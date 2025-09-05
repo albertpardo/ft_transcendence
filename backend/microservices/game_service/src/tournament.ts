@@ -45,7 +45,7 @@ class Tournament {
       throw "Everyone is already in";
     }
     this.Ids[this.stages - 1][i] = participantId;
-    console.log("added", participantId, "to", this.tId);
+    // console.log("added", participantId, "to", this.tId);
   }
 
   constructor(tName: string, adminId: string, isItPrivate: boolean = true, playersN: number, tId: string) {
@@ -66,31 +66,31 @@ class Tournament {
 
   private checkEveryonePresent() {
     if (this.stages <= 0 || this.currentStage <= 0) {
-      console.log("zeroth stage -- yup, everyone present");
+      // console.log("zeroth stage -- yup, everyone present");
       return true;
     }
     for (let i : number = 0; i < Math.pow(2, this.currentStage); i++) {
       if (this.Ids[this.currentStage - 1][i] === "") {
-        console.log("since the player number", i, "isn't present, return false");
+        // console.log("since the player number", i, "isn't present, return false");
         return false;
       }
     }
     this.started = true;
-    console.log("started = true, return true for presence");
+    // console.log("started = true, return true for presence");
     return true;
   }
 
   private gameCreator() {
     for (let i : number = 0; i < Math.pow(2, this.currentStage - 1); i++) {
-      console.log("creating game", i);
+      // console.log("creating game", i);
       let lId = this.Ids[this.currentStage - 1][2 * i];
       let rId = this.Ids[this.currentStage - 1][2 * i + 1];
       try {
         this.gameIds[this.currentStage - 1][i] = createTournamentGame(lId, rId);
-        console.log("great success in creating a game");
+        // console.log("great success in creating a game");
       }
       catch (e) {
-        console.log("motherfu- got an error:", e);
+        // console.log("motherfu- got an error:", e);
         if (typeof e === "string") {
           this.gameIds[this.currentStage - 1][i] = "";
           if (e[0] === 'L') {
@@ -101,7 +101,7 @@ class Tournament {
           }
         }
         else {
-          console.log("ts wasn't even a string");
+          console.info("ts wasn't even a string");
         }
       }
     }
@@ -109,20 +109,20 @@ class Tournament {
 
   private matchesStopped() {
     if (this.stages <= 0 || this.currentStage <= 0) {
-      console.log("<= zero stages, YES stopped");
+      // console.log("<= zero stages, YES stopped");
       return true;
     }
-    console.log("gameids in matches stopped:", this.gameIds);
+    // console.log("gameids in matches stopped:", this.gameIds);
     for (let gameId of this.gameIds[this.currentStage - 1]) {
-      console.log("checking stopped (pongDone) for", gameId);
+      // console.log("checking stopped (pongDone) for", gameId);
       if (gamesMap.has(gameId)) {
         if (!gamesMap.get(gameId).pongDone) {
-          console.log("nope,", gameId, "isn't done yet.");
+          // console.log("nope,", gameId, "isn't done yet.");
           return false;
         }
       }
       else {
-        console.log("somehow,", gameId, "not in map");
+        console.info("somehow,", gameId, "not in map");
       }
     }
     return true;
@@ -131,116 +131,86 @@ class Tournament {
   private newStageFiller() {
     // we're in the next stage already, which has been -1'd. To go back one, we +1. - 1 + 1 = 0.
     let i : number = 0;
-    console.log("starting new stage filler.");
-    console.log("the curstage var is", this.currentStage, "thus the index to use is", this.currentStage - 1);
-    console.log("game ids in this:", this.gameIds);
-    console.log("and the game map:", gamesMap);
+    // console.log("starting new stage filler.");
+    // console.log("the curstage var is", this.currentStage, "thus the index to use is", this.currentStage - 1);
+    // console.log("game ids in this:", this.gameIds);
+    // console.log("and the game map:", gamesMap);
     for (let gameId of this.gameIds[this.currentStage]) {
-      console.log("filling the new stage for", gameId);
-      console.log("i =", i, "; i*2 =", i * 2, "; i*2+1 =", i * 2 + 1);
+      // console.log("filling the new stage for", gameId);
+      // console.log("i =", i, "; i*2 =", i * 2, "; i*2+1 =", i * 2 + 1);
       if (gamesMap.has(gameId)) {
-        console.log("if 1");
+        // console.log("if 1");
         if (gamesMap.get(gameId).whoLost === "left fully" || gamesMap.get(gameId).whoLost === "left skip") {
-          console.log("if 1.1");
+          // console.log("if 1.1");
           this.Ids[this.currentStage - 1][i] = gamesMap.get(gameId).RplayerId;
         }
         else if (gamesMap.get(gameId).whoLost === "right fully" || gamesMap.get(gameId).whoLost === "right skip") {
-          console.log("elif 1.2");
+          // console.log("elif 1.2");
           this.Ids[this.currentStage - 1][i] = gamesMap.get(gameId).LplayerId;
         }
         else {
-          console.log("else 1.3");
+          // console.log("else 1.3");
           this.Ids[this.currentStage - 1][i] = "failed";
         }
       }
       else {
-        console.log("else 2");
+        // console.log("else 2");
         // in case we had a player already in a different game by that point,...
         if (this.Ids[this.currentStage][i * 2] === "failed") {
-          console.log("if 2.1");
+          // console.log("if 2.1");
           this.Ids[this.currentStage - 1][i] = this.Ids[this.currentStage][i * 2 + 1];
         }
         else if (this.Ids[this.currentStage][i * 2 + 1] === "failed") {
-          console.log("elif 2.2");
+          // console.log("elif 2.2");
           this.Ids[this.currentStage - 1][i] = this.Ids[this.currentStage][i * 2];
         }
         else {
-          console.log("mysterious nothing");
+          console.info("mysterious nothing");
         }
       }
       i++;
-      console.log("i incremented and is now", i);
+      // console.log("i incremented and is now", i);
     }
   }
 
   private oldStuffDeleter() {
     // we're in the next stage already, which has been -1'd. To go back one, we +1. - 1 + 1 = 0.
-    console.log("starting old stuff deleter.");
-    console.log("the curstage var is", this.currentStage, "thus the index to use is", this.currentStage - 1);
-    console.log("game ids in this:", this.gameIds);
-    console.log("and the game map:", gamesMap);
+    // console.log("starting old stuff deleter.");
+    // console.log("the curstage var is", this.currentStage, "thus the index to use is", this.currentStage - 1);
+    // console.log("game ids in this:", this.gameIds);
+    // console.log("and the game map:", gamesMap);
     for (let gameId of this.gameIds[this.currentStage]) {
-      console.log("cleaning up for", gameId);
+      // console.log("cleaning up for", gameId);
       if (gamesMap.has(gameId)) {
         const lid = gamesMap.get(gameId).LplayerId;
         const rid = gamesMap.get(gameId).RplayerId;
         if (playersMap.has(lid)) {
           playersMap.delete(lid);
-          console.log("from within the OSD deleted lid", lid, "of game", gameId);
+          // console.log("from within the OSD deleted lid", lid, "of game", gameId);
         }
         else {
-          console.log("from within the OSD didn't find lid", lid, "in pmap of game", gameId);
+          // console.log("from within the OSD didn't find lid", lid, "in pmap of game", gameId);
         }
         if (playersMap.has(rid)) {
           playersMap.delete(rid);
-          console.log("from within the OSD deleted rid", rid, "of game", gameId);
+          // console.log("from within the OSD deleted rid", rid, "of game", gameId);
         }
         else {
-          console.log("from within the OSD didn't find rid", rid, "in pmap of game", gameId);
+          // console.log("from within the OSD didn't find rid", rid, "in pmap of game", gameId);
         }
         gamesMap.delete(gameId);
-        console.log("also rmd gid", gameId);
+        // console.log("also rmd gid", gameId);
       }
       else {
-        console.log("from within the OSD, didn't find the game id!!!!!!!!!", gameId);
+        console.info("from within the OSD, didn't find the game id!!!!!!!!!", gameId);
       }
     }
   }
 
-  // loop checking for players in ts
-  //
-  // when EVERYONE is here, start all the games
-  //
-  // the games are started with the "tournament" mode and with a different func
-  //
-  // this mode also needs to make it so the players have to click confirm before starting
-  //
-  // also every time a runtime in tournament mode is created, a 30 second timer is started. if it passes and the enemy isn't ready yet, you can make them forfeit.
-  //
-  // if YOU forfeit, the enemy moves thru. if you both ain't ready, game dies after 60 seconds of inactivity, and places the special "failed" id on the winner
-  // this id is treated as "no next game" for this next tier
-  // visialization:
-  //
-  // 1
-  //  - 1
-  // 2
-  //          - just start, don't wait for the failed. 3
-  // 3
-  //  - 3
-  // 4
-  //
-  //                                                         - 3 vs 6 final match
-  //
-  // 5
-  //  - 6
-  // 6
-  //          - 6 autowin, as in the game was already started
-  // 7
-  //  - failed
-  // 8
+  
   public mainLoop = async () => {
     while (this.alive) {
-      console.log("stage", this.currentStage, "tour: before everyone present");
+      // console.log("stage", this.currentStage, "tour: before everyone present");
       while (!this.checkEveryonePresent()) {
         if (this.gotDeleted) {
           break ;
@@ -250,10 +220,10 @@ class Tournament {
       if (this.gotDeleted) {
         break ;
       }
-      console.log("stage", this.currentStage, "tour: after everyone present, before checking for stopped");
+      // console.log("stage", this.currentStage, "tour: after everyone present, before checking for stopped");
       this.gameCreator();
       while (!this.matchesStopped()) {
-        console.log("stage", this.currentStage, "waiting for matches to be stopped...");
+        // console.log("stage", this.currentStage, "waiting for matches to be stopped...");
         if (this.gotDeleted) {
           break ;
         }
@@ -262,7 +232,7 @@ class Tournament {
       if (this.gotDeleted) {
         break ;
       }
-      console.log("stage", this.currentStage, "tour: after stopped");
+      // console.log("stage", this.currentStage, "tour: after stopped");
       this.currentStage -= 1;
       if (this.currentStage <= 0) {
         if (this.currentStage === 0 ) {
@@ -279,26 +249,26 @@ class Tournament {
               this.winner = "failed";
             }
             else {
-              console.log("now explain to me: how did you get here?");
+              console.info("now explain to me: how did you get here?");
             }
-            console.log("WINNER CHOSEN:", this.winner);
+            console.info("WINNER CHOSEN:", this.winner);
           }
           else {
-            console.log("holy shit i think somebody deleted the very last game way too soon");
+            console.info("holy shit i think somebody deleted the very last game way too soon");
           }
         }
 
-        console.log("tour", this.tId, "awaiting a minute till auto-shutdown; will delete everything when shutting down");
+        // console.log("tour", this.tId, "awaiting a minute till auto-shutdown; will delete everything when shutting down");
         await sleep(60e3);
         this.alive = false;
-        console.log("tour", this.tId, "bye");
+        console.info("tour", this.tId, "bye");
         break ;
       }
-      console.log("stage", this.currentStage, "tour: after subtraction");
+      // console.log("stage", this.currentStage, "tour: after subtraction");
       this.newStageFiller();
-      console.log("stage", this.currentStage, "tour: after newstagefiller");
+      // console.log("stage", this.currentStage, "tour: after newstagefiller");
       this.oldStuffDeleter();
-      console.log("stage", this.currentStage, "tour: after oldstuffdeleter");
+      // console.log("stage", this.currentStage, "tour: after oldstuffdeleter");
     }
   }
 
@@ -309,13 +279,13 @@ class Tournament {
         playersParticipatingTourn.delete(pid);
         if (playersMap.has(pid)) {
           if (gamesMap.has(playersMap.get(pid))) {
-            console.log("deleting game", gamesMap.get(playersMap.get(pid)), "gamesmap from eliminateSelf");
+            // console.log("deleting game", gamesMap.get(playersMap.get(pid)), "gamesmap from eliminateSelf");
             gamesMap.delete(playersMap.get(pid));
           }
-          console.log("deleting player", pid, "from playersmap from eliminateSelf");
+          // console.log("deleting player", pid, "from playersmap from eliminateSelf");
           playersMap.delete(pid);
         }
-        console.log("players participating delete", pid, "from eliminateSelf in tournament", this.tId);
+        // console.log("players participating delete", pid, "from eliminateSelf in tournament", this.tId);
       }
     }
     this.gotDeleted = true;
@@ -332,12 +302,12 @@ class Tournament {
       }
       if (runtime.LplayerId === uuid) {
         runtime.leftReady = true;
-        console.log("lp", uuid, "confirmed");
+        // console.log("lp", uuid, "confirmed");
         return ;
       }
       if (runtime.RplayerId === uuid) {
         runtime.rightReady = true;
-        console.log("rp", uuid, "confirmed");
+        // console.log("rp", uuid, "confirmed");
         return ;
       }
     }
@@ -345,14 +315,14 @@ class Tournament {
   }
 
   public eliminatePlayer(uuid: string) {
-    console.log("beginning to eliminate", uuid);
+    // console.log("beginning to eliminate", uuid);
     let forfeit : boolean = false;
     if (this.currentStage > 0) {
       let i : number = 0;
       for (let pId of this.Ids[this.currentStage - 1]) {
         if (pId === uuid) {
           this.Ids[this.currentStage - 1][i] = "";
-          console.log("cleaned the appropriate Ids' id...");
+          // console.log("cleaned the appropriate Ids' id...");
           break ;
         }
         i++;
@@ -369,39 +339,39 @@ class Tournament {
           throw "undefined game runtime";
         }
         if (runtime.LplayerId === uuid) {
-          console.log("met our player in", runtime);
+          // console.log("met our player in", runtime);
           if (runtime.RplayerId !== "") {
             runtime.forfeit(uuid);
             forfeit = true;
-            console.log("made a lp forfeit for", uuid, "while cleaning");
+            // console.log("made a lp forfeit for", uuid, "while cleaning");
           }
           else {
             runtime.LplayerId = "failed";
             if (playersMap.has(uuid)) {
               playersMap.delete(uuid);
-              console.log("players map delete", uuid, "from eliminate player, for gid", gId, "as a left player");
+              // console.log("players map delete", uuid, "from eliminate player, for gid", gId, "as a left player");
             }
             else {
-              console.log("just set lp as failed, already didn't exist in the playersmap..", uuid);
+              console.info("just set lp as failed, already didn't exist in the playersmap..", uuid);
             }
           }
           break ;
         }
         if (runtime.RplayerId === uuid) {
-          console.log("met our player in", runtime);
+          // console.log("met our player in", runtime);
           if (runtime.LplayerId !== "") {
             runtime.forfeit(uuid);
             forfeit = true;
-            console.log("made a lp forfeit for", uuid, "while cleaning");
+            // console.log("made a lp forfeit for", uuid, "while cleaning");
           }
           else {
             runtime.RplayerId = "failed";
             if (playersMap.has(uuid)) {
               playersMap.delete(uuid);
-              console.log("players map delete", uuid, "from eliminate player, for gid", gId, "as a right player");
+              // console.log("players map delete", uuid, "from eliminate player, for gid", gId, "as a right player");
             }
             else {
-              console.log("just set rp as failed, already didn't exist in the playersmap..", uuid);
+              console.info("just set rp as failed, already didn't exist in the playersmap..", uuid);
             }
           }
           break ;
@@ -409,7 +379,7 @@ class Tournament {
       }
     }
     if (playersMap.has(uuid)) {
-      console.log("one extra deletion of", uuid, "from playersmap");
+      // console.log("one extra deletion of", uuid, "from playersmap");
       playersMap.delete(uuid);
     }
   }
@@ -454,14 +424,14 @@ export function addTournament(tName: string, playersN: number, privacy: boolean,
   playersParticipatingTourn.set(uuid, touridtoadd);
   if (!socksMap.has(uuid)) {
     socksMap.set(uuid, sock);
-    console.log("the sockmap had no sock for an admin. added!");
+    // console.log("the sockmap had no sock for an admin. added!");
   }
-  console.log(uuid, "just created a tournament", touridtoadd);
+  // console.log(uuid, "just created a tournament", touridtoadd);
   return (tourtoadd.tId);
 }
 
 export function joinTournament(tId: string, uuid: string, sock: WebSocket) {
-  console.log("trying to join tourn", tId, "as a", uuid);
+  // console.log("trying to join tourn", tId, "as a", uuid);
   if (playersParticipatingTourn.has(uuid)) {
     throw "Player already participates in " + playersParticipatingTourn.get(uuid);
   }
@@ -533,11 +503,11 @@ export function deleteTournament(adminId: string) {
 }
 
 export function leaveTournament(uuid: string) {
-  console.log("leave tournament called by", uuid);
-  console.log("here's players map:", playersMap);
-  console.log("here's players participating map:", playersParticipatingTourn);
-  console.log("here's gamesMap:", gamesMap);
-  console.log("here's tournament map:", tournamentMap);
+  // console.log("leave tournament called by", uuid);
+  // console.log("here's players map:", playersMap);
+  // console.log("here's players participating map:", playersParticipatingTourn);
+  // console.log("here's gamesMap:", gamesMap);
+  // console.log("here's tournament map:", tournamentMap);
   if (adminMap.has(uuid)) {
     throw "You can't just leave a tournament you're adminning.";
   }
@@ -553,7 +523,7 @@ export function leaveTournament(uuid: string) {
       }
       tour.eliminatePlayer(uuid);
       playersParticipatingTourn.delete(uuid);
-      console.log("according to all known laws of science, player", uuid, "eliminated from", tId);
+      // console.log("according to all known laws of science, player", uuid, "eliminated from", tId);
     }
     else {
       playersParticipatingTourn.delete(uuid);
@@ -610,7 +580,7 @@ export function confirmParticipation(uuid: string) {
     socksMap.get(uuid).send("confirmed");
   }
   else {
-    console.log("weird. we confirmed the participation but the player just straight up got no sock.");
+    console.info("weird. we confirmed the participation but the player just straight up got no sock.");
   }
 }
 
@@ -618,25 +588,25 @@ export async function tournamentsLoopCheck() {
   while (true) {
   for (const [tid, tour] of tournamentMap) {
     if (!tour.alive) {
-      console.log("from tlc: detected dead tournament", tid);
+      // console.log("from tlc: detected dead tournament", tid);
       tournamentMap.delete(tid);
       for (const [pid, tid2] of playersParticipatingTourn) {
         if (tid2 === tid) {
-          console.log("rming player", pid, "from said tournament's associated map");
+          // console.log("rming player", pid, "from said tournament's associated map");
           playersParticipatingTourn.delete(pid);
           if (playersMap.has(pid)) {
             if (gamesMap.has(playersMap.get(pid))) {
-              console.log("deleting game", gamesMap.get(playersMap.get(pid)), "gamesmap from tlc");
+              // console.log("deleting game", gamesMap.get(playersMap.get(pid)), "gamesmap from tlc");
               gamesMap.delete(playersMap.get(pid));
             }
-            console.log("deleting player", pid, "from playersmap from tlc");
+            // console.log("deleting player", pid, "from playersmap from tlc");
             playersMap.delete(pid);
           }
         }
       }
       for (const [aid, tid3] of adminMap) {
         if (tid3 === tid) {
-          console.log("rming admin", aid, "from said tournament's associated map");
+          // console.log("rming admin", aid, "from said tournament's associated map");
           adminMap.delete(aid);
         }
       }

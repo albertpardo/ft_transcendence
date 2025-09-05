@@ -31,7 +31,7 @@ export const addMatch = async (gameId : string, leftId : string, rightId : strin
 export const getAll = async () => {
 	const stmt2 = db.prepare('SELECT * FROM matches');
 	const info2 = stmt2.all();
-  console.log(info2);
+  // console.log(info2);
 }
 
 export const getHistForPlayerFromDb = async (playerId : string) => {

@@ -135,10 +135,10 @@ export async function buttonSetter(state : MetaGameState) {
   switch (state) {
     case MetaGameState.nothing: {
       // 1
-      document.getElementById("start-button").disabled = false;
-      document.getElementById("ready-button").disabled = true;
-      document.getElementById("giveup-button").disabled = true;
-      document.getElementById("local-play-button").disabled = false;
+      (document.getElementById("start-button") as HTMLButtonElement)!.disabled = false;
+      (document.getElementById("ready-button") as HTMLButtonElement)!.disabled = true;
+      (document.getElementById("giveup-button") as HTMLButtonElement)!.disabled = true;
+      (document.getElementById("local-play-button") as HTMLButtonElement)!.disabled = false;
       break;
     }
     case MetaGameState.waitmmopp: {
@@ -151,10 +151,10 @@ export async function buttonSetter(state : MetaGameState) {
     }
     case MetaGameState.inmmgame: {
       // 4
-      document.getElementById("start-button").disabled = true;
-      document.getElementById("ready-button").disabled = true;
-      document.getElementById("giveup-button").disabled = false;
-      document.getElementById("local-play-button").disabled = true;
+      (document.getElementById("start-button") as HTMLButtonElement)!.disabled = true;
+      (document.getElementById("ready-button") as HTMLButtonElement)!.disabled = true;
+      (document.getElementById("giveup-button") as HTMLButtonElement)!.disabled = false;
+      (document.getElementById("local-play-button") as HTMLButtonElement)!.disabled = true;
       break;
     }
     case MetaGameState.waittouropp: {
@@ -163,59 +163,59 @@ export async function buttonSetter(state : MetaGameState) {
     }
     case MetaGameState.waittourstart: {
       // 6
-      document.getElementById("start-button").disabled = true;
-      document.getElementById("ready-button").disabled = true;
-      document.getElementById("giveup-button").disabled = true;
-      document.getElementById("local-play-button").disabled = true;
+      (document.getElementById("start-button") as HTMLButtonElement)!.disabled = true;
+      (document.getElementById("ready-button") as HTMLButtonElement)!.disabled = true;
+      (document.getElementById("giveup-button") as HTMLButtonElement)!.disabled = true;
+      (document.getElementById("local-play-button") as HTMLButtonElement)!.disabled = true;
       break;
     }
     case MetaGameState.waittourrdy: {
       // 7
-      document.getElementById("start-button").disabled = true;
-      document.getElementById("ready-button").disabled = false;
-      document.getElementById("giveup-button").disabled = true;
-      document.getElementById("local-play-button").disabled = true;
+      (document.getElementById("start-button") as HTMLButtonElement)!.disabled = true;
+      (document.getElementById("ready-button") as HTMLButtonElement)!.disabled = false;
+      (document.getElementById("giveup-button") as HTMLButtonElement)!.disabled = true;
+      (document.getElementById("local-play-button") as HTMLButtonElement)!.disabled = true;
       break;
     }
     case MetaGameState.waittouropprdy: {
       // 8
-      document.getElementById("start-button").disabled = true;
-      document.getElementById("ready-button").disabled = true;
-      document.getElementById("giveup-button").disabled = true;
-      document.getElementById("local-play-button").disabled = true;
+      (document.getElementById("start-button") as HTMLButtonElement)!.disabled = true;
+      (document.getElementById("ready-button") as HTMLButtonElement)!.disabled = true;
+      (document.getElementById("giveup-button") as HTMLButtonElement)!.disabled = true;
+      (document.getElementById("local-play-button") as HTMLButtonElement)!.disabled = true;
       break;
     }
     case MetaGameState.intourgame: {
       // 9
-      document.getElementById("start-button").disabled = true;
-      document.getElementById("ready-button").disabled = true;
-      document.getElementById("giveup-button").disabled = false;
-      document.getElementById("local-play-button").disabled = true;
+      (document.getElementById("start-button") as HTMLButtonElement)!.disabled = true;
+      (document.getElementById("ready-button") as HTMLButtonElement)!.disabled = true;
+      (document.getElementById("giveup-button") as HTMLButtonElement)!.disabled = false;
+      (document.getElementById("local-play-button") as HTMLButtonElement)!.disabled = true;
       break;
     }
     case MetaGameState.losttour: {
       // 10
-      document.getElementById("start-button").disabled = true;
-      document.getElementById("ready-button").disabled = true;
-      document.getElementById("giveup-button").disabled = true;
-      document.getElementById("local-play-button").disabled = true;
+      (document.getElementById("start-button") as HTMLButtonElement)!.disabled = true;
+      (document.getElementById("ready-button") as HTMLButtonElement)!.disabled = true;
+      (document.getElementById("giveup-button") as HTMLButtonElement)!.disabled = true;
+      (document.getElementById("local-play-button") as HTMLButtonElement)!.disabled = true;
       break;
     }
     case MetaGameState.inlocalgame: {
       // 11
-      document.getElementById("start-button").disabled = true;
-      document.getElementById("ready-button").disabled = true;
-      document.getElementById("giveup-button").disabled = false;
-      document.getElementById("local-play-button").disabled = true;
+      (document.getElementById("start-button") as HTMLButtonElement)!.disabled = true;
+      (document.getElementById("ready-button") as HTMLButtonElement)!.disabled = true;
+      (document.getElementById("giveup-button") as HTMLButtonElement)!.disabled = false;
+      (document.getElementById("local-play-button") as HTMLButtonElement)!.disabled = true;
       break;
     }
     default: {
       //basically "misc"
       //idk if that's a good idea
-      document.getElementById("start-button").disabled = false;
-      document.getElementById("ready-button").disabled = false;
-      document.getElementById("giveup-button").disabled = false;
-      document.getElementById("local-play-button").disabled = false;
+      (document.getElementById("start-button") as HTMLButtonElement)!.disabled = false;
+      (document.getElementById("ready-button") as HTMLButtonElement)!.disabled = false;
+      (document.getElementById("giveup-button") as HTMLButtonElement)!.disabled = false;
+      (document.getElementById("local-play-button") as HTMLButtonElement)!.disabled = false;
       break;
     }
   }
@@ -658,10 +658,10 @@ export async function initDashboard() {
     </div>
   `;
 
-  const leftUpArrow: HTMLElement = document.getElementById("left-up")!;
-  const leftDownArrow : HTMLElement = document.getElementById("left-down")!;
-  const rightUpArrow : HTMLElement = document.getElementById("right-up")!;
-  const rightDownArrow : HTMLElement = document.getElementById("right-down")!;
+  const leftUpArrow = document.getElementById("left-up") as HTMLButtonElement;
+  const leftDownArrow = document.getElementById("left-down") as HTMLButtonElement;
+  const rightUpArrow = document.getElementById("right-up") as HTMLButtonElement;
+  const rightDownArrow = document.getElementById("right-down") as HTMLButtonElement;
   const ball : HTMLElement = document.getElementById("ball")!;
   const lpad : HTMLElement = document.getElementById("lpad")!;
   const rpad : HTMLElement = document.getElementById("rpad")!;
@@ -670,12 +670,12 @@ export async function initDashboard() {
   const gameArea = document.getElementById('game-area')!;
   const gameWindow = document.getElementById('game-window')!;
   let gameType = "normal";
-  const gameInfo : HTMLElement = document.getElementById("game-info");
+  const gameInfo : HTMLElement = document.getElementById("game-info")!;
 
-  document.getElementById("start-button").innerHTML = t("pong-buttons.start-button-text");
-  document.getElementById("ready-button").innerHTML = t("pong-buttons.ready-button-text");
-  document.getElementById("giveup-button").innerHTML = t("pong-buttons.giveup-button-text");
-  document.getElementById("local-play-button").innerHTML = t("pong-buttons.local-play-button-text");
+  document.getElementById("start-button")!.innerHTML = t("pong-buttons.start-button-text");
+  document.getElementById("ready-button")!.innerHTML = t("pong-buttons.ready-button-text");
+  document.getElementById("giveup-button")!.innerHTML = t("pong-buttons.giveup-button-text");
+  document.getElementById("local-play-button")!.innerHTML = t("pong-buttons.local-play-button-text");
 
   let gameText : HTMLElement | null = document.getElementById("game-text")!;
   if (gameText) {
@@ -722,7 +722,7 @@ export async function initDashboard() {
         case "connected":
           break;
         case "confirmed":
-          document.getElementById('ready-button').disabled = true;
+          (document.getElementById('ready-button') as HTMLButtonElement)!.disabled = true;
           buttonSetter(MetaGameState.intourgame);
           break;
         case "abandon":
@@ -937,7 +937,7 @@ export async function initDashboard() {
       const regPlResp = await regPlRawResp.text();
       const regPlRespObj = JSON.parse(regPlResp);
       if (regPlRespObj.err !== "nil") {
-        console.log(regPlRespObj);
+        console.info(regPlRespObj);
       }
       metaInfo = await getGameMetaInfo();
       await setterUponMetaInfo(gameInfo, metaInfo);
@@ -967,7 +967,7 @@ export async function initDashboard() {
         console.error(readyPlRespObj.err);
       }
       else {
-        document.getElementById('ready-button').disabled = true;
+        (document.getElementById('ready-button') as HTMLButtonElement)!.disabled = true;
         // I think it's okay to just do that here instead of the meta way
         // cuz it's a super simple interaction
       }

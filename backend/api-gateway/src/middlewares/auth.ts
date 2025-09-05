@@ -3,7 +3,7 @@ import { FastifyRequest, FastifyReply } from 'fastify';
 
 import { logFormat } from '../pino_utils/log_format'; //by apardo-m
 
-console.log("🛡️ Auth middleware loaded!");
+// console.log("🛡️ Auth middleware loaded!");
 let itwasasocket : boolean = false;
 
 // JWT verification using authMiddleware
@@ -22,7 +22,7 @@ export async function authMiddleware(req: FastifyRequest, reply: FastifyReply) {
     // if requested URL is public, skip auth
     const publicPaths = ['/api/signup', '/api/login', '/api/public', '/api/auth/google', '/api/user/upsert-google'];
     if (req.url && publicPaths.some(path => req.url?.startsWith(path))) {
-      console.log(`🔓 Public path skipped: ${req.url}`);
+      // console.log(`🔓 Public path skipped: ${req.url}`);
       return;
     }
 

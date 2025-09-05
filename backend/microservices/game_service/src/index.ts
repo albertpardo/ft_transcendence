@@ -49,7 +49,7 @@ const FRONT_URL = process.env.FRONT_URL;
 if (typeof FRONT_URL !== "string") {
   throw "some weird stuff happened. no FRONT_URL being string found.";
 }
-console.log(FRONT_URL);
+// console.log(FRONT_URL);
 
 // id shall come from the req and be per-user unique and persistent (jwt)
 // getIn tells do we wanna move (false) or do we wanna get into a game (true)

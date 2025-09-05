@@ -1,7 +1,7 @@
 //const { generateToken } = require('../services/authServices');
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 
-console.log('✅ exampleRoutes is registered');
+// console.log('✅ exampleRoutes is registered');
 // define a route and export a function
 module.exports = async function exampleRoutes(fastify: FastifyInstance) {
    

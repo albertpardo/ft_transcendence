@@ -231,7 +231,7 @@ class PongRuntime {
       this.gstate.stateWhoL = "both";
       this.pongStarted = true;
       this.pongDone = true;
-      console.log("both fail");
+      // console.log("both fail");
       return ;
     }
     if (this.LplayerId === "failed") {
@@ -240,7 +240,7 @@ class PongRuntime {
       addMatch(playersMap.get(this.RplayerId), this.LplayerId, this.RplayerId, this.scoreL, this.scoreR, "R", this.gameType, "absence");
       this.pongStarted = true;
       this.pongDone = true;
-      console.log("left fail");
+      // console.log("left fail");
       return ;
     }
     if (this.RplayerId === "failed") {
@@ -249,17 +249,17 @@ class PongRuntime {
       addMatch(playersMap.get(this.LplayerId), this.LplayerId, this.RplayerId, this.scoreL, this.scoreR, "L", this.gameType, "absence");
       this.pongStarted = true;
       this.pongDone = true;
-      console.log("right fail");
+      // console.log("right fail");
       return ;
     }
     if (this.gameType === "tournament") {
       const startDate = Date.now();
-      console.log("tournament! st date:", startDate);
+      // console.log("tournament! st date:", startDate);
       while ((Date.now() - startDate)/1000 < TOURNAMENT_READY_TIMEOUT) {
         if (this.leftReady && this.rightReady) {
           break ;
         }
-        console.log("time passed:", (Date.now() - startDate)/1000);
+        // console.log("time passed:", (Date.now() - startDate)/1000);
         await sleep(1e3);
       }
       if (this.leftReady && !this.rightReady) {
@@ -287,7 +287,7 @@ class PongRuntime {
       }
     }
     else {
-      console.log("everything seems normal. type:", this.gameType);
+      console.info("everything seems normal. type:", this.gameType);
     }
 
     // now that the tournament-specific fail condition check is done, begin the cycle.
@@ -377,10 +377,10 @@ const nullState : State = {
 //
 export function addPlayerCompletely(playerId: string, sock: WebSocket) {
   if (playersMap.has(playerId)) {
-    console.log("oh no! player id", playerId, "already in!");
+    // console.log("oh no! player id", playerId, "already in!");
     if (socksMap.has(playerId) === false) {
       socksMap.set(playerId, sock);
-      console.log("...however, they were most likely disconnected. re-connected now!");
+      // console.log("...however, they were most likely disconnected. re-connected now!");
       if (!gamesMap.has(playersMap.get(playerId))) {
         throw "no game found for a located gameid";
       }
@@ -395,7 +395,7 @@ export function addPlayerCompletely(playerId: string, sock: WebSocket) {
     if (!gamesMap.has(playersMap.get(playerId))) {
       throw "no game found for a located gameid";
     }
-    console.log("so the player was in already");
+    // console.log("so the player was in already");
     const gType = gamesMap.get(playersMap.get(playerId)).gameType;
     throw new JoinError({
       gType: gType,
@@ -464,7 +464,7 @@ export function createLocalGame(playerId: string, sock: WebSocket) {
 }
 
 export function createTournamentGame(lId: string, rId: string) {
-  console.log("starting to create T game with", lId, "and", rId);
+  // console.log("starting to create T game with", lId, "and", rId);
   if (playersMap.has(lId)) {
     throw "L Player already in " + playersMap.get(lId);
   }
@@ -479,8 +479,8 @@ export function createTournamentGame(lId: string, rId: string) {
   gamesMap.get(newid).gameType = "tournament";
   playersMap.set(lId, newid);
   playersMap.set(rId, newid);
-  console.log("in the createTournamentGame, let's see the socksMap:");
-  console.log(socksMap);
+  // console.log("in the createTournamentGame, let's see the socksMap:");
+  // console.log(socksMap);
   if (socksMap.has(lId)) {
     socksMap.get(lId).send("added: L");
   }
@@ -495,7 +495,7 @@ export function createTournamentGame(lId: string, rId: string) {
   }
   needToSendStartedMap.set(lId, true);
   needToSendStartedMap.set(rId, true);
-  console.log("the prt object in question", gamesMap.get(newid));
+  // console.log("the prt object in question", gamesMap.get(newid));
   return (newid);
 }
 
@@ -544,7 +544,7 @@ export function forfeit(playerId: string) {
         playersMap.delete(lpid);
         playersMap.delete(rpid);
         gamesMap.delete(gameId);
-        console.log("double deleted the players", lpid, rpid, "and the gid", gameId, "cuz abandon");
+        // console.log("double deleted the players", lpid, rpid, "and the gid", gameId, "cuz abandon");
         return ;
       }
       gamesMap.get(gameId).forfeit(playerId);
@@ -594,7 +594,7 @@ export const gamesReadyLoopCheck = async () => {
         && needToSendStartedMap.get(gameRuntime.LplayerId) === true
         && needToSendStartedMap.get(gameRuntime.RplayerId) === true) {
           if (gameRuntime.gameType === "normal") {
-            console.log("I'm so normal.");
+            // console.log("I'm so normal.");
             gameRuntime.mainLoop();
             needToSendStartedMap.set(gameRuntime.LplayerId, false);
             needToSendStartedMap.set(gameRuntime.RplayerId, false);
@@ -603,7 +603,7 @@ export const gamesReadyLoopCheck = async () => {
             dataStreamer(gameRuntime.RplayerId);
           }
           else {
-            console.log("I'm so not normal!");
+            // console.log("I'm so not normal!");
             gameRuntime.mainLoop();
             needToSendStartedMap.set(gameRuntime.LplayerId, false);
             needToSendStartedMap.set(gameRuntime.RplayerId, false);
@@ -615,7 +615,7 @@ export const gamesReadyLoopCheck = async () => {
       }
       else if (gameRuntime.LplayerId !== "" && gameRuntime.gameType === "local" && needToSendStartedMap.has(gameRuntime.LplayerId)
       && gameRuntime.pongStarted !== true) {
-        console.log("I'm so local.");
+        // console.log("I'm so local.");
         gameRuntime.mainLoop();
         needToSendStartedMap.set(gameRuntime.LplayerId, false);
         await sleep(10);
@@ -636,24 +636,24 @@ const waitingForReconnect = async (playerId) => {
 export const dataStreamer = async (playerId : string) => {
   let sock : WebSocket = socksMap.get(playerId);
   const runtime : PongRuntime = gamesMap.get(playersMap.get(playerId));
-  console.log("data streamer", playerId, "says: pm is", playersMap);
+  // console.log("data streamer", playerId, "says: pm is", playersMap);
   while (true) {
     if (!playersMap.has(playerId)) {
-      console.log("player", playerId, "has disappeared from map");
+      // console.log("player", playerId, "has disappeared from map");
       break ;
     }
     if (!gamesMap.has(playersMap.get(playerId))) {
-      console.log("game has disappeared for player", playerId);
+      // console.log("game has disappeared for player", playerId);
       break ;
     }
     if (socksMap.has(playerId) === false) {
-      console.log("player", playerId, "has currently no socks available.");
+      // console.log("player", playerId, "has currently no socks available.");
       await waitingForReconnect(playerId);
       sock = socksMap.get(playerId);
-      console.log("player", playerId, "found their sock");
+      // console.log("player", playerId, "found their sock");
     }
     if (runtime.gameType === "tournament" && (runtime.leftReady === false || runtime.rightReady === false) && !runtime.pongDone) {
-      console.log(playerId, "is waiting for left:", !runtime.leftReady, "right:", !runtime.rightReady, "; the player is", (runtime.LplayerId === playerId ? "L" : "R"));
+      // console.log(playerId, "is waiting for left:", !runtime.leftReady, "right:", !runtime.rightReady, "; the player is", (runtime.LplayerId === playerId ? "L" : "R"));
       await sleep(1e3);
     }
     else if (runtime.pongDone === false) {
@@ -664,18 +664,18 @@ export const dataStreamer = async (playerId : string) => {
         if (runtime.LplayerId === playerId) {
           sock.send(JSON.stringify(runtime.gstate));
           if (playersMap.has(playerId)) {
-            console.log("deleting lpid", playerId, "from pmap in datastreamer's pongdone thing (being a left player ourselves)");
+            // console.log("deleting lpid", playerId, "from pmap in datastreamer's pongdone thing (being a left player ourselves)");
             playersMap.delete(playerId);
           }
           if (gamesMap.has(playersMap.get(playerId))) {
-            console.log("deleting gid", playersMap.get(playerId), "from gmap in datastreamer's pongdone thing (being a left player ourselves)");
+            // console.log("deleting gid", playersMap.get(playerId), "from gmap in datastreamer's pongdone thing (being a left player ourselves)");
             gamesMap.delete(playersMap.get(playerId));
           }
         }
         else if (runtime.RplayerId === playerId) {
           sock.send(JSON.stringify(runtime.gstate));
           if (playersMap.has(playerId)) {
-            console.log("deleting rpid", playerId, "from pmap in datastreamer's pongdone thing (being a right player ourselves)");
+            // console.log("deleting rpid", playerId, "from pmap in datastreamer's pongdone thing (being a right player ourselves)");
             playersMap.delete(playerId);
           }
         }
@@ -691,11 +691,11 @@ export const dataStreamer = async (playerId : string) => {
       else if (runtime.gameType === "local") {
         sock.send(JSON.stringify(runtime.gstate));
         if (gamesMap.has(playersMap.get(playerId))) {
-          console.log("deleting gid", playersMap.get(playerId), "from gmap in datastreamer's pongdone thing (being a left player ourselves)");
+          // console.log("deleting gid", playersMap.get(playerId), "from gmap in datastreamer's pongdone thing (being a left player ourselves)");
           gamesMap.delete(playersMap.get(playerId));
         }
         if (playersMap.has(playerId)) {
-          console.log("deleting lpid", playerId, "from pmap in datastreamer's pongdone thing (being a left player ourselves)");
+          // console.log("deleting lpid", playerId, "from pmap in datastreamer's pongdone thing (being a left player ourselves)");
           playersMap.delete(playerId);
         }
       }

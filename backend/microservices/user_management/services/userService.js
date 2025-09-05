@@ -148,12 +148,12 @@ exports.putUserStatus = async (userId, userStatus) => {
 }
 
 exports.upsertGoogleUser = async (email, name, picture, googleId) => {
-  console.log('🔍 [userService] upsertGoogleUser called with:', { email, googleId, name, picture });
+  console.info('🔍 [userService] upsertGoogleUser called with:', { email, googleId, name, picture });
 
   let user = db.getUserByEmail(email) || db.getUserByGoogleId(googleId);
 
   if (!user) {
-    console.log('🆕 [userService] Creating new user');
+    // console.log('🆕 [userService] Creating new user');
     const username = email.split('@')[0].replace(/[^a-zA-Z0-9]/g, '') + Math.floor(Math.random() * 1000);
     const localid = makeid(64);
     const firstName = name?.split(' ')[0] || 'User';
@@ -172,14 +172,14 @@ exports.upsertGoogleUser = async (email, name, picture, googleId) => {
         status: 'online',
         nickname: nickname,
       });
-      console.log('✅ [userService] Created user:', user);
+      // console.log('✅ [userService] Created user:', user);
     } catch (err) {
-      console.error('❌ [userService] createUser failed:', err.message);
-      console.error('❌ [userService] Full error:', err.stack);
+      // console.error('❌ [userService] createUser failed:', err.message);
+      // console.error('❌ [userService] Full error:', err.stack);
       throw err;
     }
   } else {
-    console.log('🔄 [userService] User found:', user.username);
+    // console.log('🔄 [userService] User found:', user.username);
     const updates = {};
     if (!user.avatar) updates.avatar = picture;
     if (!user.firstName) updates.firstName = name?.split(' ')[0] || 'User';
@@ -187,9 +187,9 @@ exports.upsertGoogleUser = async (email, name, picture, googleId) => {
     if (Object.keys(updates).length > 0) {
       try {
         db.updateUser(user.id, updates);
-        console.log('✅ [userService] Updated user:', user.username);
+        // // console.log('✅ [userService] Updated user:', user.username);
       } catch (err) {
-        console.error('❌ [userService] updateUser failed:', err.message);
+        // console.error('❌ [userService] updateUser failed:', err.message);
         throw err;
       }
     }
