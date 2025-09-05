@@ -155,7 +155,7 @@
     "onlineText": "Use W/S to control your paddle",
     "local": "Local matches:",
     "localText": "Use W/S for the left paddle and O/L for the right paddle",
-    "altControls": "Alternative controls: ↑/↓ keys or swipe up/down on mobile",
+    "altControls": "Alternative controls: ↑/↓ keys or use up/down buttons on mobile",
     "important": "Important:",
     "importantText": "If you use fullscreen mode, it is strongly recommended NOT to use the arrow keys"
   },

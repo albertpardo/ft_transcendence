@@ -96,8 +96,8 @@ export async function renderHistoryContent(hideableElements) {
     const rawHist = await getHistoryForPlayerId(userId);
     const rawHistBody = await rawHist.text();
     const parsedHist = JSON.parse(rawHistBody);
-    
-   if (!Array.isArray(parsedHist) || parsedHist.length === 0) {
+
+    if (!Array.isArray(parsedHist) || parsedHist.length === 0) {
       tempInnerHTML += `
         <tr>
         <td colspan="6" class="text-gray-400 text-center p-4">
@@ -154,12 +154,12 @@ export async function renderHistoryContent(hideableElements) {
         if (userWon) {
           res = entry.finish === "forfeit" ? t("historic.winForfeit") :
             (entry.finish === "absence" || entry.finish === "technical") ? t("historic.winAbsence") :
-            t("historic.win");
+              t("historic.win");
         }
         else {
           res = entry.finish === "forfeit" ? t("historic.lossForfeit") :
             (entry.finish === "technical") ? t("historic.lossAbsence") :
-            t("historic.loss");
+              t("historic.loss");
         }
 
         const resultColorClass = userWon ? 'text-green-400 font-semibold' : 'text-red-500 font-semibold';
