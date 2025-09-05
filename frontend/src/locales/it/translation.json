@@ -15,8 +15,16 @@
     "title": "Tornei",
     "description": "Unisciti o crea tornei per competere con altri.",
     "create": "Crea Torneo",
+    "view": "Visualizza Torneo",
     "join": "Partecipa al Torneo",
-    "noTournaments": "Nessun torneo disponibile al momento.",
+    "contender": "Contendente",
+    "quarterFinal": "Quarti di finale",
+    "semiFinal": "Semifinale",
+    "final": "Finalista",
+    "leaveTournament": "Esci dal torneo (se sei iscritto)",
+    "destroyTournament": "Distruggi torneo (solo admin)",
+    "noTournaments": "Non sei iscritto a nessun torneo.",
+    "noTournamentsAvailable": "Nessun torneo disponibile.",
     "tournamentName": "Nome torneo",
     "startDate": "Data di inizio",
     "endDate": "Data di fine",
@@ -24,7 +32,25 @@
     "createSuccess": "Torneo creato con successo!",
     "joinSuccess": "Iscritto al torneo con successo!",
     "errorCreating": "Errore nella creazione del torneo.",
-    "errorJoining": "Errore nell'iscrizione al torneo."
+    "errorJoining": "Errore nell'iscrizione al torneo.",
+    "tournamentManagement": "Gestione torneo",
+    "privatizeTournament": "Privatizza torneo",
+    "registerTournament": "Registra torneo",
+    "joinTournamentById": "Iscriviti a un torneo tramite ID",
+    "tournamentId": "ID torneo",
+    "ID": "ID",
+    "enterTournament": "Entra nel torneo",
+    "myTournaments": "Visualizza il torneo",
+    "allTournaments": "Tutti i tornei",
+    "nobodyWon": "In una rara esibizione di assenza, nessuno ha vinto",
+    "empty": "vuoto",
+    "finalist": "Finalista",
+    "lWon": "L ha vinto",
+    "rWon": "R ha vinto",
+    "lSuperWon": "L ha vinto completamente",
+    "rSuperWon": "R ha vinto completamente",
+    "name": "Nome",
+    "players": "Giocatori"
   },
   "historic": {
     "title": "Cronologia partite",
@@ -33,10 +59,19 @@
     "score": "Punteggio",
     "opponent": "Avversario",
     "date": "Data",
-    "victory": "Vittoria",
-    "loss": "Sconfitta",
+	  "win": "Vittoria",
+	  "loss": "Sconfitta",
+    "side": "Lateralità",
+    "right": "Destra",
+    "left": "Sinistra",
+    "type": "Tipo",
+	  "winForfeit": "Vittoria (il nemico ha rinunciato)",
+	  "lossForfeit": "Sconfitta (hai rinunciato)",
+	  "winAbsence": "Vittoria (il nemico non si è presentato)",
+	  "lossAbsence": "Sconfitta (non ti sei presentato)",
     "notLoggedIn": "Non sei connesso.",
     "noAuthToken": "Token di autenticazione mancante.",
+    "noGames": "Non hai ancora giocato partite.",
     "failedToLoad": "Impossibile caricare la cronologia partite."
   },
   "profiles": {
@@ -62,7 +97,19 @@
     "confirm.save.text": "Sei sicuro di voler salvare queste modifiche?",
     "save": "Salva",
     "success.update": "Profilo aggiornato con successo!",
-    "success.delete": "Account eliminato con successo!"
+    "success.delete": "Account eliminato con successo!",
+    "newPassword": "Inserisci nuova password"
+  },
+  "friendsTxt": {
+    "refresh": "Aggiorna lo stato degli amici",
+    "nickTxt": "Soprannome",
+    "addBtn": "Aggiungi amico",
+    "nickRow": "Soprannome",
+    "statusRow": "Stato",
+    "addError": "Si è verificato un errore durante l'aggiunta dell'amico.",
+    "addFailed": "Impossibile aggiungere un amico.",
+    "getError": "Errore durante il caricamento degli amici. Riprova più tardi.",
+    "getFailed": "Impossibile recuperare i dati degli amici."
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -71,6 +118,7 @@
     "history": "Cronologia",
     "tournament": "Torneo",
     "stats": "Statistiche",
+    "friends": "Amici",
     "logout": "Esci"
   },
   "play": "Gioca a Pong",
@@ -78,6 +126,7 @@
   "history": "Cronologia",
   "tournament": "Torneo",
   "stats": "Statistiche",
+  "friends": "Amici",
   "logout": "Esci",
   "welcome": "Benvenuto su Pong",
   "login": "Accedi",
@@ -88,5 +137,41 @@
   "wonGame": "Hai vinto la partita!",
   "lostGame": "Hai perso la partita.",
   "wonRound": "Hai vinto il round!",
-  "lostRound": "Hai perso il round."
+  "lostRound": "Hai perso il round.",
+  "pong-buttons": {
+	  "start-button-text": "Cerca una partita veloce",
+	  "ready-button-text": "Conferma la partecipazione",
+	  "giveup-button-text": "Rinuncia IMMEDIATAMENTE",
+    "local-play-button-text": "Avvia partita locale"
+	},
+  "instructions": {
+  "title": "Istruzioni di gioco",
+  "intro": "Questa guida ti aiuterà a capire tutte le funzioni e i controlli del gioco.",
+  "controls": {
+    "title": "Controlli di gioco",
+    "online": "Partite online:",
+    "onlineText": "Usa W/S per controllare la tua racchetta",
+    "local": "Partite locali:",
+    "localText": "Usa W/S per la racchetta sinistra e O/L per quella destra",
+    "altControls": "Controlli alternativi: tasti ↑/↓ o con i pulsanti su/giù su mobile",
+    "important": "Importante:",
+    "importantText": "Se utilizzi la modalità a schermo intero, è fortemente sconsigliato usare le frecce"
+  },
+  "navMenu": {
+    "title": "Descrizione del menu di navigazione",
+    "profile": "Profilo",
+    "profileText": "Nel tuo profilo puoi personalizzare l’esperienza cambiando avatar, password, soprannome, email e nome utente. Queste opzioni sono disponibili solo se non hai effettuato l’accesso con Google OAuth.",
+    "playPong": "Gioca a Pong",
+    "playPongText": "• Scegli avversari casuali per partite veloci<br>• Abbandona partite in corso se necessario<br>• Avvia partite locali sullo stesso schermo<br>• Conferma la tua partecipazione ai tornei<br>• Goditi controlli fluidi",
+    "history": "Storico",
+    "historyText": "Consulta il riepilogo di tutte le tue partite, con i dettagli degli avversari e se erano tornei o partite normali.",
+    "tournament": "Torneo",
+    "tournamentText": "Visualizza la struttura e l’avanzamento dei tornei in corso. I risultati sono mostrati in un albero delle fasi.",
+    "tournamentMgmt": "Gestione tornei",
+    "tournamentMgmtText": "• Crea tornei da 2, 4 o 8 giocatori<br>• Rendili privati o pubblici<br>• Unisciti tramite ID o cerca i tornei disponibili<br>• Ogni torneo mostra nome, giocatori e pulsanti per partecipare",
+    "friends": "Amici",
+    "friendsText": "Aggiungi giocatori alla tua lista amici e controlla il loro stato online. Usa il pulsante aggiorna per ricaricare gli stati."
+  }
+}
+
 }
