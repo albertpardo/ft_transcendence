@@ -1,0 +1,4 @@
+api.http.host: "logstash"
+api.http.port: 9600
+pipeline.buffer.type: heap
+xpack.monitoring.enabled: false

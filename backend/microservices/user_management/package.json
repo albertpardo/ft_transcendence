@@ -17,7 +17,10 @@
     "better-sqlite3": "^11.9.1",
     "dotenv": "^16.5.0",
     "fastify": "^5.3.2",
-    "jsonwebtoken": "^9.0.2"
+	"fastify-plugin": "^5.0.1",
+    "jsonwebtoken": "^9.0.2",
+    "pino": "^9.7.0",
+    "pino-pretty": "^13.0.0"
   },
   "devDependencies": {
     "@types/node": "^22.14.1"

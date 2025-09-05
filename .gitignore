@@ -74,6 +74,7 @@ web_modules/
 .yarn-integrity
 
 # dotenv environment variable files
+*/.env
 .env
 .env.development.local
 .env.test.local
@@ -144,14 +145,24 @@ dist
 git-script.sh
 
 # backend/.gitignore
-#database.db
-
+*.db
+*/*.db
 
 .vscode/
 
 # Desktop Services Store
 .DS_Store
 
-backend/package-lock.json
-frontend/package-lock.json
+*package-lock.json
+package-lock.json
+*/package-lock.json
 
+# by apardo-m
+/backend/elk/certs
+elk_folder/
+
+# vim
+*.swp
+*.swo
+.swp
+.swo

@@ -3,10 +3,11 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: transcendence_frontend
+    container_name: trans_frontend
     volumes:
       - ./frontend:/app
       - /app/node_modules
+      - shared_logs:/shared_logs
     ports:
       - "3000:3000"
     depends_on:
@@ -23,10 +24,11 @@ services:
       - "8443:8443"     # TLS port exposed to host
     depends_on:
       - user_management
-#      - game_service
+      - game_service
     volumes:
       - ./backend/api-gateway:/app
       - /app/node_modules      # use container-installed deps
+      - shared_logs:/shared_logs
     env_file:
       - ./backend/api-gateway/.env
     restart: always
@@ -41,25 +43,31 @@ services:
     volumes:
       - ./backend/microservices/user_management:/app
       - /app/node_modules      # use container-installed deps
+      - shared_logs:/shared_logs 
     environment:
       - ./backend/microservices/user_management/.env
     restart: always
     networks:
       - backend
 
-#  game_service:
-#    build: ./game_service
-#    expose:
-#      - "9002"
-#    networks:
-#      - backend
+  game_service:
+    build: ./backend/microservices/game_service
+    container_name: trans_game_service
+    expose:
+      - "9002"
+    volumes:
+      - ./backend/microservices/game_service:/app
+      - /app/node_modules      # use container-installed deps
+      - ./backend/microservices/game_service/vol:/app/dbs
+      - shared_logs:/shared_logs 
+    restart: always
+    networks:
+      - backend
 
-#  chat_service:
-#    build: ./chat_service
-#    expose:
-#      - "9003"
-#    networks:
-#      - backend
+# shared_logs store log's files from microservices 
+volumes:
+  shared_logs:
+    driver: local
 
 networks:
   backend:

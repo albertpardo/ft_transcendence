@@ -1,4 +1,7 @@
 # Use Node with Alpine for small size
+#  FROM nexus.42barcelona.com:5000/node:23-slim
+# {"registry-mirrors": ["https://nexus.42barcelona.com:5000/"]}%    
+
 FROM node:23-slim
 
 # Install dependencies we need for ts-node (including typescript)
@@ -19,9 +22,14 @@ RUN npm install -g ts-node typescript ts-node-dev
 # Copy source code & certs
 COPY . .
 
+#by apardo-m
+RUN chmod +x script.sh
+
 # Expose HTTPS port
 EXPOSE 8443
 
 # Run using ts-node (just like the local command)
-# CMD ["npm", "run", "dev"]
-CMD ["npm", "run", "serve"]
+#CMD ["npm", "run", "dev"]
+
+#by apardo-m
+CMD ["sh" , "./script.sh"] 

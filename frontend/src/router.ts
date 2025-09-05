@@ -1,9 +1,13 @@
-//src/router.ts
+///src/router.ts
 
 import { renderLogin } from './views/login';
-import { renderHomeContent, renderPlayContent, renderTournamentContent, renderStatsContent } from './views/sections';
-import { initDashboard } from './views/dashboard';
+import { renderHomeContent, renderPlayContent, renderStatsContent } from './views/sections';
 import { renderProfileContent } from './views/profile';
+import { renderHistoryContent } from './views/history';
+import { renderTournamentContent, renderTournamentManagerContent } from './views/tournament';
+import { initDashboard } from './views/dashboard';
+
+import { renderFriendsContent } from './views/friends'
 
 export function route() {
   const hash = window.location.hash.replace('#', '') || 'home';
@@ -28,13 +32,21 @@ export function route() {
   }
 
   // Renderiza el contenido según la sección
-  const content = document.getElementById('content-area')!;
+  const hideableElements = {
+    contentArea: document.getElementById('content-area')!,
+    buttonArea: document.getElementById('button-area')!,
+    gameArea: document.getElementById('game-area')!,
+    gameWindow: document.getElementById('game-window')!,
+    gameInfo: document.getElementById('game-info')!,
+  };
   switch (hash) {
-    case 'profile':    renderProfileContent(content);    break;
-    case 'play':       renderPlayContent(content);       break;
-    case 'tournament': renderTournamentContent(content); break;
-    case 'stats':      renderStatsContent(content);      break;
-    default:           renderHomeContent(content);
+    case 'profile':           renderProfileContent(hideableElements);           break;
+    case 'play':              renderPlayContent(hideableElements);              break;
+    case 'history':           renderHistoryContent(hideableElements);           break;
+    case 'tournament':        renderTournamentContent(hideableElements);        break;
+    case 'tournamentmanager': renderTournamentManagerContent(hideableElements); break;
+    case 'friends':           renderFriendsContent(hideableElements);           break;
+    default:                  renderHomeContent(hideableElements);
   }
 
   // Actualiza el estado activo de los links del sidebar
