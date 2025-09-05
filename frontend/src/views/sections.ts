@@ -42,54 +42,54 @@ export function renderHomeContent(el: HTMLElement, bu: HTMLElement, gArea: HTMLE
     </div>
     <div class="max-w-4xl mx-auto p-6 bg-gray-900 text-white rounded-lg">
     <h2 class="text-2xl font-bold mb-4 text-center text-blue-400">${t('instructions.title')}</h2>
+    
+    <p class="mb-6 leading-relaxed">
+      ${t('instructions.intro')}
+      <br><br>
       
-      <p class="mb-6 leading-relaxed">
-        ${t('instructions.intro')}
-        <br><br>
-        
-        <strong class="text-yellow-400">${t('instructions.controls.title')}</strong>
-        <br>
-        • <strong>${t('instructions.controls.online')}</strong> ${t('instructions.controls.onlineText')}
-        <br>
-        • <strong>${t('instructions.controls.local')}</strong> ${t('instructions.controls.localText')}
-        <br>
-        • ${t('instructions.controls.altControls')}
-        <br>
-        • <strong class="text-red-400">${t('instructions.controls.important')}</strong> ${t('instructions.controls.importantText')}
-        <br><br>
-    
-        <h4 class="text-2xl font-bold mb-4 text-center text-blue-400">${t('instructions.navMenu.title')}</h4>
-        
-        <strong class="text-yellow-400">${t('instructions.navMenu.profile')}</strong>
-        <br>
-        ${t('instructions.navMenu.profileText')}
-        <br><br>
-        
-        <strong class="text-yellow-400">${t('instructions.navMenu.playPong')}</strong>
-        <br>
-        ${t('instructions.navMenu.playPongText')}
-        <br><br>
-        
-        <strong class="text-yellow-400">${t('instructions.navMenu.history')}</strong>
-        <br>
-        ${t('instructions.navMenu.historyText')}
-        <br><br>
-        
-        <strong class="text-yellow-400">${t('instructions.navMenu.tournament')}</strong>
-        <br>
-        ${t('instructions.navMenu.tournamentText')}
-        <br><br>
-    
-        <strong class="text-yellow-400">${t('instructions.navMenu.tournamentMgmt')}</strong>
-        <br>
-        ${t('instructions.navMenu.tournamentMgmtText')}
-        <br><br>
-        
-        <strong class="text-yellow-400">${t('instructions.navMenu.friends')}</strong>
-        <br>
-        ${t('instructions.navMenu.friendsText')}
-      </p>
-    </div>
+      <strong class="text-yellow-400">${t('instructions.controls.title')}</strong>
+      <br>
+      • <strong>${t('instructions.controls.online')}</strong> ${t('instructions.controls.onlineText')}
+      <br>
+      • <strong>${t('instructions.controls.local')}</strong> ${t('instructions.controls.localText')}
+      <br>
+      • ${t('instructions.controls.altControls')}
+      <br>
+      • <strong class="text-red-400">${t('instructions.controls.important')}</strong> ${t('instructions.controls.importantText')}
+      <br><br>
+  
+      <h4 class="text-2xl font-bold mb-4 text-center text-blue-400">${t('instructions.navMenu.title')}</h4>
+      
+      <strong class="text-yellow-400">${t('instructions.navMenu.profile')}</strong>
+      <br>
+      ${t('instructions.navMenu.profileText')}
+      <br><br>
+      
+      <strong class="text-yellow-400">${t('instructions.navMenu.playPong')}</strong>
+      <br>
+      ${t('instructions.navMenu.playPongText')}
+      <br><br>
+      
+      <strong class="text-yellow-400">${t('instructions.navMenu.history')}</strong>
+      <br>
+      ${t('instructions.navMenu.historyText')}
+      <br><br>
+      
+      <strong class="text-yellow-400">${t('instructions.navMenu.tournament')}</strong>
+      <br>
+      ${t('instructions.navMenu.tournamentText')}
+      <br><br>
+  
+      <strong class="text-yellow-400">${t('instructions.navMenu.tournamentMgmt')}</strong>
+      <br>
+      ${t('instructions.navMenu.tournamentMgmtText')}
+      <br><br>
+      
+      <strong class="text-yellow-400">${t('instructions.navMenu.friends')}</strong>
+      <br>
+      ${t('instructions.navMenu.friendsText')}
+    </p>
+  </div>
   `;
 
   bu.classList.add('hidden');
