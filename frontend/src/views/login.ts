@@ -120,10 +120,10 @@ export function renderLogin(appElement: HTMLElement) {
   const togglePasswordVisibility = (fieldId: string, button?: HTMLElement) => {
     const passwordField = document.getElementById(fieldId) as HTMLInputElement;
     if (!passwordField) return;
-  
+
     const isPassword = passwordField.type === 'password';
     passwordField.type = isPassword ? 'text' : 'password';
-  
+
     if (button) {
       const svg = button.querySelector('svg');
       if (svg) {
@@ -138,18 +138,11 @@ export function renderLogin(appElement: HTMLElement) {
   if (toggleForm && loginForm && registerForm && toggleFormText) {
     toggleForm.addEventListener('click', (e) => {
       e.preventDefault();
-   /*    if (googleButton) {
-        googleButton.innerHTML = ''; // ✅ Clear any previous button
-        waitForGoogle(); // ✅ Wait for DOM + script, then render
-      } */
 
       if (loginForm.classList.contains('hidden')) {
         loginForm.classList.remove('hidden');
         registerForm.classList.add('hidden');
-       /*  googleButton.removeAttribute('hidden');
-        googleButton.innerHTML = ''; // ✅ Clear old button
-        const newId = `google-signin-${Date.now()}`;
-        wrapper.innerHTML = `<div id="${newId}"></div>`; */
+
         wrapper.hidden = false;
         initGoogleSignIn();
         toggleFormText.textContent = 'Don\'t have an account? ';
@@ -161,7 +154,7 @@ export function renderLogin(appElement: HTMLElement) {
         toggleForm.textContent = 'Login now';
         wrapper.hidden = true;
         wrapper.classList.add('hidden');
-         if (currentGoogleButtonId) {
+        if (currentGoogleButtonId) {
           const old = document.getElementById(currentGoogleButtonId);
           if (old) old.remove();
         }
@@ -187,7 +180,7 @@ export function renderLogin(appElement: HTMLElement) {
   if (loginForm) {
     loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      
+
       const username = (document.getElementById('username') as HTMLInputElement).value;
       const password = (document.getElementById('login-password') as HTMLInputElement).value;
       const errorElement = document.getElementById('login-error') as HTMLElement;
@@ -199,13 +192,13 @@ export function renderLogin(appElement: HTMLElement) {
           window.location.href = `${API_BASE_URL}/api/auth/42`;
         });
       }
-   
+
       errorElement.classList.add('hidden');
       errorElement.textContent = '';
 
       submitButton.disabled = true;
       submitButton.textContent = 'Signing in...';
-      
+
       try {
         const response = await fetch(`${API_BASE_URL}/api/login`, {
           method: 'POST',
@@ -223,26 +216,26 @@ export function renderLogin(appElement: HTMLElement) {
         if (!response.ok || data.error) {
           throw new Error(data.error || 'Login failed');
         }
-       
+
         localStorage.setItem('authToken', data.token);
         localStorage.setItem('userId', data.id);
         localStorage.setItem('authProvider', '42');
- 
+
         const userAvatar = data.user?.avatar?.trim()
-         ? data.user.avatar
-         : `https://i.pravatar.cc/150?u=${username}`;
-        localStorage.setItem('user', JSON.stringify({ 
-             username: data.user?.username || username,
-             nickname: data.user?.nickname || username,
-             avatar: userAvatar
- //            avatar: data.user?.avatar || `https://i.pravatar.cc/150?u=${username}`
+          ? data.user.avatar
+          : `https://i.pravatar.cc/150?u=${username}`;
+        localStorage.setItem('user', JSON.stringify({
+          username: data.user?.username || username,
+          nickname: data.user?.nickname || username,
+          avatar: userAvatar
+          //            avatar: data.user?.avatar || `https://i.pravatar.cc/150?u=${username}`
         }));
         window.location.hash = 'home';
         await setUserStatus("online");
       } catch (error) {
         errorElement.textContent = error instanceof Error ? error.message : 'Login failed';
         errorElement.classList.remove('hidden');
-       
+
       } finally {
         submitButton.disabled = false;
         submitButton.textContent = 'Sign in';
@@ -253,14 +246,14 @@ export function renderLogin(appElement: HTMLElement) {
   if (registerForm) {
     registerForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      
+
       const nickname = (document.getElementById('reg-nickname') as HTMLInputElement).value;
       const username = (document.getElementById('reg-username') as HTMLInputElement).value;
       const email = (document.getElementById('reg-email') as HTMLInputElement).value;
       const password = (document.getElementById('reg-password') as HTMLInputElement).value;
       const errorElement = document.getElementById('register-error') as HTMLElement;
       const registerButton = document.getElementById('register-button') as HTMLButtonElement;
-     
+
       errorElement.classList.add('hidden');
       errorElement.textContent = '';
       if (!nickname || !username || !email || !password) {
@@ -272,7 +265,7 @@ export function renderLogin(appElement: HTMLElement) {
 
       registerButton.disabled = true;
       registerButton.textContent = 'Registering...';
-      
+
       try {
         const response = await fetch(`${API_BASE_URL}/api/signup`,
           {
@@ -282,10 +275,10 @@ export function renderLogin(appElement: HTMLElement) {
               'Accept': 'application/json,application/html,text/html,*/*',
               'Origin': FRONT_URL,
             },
-            body: JSON.stringify({ nickname, username, email ,password }),
+            body: JSON.stringify({ nickname, username, email, password }),
             credentials: 'include',
             mode: 'cors',
-        });
+          });
 
         if (!response.ok) {
           const errorData = await response.json();
@@ -322,7 +315,7 @@ export function renderLogin(appElement: HTMLElement) {
 
 export async function waitForGoogle() {
   let googleButton = document.getElementById('google-signin');
-  let counter : number = 5;
+  let counter: number = 5;
   while (!googleButton || typeof google === "undefined") {
     try {
       await initGoogleSignIn();
@@ -334,31 +327,17 @@ export async function waitForGoogle() {
     counter--;
     if (counter < 0) {
       console.error("failed to reach google");
-      break ;
+      break;
     }
     await sleep(1e3);
   }
-/*
-  if (googleButton) {
-    console.log('✅ #google-signin found and Google script loaded');
-//    initGoogleSignIn();
-  }
-  else {
-    console.error("no google button!");
-  }
-*/
+
 
   if (!googleButton) {
     console.error("no google button!");
   }
 
-//  if (googleButton && typeof google !== 'undefined') {
-//    console.log('✅ #google-signin found and Google script loaded');
-//    initGoogleSignIn();
-//  } else {
-//    console.log('⏳ Waiting for Google script or DOM...');
-//    setTimeout(initGoogleSignIn, 100);
-//  }
+
 }
 
 async function mainFuncLogin() {
@@ -372,10 +351,7 @@ export let googleInitialized = false;
 
 
 export function createGoogleButton() {
-  /* const wrapper = document.getElementById('google-signin-wrapper');
-  if (!wrapper) return;
- */
-  // Remove any existing
+
   if (currentGoogleButtonId) {
     const old = document.getElementById(currentGoogleButtonId);
     if (old) old.remove();
@@ -427,7 +403,7 @@ export async function initGoogleSignIn() {
   if (typeof google === 'undefined') {
     throw '❌ Google script not loaded';
   }
- if (!googleInitialized) {
+  if (!googleInitialized) {
     // @ts-ignore
     await google.accounts.id.initialize({
       client_id: '142914619782-scgrlb1fklqo43g9b2901hemub6hg51h.apps.googleusercontent.com',
