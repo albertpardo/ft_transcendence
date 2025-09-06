@@ -141,6 +141,9 @@
   "lostGame": "您输了比赛。",
   "wonRound": "您赢得了这一轮！",
   "lostRound": "您输了这一轮。",
+  "abandoned": "比赛被任一玩家放弃",
+  "gametype": "游戏类型：",
+  "versus": "；对战：",
   "pong-buttons": {
 	  "start-button-text": "寻找快速对局",
 	  "ready-button-text": "确认参赛",

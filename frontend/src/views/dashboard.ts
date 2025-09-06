@@ -248,7 +248,7 @@ export async function setterUponMetaInfo(gameInfo : HTMLElement, metaInfo : {gTy
     // we don't check for anything since basically once you get into a game with whatever state it's got, you
     // can only forfeit/escape, unlike the tournament stuff which has some various conditions for getting ready/forfeitting.
     buttonSetter(MetaGameState.inmmgame);
-    gameInfo.innerHTML = "Game type: " + metaInfo.gType + "; versus: " + metaInfo.oppName;
+    gameInfo.innerHTML = t("gametype") + metaInfo.gType + t("versus") + metaInfo.oppName;
   }
   else if (metaInfo.gType === "tournament") {
     // ok, it's a tournament
@@ -263,11 +263,11 @@ export async function setterUponMetaInfo(gameInfo : HTMLElement, metaInfo : {gTy
     else {
       buttonSetter(MetaGameState.intourgame);
     }
-    gameInfo.innerHTML = "Game type: " + metaInfo.gType + "; versus: " + metaInfo.oppName;
+    gameInfo.innerHTML = t("gametype") + metaInfo.gType + t("versus") + metaInfo.oppName;
   }
   else if (metaInfo.gType === "local") {
     buttonSetter(MetaGameState.inlocalgame);
-    gameInfo.innerHTML = "Game type: " + metaInfo.gType;
+    gameInfo.innerHTML = t("gametype") + metaInfo.gType;
   }
 }
 
@@ -716,7 +716,7 @@ export async function initDashboard() {
             gameInfo.innerHTML = "";
           }
           else {
-            gameInfo.innerHTML = "Game type: " + metaInfo.gType + "; versus: " + metaInfo.oppName;
+            gameInfo.innerHTML = t("gametype") + metaInfo.gType + t("versus") + metaInfo.oppName;
           }
           break;
         case "connected":
@@ -743,10 +743,10 @@ export async function initDashboard() {
             gameInfo.innerHTML = "";
           }
           else if (metaInfo.gType === "local") {
-            gameInfo.innerHTML = "Game type: " + metaInfo.gType;
+            gameInfo.innerHTML = t("gametype") + metaInfo.gType;
           }
           else {
-            gameInfo.innerHTML = "Game type: " + metaInfo.gType + "; versus: " + metaInfo.oppName;
+            gameInfo.innerHTML = t("gametype") + metaInfo.gType + t("versus") + metaInfo.oppName;
           }
           await setterUponMetaInfo(gameInfo, metaInfo);
           started = false;
@@ -777,7 +777,7 @@ export async function initDashboard() {
             gameInfo.innerHTML = "";
           }
           else {
-            gameInfo.innerHTML = "Game type: " + metaInfo.gType + "; versus: " + metaInfo.oppName;
+            gameInfo.innerHTML = t("gametype") + metaInfo.gType + t("versus") + metaInfo.oppName;
           }
           await setterUponMetaInfo(gameInfo, metaInfo);
           started = false;
@@ -955,7 +955,7 @@ export async function initDashboard() {
         gameInfo.innerHTML = "";
       }
       else {
-        gameInfo.innerHTML = "Game type: " + metaInfo.gType + "; versus: " + metaInfo.oppName;
+        gameInfo.innerHTML = t("gametype") + metaInfo.gType + t("versus") + metaInfo.oppName;
       }
       await setterUponMetaInfo(gameInfo, metaInfo);
     });
@@ -985,7 +985,7 @@ export async function initDashboard() {
         gameInfo.innerHTML = "";
       }
       else {
-        gameInfo.innerHTML = "Game type: " + metaInfo.gType + "; versus: " + metaInfo.oppName;
+        gameInfo.innerHTML = t("gametype") + metaInfo.gType + t("versus") + metaInfo.oppName;
       }
       await setterUponMetaInfo(gameInfo, metaInfo);
     });
@@ -998,7 +998,7 @@ export async function initDashboard() {
       }
       metaInfo = await getGameMetaInfo();
       if (metaInfo.gType === "local") {
-        gameInfo.innerHTML = "Game type: " + metaInfo.gType;
+        gameInfo.innerHTML = t("gametype") + metaInfo.gType;
       }
       else {
         gameInfo.innerHTML = "Something weird has happened trying to do a local game.";

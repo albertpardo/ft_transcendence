@@ -140,6 +140,9 @@
   "lostGame": "You lost the game.",
   "wonRound": "You won the round!",
   "lostRound": "You lost the round.",
+  "gametype": "Game type: ",
+  "abandoned": "Match abandoned by either player",
+  "versus": "; versus: ",
   "pong-buttons": {
 	  "start-button-text": "Search for a quick game",
 	  "ready-button-text": "Confirm participation",
