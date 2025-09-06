@@ -141,6 +141,9 @@
   "lostGame": "Takiypi yaykuy.",
   "wonRound": "Roundpi winay!",
   "lostRound": "Roundpi yaykuy.",
+  "abandoned": "Pukllay huk pukllaqpa saqisqanmanta",
+  "gametype": "Pukllay ñiqi: ",
+  "versus": "; awqa: ",
   "pong-buttons": {
 	  "start-button-text": "Sapa kuti pukllanata maskay",
 	  "ready-button-text": "Hukmanta haykuyta ratificay",

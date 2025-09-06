@@ -140,6 +140,9 @@
   "lostGame": "Has perdut la partida.",
   "wonRound": "Has guanyat la ronda!",
   "lostRound": "Has perdut la ronda.",
+  "gametype": "Tipus de joc: ",
+  "abandoned": "Partida abandonada per qualsevol jugador",
+  "versus": "; contra: ",
   "pong-buttons": {
 	  "start-button-text": "Cerca una partida ràpida",
 	  "ready-button-text": "Confirma la participació",
