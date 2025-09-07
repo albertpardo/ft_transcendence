@@ -65,6 +65,8 @@
     "right": "Destra",
     "left": "Sinistra",
     "type": "Tipo",
+	"normal": "Normale",
+	"tournament": "Torneo",
 	  "winForfeit": "Vittoria (il nemico ha rinunciato)",
 	  "lossForfeit": "Sconfitta (hai rinunciato)",
 	  "winAbsence": "Vittoria (il nemico non si è presentato)",

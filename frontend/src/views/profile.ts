@@ -36,7 +36,7 @@ export async function renderProfileContent(hideableElements) {
 
     userData = await res.json();
   } catch (err) {
-    console.error(err);
+//    console.error(err);
     hideableElements.contentArea.innerHTML = `<p class="text-red-500">Error loading profile. Please try again later.</p>`;
     return;
   }
@@ -338,7 +338,7 @@ export async function renderProfileContent(hideableElements) {
         saveModal.classList.add("hidden");
       }
     } catch (err) {
-      console.error("Error updating profile:", err);
+//      console.error("Error updating profile:", err);
       alert("An error occurred while updating the profile.");
       saveModal.classList.add("hidden");
     }
@@ -386,7 +386,7 @@ export async function renderProfileContent(hideableElements) {
         deleteModal.classList.add("hidden");
       }
     } catch (err) {
-      console.error("Error deleting account:", err);
+//      console.error("Error deleting account:", err);
       alert("An error occurred while deleting the account");
       deleteModal.classList.add("hidden");
     }
