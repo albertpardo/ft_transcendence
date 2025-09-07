@@ -22,9 +22,9 @@ export async function setUserStatus(userStatus: string) {
       body: JSON.stringify(updatedData),
     })  ;
     if (!response.ok) {
-      console.error("!response.ok -- When put Status : ", updatedData.userStatus);  
+//      console.error("!response.ok -- When put Status : ", updatedData.userStatus);  
     }
   } catch (err) {
-    console.error("Error when change status: ", err);
+//    console.error("Error when change status: ", err);
   }
 }

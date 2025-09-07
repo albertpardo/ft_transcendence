@@ -40,7 +40,7 @@ async function movePaddleWrapper(d: number) {
   const movePaddleResp = await movePaddleRawResp.text();
   const movePaddleRespObj = JSON.parse(movePaddleResp);
   if (movePaddleRespObj.err !== "nil") {
-    console.error(movePaddleRespObj.err);
+//    console.error(movePaddleRespObj.err);
   }
 }
 
@@ -50,7 +50,7 @@ async function localMovePaddleWrapper(d: number, p: string) {
   const lmovePaddleResp = await lmovePaddleRawResp.text();
   const lmovePaddleRespObj = JSON.parse(lmovePaddleResp);
   if (lmovePaddleRespObj.err !== "nil") {
-    console.error(lmovePaddleRespObj.err);
+//    console.error(lmovePaddleRespObj.err);
   }
 }
 
@@ -94,7 +94,7 @@ export async function getGameMetaInfo() {
     return (ret);
   }
   else {
-    console.error("suffered an error trying to get game info:", parsedFresp.err);
+//    console.error("suffered an error trying to get game info:", parsedFresp.err);
     if (parsedFresp.err === "Player not found in playersMap") {
       const ret = {
         gType: "none",
@@ -241,7 +241,7 @@ export async function setterUponMetaInfo(gameInfo : HTMLElement, metaInfo : {gTy
   }
   else if (metaInfo.gType === "unknown") {
     // some bs happened. must investigate
-    console.error("unknown game type");
+//    console.error("unknown game type");
     buttonSetter(MetaGameState.misc);
   }
   else if (metaInfo.gType === "normal") {
@@ -698,7 +698,7 @@ export async function initDashboard() {
   if (localStorage.getItem("authToken")) {
     await setterUponMetaInfo(gameInfo, metaInfo);
     if (metaInfo.gType === "tournament" || metaInfo.gType === "normal") {
-      console.warn("oh snap! reconnect the socket");
+//      console.warn("oh snap! reconnect the socket");
       reconn = true;
     }
     socket = new WebSocket(`${API_BASE_URL}/api/pong/game-ws?uuid=${localStorage.getItem("userId")}&authorization=${localStorage.getItem("authToken")}`);
@@ -830,7 +830,7 @@ export async function initDashboard() {
             if (newState.stateBall.hitRPaddle) triggerPaddleEffect('rpad');
             if (newState.stateBall.hitWall) triggerBallEffect();
           } catch (e) {
-            console.error("Error updating game state:", e);
+//            console.error("Error updating game state:", e);
           }
           scoreText.innerHTML = `${newState.stateScoreL} : ${newState.stateScoreR}`;
           scoreText.classList.remove('opacity-0');
@@ -937,7 +937,7 @@ export async function initDashboard() {
       const regPlResp = await regPlRawResp.text();
       const regPlRespObj = JSON.parse(regPlResp);
       if (regPlRespObj.err !== "nil") {
-        console.log(regPlRespObj);
+//        console.log(regPlRespObj);
       }
       metaInfo = await getGameMetaInfo();
       await setterUponMetaInfo(gameInfo, metaInfo);
@@ -948,7 +948,7 @@ export async function initDashboard() {
       const regPlResp = await regPlRawResp.text();
       const regPlRespObj = JSON.parse(regPlResp);
       if (regPlRespObj.err !== "nil") {
-        console.error(regPlRespObj.err);
+//        console.error(regPlRespObj.err);
       }
       metaInfo = await getGameMetaInfo();
       if (metaInfo.gType === "unknown") {
@@ -964,7 +964,7 @@ export async function initDashboard() {
       const readyPlResp = await readyPlRawResp.text();
       const readyPlRespObj = JSON.parse(readyPlResp);
       if (readyPlRespObj.err !== "nil") {
-        console.error(readyPlRespObj.err);
+//        console.error(readyPlRespObj.err);
       }
       else {
         document.getElementById('ready-button').disabled = true;
@@ -977,7 +977,7 @@ export async function initDashboard() {
       const forfeitResp = await forfeitRawResp.text();
       const forfeitRespObj = JSON.parse(forfeitResp);
       if (forfeitRespObj.err !== "nil") {
-        console.error(forfeitRespObj.err);
+//        console.error(forfeitRespObj.err);
       }
       // after giving up we can have various scenarios so
       metaInfo = await getGameMetaInfo();
@@ -994,7 +994,7 @@ export async function initDashboard() {
       const localGamingResp = await localGamingRawResp.text();
       const localGamingRespObj = JSON.parse(localGamingResp);
       if (localGamingRespObj.err !== "nil") {
-        console.error(localGamingRespObj.err);
+//        console.error(localGamingRespObj.err);
       }
       metaInfo = await getGameMetaInfo();
       if (metaInfo.gType === "local") {

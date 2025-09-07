@@ -51,7 +51,7 @@ async function getFriendsAndRenderFriendsTable( authstringheader : string, API_B
       renderFriendsTable(friendsData);
 	  }
   } catch (err) {
-    console.error(err);
+//    console.error(err);
 	  errorContent.textContent = t("friendsTxt.getError");
     return;
   }
@@ -140,7 +140,7 @@ export async function renderFriendsContent(hideableElements) {
       });
 	  	if (!response.ok) {
 		    errorContent.textContent = t("friendsTxt.addFailed");
-        console.error("!response.ok -- ", t("friendsTxt.addFailed"));  
+//        console.error("!response.ok -- ", t("friendsTxt.addFailed"));  
 	  	}
 	  } catch (err) {
       errorContent.textContent = t("friendsTxt.addError");

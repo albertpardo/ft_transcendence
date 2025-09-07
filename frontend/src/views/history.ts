@@ -52,7 +52,7 @@ export async function renderHistoryContent(hideableElements) {
   try {
     await i18nReady;
   } catch (err) {
-    console.error('i18n not ready, using fallback keys:', err);
+//    console.error('i18n not ready, using fallback keys:', err);
   }
 
   const userId = localStorage.getItem('userId');
@@ -187,7 +187,7 @@ export async function renderHistoryContent(hideableElements) {
       }
     }
   } catch (err) {
-    console.error('Failed to render history:', err);
+//    console.error('Failed to render history:', err);
     tempInnerHTML += `
       <tr>
         <td colspan="6" class="text-red-400 text-center p-4">

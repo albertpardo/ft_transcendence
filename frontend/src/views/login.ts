@@ -322,11 +322,11 @@ export async function waitForGoogle() {
       googleButton = document.getElementById('google-signin');
     }
     catch (e) {
-      console.error("failed at initgooglesignin:", e);
+//      console.error("failed at initgooglesignin:", e);
     }
     counter--;
     if (counter < 0) {
-      console.error("failed to reach google");
+//      console.error("failed to reach google");
       break;
     }
     await sleep(1e3);
@@ -334,7 +334,7 @@ export async function waitForGoogle() {
 
 
   if (!googleButton) {
-    console.error("no google button!");
+//    console.error("no google button!");
   }
 
 
@@ -371,7 +371,7 @@ export function createGoogleButton() {
 function renderGoogleButton(container: HTMLElement) {
   // @ts-ignore
   if (typeof google === 'undefined') {
-    console.error('❌ Google script not loaded');
+//    console.error('❌ Google script not loaded');
     return;
   }
 
@@ -445,7 +445,7 @@ async function handleGoogleCredentialResponse(response: { credential: string }) 
 
     route();
   } catch (error) {
-    console.error('❌ Google sign-in failed:', error);
+//    console.error('❌ Google sign-in failed:', error);
     alert('Google sign-in failed. Please try again.');
   }
 }

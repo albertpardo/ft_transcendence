@@ -285,7 +285,7 @@ export async function renderTournamentContent(hideableElements) {
           buttonSetter(MetaGameState.nothing);
         }
         else {
-          console.error("failed to delete tournament:", resOfDeleteObj.err);
+//          console.error("failed to delete tournament:", resOfDeleteObj.err);
         }
         await fillInTheTournTable(tournAllInfoRespObj, bracketSize);
       });
@@ -314,13 +314,13 @@ export async function renderTournamentContent(hideableElements) {
           buttonSetter(MetaGameState.nothing);
         }
         else {
-          console.error("failed to leave tournament:", resOfLeaveObj.err);
+//          console.error("failed to leave tournament:", resOfLeaveObj.err);
         }
         await fillInTheTournTable(tournAllInfoRespObj, bracketSize);
       });
     }
     else {
-      console.warn("just checked and you don't participate in anything OR you admin the thing:", checkPartRespObj.err);
+//      console.warn("just checked and you don't participate in anything OR you admin the thing:", checkPartRespObj.err);
       (tournLeaveButton as HTMLButtonElement).disabled = true;
       noparticipateFlag = true;
     }
@@ -351,7 +351,7 @@ async function fillInTheTournTable(tournAllInfoRespObj, bracketSize = 8) {
 
   const tourn = tournAllInfoRespObj.res;
   if (typeof tourn === "undefined") {
-    console.error("weird error occured: tour is undefined, although no err received");
+//    console.error("weird error occured: tour is undefined, although no err received");
     return;
   }
 
@@ -388,7 +388,7 @@ async function fillInTheTournTable(tournAllInfoRespObj, bracketSize = 8) {
         }
       }
     } else {
-      console.warn("No contender data found for 2-player tournament");
+//      console.warn("No contender data found for 2-player tournament");
       for (let j = 0; j < 2; j++) {
         const element = document.getElementById(`table-contender-${j + 1}`);
         if (element) {
@@ -547,7 +547,7 @@ async function fillInTheTournTable(tournAllInfoRespObj, bracketSize = 8) {
     }
   }
   else {
-    console.error("finalist lookup error:", finObj.err);
+//    console.error("finalist lookup error:", finObj.err);
   }
 
 }
@@ -679,7 +679,7 @@ async function generateUpdateAllTourTable(canWeJoin: boolean) {
       (document.getElementById(`join-button-${newCount}`) as HTMLButtonElement)!.disabled = true;
     }
     else {
-      console.warn("can't join count:", newCount);
+//      console.warn("can't join count:", newCount);
       (document.getElementById(`join-button-${newCount}`) as HTMLButtonElement)!.disabled = false;
     }
     document.getElementById(`join-button-${newCount}`)!.addEventListener('click', async () => {
@@ -710,7 +710,7 @@ async function generateUpdateAllTourTable(canWeJoin: boolean) {
 
       }
       else {
-        console.error("failed to enroll in " + allPTRObj.res[newCount].tId + " because: " + resOfEnrollObj.err);
+//        console.error("failed to enroll in " + allPTRObj.res[newCount].tId + " because: " + resOfEnrollObj.err);
       }
     });
   }
@@ -819,7 +819,7 @@ export async function renderTournamentManagerContent(hideableElements) {
   const myTournamentField = document.getElementById('my-tournament');
   const metaInfo = await getGameMetaInfo();
   if (metaInfo.gType === "normal") {
-    console.log("you're already in a normal game btw");
+//    console.log("you're already in a normal game btw");
   }
   else {
     const checkPartRawResp = await participantCheck();
@@ -855,7 +855,7 @@ export async function renderTournamentManagerContent(hideableElements) {
             buttonSetter(MetaGameState.waittouropp);
           }
           else {
-            console.error("Tournament creation error: " + tourRespObj.err + "; tId (if available): " + tourRespObj.tId);
+//            console.error("Tournament creation error: " + tourRespObj.err + "; tId (if available): " + tourRespObj.tId);
             submitButton.removeAttribute('disabled');
             document.getElementById('enter-tournament-by-id-button')!.removeAttribute("disabled");
             canWeJoin = true;
@@ -865,7 +865,7 @@ export async function renderTournamentManagerContent(hideableElements) {
         });
       }
       else {
-        console.warn("can't allow generating a tournament");
+//        console.warn("can't allow generating a tournament");
         canWeJoin = false;
         localStorage.setItem('tId', checkPartRespObj.tId);
         submitButton.disabled = true;
@@ -904,7 +904,7 @@ export async function renderTournamentManagerContent(hideableElements) {
             buttonSetter(MetaGameState.waittouropp);
           }
           else {
-            console.error("failed to enroll in " + tidEl.value + " because: " + resOfEnrollObj.err);
+//            console.error("failed to enroll in " + tidEl.value + " because: " + resOfEnrollObj.err);
             document.getElementById('register-tournament-button')!.removeAttribute("disabled");
             enterByIdButton.removeAttribute("disabled");
             canWeJoin = true;
@@ -914,7 +914,7 @@ export async function renderTournamentManagerContent(hideableElements) {
         });
       }
       else {
-        console.warn("can't allow joining a tournament");
+//        console.warn("can't allow joining a tournament");
         canWeJoin = false;
         localStorage.setItem('tId', checkPartRespObj.tId);
         (document.getElementById('register-tournament-button') as HTMLButtonElement).disabled = true;
