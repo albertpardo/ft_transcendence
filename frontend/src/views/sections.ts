@@ -1,22 +1,30 @@
-// src/views/sections.ts
+import { route } from '../router';
+import { getGameMetaInfo, setterUponMetaInfo } from './dashboard';
 import { t } from '../i18n';
 
-// import { doSomething } from './buttonClicking';
-
-export function renderHomeContent(el: HTMLElement, bu: HTMLElement, gArea: HTMLElement, gWin: HTMLElement) {
+export function renderHomeContent(hideableElements) {
+  hideableElements.buttonArea.hidden = true;
+  hideableElements.gameArea.classList.add("hidden");
+  hideableElements.gameWindow.hidden = true;
+  const el = hideableElements.contentArea;
+  const bu = hideableElements.buttonArea;
+  const gArea = hideableElements.gameArea;
+  const gWin = hideableElements.gameWindow;
   el.innerHTML = `
     <h1 class="text-3xl font-bold mb-6 text-center">${t('welcome')} 👋</h1>
-    <p class="mb-4 text-center">${t('home.intro')}</p>
+   <!-- <p class="mb-4 text-center">${t('home.intro')}</p> -->
+
     <!-- Language Switcher -->
     <div id="lang-switcher" class="mt-8 p-4 bg-gray-800 rounded-lg text-white text-sm max-w-md mx-auto">
       <p class="text-center text-sm mb-3 font-medium">${t('select.language')}:</p>
       <div class="grid grid-cols-3 gap-2">
         <button data-lang="ca" class="px-3 py-2 rounded hover:bg-blue-600 flex flex-col items-center justify-center gap-1 transition">
-          🐱 <span class="text-xs font-semibold">Català</span>
+          🏴 <span class="text-xs font-semibold">Català</span>
         </button>
         <button data-lang="zh" class="px-3 py-2 rounded hover:bg-blue-600 flex flex-col items-center justify-center gap-1 transition">
           🇨🇳 <span class="text-xs font-semibold">中文</span>
         </button>
+
         <button data-lang="de" class="px-3 py-2 rounded hover:bg-blue-600 flex flex-col items-center justify-center gap-1 transition">
           🇩🇪 <span class="text-xs font-semibold">Deutsch</span>
         </button>
@@ -90,12 +98,15 @@ export function renderHomeContent(el: HTMLElement, bu: HTMLElement, gArea: HTMLE
       ${t('instructions.navMenu.friendsText')}
     </p>
   </div>
+
   `;
 
-  bu.classList.add('hidden');
-  gArea.classList.add('hidden');
-  gWin.classList.add('hidden');
-  
+  // Hide game-related elements
+  bu.hidden = true;
+  gArea.hidden = true;
+  gWin.hidden = true;
+
+  // Attach language switcher events
   el.querySelectorAll('#lang-switcher button').forEach(btn => {
     btn.addEventListener('click', () => {
       const lang = btn.getAttribute('data-lang')!;
@@ -103,38 +114,14 @@ export function renderHomeContent(el: HTMLElement, bu: HTMLElement, gArea: HTMLE
       window.location.reload();
     });
   });
-  
 }
 
-export function renderPlayContent(el: HTMLElement, bu: HTMLElement, gArea: HTMLElement, gWin: HTMLElement) {
-  el.innerHTML = `
+export async function renderPlayContent(hideableElements) {
+  hideableElements.contentArea.innerHTML = `
   `;
-
-  bu.classList.remove('hidden');
-  gArea.classList.remove('hidden');
-  gWin.classList.remove('hidden');
-}
-
-export function renderTournamentContent(el: HTMLElement, bu: HTMLElement, gArea: HTMLElement, gWin: HTMLElement) {
-  el.innerHTML = `
-    <h1 class="text-3xl font-bold mb-6">${t("tournaments.title")}</h1>
-    <p class="mb-4">${t("tournaments.description")}</p>
-    <img src="https://placehold.co/1000x400/444444/ffffff?text=Demo" class="w-full rounded-lg" alt="Tournament">
-  `;
-
-  bu.classList.add('hidden');
-  gArea.classList.add('hidden');
-  gWin.classList.add('hidden');
-}
-
-export function renderStatsContent(el: HTMLElement, bu: HTMLElement, gArea: HTMLElement, gWin: HTMLElement) {
-  el.innerHTML = `
-     <h1 class="text-3xl font-bold mb-6">${t("statistics.title")}</h1>
-    <p class="mb-4">${t("statistics.description")}</p>
-    <img src="https://placehold.co/1000x400/444444/ffffff?text=Demo" class="w-full rounded-lg" alt="Stats">
-  `;
-
-  bu.classList.add('hidden');
-  gArea.classList.add('hidden');
-  gWin.classList.add('hidden');
+  hideableElements.buttonArea.hidden = false;
+  hideableElements.gameArea.classList.remove("hidden");
+  hideableElements.gameWindow.hidden = false;
+  const metaInfo = await getGameMetaInfo();
+  setterUponMetaInfo(hideableElements.gameInfo, metaInfo);
 }
