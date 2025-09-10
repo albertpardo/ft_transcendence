@@ -98,6 +98,28 @@ ft_transcendence/
 - **Spectator Mode**: Watch ongoing games
 - **Game Statistics**: Track wins, losses, and performance metrics
 
+## 📸 Screenshots
+
+![Screenshot 1](screenshots/Screenshot%20from%202025-09-10%2014-41-45.png)
+
+*Main game interface*
+
+
+![Screenshot 2](screenshots/Screenshot%20from%202025-09-10%2014-42-22.png)
+
+*Game in progress*
+
+
+![Screenshot 3](screenshots/Screenshot%20from%202025-09-10%2014-43-19.png)
+
+*Tournament view*
+
+
+![Screenshot 4](screenshots/Screenshot%20from%202025-09-10%2014-43-25.png)
+
+*User dashboard*
+
+
 ## 🔧 Technical Stack
 
 ### Frontend
