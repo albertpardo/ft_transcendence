@@ -101,14 +101,17 @@ ft_transcendence/
 
 ## 📸 Screenshots
 
-![Screenshot 1](screenshots/Screenshot%20from%202025-09-10%2014-41-45.png)
+![Screenshot 0](screenshots/Screenshot%20from%202025-09-10%2014-41-45.png)
 
 *register*
 
 
-![Screenshot 2](screenshots/Screenshot%20from%202025-09-10%2014-42-22.png)
+![Screenshot 1](screenshots/Screenshot%20from%202025-09-10%2014-42-22.png)
 
 *login*
+![Screenshot 2](screenshots/dashboard.png)
+
+*dashboard*
 
 
 ![Screenshot 3](screenshots/Screenshot%20from%202025-09-10%2014-43-19.png)
@@ -118,9 +121,13 @@ ft_transcendence/
 
 ![Screenshot 4](screenshots/Screenshot%20from%202025-09-10%2014-43-25.png)
 
-![Screenshot 4](screenshots/Screenshot%20from%202025-09-10%2014-43-25.png)
+![Screenshot 5](screenshots/Pong_winner.png)
 
 *game*
+
+![Screenshot 6](screenshots/match_history.png)
+
+*macth history*
 
 
 ## 🔧 Technical Stack
