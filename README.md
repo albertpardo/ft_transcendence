@@ -43,11 +43,12 @@ cd ft_transcendence
 make all
 # or alternatively
 docker compose up -d --build
-```
+```    
 
 3. Access the application:
    - **Frontend**: https://localhost:3000
-   - **API Gateway**: https://localhost:8443
+   - **API Gateway**: https://localhost:8443      
+     you will have to visit the API Gatway and follow through to accept the risks of the self signed certificates.
 
 ### With ELK Stack (Logging)
 
@@ -114,6 +115,8 @@ ft_transcendence/
 
 *profile*
 
+
+![Screenshot 4](screenshots/Screenshot%20from%202025-09-10%2014-43-25.png)
 
 ![Screenshot 4](screenshots/Screenshot%20from%202025-09-10%2014-43-25.png)
 
